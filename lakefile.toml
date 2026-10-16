@@ -1,0 +1,24 @@
+name = "group-dimension"
+version = "0.1.0"
+keywords = ["mathematics", "group-theory", "dimension-subgroups"]
+defaultTargets = ["GroupDimension"]
+
+[leanOptions]
+autoImplicit = false
+pp.unicode.fun = true
+relaxedAutoImplicit = false
+
+[[require]]
+name = "mathlib"
+scope = "leanprover-community"
+rev = "v4.29.0"
+
+[[lean_lib]]
+name = "GroupDimension"
+
+# The authors' formalization of the Lie-ring case (IMP26), pinned to the audited commit
+# (the same one as the submodule `upstream/lie-algebras`); used only by `LieComparison`.
+[[require]]
+name = "lie-rings"
+git = "https://github.com/TimmPeterson/lie-algebras"
+rev = "ed3d9fb660024ec849884b542cfc779462aea8f5"
