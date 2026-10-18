@@ -200,6 +200,7 @@ structure Frame (G : Type*) [Group G] (ι : Type*) [LinearOrder ι] [Fintype ι]
   w_pos : ∀ j, 1 ≤ w j
   w_mono : Monotone w
   mem : ∀ j, x j ∈ lowerCentralSeries G (w j - 1)
+  pow_mem : ∀ j, x j ^ o j ∈ lowerCentralSeries G (w j)
   nf : ∀ g : G, ∃ b : ι → ℕ, (∀ j, b j < o j) ∧ lprod (ordL ι) x b = g
   nf_unique : ∀ b c : ι → ℕ, (∀ j, b j < o j) → (∀ j, c j < o j) →
     lprod (ordL ι) x b = lprod (ordL ι) x c → b = c
