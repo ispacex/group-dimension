@@ -61,12 +61,12 @@ theorem W_cnt (l : List ι) : F.W (cnt l) = (l.map F.w).sum := by
 
 /-! ## Hypotheses -/
 
-/-- A frame of a group of class `≤ 4` with Tahara's divisibility chains in each layer. -/
+/-- A frame of a group of class `≤ 4` with Tahara's divisibility chains in the first two layers. -/
 structure Class4 : Prop where
   top : lowerCentralSeries G 4 = ⊥
   w_le : ∀ j, F.w j ≤ 4
   one_lt : ∀ j, 1 < F.o j
-  dvd : ∀ i j, F.w i = F.w j → i ≤ j → F.o i ∣ F.o j
+  dvd : ∀ i j, F.w i = F.w j → F.w i ≤ 2 → i ≤ j → F.o i ∣ F.o j
 
 /-! ## The target -/
 

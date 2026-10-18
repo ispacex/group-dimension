@@ -206,8 +206,8 @@ theorem torsion (hF : F.Class4) {c : ι → ℕ} {z : ι} (hz : c z ≠ 0) (hW :
     by_contra h; exact hz (by rw [hcnt z]; exact List.count_eq_zero.mpr h)
   have hp := F.w_pos
   have hmono : ∀ i j, i ≤ j → F.w i ≤ F.w j := fun i j h => F.w_mono h
-  have hdvd : ∀ i j, F.w i = F.w j → i ≤ j → (F.o i : ℤ) ∣ (F.o j : ℤ) := fun i j h1 h2 =>
-    Int.natCast_dvd_natCast.mpr (hF.dvd i j h1 h2)
+  have hdvd : ∀ i j, F.w i = F.w j → i ≤ j → F.w i ≤ 2 → (F.o i : ℤ) ∣ (F.o j : ℤ) :=
+    fun i j h1 h2 h3 => Int.natCast_dvd_natCast.mpr (hF.dvd i j h1 h3 h2)
   match l, hzl, hWw, hsort with
   | [q], hzl, hWw, _ =>
     simp at hzl hWw; subst hzl
@@ -232,7 +232,7 @@ theorem torsion (hF : F.Class4) {c : ι → ℕ} {z : ι} (hz : c z ≠ 0) (hW :
     · have hd : ((F.o i : ℕ) : ℤ) ∣ (F.o z : ℤ) := by
         rcases hzl with rfl | rfl
         · exact dvd_rfl
-        · exact hdvd i z (by omega) hij
+        · exact hdvd i z (by omega) hij (by omega)
       rw [Φ3w_22 h1 h2]
       simp only [S2', Prod.smul_mk, smul_zero]
       rw [zsmul_single_zmod' (fun q : ι × ι => F.o q.1) (i, j) hd]; rfl
@@ -249,7 +249,7 @@ theorem torsion (hF : F.Class4) {c : ι → ℕ} {z : ι} (hz : c z ≠ 0) (hW :
       rcases hzl with rfl | rfl | rfl
       · exact Int.natCast_dvd_natCast.mpr (Nat.gcd_dvd_left _ _)
       · exact dvd_trans (Int.natCast_dvd_natCast.mpr (Nat.gcd_dvd_left _ _))
-          (hdvd i z (by omega) hij)
+          (hdvd i z (by omega) hij (by omega))
       · exact Int.natCast_dvd_natCast.mpr (Nat.gcd_dvd_right _ _)
     rw [Φ3w_112 h1 h2 h3]
     simp only [S22, Prod.smul_mk, smul_zero]
@@ -265,9 +265,9 @@ theorem torsion (hF : F.Class4) {c : ι → ℕ} {z : ι} (hz : c z ≠ 0) (hW :
     have hd : ((F.o i : ℕ) : ℤ) ∣ (F.o z : ℤ) := by
       rcases hzl with rfl | rfl | rfl | rfl
       · exact dvd_rfl
-      · exact hdvd i z (by omega) (hle z (by simp))
-      · exact hdvd i z (by omega) (hle z (by simp))
-      · exact hdvd i z (by omega) (hle z (by simp))
+      · exact hdvd i z (by omega) (hle z (by simp)) (by omega)
+      · exact hdvd i z (by omega) (hle z (by simp)) (by omega)
+      · exact hdvd i z (by omega) (hle z (by simp)) (by omega)
     rw [Φ3w_1111 h1 h2 h3 h4]
     simp only [S4, Prod.smul_mk, smul_zero]
     rw [zsmul_single_zmod' (fun q : ι × ι × ι × ι => F.o q.1) (i, j, k, l) hd]; rfl
@@ -664,7 +664,7 @@ theorem case_II (hw : F.w x = 1) {j : ι} (hj : F.w j = 1) (hjx : j < x)
   rw [cnt_nil] at hhi
   have hW : F.W (cnt [j]) = 1 := by rw [W_cnt]; simp [hj]
   have hT := TE1 IH hx hhi (by rw [hlo, hW, hw]) (by rw [hlo, hW, hw])
-  have hdv : F.o j ∣ F.o x := hF.dvd j x (by rw [hj, hw]) hjx.le
+  have hdv : F.o j ∣ F.o x := hF.dvd j x (by rw [hj, hw]) (by omega) hjx.le
   have h0 : ((F.o x : ℤ) • F.P ((F.lo a x + hi a x) + 1 • Pi.single x 1),
       ((F.o x / F.o j : ℕ) : ℤ) • F.V3val j x) ∈ rel3 hF := by
     have hf := rel3_smul hF ((F.o x / F.o j : ℕ) : ℤ)
