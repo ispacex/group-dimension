@@ -440,6 +440,38 @@ theorem case_IV (hw : F.w x = 2) {i : ι} (hi1 : F.w i = 1) (hr : F.lo a x + hi 
     show cnt [i] + Pi.single x 1 = cnt [i, x] by rw [← cnt_single, ← cnt_append]; rfl]
   exact F.gIV_mem hi1 hw
 
+omit IH in
+theorem Φ3_r_rep {l₁ l₂ : List ι} (hr : F.lo a x + hi a x = cnt (l₁ ++ l₂)) (m : ℕ)
+    (hs : (l₁ ++ List.replicate m x ++ l₂).Pairwise (· ≤ ·)) :
+    F.Φ3 ((F.lo a x + hi a x) + m • Pi.single x 1) = F.Φ3w (l₁ ++ List.replicate m x ++ l₂) := by
+  rw [← F.Φ3_cnt hs, hr, ← cnt_replicate, cnt_append, cnt_append, cnt_append]
+  abel_nf
+
+omit IH in
+theorem f3_zero {r : ι → ℕ} (hr : F.lo a x + hi a x = r) (hW : 2 ≤ F.W r) (hw : F.w x = 1) :
+    F.Φ3 ((F.lo a x + hi a x) + 3 • Pi.single x 1) = 0 :=
+  F.Φ3_eq_zero_of_five_le (by rw [hr, W_add, W_nsmul_single, hw]; omega)
+
+/-- **Case (VII)**: `j ≤ k < x`, all of weight 1. -/
+theorem case_VII (hw : F.w x = 1) {j k : ι} (hj : F.w j = 1) (hk : F.w k = 1) (hjk : j ≤ k)
+    (hkx : k < x) (hr : F.lo a x + hi a x = cnt [j, k]) : (F.P a, F.Φ3 a) ∈ rel3 hF := by
+  obtain ⟨hlo, hhi⟩ := lo_hi_split hx (l₁ := [j, k]) (l₂ := []) (by simp [hkx.le, hjk.trans hkx.le])
+    (by simp) (by simpa using hr)
+  rw [cnt_nil] at hhi
+  have hW : F.W (cnt [j, k]) = 2 := by rw [W_cnt]; simp [hj, hk]
+  have hT := TE1 IH hx hhi (by rw [hlo, hW]; omega) (by rw [hlo, hW]; omega)
+  refine std_case IH hx hT (by rw [hr, hW]; omega) (fun m hm =>
+    F.Φ3_eq_zero_of_five_le (by rw [W_r_add IH hx, hr, hW]; nlinarith)) ?_
+  rw [f3_zero hx hr (by rw [hW]) hw,
+    Φ3_r_rep hx (l₁ := [j, k]) (l₂ := []) (by simpa using hr) 1 (by simp [hjk, hkx.le, (hjk.trans hkx.le)]),
+    Φ3_r_rep hx (l₁ := [j, k]) (l₂ := []) (by simpa using hr) 2 (by simp [hjk, hkx.le, (hjk.trans hkx.le)]),
+    hlo]
+  have := F.gVII_mem hj hk hw hjk hkx
+  convert this using 1
+  simp only [gVII, F.Φ3_cnt (show [j, k, x].Pairwise (· ≤ ·) by simp [hjk, hkx.le, (hjk.trans hkx.le)]),
+    F.Φ3_cnt (show [j, k, x, x].Pairwise (· ≤ ·) by simp [hjk, hkx.le, (hjk.trans hkx.le)])]
+  simp; abel
+
 end Cases
 
 end Frame
