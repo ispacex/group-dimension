@@ -656,6 +656,95 @@ theorem q_combine (hw : F.w x = 1) (hr1 : F.W (F.lo a x + hi a x) = 1) {vT v0 : 
       rw [← key]; abel
     rw [sub_sub, add_assoc, e, ← sub_sub]; exact hid
 
+/-- **Case (II)**: the rest `e_j`, `j < x` of weight 1. -/
+theorem case_II (hw : F.w x = 1) {j : ι} (hj : F.w j = 1) (hjx : j < x)
+    (hr : F.lo a x + hi a x = cnt [j]) : (F.P a, F.Φ3 a) ∈ rel3 hF := by
+  obtain ⟨hlo, hhi⟩ := lo_hi_split hx (l₁ := [j]) (l₂ := []) (by simp [hjx.le]) (by simp)
+    (by simpa using hr)
+  rw [cnt_nil] at hhi
+  have hW : F.W (cnt [j]) = 1 := by rw [W_cnt]; simp [hj]
+  have hT := TE1 IH hx hhi (by rw [hlo, hW, hw]) (by rw [hlo, hW, hw])
+  have hdv : F.o j ∣ F.o x := hF.dvd j x (by rw [hj, hw]) hjx.le
+  have h0 : ((F.o x : ℤ) • F.P ((F.lo a x + hi a x) + 1 • Pi.single x 1),
+      ((F.o x / F.o j : ℕ) : ℤ) • F.V3val j x) ∈ rel3 hF := by
+    have hf := rel3_smul hF ((F.o x / F.o j : ℕ) : ℤ)
+      (rel3_fam hF (F := F) (.inr (.inr (.inl ⟨(j, x), hj, hw, hjx.le⟩))))
+    simp only [fam, famVal] at hf
+    rw [smul_smul, ← Nat.cast_mul, Nat.div_mul_cancel hdv] at hf
+    rwa [hr, one_smul, show cnt [j] + Pi.single x 1 = cnt [j, x] by
+      rw [← cnt_single, ← cnt_append]; rfl]
+  refine q_combine IH hx hw (by rw [hr, hW]) hT h0 ?_
+  rw [Φ3_r_rep hx (l₁ := [j]) (l₂ := []) (by simpa using hr) 2 (by simp [hjx.le]),
+    Φ3_r_rep hx (l₁ := [j]) (l₂ := []) (by simpa using hr) 3 (by simp [hjx.le]), hlo]
+  have := F.gII_mem hj hw hjx
+  convert this using 1
+  simp only [gII, F.Φ3_cnt (show [j, x, x].Pairwise (· ≤ ·) by simp [hjx.le]),
+    F.Φ3_cnt (show [j, x, x, x].Pairwise (· ≤ ·) by simp [hjx.le])]
+  simp; abel
+
+/-- **Value (3)**: the rest `e_j`, `x < j` of weight 1. -/
+theorem case_3 (hw : F.w x = 1) {j : ι} (hj : F.w j = 1) (hxj : x < j)
+    (hr : F.lo a x + hi a x = cnt [j]) : (F.P a, F.Φ3 a) ∈ rel3 hF := by
+  obtain ⟨hlo, hhi⟩ := lo_hi_split hx (l₁ := []) (l₂ := [j]) (by simp) (by simp [hxj])
+    (by simpa using hr)
+  rw [cnt_nil] at hlo
+  have hW : F.W (cnt [j]) = 1 := by rw [W_cnt]; simp [hj]
+  have hT := TE2 IH hx hw hj hxj hhi
+  have h0 : ((F.o x : ℤ) • F.P ((F.lo a x + hi a x) + 1 • Pi.single x 1), F.V3val x j) ∈
+      rel3 hF := by
+    have hf := rel3_fam hF (F := F) (.inr (.inr (.inl ⟨(x, j), hw, hj, hxj.le⟩)))
+    simp only [fam, famVal] at hf
+    rwa [hr, one_smul, show cnt [j] + Pi.single x 1 = cnt [x, j] by
+      rw [← cnt_single, add_comm, ← cnt_append]; rfl]
+  refine q_combine IH hx hw (by rw [hr, hW]) hT h0 ?_
+  rw [Φ3_r_rep hx (l₁ := []) (l₂ := [j]) (by simpa using hr) 2 (by simp [hxj.le]),
+    Φ3_r_rep hx (l₁ := []) (l₂ := [j]) (by simpa using hr) 3 (by simp [hxj.le]), hlo]
+  convert zero_mem F.R5 using 1
+  simp only [V3val, F.Φ3_cnt (show [x, x, j].Pairwise (· ≤ ·) by simp [hxj.le]),
+    F.Φ3_cnt (show [x, x, x, j].Pairwise (· ≤ ·) by simp [hxj.le])]
+  simp; abel
+
+/-- **Value (3)**, the rest `e_x`. -/
+theorem case_3' (hw : F.w x = 1) (hr : F.lo a x + hi a x = cnt [x]) :
+    (F.P a, F.Φ3 a) ∈ rel3 hF := by
+  obtain ⟨hlo, hhi⟩ := lo_hi_split hx (l₁ := [x]) (l₂ := []) (by simp) (by simp)
+    (by simpa using hr)
+  rw [cnt_nil] at hhi
+  have hW : F.W (cnt [x]) = 1 := by rw [W_cnt]; simp [hw]
+  have hT := TE1 IH hx hhi (by rw [hlo, hW, hw]) (by rw [hlo, hW, hw])
+  have h0 : ((F.o x : ℤ) • F.P ((F.lo a x + hi a x) + 1 • Pi.single x 1), F.V3val x x) ∈
+      rel3 hF := by
+    have hf := rel3_fam hF (F := F) (.inr (.inr (.inl ⟨(x, x), hw, hw, le_rfl⟩)))
+    simp only [fam, famVal] at hf
+    rwa [hr, one_smul, show cnt [x] + Pi.single x 1 = cnt [x, x] by
+      rw [← cnt_single, ← cnt_append]; rfl]
+  refine q_combine IH hx hw (by rw [hr, hW]) hT h0 ?_
+  rw [Φ3_r_rep hx (l₁ := [x]) (l₂ := []) (by simpa using hr) 2 (by simp),
+    Φ3_r_rep hx (l₁ := [x]) (l₂ := []) (by simpa using hr) 3 (by simp), hlo]
+  convert zero_mem F.R5 using 1
+  simp only [V3val, cc_self, nsum_one, F.Φ3_cnt (show [x, x, x].Pairwise (· ≤ ·) by simp),
+    F.Φ3_cnt (show [x, x, x, x].Pairwise (· ≤ ·) by simp)]
+  simp; abel
+
+omit IH in
+/-- `a = d e_x` with `w(x) = 1`, `d ≥ 3`: a member of Losey's basis. -/
+theorem case_K1 (hw : F.w x = 1) (hr : F.lo a x + hi a x = 0) (ha : 3 ≤ F.W a) :
+    (F.P a, F.Φ3 a) ∈ rel3 hF := by
+  have hae : a = cnt (List.replicate (F.o x) x) := by
+    rw [cnt_replicate]; conv_lhs => rw [a_eq_r hx, hr, zero_add]
+  have h3 : 3 ≤ F.o x := by rw [hae, W_cnt] at ha; simpa [hw] using ha
+  rw [hae]
+  exact rel3_fam hF (F := F) (.inl ⟨x, hw, h3⟩)
+
+omit IH in
+/-- `a = e e_x` with `w(x) = 2`: a member of Losey's basis. -/
+theorem case_K2 (hw : F.w x = 2) (hr : F.lo a x + hi a x = 0) :
+    (F.P a, F.Φ3 a) ∈ rel3 hF := by
+  have hae : a = cnt (List.replicate (F.o x) x) := by
+    rw [cnt_replicate]; conv_lhs => rw [a_eq_r hx, hr, zero_add]
+  rw [hae]
+  exact rel3_fam hF (F := F) (.inr (.inl ⟨x, hw⟩))
+
 end Cases
 
 end Frame
