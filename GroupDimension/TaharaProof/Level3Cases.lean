@@ -747,6 +747,64 @@ theorem case_K2 (hw : F.w x = 2) (hr : F.lo a x + hi a x = 0) :
 
 end Cases
 
+variable (hF) in
+/-- **`ψ₃(P a) ≡ Φ₃(a) (mod R₅*)`** for every `m`-sequence of weight `≥ 3`
+([Tah81, Lemmas 3.5, 5.3–5.6]). -/
+theorem U3 (a : ι → ℕ) (ha : 3 ≤ F.W a) : (F.P a, F.Φ3 a) ∈ rel3 hF := by
+  refine (lexLT_wf (ι := ι)).induction (C := fun a => 3 ≤ F.W a → (F.P a, F.Φ3 a) ∈ rel3 hF)
+    a ?_ ha
+  intro a ih ha
+  have IH : IHat hF a := fun β hβ h3 => ih β hβ h3
+  by_cases hb : ∀ j, a j < F.o j
+  · have := rel3_fam hF (F := F) (.inr (.inr (.inr ⟨F.toBasic a hb, ha⟩)))
+    simpa [fam, famVal] using this
+  push Not at hb
+  obtain ⟨x, hx⟩ := hb
+  have hw1 := F.w_pos x
+  have hw4 := hF.w_le x
+  by_cases h4 : 4 ≤ F.W (F.lo a x + hi a x) + F.w x
+  · exact case_A IH hx h4
+  have hWr : F.W (F.lo a x + hi a x) ≤ 2 := by omega
+  rcases shape_of_W hWr with hr | ⟨i, hi1, hr⟩ | ⟨k, hk2, hr⟩ | ⟨i, j, hij, hi1, hj1, hr⟩
+  · rw [hr, W_zero (F := F)] at h4
+    rcases (show F.w x = 1 ∨ F.w x = 2 ∨ F.w x = 3 by omega) with h | h | h
+    · exact case_K1 hx h hr ha
+    · exact case_K2 hx h hr
+    · exact case_I IH hx h hr
+  · have hWi : F.W (F.lo a x + hi a x) = 1 := by rw [hr, W_cnt]; simp [hi1]
+    rcases (show F.w x = 1 ∨ F.w x = 2 by omega) with h | h
+    · rcases lt_trichotomy i x with hix | rfl | hxi
+      · exact case_II IH hx h hi1 hix hr
+      · exact case_3' IH hx h hr
+      · exact case_3 IH hx h hi1 hxi hr
+    · exact case_IV IH hx h hi1 hr
+  · have hWk : F.W (F.lo a x + hi a x) = 2 := by rw [hr, W_cnt]; simp [hk2]
+    exact case_III IH hx (by omega) hk2 hr
+  · have hWij : F.W (F.lo a x + hi a x) = 2 := by rw [hr, W_cnt]; simp [hi1, hj1]
+    have hw : F.w x = 1 := by omega
+    rcases lt_trichotomy j x with hjx | rfl | hxj
+    · exact case_VII IH hx hw hi1 hj1 hij hjx hr
+    · rcases lt_or_eq_of_le hij with hix | rfl
+      · exact case_VI' IH hx hw hi1 hix hr
+      · exact case_V'' IH hx hw hr
+    · rcases lt_trichotomy i x with hix | rfl | hxi
+      · exact case_VI IH hx hw hi1 hj1 hix hxj hr
+      · exact case_V' IH hx hw hj1 hxj hr
+      · exact case_V IH hx hw hi1 hj1 hxi hij hr
+
+variable (hF) in
+/-- **`ψ₃(Λ₅) ⊆ R₅*`** ([Tah81, Lemma 5.6]): `Λ₅ ⊆ L₃` and `ψ₃` maps it into `R₅*`. -/
+theorem rel3_of_mem_Sp5 {z : MonoidAlgebra ℤ G} (hz : z ∈ F.Sp 5 Set.univ) :
+    (z, (0 : F.M3)) ∈ rel3 hF := by
+  induction hz using Submodule.span_induction with
+  | zero => exact rel3_zero hF
+  | add u v _ _ hu hv => have := rel3_add hF hu hv; rwa [add_zero] at this
+  | smul c u _ hu => have := rel3_smul hF c hu; rwa [smul_zero] at this
+  | mem z hz =>
+  obtain ⟨a, ha, -, rfl⟩ := hz
+  have := U3 hF a (by omega)
+  rwa [F.Φ3_eq_zero_of_five_le ha] at this
+
 end Frame
 
 end TaharaProof
