@@ -50,6 +50,9 @@ statement of the problem. Both identities are proved (`of_commutator_sub_one`,
 | $D_n(G/N)=1 \Rightarrow D_n(G)\subseteq N$ | `D_le_of_D_quotient_eq_bot` | `Reduction.lean` |
 | **reduction**: the question $D_5\subseteq\gamma_4$ ⇔ $D_5(Q)=1$ for all $Q$ of class $\le 3$ | `forall_D_le_iff`, `dimensionQuestion5_iff` | `Reduction.lean` |
 | **Lemma 5.9 of the paper** (central root): $K=H\langle r\rangle$, $r$ central, $|K:H|=m$, $r^m=g^m$ with $g\in H$ (not necessarily central) $\Rightarrow$ $\mathbb Z[H]\cap\Delta(K)^n=\Delta(H)^n$ for all $n$ and $D_n(K)=D_n(H)$ for $n\ge2$ | `D_n_eq_of_index`; `CentralRoot.iota_mem_augIdeal_pow_iff`, `CentralRoot.D_eq` | `CentralRoot.lean` |
+| **Proposition 5.8(1) of the paper**, $E=D_8$: $Q=H\circ D_8$ ($a,b$ involutions commuting with $H$, $Q=H\langle a,b\rangle$, $a,b,ab\notin H$), $t=[a,b]\in\gamma_2(H)$ $\Rightarrow$ $\mathbb Z[H]\cap\Delta(Q)^n=\Delta(H)^n$ and $D_n(Q)=D_n(H)$ for $n\ge2$ | `D_n_eq_of_dihedral`; `DihedralData.iota_mem_augIdeal_pow_iff` | `CentralD8.lean` |
+| central square root: $K=H\sqcup Hr$, $r$ central, $c=g^{-2}r^2$ with $c^{2^j}-1\in\Delta(H)^{j+2}$ $\Rightarrow$ $\mathbb Z[H]\cap\Delta(K)^n=\Delta(H)^n$, $D_n(K)=D_n(H)$ | `D_n_eq_of_sqrt` | `CentralSqrt.lean` |
+| **Proposition 5.8 of the paper**, all cases: $Q=H\circ E$, $E/Z(E)\cong(\mathbb Z/2)^2$ ($s=\alpha^2$, $\beta^2=s^e$, $t=[\alpha,\beta]\in\gamma_2(H)$, $c=g^{-2}s$ with $c^{2^j}-1\in\Delta(H)^{j+2}$) $\Rightarrow$ $\mathbb Z[H]\cap\Delta(Q)^n=\Delta(H)^n$ and $D_n(Q)=D_n(H)$, $n\ge2$ (stated for $Q$ in the normal form $H\sqcup H\alpha\sqcup H\beta\sqcup H\alpha\beta$); the cases $Q_8$, $M_{2^{k+2}}$ with $s=g^2$, $s\in\gamma_2$, $s^2\in\gamma_3$, $s^4=1$, and $c^{2^j}\in\gamma_{j+2}(H)$ | `D_n_eq_of_central_product`; `D_n_eq_of_quaternion`, `D_n_eq_of_modular_sq`, `D_n_eq_of_modular_comm`, `D_n_eq_of_central_product_of_gamma` | `CentralProduct.lean` |
 | Lie $D_5(L)\subseteq\gamma_4(L)$ (from the authors' `corollaryD`) | `LieComparison.lieDimensionQuestion5` | `LieComparison.lean` |
 
 $D_2 = \gamma_2$ is proved via the trivial square-zero extension $T=\mathbb Z\oplus G_{ab}$
@@ -57,7 +60,7 @@ $D_2 = \gamma_2$ is proved via the trivial square-zero extension $T=\mathbb Z\op
 first coordinate is $\varepsilon$, so $\Phi(\Delta^2)=0$ and $\Phi(g-1)=(0,\bar g)$. This is the
 same idea as the authors' `DegreeTwo.lean` (a square-zero representation).
 
-`#print axioms` for all 51 proved declarations (`AxiomAudit.lean`) — only `propext`,
+`#print axioms` for all 173 proved declarations (`AxiomAudit.lean`) — only `propext`,
 `Classical.choice`, `Quot.sound`. No `sorry` and no `axiom` in the sources.
 
 ## Only stated (`def … : Prop`, no proof and no assumption)

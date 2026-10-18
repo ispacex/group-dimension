@@ -5,3 +5,6 @@ import GroupDimension.Statements
 import GroupDimension.Reduction
 import GroupDimension.LieComparison
 import GroupDimension.CentralRoot
+import GroupDimension.CentralD8
+import GroupDimension.CentralSqrt
+import GroupDimension.CentralProduct
