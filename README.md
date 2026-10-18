@@ -49,6 +49,7 @@ statement of the problem. Both identities are proved (`of_commutator_sub_one`,
 | for a surjection $\gamma_k(H) \subseteq f(\gamma_k(G))$; $\gamma_k(G/\gamma_k G)=1$ | `lowerCentralSeries_le_map_of_surjective`, `lowerCentralSeries_quotient_eq_bot` | `Reduction.lean` |
 | $D_n(G/N)=1 \Rightarrow D_n(G)\subseteq N$ | `D_le_of_D_quotient_eq_bot` | `Reduction.lean` |
 | **reduction**: the question $D_5\subseteq\gamma_4$ ⇔ $D_5(Q)=1$ for all $Q$ of class $\le 3$ | `forall_D_le_iff`, `dimensionQuestion5_iff` | `Reduction.lean` |
+| **Lemma 5.9 of the paper** (central root): $K=H\langle r\rangle$, $r$ central, $|K:H|=m$, $r^m=g^m$ with $g\in H$ (not necessarily central) $\Rightarrow$ $\mathbb Z[H]\cap\Delta(K)^n=\Delta(H)^n$ for all $n$ and $D_n(K)=D_n(H)$ for $n\ge2$ | `D_n_eq_of_index`; `CentralRoot.iota_mem_augIdeal_pow_iff`, `CentralRoot.D_eq` | `CentralRoot.lean` |
 | Lie $D_5(L)\subseteq\gamma_4(L)$ (from the authors' `corollaryD`) | `LieComparison.lieDimensionQuestion5` | `LieComparison.lean` |
 
 $D_2 = \gamma_2$ is proved via the trivial square-zero extension $T=\mathbb Z\oplus G_{ab}$
@@ -56,7 +57,7 @@ $D_2 = \gamma_2$ is proved via the trivial square-zero extension $T=\mathbb Z\op
 first coordinate is $\varepsilon$, so $\Phi(\Delta^2)=0$ and $\Phi(g-1)=(0,\bar g)$. This is the
 same idea as the authors' `DegreeTwo.lean` (a square-zero representation).
 
-`#print axioms` for all 23 proved declarations (`AxiomAudit.lean`) — only `propext`,
+`#print axioms` for all 51 proved declarations (`AxiomAudit.lean`) — only `propext`,
 `Classical.choice`, `Quot.sound`. No `sorry` and no `axiom` in the sources.
 
 ## Only stated (`def … : Prop`, no proof and no assumption)

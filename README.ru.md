@@ -49,6 +49,7 @@ $[a,b]=a^{-1}b^{-1}ab$ — $[a,b]-1 = a^{-1}b^{-1}\bigl((a-1)(b-1)-(b-1)(a-1)\bi
 | для сюръекции $\gamma_k(H) \subseteq f(\gamma_k(G))$; $\gamma_k(G/\gamma_k G)=1$ | `lowerCentralSeries_le_map_of_surjective`, `lowerCentralSeries_quotient_eq_bot` | `Reduction.lean` |
 | $D_n(G/N)=1 \Rightarrow D_n(G)\subseteq N$ | `D_le_of_D_quotient_eq_bot` | `Reduction.lean` |
 | **сведение**: вопрос $D_5\subseteq\gamma_4$ ⇔ $D_5(Q)=1$ для всех $Q$ класса $\le 3$ | `forall_D_le_iff`, `dimensionQuestion5_iff` | `Reduction.lean` |
+| **лемма 5.9 статьи** (центральный корень): $K=H\langle r\rangle$, $r$ централен, $|K:H|=m$, $r^m=g^m$ с $g\in H$ (не обязательно центральным) $\Rightarrow$ $\mathbb Z[H]\cap\Delta(K)^n=\Delta(H)^n$ при всех $n$ и $D_n(K)=D_n(H)$ при $n\ge2$ | `D_n_eq_of_index`; `CentralRoot.iota_mem_augIdeal_pow_iff`, `CentralRoot.D_eq` | `CentralRoot.lean` |
 | лиевский $D_5(L)\subseteq\gamma_4(L)$ (из `corollaryD` авторов) | `LieComparison.lieDimensionQuestion5` | `LieComparison.lean` |
 
 $D_2 = \gamma_2$ доказано через тривиальное квадратично-нулевое расширение
@@ -57,7 +58,7 @@ $\Phi\colon\mathbb Z[G]\to T$ с первой координатой $\varepsilo
 $\Phi(g-1)=(0,\bar g)$. Это та же идея, что у авторов в `DegreeTwo.lean` (квадратично-нулевое
 представление).
 
-`#print axioms` для всех 23 доказанных объявлений (`AxiomAudit.lean`) — только `propext`,
+`#print axioms` для всех 51 доказанного объявления (`AxiomAudit.lean`) — только `propext`,
 `Classical.choice`, `Quot.sound`. Ни `sorry`, ни `axiom` в исходниках нет.
 
 ## Только сформулировано (`def … : Prop`, без доказательства и без допущения)

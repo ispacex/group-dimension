@@ -4,3 +4,4 @@ import GroupDimension.DTwo
 import GroupDimension.Statements
 import GroupDimension.Reduction
 import GroupDimension.LieComparison
+import GroupDimension.CentralRoot
