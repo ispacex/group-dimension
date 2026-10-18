@@ -30,6 +30,14 @@ theorem TIdx_sum {M : Type*} [AddCommMonoid M] (f : TIdx s t u v → M) :
   rw [sum_lex, sum_lex, sum_lex, sum_lex]
   simp [ℓ1, ℓ2, ℓ3, ℓ4]
 
+theorem ℓ1_lt_ℓ2 (i : Fin s) (k : Fin t) : (ℓ1 i : TIdx s t u v) < ℓ2 k := Sum.Lex.inl_lt_inr _ _
+theorem ℓ1_lt_ℓ3 (i : Fin s) (l : Fin u) : (ℓ1 i : TIdx s t u v) < ℓ3 l := Sum.Lex.inl_lt_inr _ _
+theorem ℓ1_lt_ℓ4 (i : Fin s) (q : Fin v) : (ℓ1 i : TIdx s t u v) < ℓ4 q := Sum.Lex.inl_lt_inr _ _
+theorem ℓ2_lt_ℓ3 (k : Fin t) (l : Fin u) : (ℓ2 k : TIdx s t u v) < ℓ3 l := by
+  simp only [ℓ2, ℓ3, Sum.Lex.inr_lt_inr_iff]; exact Sum.Lex.inl_lt_inr _ _
+theorem ℓ2_lt_ℓ4 (k : Fin t) (q : Fin v) : (ℓ2 k : TIdx s t u v) < ℓ4 q := by
+  simp only [ℓ2, ℓ4, Sum.Lex.inr_lt_inr_iff]; exact Sum.Lex.inl_lt_inr _ _
+
 theorem ℓ1_inj {i j : Fin s} : (ℓ1 i : TIdx s t u v) = ℓ1 j ↔ i = j := by
   simp [ℓ1]
 theorem ℓ2_inj {i j : Fin t} : (ℓ2 i : TIdx s t u v) = ℓ2 j ↔ i = j := by
@@ -43,7 +51,7 @@ end TIdx
 
 section TFrame
 
-variable [Finite G] (h4 : lowerCentralSeries G 4 = ⊥) {T : Data G} (hT : T.Valid)
+variable [Finite G] [Fintype G] (h4 : lowerCentralSeries G 4 = ⊥) {T : Data G} (hT : T.Valid)
   {v : ℕ} {y4 : Fin v → G} {o4 : Fin v → ℕ} (hy4 : LayerNF 3 y4 o4)
 
 /-- The normal form in Tahara's frame, layer by layer. -/
@@ -156,6 +164,95 @@ theorem nfc_cc {g h : Fin T.s} (hgh : g ≤ h) (l : Fin T.u) :
         hT.α_range g h l hgh) ?_).2 l
   have h0 : oprod T.x₂ (0 : Fin T.t → ℤ) = 1 := by simp [oprod]
   rw [h0, one_mul]; exact hT.hα g h hgh
+
+/-! ## First-order symbols in Tahara's frame -/
+
+theorem nfc_ℓ1_zero {y : G} (hy : y ∈ lowerCentralSeries G 1) (i : Fin T.s) :
+    (Tframe h4 hT hy4).nfc y (ℓ1 i) = 0 := by
+  by_contra h0
+  have := (Tframe h4 hT hy4).nf_weight (k := 2) (by simpa using hy)
+    ((Tframe h4 hT hy4).nfc_lt y) ((Tframe h4 hT hy4).nprod_nfc y) h0
+  simp at this
+
+theorem nfc_ℓ2_zero {y : G} (hy : y ∈ lowerCentralSeries G 2) (k : Fin T.t) :
+    (Tframe h4 hT hy4).nfc y (ℓ2 k) = 0 := by
+  by_contra h0
+  have := (Tframe h4 hT hy4).nf_weight (k := 3) (by simpa using hy)
+    ((Tframe h4 hT hy4).nfc_lt y) ((Tframe h4 hT hy4).nprod_nfc y) h0
+  simp at this
+
+/-- `P(x_{1j} - 1)(y - 1)` to first order, for `y ∈ γ₂`. -/
+theorem nsum_ℓ1 {y : G} (hy : y ∈ lowerCentralSeries G 1) (j : Fin T.s) :
+    (Tframe h4 hT hy4).nsum y (cnt [ℓ1 j]) =
+      ∑ k, ((Tframe h4 hT hy4).nfc y (ℓ2 k) : ℤ) • (Tframe h4 hT hy4).E12 (ℓ1 j) (ℓ2 k) +
+        ∑ l, ((Tframe h4 hT hy4).nfc y (ℓ3 l) : ℤ) • (Tframe h4 hT hy4).T13 (ℓ1 j) (ℓ3 l) := by
+  set F := Tframe h4 hT hy4
+  rw [Frame.nsum, TIdx_sum]
+  have e1 : ∑ i, (F.nfc y (ℓ1 i) : ℤ) • F.Φ3 (cnt [ℓ1 j] + Pi.single (ℓ1 i) 1) = 0 :=
+    Finset.sum_eq_zero fun i _ => by rw [nfc_ℓ1_zero h4 hT hy4 hy]; simp
+  have e2 : ∀ k, F.Φ3 (cnt [ℓ1 j] + Pi.single (ℓ2 k) 1) = F.E12 (ℓ1 j) (ℓ2 k) := fun k => by
+    rw [← cnt_single, ← cnt_append, F.Φ3_cnt (by simp [(ℓ1_lt_ℓ2 j k).le])]
+    exact Frame.Φ3w_12 (by simp [F]) (by simp [F])
+  have e3 : ∀ l, F.Φ3 (cnt [ℓ1 j] + Pi.single (ℓ3 l) 1) = F.T13 (ℓ1 j) (ℓ3 l) := fun l => by
+    rw [← cnt_single, ← cnt_append, F.Φ3_cnt (by simp [(ℓ1_lt_ℓ3 j l).le])]
+    exact Frame.Φ3w_13 (by simp [F]) (by simp [F])
+  have e4 : ∀ q, F.Φ3 (cnt [ℓ1 j] + Pi.single (ℓ4 q) 1) = 0 := fun q =>
+    F.Φ3_eq_zero_of_five_le (by rw [← cnt_single, ← cnt_append, F.W_cnt]; simp [F])
+  simp only [e1, e2, e3, e4, smul_zero, Finset.sum_const_zero, add_zero, zero_add]
+
+/-- `P(x_{1j} - 1)(x_{1j'} - 1)(y - 1)` to first order, for `y ∈ γ₂`, `j ≤ j'`. -/
+theorem nsum_ℓ11 {y : G} (hy : y ∈ lowerCentralSeries G 1) {j j' : Fin T.s} (hjj : j ≤ j') :
+    (Tframe h4 hT hy4).nsum y (cnt [ℓ1 j, ℓ1 j']) =
+      ∑ k, ((Tframe h4 hT hy4).nfc y (ℓ2 k) : ℤ) •
+        (Tframe h4 hT hy4).S22 (ℓ1 j) (ℓ1 j') (ℓ2 k) := by
+  set F := Tframe h4 hT hy4
+  rw [Frame.nsum, TIdx_sum]
+  have hle : (ℓ1 j : TIdx T.s T.t T.u v) ≤ ℓ1 j' := ℓ1_le_ℓ1.mpr hjj
+  have e1 : ∑ i, (F.nfc y (ℓ1 i) : ℤ) • F.Φ3 (cnt [ℓ1 j, ℓ1 j'] + Pi.single (ℓ1 i) 1) = 0 :=
+    Finset.sum_eq_zero fun i _ => by rw [nfc_ℓ1_zero h4 hT hy4 hy]; simp
+  have e2 : ∀ k, F.Φ3 (cnt [ℓ1 j, ℓ1 j'] + Pi.single (ℓ2 k) 1) = F.S22 (ℓ1 j) (ℓ1 j') (ℓ2 k) :=
+    fun k => by
+    rw [← cnt_single, ← cnt_append, F.Φ3_cnt (by
+      simp [hle, (ℓ1_lt_ℓ2 j k).le, (ℓ1_lt_ℓ2 j' k).le])]
+    exact Frame.Φ3w_112 (by simp [F]) (by simp [F]) (by simp [F])
+  have e3 : ∀ l, F.Φ3 (cnt [ℓ1 j, ℓ1 j'] + Pi.single (ℓ3 l) 1) = 0 := fun l =>
+    F.Φ3_eq_zero_of_five_le (by rw [← cnt_single, ← cnt_append, F.W_cnt]; simp [F])
+  have e4 : ∀ q, F.Φ3 (cnt [ℓ1 j, ℓ1 j'] + Pi.single (ℓ4 q) 1) = 0 := fun q =>
+    F.Φ3_eq_zero_of_five_le (by rw [← cnt_single, ← cnt_append, F.W_cnt]; simp [F])
+  simp only [e1, e2, e3, e4, smul_zero, Finset.sum_const_zero, add_zero, zero_add]
+
+/-- `P(x_{1j} - 1)(y - 1)` to first order, for `y ∈ γ₃`. -/
+theorem nsum_ℓ1_of_mem2 {y : G} (hy : y ∈ lowerCentralSeries G 2) (j : Fin T.s) :
+    (Tframe h4 hT hy4).nsum y (cnt [ℓ1 j]) =
+      ∑ l, ((Tframe h4 hT hy4).nfc y (ℓ3 l) : ℤ) • (Tframe h4 hT hy4).T13 (ℓ1 j) (ℓ3 l) := by
+  rw [nsum_ℓ1 h4 hT hy4 (lcs_mem_of_le (by norm_num) hy)]
+  simp [nfc_ℓ2_zero h4 hT hy4 hy]
+
+/-- `P(x_{2k} - 1)(y - 1)` to first order, for `y ∈ γ₂`. -/
+theorem nsum_ℓ2 {y : G} (hy : y ∈ lowerCentralSeries G 1) (k : Fin T.t) :
+    (Tframe h4 hT hy4).nsum y (cnt [ℓ2 k]) =
+      ∑ m, ((Tframe h4 hT hy4).nfc y (ℓ2 m) : ℤ) •
+        (if k ≤ m then (Tframe h4 hT hy4).S2' (ℓ2 k) (ℓ2 m)
+          else (Tframe h4 hT hy4).S2' (ℓ2 m) (ℓ2 k)) := by
+  set F := Tframe h4 hT hy4
+  rw [Frame.nsum, TIdx_sum]
+  have e1 : ∑ i, (F.nfc y (ℓ1 i) : ℤ) • F.Φ3 (cnt [ℓ2 k] + Pi.single (ℓ1 i) 1) = 0 :=
+    Finset.sum_eq_zero fun i _ => by rw [nfc_ℓ1_zero h4 hT hy4 hy]; simp
+  have e2 : ∀ m, F.Φ3 (cnt [ℓ2 k] + Pi.single (ℓ2 m) 1) =
+      if k ≤ m then F.S2' (ℓ2 k) (ℓ2 m) else F.S2' (ℓ2 m) (ℓ2 k) := fun m => by
+    rw [← cnt_single, ← cnt_append]
+    split_ifs with h
+    · rw [F.Φ3_cnt (by simp [ℓ2_le_ℓ2.mpr h])]
+      exact Frame.Φ3w_22 (by simp [F]) (by simp [F])
+    · have e : cnt ([ℓ2 k] ++ [ℓ2 m]) = cnt ([ℓ2 m] ++ [ℓ2 k] : List (TIdx T.s T.t T.u v)) := by
+        rw [cnt_append, cnt_append, add_comm]
+      rw [e, F.Φ3_cnt (by simp [ℓ2_le_ℓ2.mpr (le_of_not_ge h)])]
+      exact Frame.Φ3w_22 (by simp [F]) (by simp [F])
+  have e3 : ∀ l, F.Φ3 (cnt [ℓ2 k] + Pi.single (ℓ3 l) 1) = 0 := fun l =>
+    F.Φ3_eq_zero_of_five_le (by rw [← cnt_single, ← cnt_append, F.W_cnt]; simp [F])
+  have e4 : ∀ q, F.Φ3 (cnt [ℓ2 k] + Pi.single (ℓ4 q) 1) = 0 := fun q =>
+    F.Φ3_eq_zero_of_five_le (by rw [← cnt_single, ← cnt_append, F.W_cnt]; simp [F])
+  simp only [e1, e2, e3, e4, smul_zero, Finset.sum_const_zero, add_zero, zero_add]
 
 end TFrame
 
