@@ -205,6 +205,171 @@ theorem first_order {β : ι → ℕ} (hβ : ∀ j, β j ≠ 0 → x < j) {g : G
   have := rel3_add hF hlin hrem
   rwa [← mul_add, add_sub_cancel, add_zero] at this
 
+omit IH hx in
+/-- The commutation rule modulo weight `2p + q`. -/
+theorem comm_sub_mem {g h : G} {p q : ℕ} (hg : E g ∈ F.Sp p (Set.Ioi x))
+    (hh : E h ∈ F.Sp q (Set.Ioi x)) (hc : E (tc g h) ∈ F.Sp (p + q) (Set.Ioi x)) :
+    E g * E h - (E h * E g + E (tc g h) + E h * E (tc g h)) ∈ F.Sp (2 * p + q) (Set.Ioi x) := by
+  have e : E g * E h - (E h * E g + E (tc g h) + E h * E (tc g h)) =
+      E g * E (tc g h) + E h * E g * E (tc g h) := by
+    rw [E_comm]; abel
+  rw [e]
+  refine add_mem (F.Sp_mono (by omega) _ (F.mul_mem_Ioi hg hc)) ?_
+  exact F.Sp_mono (by omega) _ (F.mul_mem_Ioi (F.mul_mem_Ioi hh hg) hc)
+
+/-- Replacing a factor modulo `Sp K (Ioi x)` with `W(a_lo) + K ≥ 5`. -/
+theorem rel3_of_sub {u u' : MonoidAlgebra ℤ G} {v : F.M3} {K : ℕ}
+    (hu : (F.P (F.lo a x) * u', v) ∈ rel3 hF) (hd : u - u' ∈ F.Sp K (Set.Ioi x))
+    (hK : 5 ≤ F.W (F.lo a x) + K) : (F.P (F.lo a x) * u, v) ∈ rel3 hF := by
+  have := rel3_add hF hu (junk IH hx hd hK)
+  rwa [← mul_add, add_sub_cancel, add_zero] at this
+
+omit IH hx in
+/-- `y = x^{o(x)}` lies in `γ_{w(x)+1}`. -/
+theorem yy_mem : F.yy x ∈ lowerCentralSeries G (F.w x + 1 - 1) := by
+  simpa [yy] using F.pow_mem x
+
+omit IH hx in
+theorem E_yy_mem : E (F.yy x) ∈ F.Sp (F.w x + 1) (Set.Ioi x) :=
+  F.E_mem_Ioi (yy_mem (F := F)) (by omega)
+
+/-- **TE1**: `a_hi = 0`. -/
+theorem TE1 (hhi : hi a x = 0) (h3 : 3 ≤ F.W (F.lo a x) + (F.w x + 1))
+    (h5 : 5 ≤ F.W (F.lo a x) + 2 * (F.w x + 1)) :
+    (F.P (F.lo a x) * E (F.yy x) * F.P (hi a x), F.nsum (F.yy x) (F.lo a x)) ∈ rel3 hF := by
+  have hW0 : F.W 0 = 0 := by simp [W]
+  have := first_order IH hx (β := 0) (by simp) (yy_mem (F := F) (x := x)) (by omega) (by simp)
+    (by rw [hW0]; omega) (by rw [hW0]; omega)
+  rw [hhi, P_zero, mul_one]
+  rwa [P_zero, mul_one, add_zero] at this
+
+omit IH hx in
+theorem W_zero : F.W 0 = 0 := by simp [W]
+
+omit IH hx in
+theorem cc_mem (hwx : F.w x = 1) (k : ι) (hk : F.w k = 1) :
+    F.cc x k ∈ lowerCentralSeries G 2 :=
+  ExpThree.tc_mem (i := 1) (j := 0) (by norm_num) (by simpa [hwx] using yy_mem (F := F) (x := x))
+    (by simpa [hk] using F.mem k)
+
+/-- **TE2**: `a_hi = e_k` for a letter `k > x` of weight 1 (and `w x = 1`). -/
+theorem TE2 (hwx : F.w x = 1) {k : ι} (hk : F.w k = 1) (hxk : x < k)
+    (hhi : hi a x = cnt [k]) :
+    (F.P (F.lo a x) * E (F.yy x) * F.P (hi a x),
+      F.nsum (F.yy x) (F.lo a x + cnt [k]) + F.nsum (F.cc x k) (F.lo a x) +
+        F.nsum (F.cc x k) (F.lo a x + cnt [k])) ∈ rel3 hF := by
+  have hk1 : ∀ j, cnt [k] j ≠ 0 → x < j := fun j hj => by
+    rw [cnt_single] at hj
+    by_cases h : j = k
+    · exact h ▸ hxk
+    · simp [Pi.single_eq_of_ne h] at hj
+  have hkw : ∀ j, cnt [k] j ≠ 0 → F.w j < 2 := fun j hj => by
+    rw [cnt_single] at hj
+    by_cases h : j = k
+    · subst h; omega
+    · simp [Pi.single_eq_of_ne h] at hj
+  have hWk : F.W (cnt [k]) = 1 := by rw [W_cnt]; simp [hk]
+  have hPk : F.P (cnt [k]) = F.X k := by rw [cnt_single, F.P_single]
+  have hc := cc_mem (F := F) (x := x) hwx k hk
+  have hEy := E_yy_mem (F := F) (x := x)
+  rw [hwx] at hEy
+  have hXk : E (F.x k) ∈ F.Sp 1 (Set.Ioi x) := by
+    rw [← X_eq_E, ← hk]; exact F.X_mem_Ioi hxk
+  have hEc : E (F.cc x k) ∈ F.Sp 3 (Set.Ioi x) := F.E_mem_Ioi hc (by omega)
+  have hD := comm_sub_mem (x := x) hEy hXk hEc
+  rw [hhi, hPk, mul_assoc]
+  refine rel3_of_sub IH hx ?_ hD (by omega)
+  have t1 := first_order IH hx hk1 (yy_mem (F := F) (x := x)) (by omega) (by rw [hwx]; exact hkw)
+    (by rw [hWk, hwx]; omega) (by rw [hWk, hwx]; omega)
+  have t2 := first_order IH hx (β := 0) (by simp) (k := 3) hc (by omega) (by simp)
+    (by rw [W_zero (F := F)]; omega) (by rw [W_zero (F := F)]; omega)
+  have t3 := first_order IH hx hk1 (k := 3) hc (by omega) (fun j hj => by
+    have := hkw j hj; omega) (by rw [hWk]; omega) (by rw [hWk]; omega)
+  rw [hPk] at t1 t3
+  rw [P_zero, mul_one, add_zero] at t2
+  have := rel3_add hF (rel3_add hF t1 t2) t3
+  convert this using 2
+  simp only [cc, X_eq_E]; noncomm_ring
+
+/-- **TE3**: `a_hi = e_j + e_k` for letters `x < j ≤ k` of weight 1 (and `w x = 1`). -/
+theorem TE3 (hwx : F.w x = 1) {j k : ι} (hj : F.w j = 1) (hk : F.w k = 1) (hxj : x < j)
+    (hjk : j ≤ k) (hhi : hi a x = cnt [j, k]) :
+    (F.P (F.lo a x) * E (F.yy x) * F.P (hi a x),
+      F.nsum (F.yy x) (F.lo a x + cnt [j, k]) + F.nsum (F.cc x k) (F.lo a x + cnt [j]) +
+        F.nsum (F.cc x j) (F.lo a x + cnt [k]) + F.nsum (tc (F.cc x j) (F.x k)) (F.lo a x)) ∈
+      rel3 hF := by
+  have hxk : x < k := lt_of_lt_of_le hxj hjk
+  have hlet : ∀ (l : List ι), (∀ i ∈ l, x < i ∧ F.w i = 1) →
+      (∀ i, cnt l i ≠ 0 → x < i) ∧ (∀ i, cnt l i ≠ 0 → F.w i < 2) := by
+    intro l hl
+    constructor <;> intro i hi <;> have hm : i ∈ l := List.count_pos_iff.mp (Nat.pos_of_ne_zero hi)
+    · exact (hl i hm).1
+    · have := (hl i hm).2; omega
+  obtain ⟨hjk1, hjk2⟩ := hlet [j, k] (by simp [hxj, hxk, hj, hk])
+  obtain ⟨hj1, hj2⟩ := hlet [j] (by simp [hxj, hj])
+  obtain ⟨hk1, hk2⟩ := hlet [k] (by simp [hxk, hk])
+  have hWjk : F.W (cnt [j, k]) = 2 := by rw [W_cnt]; simp [hj, hk]
+  have hWj : F.W (cnt [j]) = 1 := by rw [W_cnt]; simp [hj]
+  have hWk : F.W (cnt [k]) = 1 := by rw [W_cnt]; simp [hk]
+  have hPjk : F.P (cnt [j, k]) = F.X j * F.X k := by
+    rw [F.P_cnt (by simp [hjk])]; simp
+  have hPj : F.P (cnt [j]) = F.X j := by rw [cnt_single, F.P_single]
+  have hPk : F.P (cnt [k]) = F.X k := by rw [cnt_single, F.P_single]
+  have hcj := cc_mem (F := F) (x := x) hwx j hj
+  have hck := cc_mem (F := F) (x := x) hwx k hk
+  have hc' : tc (F.cc x j) (F.x k) ∈ lowerCentralSeries G 3 :=
+    ExpThree.tc_mem (i := 2) (j := 0) (by norm_num) hcj (by simpa [hk] using F.mem k)
+  have hEy := E_yy_mem (F := F) (x := x)
+  rw [hwx] at hEy
+  have hXj : E (F.x j) ∈ F.Sp 1 (Set.Ioi x) := by rw [← X_eq_E, ← hj]; exact F.X_mem_Ioi hxj
+  have hXk : E (F.x k) ∈ F.Sp 1 (Set.Ioi x) := by rw [← X_eq_E, ← hk]; exact F.X_mem_Ioi hxk
+  have hEcj : E (F.cc x j) ∈ F.Sp 3 (Set.Ioi x) := F.E_mem_Ioi hcj (by omega)
+  have hEck : E (F.cc x k) ∈ F.Sp 3 (Set.Ioi x) := F.E_mem_Ioi hck (by omega)
+  have hEc' : E (tc (F.cc x j) (F.x k)) ∈ F.Sp 4 (Set.Ioi x) := F.E_mem_Ioi hc' (by omega)
+  have hD1 := comm_sub_mem (x := x) hEy hXj hEcj
+  have hD2 := comm_sub_mem (x := x) hEy hXk hEck
+  have hD3 := comm_sub_mem (x := x) hEcj hXk hEc'
+  have hJ : E (F.yy x) * (E (F.x j) * E (F.x k)) - (E (F.x j) * E (F.x k) * E (F.yy x) +
+      E (F.x j) * E (F.cc x k) + E (F.x k) * E (F.cc x j) + E (tc (F.cc x j) (F.x k))) ∈
+      F.Sp 5 (Set.Ioi x) := by
+    have key : E (F.yy x) * (E (F.x j) * E (F.x k)) - (E (F.x j) * E (F.x k) * E (F.yy x) +
+        E (F.x j) * E (F.cc x k) + E (F.x k) * E (F.cc x j) + E (tc (F.cc x j) (F.x k))) =
+        E (F.x j) * E (F.x k) * E (F.cc x k) +
+        E (F.x j) * (E (F.yy x) * E (F.x k) - (E (F.x k) * E (F.yy x) + E (F.cc x k) +
+          E (F.x k) * E (F.cc x k))) +
+        E (F.x k) * E (tc (F.cc x j) (F.x k)) +
+        (E (F.cc x j) * E (F.x k) - (E (F.x k) * E (F.cc x j) + E (tc (F.cc x j) (F.x k)) +
+          E (F.x k) * E (tc (F.cc x j) (F.x k)))) +
+        E (F.x j) * E (F.cc x j) * E (F.x k) +
+        (E (F.yy x) * E (F.x j) - (E (F.x j) * E (F.yy x) + E (F.cc x j) +
+          E (F.x j) * E (F.cc x j))) * E (F.x k) := by
+      noncomm_ring
+    rw [key]
+    refine add_mem (add_mem (add_mem (add_mem (add_mem ?_ ?_) ?_) ?_) ?_) ?_
+    · exact F.Sp_mono (by omega) _ (F.mul_mem_Ioi (F.mul_mem_Ioi hXj hXk) hEck)
+    · exact F.Sp_mono (by omega) _ (F.mul_mem_Ioi hXj hD2)
+    · exact F.Sp_mono (by omega) _ (F.mul_mem_Ioi hXk hEc')
+    · exact F.Sp_mono (by omega) _ hD3
+    · exact F.Sp_mono (by omega) _ (F.mul_mem_Ioi (F.mul_mem_Ioi hXj hEcj) hXk)
+    · exact F.Sp_mono (by omega) _ (F.mul_mem_Ioi hD1 hXk)
+  rw [hhi, hPjk, mul_assoc]
+  refine rel3_of_sub IH hx ?_ hJ (by omega)
+  have t1 := first_order IH hx hjk1 (yy_mem (F := F) (x := x)) (by omega) (by rw [hwx]; exact hjk2)
+    (by rw [hWjk, hwx]; omega) (by rw [hWjk, hwx]; omega)
+  have t2 := first_order IH hx hj1 (k := 3) hck (by omega) (fun i hi => by
+    have := hj2 i hi; omega) (by rw [hWj]; omega) (by rw [hWj]; omega)
+  have t3 := first_order IH hx hk1 (k := 3) hcj (by omega) (fun i hi => by
+    have := hk2 i hi; omega) (by rw [hWk]; omega) (by rw [hWk]; omega)
+  have t4 := first_order IH hx (β := 0) (by simp) (k := 4) hc' (by omega) (by simp)
+    (by rw [W_zero (F := F)]; omega) (by rw [W_zero (F := F)]; omega)
+  rw [hPjk] at t1
+  rw [hPj] at t2
+  rw [hPk] at t3
+  rw [P_zero, mul_one, add_zero] at t4
+  have := rel3_add hF (rel3_add hF (rel3_add hF t1 t2) t3) t4
+  convert this using 2
+  simp only [cc, X_eq_E]; noncomm_ring
+
 end Frame
 
 end TaharaProof
