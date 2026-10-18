@@ -9,3 +9,5 @@ import GroupDimension.CentralD8
 import GroupDimension.CentralSqrt
 import GroupDimension.CentralProduct
 import GroupDimension.FiniteReduction
+import GroupDimension.ClassFour
+import GroupDimension.ClassFourOrder

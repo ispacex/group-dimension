@@ -52,6 +52,10 @@ $[a,b]=a^{-1}b^{-1}ab$ — $[a,b]-1 = a^{-1}b^{-1}\bigl((a-1)(b-1)-(b-1)(a-1)\bi
 | конечная порождённость: $x\in D_n(G)$ ⇒ $x\in D_n(H)$, $H$ порождена конечным множеством | `finRep_of_mem`, `exists_closure_finset_mem_D` | `FiniteReduction.lean` |
 | **предложение 2.1 статьи**: при теоремах Пасси ($D_4^2\subseteq\gamma_4$) и Грюнберга (гипотезы) вопрос $D_5\subseteq\gamma_4$ ⇔ $D_5(Q)=1$ для всех конечных $2$-групп $Q$ класса $\le3$; при $D_3=\gamma_3$ (гипотеза) — класса ровно $3$ | `dimensionQuestion5_iff_finite_two_groups`, `dimensionQuestion5_iff_class_three` | `FiniteReduction.lean` |
 | **замечание 2.3** (ограниченный вариант): при теореме Пасси (гипотеза) $D_5(Q)=1$ для $2$-групп класса $\le3$ порядка $\le2^k$ ⇒ $D_5(G)\subseteq\gamma_4(G)$ для конечных $G$ с силовской $2$-подгруппой порядка $\le2^k$; при $D_3=\gamma_3$ (гипотеза) — класса ровно $3$ | `D_five_le_of_bounded`, `D_five_le_of_bounded_class_three`, `exists_sylow_two_proj` | `FiniteReduction.lean` |
+| $[\gamma_i,\gamma_j]\subseteq\gamma_{i+j}$; тождество Холла–Витта | `commutator_lcs_le`, `hall_witt` | `ClassFour.lean` |
+| **лемма 6.3 статьи**: $p$ нечётно, $\vert\gamma_3/\gamma_4\vert=p$, $\gamma_2/\gamma_3$ порождается не более чем двумя элементами $\Rightarrow$ $[\gamma_2,\gamma_2]\subseteq\gamma_5$ (метабелевость при классе $\le4$); циклический случай без условия на $\gamma_3/\gamma_4$ | `commutator_gamma_two_le_gamma_five`, `metabelian_of_class_four`, `commutator_gamma_two_le_gamma_five_of_cyclic` | `ClassFour.lean`, `ClassFourOrder.lean` |
+| **предложение 6.5 статьи**: $p$ нечётно, $Q$ — $p$-группа класса $\le4$, $Q''\ne1$ $\Rightarrow$ $d(Q)\ge3$, $\vert Q\vert\ge p^{d(Q)+5}$; отсюда (1) метабелевость при $\vert Q\vert\le p^7$ или $\vert Q\vert=p^8$, $d(Q)\ge4$; (2) при $p^9$: $d(Q)\in\{3,4\}$, тип $(4,3,1,1)$ или $(4,2,2,1)$ при $d=4$ | `card_ge_of_not_metabelian`, `metabelian_of_card_le`, `rank_of_card_nine`, `type_of_card_nine` | `ClassFourOrder.lean` |
+| $p$-группа порядка $\le p^n$ порождается $n$ элементами; $H\gamma_2=G\Rightarrow H=G$ в конечной $p$-группе; $G=\langle x,y\rangle\Rightarrow\gamma_2=\langle[x,y]\rangle\gamma_3$ | `exists_generators_card_le`, `eq_top_of_sup_commutator`, `gamma_two_mod_of_pair` | `ClassFourOrder.lean` |
 | **лемма 5.9 статьи** (центральный корень): $K=H\langle r\rangle$, $r$ централен, $|K:H|=m$, $r^m=g^m$ с $g\in H$ (не обязательно центральным) $\Rightarrow$ $\mathbb Z[H]\cap\Delta(K)^n=\Delta(H)^n$ при всех $n$ и $D_n(K)=D_n(H)$ при $n\ge2$ | `D_n_eq_of_index`; `CentralRoot.iota_mem_augIdeal_pow_iff`, `CentralRoot.D_eq` | `CentralRoot.lean` |
 | **предложение 5.8(1) статьи**, $E=D_8$: $Q=H\circ D_8$ ($a,b$ — инволюции, перестановочные с $H$, $Q=H\langle a,b\rangle$, $a,b,ab\notin H$), $t=[a,b]\in\gamma_2(H)$ $\Rightarrow$ $\mathbb Z[H]\cap\Delta(Q)^n=\Delta(H)^n$ и $D_n(Q)=D_n(H)$ при $n\ge2$ | `D_n_eq_of_dihedral`; `DihedralData.iota_mem_augIdeal_pow_iff` | `CentralD8.lean` |
 | центральный квадратный корень: $K=H\sqcup Hr$, $r$ централен, $c=g^{-2}r^2$, $c^{2^j}-1\in\Delta(H)^{j+2}$ $\Rightarrow$ $\mathbb Z[H]\cap\Delta(K)^n=\Delta(H)^n$, $D_n(K)=D_n(H)$ | `D_n_eq_of_sqrt` | `CentralSqrt.lean` |
@@ -64,7 +68,7 @@ $\Phi\colon\mathbb Z[G]\to T$ с первой координатой $\varepsilo
 $\Phi(g-1)=(0,\bar g)$. Это та же идея, что у авторов в `DegreeTwo.lean` (квадратично-нулевое
 представление).
 
-`#print axioms` для всех 188 доказанных объявлений (`AxiomAudit.lean`) — только `propext`,
+`#print axioms` для всех 260 доказанных объявлений (`AxiomAudit.lean`) — только `propext`,
 `Classical.choice`, `Quot.sound`. Ни `sorry`, ни `axiom` в исходниках нет.
 
 ## Только сформулировано (`def … : Prop`, без доказательства)
