@@ -472,6 +472,143 @@ theorem case_VII (hw : F.w x = 1) {j k : ι} (hj : F.w j = 1) (hk : F.w k = 1) (
     F.Φ3_cnt (show [j, k, x, x].Pairwise (· ≤ ·) by simp [hjk, hkx.le, (hjk.trans hkx.le)])]
   simp; abel
 
+/-- **Case (VI)**, `j < x < k`. -/
+theorem case_VI (hw : F.w x = 1) {j k : ι} (hj : F.w j = 1) (hk : F.w k = 1) (hjx : j < x)
+    (hxk : x < k) (hr : F.lo a x + hi a x = cnt [j, k]) : (F.P a, F.Φ3 a) ∈ rel3 hF := by
+  obtain ⟨hlo, hhi⟩ := lo_hi_split hx (l₁ := [j]) (l₂ := [k]) (by simp [hjx.le]) (by simp [hxk])
+    (by simpa using hr)
+  have hW : F.W (cnt [j, k]) = 2 := by rw [W_cnt]; simp [hj, hk]
+  have hT := TE2 IH hx hw hk hxk hhi
+  refine std_case IH hx hT (by rw [hr, hW]; omega) (fun m hm =>
+    F.Φ3_eq_zero_of_five_le (by rw [W_r_add IH hx, hr, hW]; nlinarith)) ?_
+  have hs : ∀ m, ([j] ++ List.replicate m x ++ [k]).Pairwise (· ≤ ·) := by
+    intro m
+    rw [List.append_assoc, List.singleton_append, List.pairwise_cons, List.pairwise_append]
+    refine ⟨fun b hb => ?_, List.pairwise_replicate.mpr (Or.inr le_rfl),
+      List.pairwise_singleton _ _, fun a ha b hb => ?_⟩
+    · rcases List.mem_append.mp hb with hb | hb
+      · rw [List.eq_of_mem_replicate hb]; exact hjx.le
+      · rw [List.mem_singleton.mp hb]; exact (hjx.trans hxk).le
+    · rw [List.eq_of_mem_replicate ha, List.mem_singleton.mp hb]; exact hxk.le
+  rw [f3_zero hx hr (by rw [hW]) hw, Φ3_r_rep hx (by simpa using hr) 1 (hs 1),
+    Φ3_r_rep hx (by simpa using hr) 2 (hs 2), hlo,
+    show cnt [j] + cnt [k] = cnt [j, k] by rw [← cnt_append]; rfl,
+    F.nsum_eq_zero (k := 3) (cc_mem (F := F) (x := x) hw k hk) (β := cnt [j, k]) (by rw [hW])]
+  have := F.gVI_mem hj hw hk hjx.le hxk.le
+  convert this using 1
+  simp only [gVI, F.Φ3_cnt (show [j, x, k].Pairwise (· ≤ ·) by
+      simp [hjx.le, hxk.le, (hjx.trans hxk).le]),
+    F.Φ3_cnt (show [j, x, x, k].Pairwise (· ≤ ·) by simp [hjx.le, hxk.le, (hjx.trans hxk).le])]
+  simp; abel
+
+/-- **Case (VI)**, `j < x`, the second letter `x` itself. -/
+theorem case_VI' (hw : F.w x = 1) {j : ι} (hj : F.w j = 1) (hjx : j < x)
+    (hr : F.lo a x + hi a x = cnt [j, x]) : (F.P a, F.Φ3 a) ∈ rel3 hF := by
+  obtain ⟨hlo, hhi⟩ := lo_hi_split hx (l₁ := [j, x]) (l₂ := []) (by simp [hjx.le]) (by simp)
+    (by simpa using hr)
+  rw [cnt_nil] at hhi
+  have hW : F.W (cnt [j, x]) = 2 := by rw [W_cnt]; simp [hj, hw]
+  have hT := TE1 IH hx hhi (by rw [hlo, hW]; omega) (by rw [hlo, hW]; omega)
+  refine std_case IH hx hT (by rw [hr, hW]; omega) (fun m hm =>
+    F.Φ3_eq_zero_of_five_le (by rw [W_r_add IH hx, hr, hW]; nlinarith)) ?_
+  rw [f3_zero hx hr (by rw [hW]) hw,
+    Φ3_r_rep hx (l₁ := [j, x]) (l₂ := []) (by simpa using hr) 1 (by simp [hjx.le]),
+    Φ3_r_rep hx (l₁ := [j, x]) (l₂ := []) (by simpa using hr) 2 (by simp [hjx.le]), hlo]
+  have := F.gVI_mem hj hw hw hjx.le le_rfl
+  convert this using 1
+  simp only [gVI, cc_self, nsum_one, F.Φ3_cnt (show [j, x, x].Pairwise (· ≤ ·) by simp [hjx.le]),
+    F.Φ3_cnt (show [j, x, x, x].Pairwise (· ≤ ·) by simp [hjx.le])]
+  simp; abel
+
+/-- **Case (V)**, `x < j ≤ k`. -/
+theorem case_V (hw : F.w x = 1) {j k : ι} (hj : F.w j = 1) (hk : F.w k = 1) (hxj : x < j)
+    (hjk : j ≤ k) (hr : F.lo a x + hi a x = cnt [j, k]) : (F.P a, F.Φ3 a) ∈ rel3 hF := by
+  have hxk := lt_of_lt_of_le hxj hjk
+  obtain ⟨hlo, hhi⟩ := lo_hi_split hx (l₁ := []) (l₂ := [j, k]) (by simp) (by simp [hxj, hxk])
+    (by simpa using hr)
+  rw [cnt_nil] at hlo
+  have hW : F.W (cnt [j, k]) = 2 := by rw [W_cnt]; simp [hj, hk]
+  have hT := TE3 IH hx hw hj hk hxj hjk hhi
+  refine std_case IH hx hT (by rw [hr, hW]; omega) (fun m hm =>
+    F.Φ3_eq_zero_of_five_le (by rw [W_r_add IH hx, hr, hW]; nlinarith)) ?_
+  rw [f3_zero hx hr (by rw [hW]) hw,
+    Φ3_r_rep hx (l₁ := []) (l₂ := [j, k]) (by simpa using hr) 1 (by simp [hjk, hxj.le, hxk.le]),
+    Φ3_r_rep hx (l₁ := []) (l₂ := [j, k]) (by simpa using hr) 2 (by simp [hjk, hxj.le, hxk.le]),
+    hlo, zero_add, zero_add, zero_add]
+  have := F.gV_mem hw hj hk hxj.le hjk
+  convert this using 1
+  simp only [gV, F.Φ3_cnt (show [x, j, k].Pairwise (· ≤ ·) by simp [hjk, hxj.le, hxk.le]),
+    F.Φ3_cnt (show [x, x, j, k].Pairwise (· ≤ ·) by simp [hjk, hxj.le, hxk.le])]
+  simp; abel
+
+/-- **Case (V)**, `x < k`, the first letter `x` itself. -/
+theorem case_V' (hw : F.w x = 1) {k : ι} (hk : F.w k = 1) (hxk : x < k)
+    (hr : F.lo a x + hi a x = cnt [x, k]) : (F.P a, F.Φ3 a) ∈ rel3 hF := by
+  obtain ⟨hlo, hhi⟩ := lo_hi_split hx (l₁ := [x]) (l₂ := [k]) (by simp) (by simp [hxk])
+    (by simpa using hr)
+  have hW : F.W (cnt [x, k]) = 2 := by rw [W_cnt]; simp [hk, hw]
+  have hT := TE2 IH hx hw hk hxk hhi
+  refine std_case IH hx hT (by rw [hr, hW]; omega) (fun m hm =>
+    F.Φ3_eq_zero_of_five_le (by rw [W_r_add IH hx, hr, hW]; nlinarith)) ?_
+  have hs : ∀ m, ([x] ++ List.replicate m x ++ [k]).Pairwise (· ≤ ·) := by
+    intro m
+    rw [List.append_assoc, List.singleton_append, List.pairwise_cons, List.pairwise_append]
+    refine ⟨fun b hb => ?_, List.pairwise_replicate.mpr (Or.inr le_rfl),
+      List.pairwise_singleton _ _, fun a ha b hb => ?_⟩
+    · rcases List.mem_append.mp hb with hb | hb
+      · rw [List.eq_of_mem_replicate hb]
+      · rw [List.mem_singleton.mp hb]; exact hxk.le
+    · rw [List.eq_of_mem_replicate ha, List.mem_singleton.mp hb]; exact hxk.le
+  rw [f3_zero hx hr (by rw [hW]) hw, Φ3_r_rep hx (by simpa using hr) 1 (hs 1),
+    Φ3_r_rep hx (by simpa using hr) 2 (hs 2), hlo,
+    show cnt [x] + cnt [k] = cnt [x, k] by rw [← cnt_append]; rfl,
+    F.nsum_eq_zero (k := 3) (cc_mem (F := F) (x := x) hw k hk) (β := cnt [x, k]) (by rw [hW])]
+  have := F.gV_mem hw hw hk le_rfl hxk.le
+  convert this using 1
+  simp only [gV, cc_self, tc_one_left, nsum_one,
+    F.Φ3_cnt (show [x, x, k].Pairwise (· ≤ ·) by simp [hxk.le]),
+    F.Φ3_cnt (show [x, x, x, k].Pairwise (· ≤ ·) by simp [hxk.le])]
+  simp; abel
+
+/-- **Case (V)**, the rest `x, x`. -/
+theorem case_V'' (hw : F.w x = 1) (hr : F.lo a x + hi a x = cnt [x, x]) :
+    (F.P a, F.Φ3 a) ∈ rel3 hF := by
+  obtain ⟨hlo, hhi⟩ := lo_hi_split hx (l₁ := [x, x]) (l₂ := []) (by simp) (by simp)
+    (by simpa using hr)
+  rw [cnt_nil] at hhi
+  have hW : F.W (cnt [x, x]) = 2 := by rw [W_cnt]; simp [hw]
+  have hT := TE1 IH hx hhi (by rw [hlo, hW]; omega) (by rw [hlo, hW]; omega)
+  refine std_case IH hx hT (by rw [hr, hW]; omega) (fun m hm =>
+    F.Φ3_eq_zero_of_five_le (by rw [W_r_add IH hx, hr, hW]; nlinarith)) ?_
+  rw [f3_zero hx hr (by rw [hW]) hw,
+    Φ3_r_rep hx (l₁ := [x, x]) (l₂ := []) (by simpa using hr) 1 (by simp),
+    Φ3_r_rep hx (l₁ := [x, x]) (l₂ := []) (by simpa using hr) 2 (by simp), hlo]
+  have := F.gV_mem hw hw hw le_rfl le_rfl
+  convert this using 1
+  simp only [gV, cc_self, tc_one_left, nsum_one, F.Φ3_cnt (show [x, x, x].Pairwise (· ≤ ·) by simp),
+    F.Φ3_cnt (show [x, x, x, x].Pairwise (· ≤ ·) by simp)]
+  simp; abel
+
+/-- **Case (III)**: the rest is a letter `k` of weight 2. -/
+theorem case_III (hw : F.w x = 1) {k : ι} (hk : F.w k = 2) (hr : F.lo a x + hi a x = cnt [k]) :
+    (F.P a, F.Φ3 a) ∈ rel3 hF := by
+  have hxk : x < k := F.lt_of_w_lt (by omega)
+  obtain ⟨hlo, hhi⟩ := lo_hi_split hx (l₁ := []) (l₂ := [k]) (by simp) (by simp [hxk])
+    (by simpa using hr)
+  rw [cnt_nil] at hlo
+  have hW : F.W (cnt [k]) = 2 := by rw [W_cnt]; simp [hk]
+  have hT := TE4 IH hx hw hk hxk hhi
+  refine std_case IH hx hT (by rw [hr, hW]; omega) (fun m hm =>
+    F.Φ3_eq_zero_of_five_le (by rw [W_r_add IH hx, hr, hW]; nlinarith)) ?_
+  rw [f3_zero hx hr (by rw [hW]) hw,
+    Φ3_r_rep hx (l₁ := []) (l₂ := [k]) (by simpa using hr) 1 (by simp [hxk.le]),
+    Φ3_r_rep hx (l₁ := []) (l₂ := [k]) (by simpa using hr) 2 (by simp [hxk.le]), hlo, zero_add]
+  have := F.gIII_mem hw hk
+  convert this using 1
+  simp only [gIII, F.Φ3_cnt (show [x, k].Pairwise (· ≤ ·) by simp [hxk.le]),
+    F.Φ3_cnt (show [x, x, k].Pairwise (· ≤ ·) by simp [hxk.le])]
+  simp; abel
+
 end Cases
 
 end Frame
