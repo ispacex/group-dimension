@@ -522,6 +522,85 @@ theorem fam_linearIndependent : LinearIndependent ℤ F.fam := by
       show F.crd b.1.val (F.P b'.1.val) = 0
       rw [F.crd_P b'.1.val_lt b.1.val_lt, if_neg hbb]
 
+/-! ## `ψ₃` on the span of Losey's basis -/
+
+omit hF in
+/-- The span of Losey's basis (this is `Λ₃`; we only use that it contains what we need). -/
+noncomputable def L3 : Submodule ℤ (MonoidAlgebra ℤ G) := Submodule.span ℤ (Set.range F.fam)
+
+/-- Losey's basis as a basis of `L3`. -/
+noncomputable def basisL3 : Module.Basis F.Fam ℤ F.L3 :=
+  Module.Basis.span (fam_linearIndependent hF)
+
+/-- Tahara's `ψ₃ : Λ₃ → W₃* ⊕ W₄`. -/
+noncomputable def ψ3 : F.L3 →ₗ[ℤ] F.M3 := (basisL3 hF).constr ℤ F.famVal
+
+omit hF in
+theorem fam_mem_L3 (f : F.Fam) : F.fam f ∈ F.L3 := Submodule.subset_span ⟨f, rfl⟩
+
+theorem ψ3_fam (f : F.Fam) : ψ3 hF ⟨F.fam f, F.fam_mem_L3 f⟩ = F.famVal f := by
+  have : (⟨F.fam f, F.fam_mem_L3 f⟩ : F.L3) = basisL3 hF f := by
+    show _ = Module.Basis.span (fam_linearIndependent hF) f
+    simp only [Module.Basis.span_apply]
+    rfl
+  rw [this, ψ3, Module.Basis.constr_basis]
+
+/-- Pairs `(z, v)` with `z ∈ L3` and `ψ₃ z ≡ v (mod R₅*)`. -/
+noncomputable def rel3 : Submodule ℤ (MonoidAlgebra ℤ G × F.M3) where
+  carrier := {p | ∃ h : p.1 ∈ F.L3, ψ3 hF ⟨p.1, h⟩ - p.2 ∈ F.R5}
+  add_mem' := by
+    rintro ⟨z, v⟩ ⟨z', v'⟩ ⟨h, hv⟩ ⟨h', hv'⟩
+    refine ⟨add_mem h h', ?_⟩
+    have e : (⟨(z, v).1 + (z', v').1, add_mem h h'⟩ : F.L3) = ⟨z, h⟩ + ⟨z', h'⟩ := rfl
+    simp only [Prod.fst_add, Prod.snd_add] at e ⊢
+    rw [e, map_add]
+    convert add_mem hv hv' using 1; abel
+  zero_mem' := ⟨zero_mem _, by
+    have e : (⟨(0 : MonoidAlgebra ℤ G × F.M3).1, zero_mem _⟩ : F.L3) = 0 := rfl
+    rw [e, map_zero]; simp⟩
+  smul_mem' := by
+    rintro c ⟨z, v⟩ ⟨h, hv⟩
+    refine ⟨Submodule.smul_mem _ c h, ?_⟩
+    have e : (⟨(c • (z, v)).1, Submodule.smul_mem _ c h⟩ : F.L3) = c • ⟨z, h⟩ := rfl
+    rw [e, map_smul]
+    convert Submodule.smul_mem _ c hv using 1
+    simp [smul_sub]
+
+theorem mem_rel3 {z : MonoidAlgebra ℤ G} {v : F.M3} :
+    (z, v) ∈ rel3 hF ↔ ∃ h : z ∈ F.L3, ψ3 hF ⟨z, h⟩ - v ∈ F.R5 := Iff.rfl
+
+theorem rel3_fam (f : F.Fam) : (F.fam f, F.famVal f) ∈ rel3 hF :=
+  ⟨F.fam_mem_L3 f, by rw [ψ3_fam, sub_self]; exact zero_mem _⟩
+
+theorem rel3_congr {z : MonoidAlgebra ℤ G} {v v' : F.M3} (h : (z, v) ∈ rel3 hF)
+    (hv : v - v' ∈ F.R5) : (z, v') ∈ rel3 hF := by
+  obtain ⟨hz, h⟩ := h
+  refine ⟨hz, ?_⟩
+  have := add_mem h hv
+  rwa [sub_add_sub_cancel] at this
+
+theorem rel3_add {z z' : MonoidAlgebra ℤ G} {v v' : F.M3} (h : (z, v) ∈ rel3 hF)
+    (h' : (z', v') ∈ rel3 hF) : (z + z', v + v') ∈ rel3 hF := add_mem h h'
+
+theorem rel3_sub {z z' : MonoidAlgebra ℤ G} {v v' : F.M3} (h : (z, v) ∈ rel3 hF)
+    (h' : (z', v') ∈ rel3 hF) : (z - z', v - v') ∈ rel3 hF := sub_mem h h'
+
+theorem rel3_smul {z : MonoidAlgebra ℤ G} {v : F.M3} (c : ℤ) (h : (z, v) ∈ rel3 hF) :
+    (c • z, c • v) ∈ rel3 hF := Submodule.smul_mem _ c h
+
+theorem rel3_zero : ((0 : MonoidAlgebra ℤ G), (0 : F.M3)) ∈ rel3 hF := zero_mem _
+
+theorem rel3_sum {α : Type*} (s : Finset α) (c : α → ℤ) (z : α → MonoidAlgebra ℤ G)
+    (v : α → F.M3) (h : ∀ i ∈ s, (z i, v i) ∈ rel3 hF) :
+    (∑ i ∈ s, c i • z i, ∑ i ∈ s, c i • v i) ∈ rel3 hF := by
+  classical
+  induction s using Finset.induction_on with
+  | empty => simpa using rel3_zero hF
+  | insert i s hi ih =>
+    rw [Finset.sum_insert hi, Finset.sum_insert hi]
+    exact rel3_add hF (rel3_smul hF _ (h i (Finset.mem_insert_self i s)))
+      (ih fun j hj => h j (Finset.mem_insert_of_mem hj))
+
 end Frame
 
 end TaharaProof
