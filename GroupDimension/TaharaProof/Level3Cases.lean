@@ -372,6 +372,76 @@ theorem std_case {vT : F.M3}
 end Step
 
 
+section Cases
+
+variable {a : ι → ℕ} (IH : IHat hF a) {x : ι} (hx : F.o x ≤ a x)
+include IH hx
+
+theorem W_r_add (m : ℕ) : F.W ((F.lo a x + hi a x) + m • Pi.single x 1) =
+    F.W (F.lo a x + hi a x) + m * F.w x := by
+  rw [W_add, W_nsmul_single]
+
+/-- **Case A**: `W(r) + w(x) ≥ 4`; everything vanishes. -/
+theorem case_A (h4 : 4 ≤ F.W (F.lo a x + hi a x) + F.w x) : (F.P a, F.Φ3 a) ∈ rel3 hF := by
+  have hwx := F.w_pos x
+  have hWr := W_add (F := F) (F.lo a x) (hi a x)
+  have hT : (F.P (F.lo a x) * E (F.yy x) * F.P (hi a x), (0 : F.M3)) ∈ rel3 hF := by
+    refine F.below_rel (rel3 hF) (a := a) (K := 5) (fun β hβ h5 => ?_)
+      (F.Below_mono (by omega) (F.T_mem hx))
+    have := IH β hβ (by omega)
+    rwa [F.Φ3_eq_zero_of_five_le h5] at this
+  refine std_case IH hx hT (by omega) (fun m hm => F.Φ3_eq_zero_of_five_le (by
+    rw [W_r_add IH hx]; nlinarith)) ?_
+  have h2 : F.Φ3 ((F.lo a x + hi a x) + 2 • Pi.single x 1) = 0 :=
+    F.Φ3_eq_zero_of_five_le (by rw [W_r_add IH hx]; omega)
+  have h3 : F.Φ3 ((F.lo a x + hi a x) + 3 • Pi.single x 1) = 0 :=
+    F.Φ3_eq_zero_of_five_le (by rw [W_r_add IH hx]; omega)
+  have h1 : (F.o x : ℤ) • F.Φ3 ((F.lo a x + hi a x) + 1 • Pi.single x 1) = 0 := by
+    rcases (show F.W (F.lo a x + hi a x) + F.w x = 4 ∨ 5 ≤ F.W (F.lo a x + hi a x) + F.w x
+      by omega) with h | h
+    · exact torsion hF (by simp) (by rw [W_r_add IH hx]; omega)
+    · rw [F.Φ3_eq_zero_of_five_le (by rw [W_r_add IH hx]; omega), smul_zero]
+  rw [h1, h2, h3, smul_zero, smul_zero, add_zero, add_zero, sub_zero]; exact zero_mem _
+
+/-- **Case (I)**: `w(x) = 3`, `r = 0`. -/
+theorem case_I (hw : F.w x = 3) (hr : F.lo a x + hi a x = 0) : (F.P a, F.Φ3 a) ∈ rel3 hF := by
+  have hlo : F.lo a x = 0 := funext fun j => by
+    have := congrFun hr j; simp only [Pi.add_apply, Pi.zero_apply] at this ⊢; omega
+  have hhi : hi a x = 0 := funext fun j => by
+    have := congrFun hr j; simp only [Pi.add_apply, Pi.zero_apply] at this ⊢; omega
+  have hT := TE1 IH hx hhi (by rw [hlo, W_zero (F := F)]; omega)
+    (by rw [hlo, W_zero (F := F)]; omega)
+  refine std_case IH hx hT (by rw [hr, W_zero (F := F)]; omega) (fun m hm =>
+    F.Φ3_eq_zero_of_five_le (by rw [W_r_add IH hx, hr, W_zero (F := F)]; nlinarith)) ?_
+  rw [hr, hlo, zero_add, zero_add, zero_add,
+    F.Φ3_eq_zero_of_five_le (a := 2 • Pi.single x 1) (by rw [W_nsmul_single]; omega),
+    F.Φ3_eq_zero_of_five_le (a := 3 • Pi.single x 1) (by rw [W_nsmul_single]; omega),
+    one_smul, smul_zero, smul_zero, add_zero, add_zero]
+  have := neg_mem (F.gI_mem hw)
+  convert this using 1
+  rw [gI, ← cnt_single]; abel
+
+/-- **Case (IV)**: `w(x) = 2`, `r = e_i` with `w(i) = 1`. -/
+theorem case_IV (hw : F.w x = 2) {i : ι} (hi1 : F.w i = 1) (hr : F.lo a x + hi a x = cnt [i]) :
+    (F.P a, F.Φ3 a) ∈ rel3 hF := by
+  have hix : i < x := F.lt_of_w_lt (by omega)
+  obtain ⟨hlo, hhi⟩ := lo_hi_split hx (l₁ := [i]) (l₂ := []) (by simp [hix.le]) (by simp)
+    (by simpa using hr)
+  rw [cnt_nil] at hhi
+  have hWi : F.W (cnt [i]) = 1 := by rw [W_cnt]; simp [hi1]
+  have hT := TE1 IH hx hhi (by rw [hlo, hWi]; omega) (by rw [hlo, hWi]; omega)
+  refine std_case IH hx hT (by rw [hr, hWi]; omega) (fun m hm =>
+    F.Φ3_eq_zero_of_five_le (by rw [W_r_add IH hx, hr, hWi]; nlinarith)) ?_
+  rw [hr, hlo, F.Φ3_eq_zero_of_five_le (a := cnt [i] + 2 • Pi.single x 1)
+      (by rw [W_add, W_nsmul_single, hWi]; omega),
+    F.Φ3_eq_zero_of_five_le (a := cnt [i] + 3 • Pi.single x 1)
+      (by rw [W_add, W_nsmul_single, hWi]; omega),
+    smul_zero, smul_zero, add_zero, add_zero, one_smul,
+    show cnt [i] + Pi.single x 1 = cnt [i, x] by rw [← cnt_single, ← cnt_append]; rfl]
+  exact F.gIV_mem hi1 hw
+
+end Cases
+
 end Frame
 
 end TaharaProof
