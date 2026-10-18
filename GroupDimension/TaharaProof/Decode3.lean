@@ -119,6 +119,44 @@ theorem nfc_23 {z : G} (hz : z ∈ lowerCentralSeries G 1) {β : Fin T.t → ℤ
   · have := congrFun e2 k; simp only at this; rw [this, Int.toNat_of_nonneg (hβ k).1]
   · have := congrFun e3 l; simp only at this; rw [this, Int.toNat_of_nonneg (hγ l).1]
 
+/-! ## Tahara's structure constants -/
+
+theorem yy_ℓ1 (i : Fin T.s) : (Tframe h4 hT hy4).yy (ℓ1 i) = T.x₁ i ^ T.d i := rfl
+theorem yy_ℓ2 (k : Fin T.t) : (Tframe h4 hT hy4).yy (ℓ2 k) = T.x₂ k ^ T.e k := rfl
+theorem cc_ℓ1 (g h : Fin T.s) :
+    (Tframe h4 hT hy4).cc (ℓ1 g) (ℓ1 h) = tc (T.x₁ g ^ T.d g) (T.x₁ h) := rfl
+
+/-- `b, c`: the normal form of `x_{1i}^{d(i)}`. -/
+theorem nfc_yy1 (i : Fin T.s) :
+    (∀ k, ((Tframe h4 hT hy4).nfc ((Tframe h4 hT hy4).yy (ℓ1 i)) (ℓ2 k) : ℤ) = T.b i k) ∧
+      ∀ l, ((Tframe h4 hT hy4).nfc ((Tframe h4 hT hy4).yy (ℓ1 i)) (ℓ3 l) : ℤ) = T.c i l := by
+  rw [yy_ℓ1]
+  exact nfc_23 h4 hT hy4 ((IsLayerBasis.layerNF hT.basis₁).pow_mem i) (hT.b_range i)
+    (hT.c_range i) (hT.hb i)
+
+/-- `d`: the normal form of `x_{2k}^{e(k)}`. -/
+theorem nfc_yy2 (k : Fin T.t) (l : Fin T.u) :
+    ((Tframe h4 hT hy4).nfc ((Tframe h4 hT hy4).yy (ℓ2 k)) (ℓ3 l) : ℤ) = T.dd k l := by
+  rw [yy_ℓ2]
+  refine (nfc_23 h4 hT hy4 (β := 0) (lcs_mem_of_le (by norm_num)
+    ((IsLayerBasis.layerNF hT.basis₂).pow_mem k)) (fun k' => ⟨le_rfl, by
+      have := hT.basis₂.one_lt k'; simp only [Pi.zero_apply]; omega⟩) (hT.dd_range k) ?_).2 l
+  have h0 : oprod T.x₂ (0 : Fin T.t → ℤ) = 1 := by simp [oprod]
+  rw [h0, one_mul]; exact hT.hdd k
+
+/-- `α`: the normal form of `[x_{1g}^{d(g)}, x_{1h}]`, `g ≤ h`. -/
+theorem nfc_cc {g h : Fin T.s} (hgh : g ≤ h) (l : Fin T.u) :
+    ((Tframe h4 hT hy4).nfc ((Tframe h4 hT hy4).cc (ℓ1 g) (ℓ1 h)) (ℓ3 l) : ℤ) = T.α g h l := by
+  rw [cc_ℓ1]
+  have hm : tc (T.x₁ g ^ T.d g) (T.x₁ h) ∈ lowerCentralSeries G 2 :=
+    ExpThree.tc_mem (i := 1) (j := 0) (by norm_num) ((IsLayerBasis.layerNF hT.basis₁).pow_mem g)
+      (hT.basis₁.mem h)
+  refine (nfc_23 h4 hT hy4 (β := 0) (lcs_mem_of_le (by norm_num) hm) (fun k' => ⟨le_rfl, by
+      have := hT.basis₂.one_lt k'; simp only [Pi.zero_apply]; omega⟩) (fun l =>
+        hT.α_range g h l hgh) ?_).2 l
+  have h0 : oprod T.x₂ (0 : Fin T.t → ℤ) = 1 := by simp [oprod]
+  rw [h0, one_mul]; exact hT.hα g h hgh
+
 end TFrame
 
 end TaharaProof
