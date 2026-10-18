@@ -138,7 +138,7 @@ structure Data.Admissible (τ : Coeffs T.s T.t) : Prop where
       - (∑ h, if h < i then τ.u h i * T.q h i * T.b h k else 0)
       + τ.v i k * T.d i + τ.v' i k * T.e k = 0
   C₁ : ∀ i j, i < j → τ.u i j * T.q i j * T.ch i 3 + τ.w i i j * T.ch i 2 ≡ 0 [ZMOD T.d i]
-  C₂ : ∀ i j, i < j → τ.w i i j * T.ch i 2 + τ.w'' i i j * T.ch j 2 ≡ 0 [ZMOD T.d i]
+  C₂ : ∀ i j, i < j → τ.w i j j * T.ch i 2 + τ.w'' i i j * T.ch j 2 ≡ 0 [ZMOD T.d i]
   C₃ : ∀ i j, i < j → -τ.u i j * T.ch j 3 + τ.w' i j j * T.ch j 2 ≡ 0 [ZMOD T.d i]
   C₄ : ∀ i j k, i < j → j < k →
     τ.w i j k * T.ch i 2 ≡ 0 [ZMOD T.d i] ∧ τ.w' i j k * T.ch j 2 ≡ 0 [ZMOD T.d i] ∧
