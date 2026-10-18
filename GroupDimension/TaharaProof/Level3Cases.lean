@@ -609,6 +609,53 @@ theorem case_III (hw : F.w x = 1) {k : ι} (hk : F.w k = 2) (hr : F.lo a x + hi 
     F.Φ3_cnt (show [x, x, k].Pairwise (· ≤ ·) by simp [hxk.le])]
   simp; abel
 
+/-- The reduction step when `W(r) = 1` and `w(x) = 1`: the term `h = 1` is `d(x - 1)(…)`, a
+multiple of a member of Losey's basis of the third kind. -/
+theorem q_combine (hw : F.w x = 1) (hr1 : F.W (F.lo a x + hi a x) = 1) {vT v0 : F.M3}
+    (hT : (F.P (F.lo a x) * E (F.yy x) * F.P (hi a x), vT) ∈ rel3 hF)
+    (h0 : ((F.o x : ℤ) • F.P ((F.lo a x + hi a x) + 1 • Pi.single x 1), v0) ∈ rel3 hF)
+    (hid : vT - v0 - (((F.o x).choose 2 : ℤ) • F.Φ3 ((F.lo a x + hi a x) + 2 • Pi.single x 1) +
+        ((F.o x).choose 3 : ℤ) • F.Φ3 ((F.lo a x + hi a x) + 3 • Pi.single x 1)) ∈ F.R5) :
+    (F.P a, F.Φ3 a) ∈ rel3 hF := by
+  obtain ⟨n, hn⟩ : ∃ n, F.o x - 1 = n + 1 := ⟨F.o x - 2, by have := hF.one_lt x; omega⟩
+  have hf4 : ∀ m, 4 ≤ m → F.Φ3 ((F.lo a x + hi a x) + m • Pi.single x 1) = 0 := fun m hm =>
+    F.Φ3_eq_zero_of_five_le (by rw [W_r_add IH hx, hr1, hw]; omega)
+  have hrest : ∀ h ∈ Finset.range n,
+      (F.P (a - (F.o x - (h + 1 + 1)) • (Pi.single x 1 : ι → ℕ)),
+        F.Φ3 (a - (F.o x - (h + 1 + 1)) • (Pi.single x 1 : ι → ℕ))) ∈ rel3 hF := by
+    intro h hh
+    rw [Finset.mem_range] at hh
+    refine IH _ (lexLT_of x (fun j hj => ?_) ?_) ?_
+    · simp only [Pi.sub_apply, nsmul_single_apply, if_neg hj.ne, tsub_zero]
+    · simp only [Pi.sub_apply, nsmul_single_apply, ↓reduceIte]; omega
+    · rw [sub_eq_r hx (by omega), W_r_add IH hx, hr1, hw]; omega
+  have hB := rel3_add hF h0 (rel3_sum hF _ (fun h => ((F.o x).choose (h + 1 + 1) : ℤ)) _ _ hrest)
+  refine combine IH hx hT (vB := v0 + ∑ h ∈ Finset.range n, ((F.o x).choose (h + 1 + 1) : ℤ) •
+    F.Φ3 (a - (F.o x - (h + 1 + 1)) • (Pi.single x 1 : ι → ℕ))) ?_ ?_
+  · rw [hn, Finset.sum_range_succ']
+    convert hB using 1
+    rw [add_comm, sub_eq_r hx (show 1 ≤ F.o x by have := hF.one_lt x; omega)]
+    simp
+  · have key := binom_trunc (fun m => F.Φ3 ((F.lo a x + hi a x) + m • Pi.single x 1)) (F.o_pos x)
+      hf4
+    rw [hn, Finset.sum_range_succ'] at key
+    simp only [zero_add, Nat.choose_one_right] at key
+    have e : ∑ h ∈ Finset.range n, ((F.o x).choose (h + 1 + 1) : ℤ) •
+          F.Φ3 (a - (F.o x - (h + 1 + 1)) • (Pi.single x 1 : ι → ℕ)) + F.Φ3 a =
+        ((F.o x).choose 2 : ℤ) • F.Φ3 ((F.lo a x + hi a x) + 2 • Pi.single x 1) +
+          ((F.o x).choose 3 : ℤ) • F.Φ3 ((F.lo a x + hi a x) + 3 • Pi.single x 1) := by
+      have e2 : ∑ h ∈ Finset.range n, ((F.o x).choose (h + 1 + 1) : ℤ) •
+            F.Φ3 (a - (F.o x - (h + 1 + 1)) • (Pi.single x 1 : ι → ℕ)) =
+          ∑ h ∈ Finset.range n, ((F.o x).choose (h + 1 + 1) : ℤ) •
+            F.Φ3 ((F.lo a x + hi a x) + (h + 1 + 1) • Pi.single x 1) :=
+        Finset.sum_congr rfl fun h hh => by
+          rw [Finset.mem_range] at hh; rw [sub_eq_r hx (by omega)]
+      rw [e2, show F.Φ3 a = F.Φ3 ((F.lo a x + hi a x) + F.o x • Pi.single x 1) from
+        congrArg _ (a_eq_r hx)]
+      rw [← sub_eq_zero]; rw [← sub_eq_zero] at key
+      rw [← key]; abel
+    rw [sub_sub, add_assoc, e, ← sub_sub]; exact hid
+
 end Cases
 
 end Frame
