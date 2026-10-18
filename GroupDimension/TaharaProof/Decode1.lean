@@ -137,6 +137,63 @@ theorem zprod_add {a a' : ι → ℤ} (ha : ∀ j, a j ≠ 0 → 3 ≤ F.w j)
   rw [← list_prod_mul_of_mem hF _ _ _ (fun j _ => hm a ha j) (fun j _ => hm a' ha' j)]
   simp only [Pi.add_apply, zpow_add]
 
+omit [Fintype G] hF in
+theorem A4_list_prod (L : List G) (hL : ∀ g ∈ L, g ∈ lowerCentralSeries G 3) :
+    F.A4 L.prod = (L.map F.A4).sum := by
+  induction L with
+  | nil => simp [A4_one]
+  | cons g L ih =>
+    rw [List.prod_cons, A4_mul (hL g List.mem_cons_self)
+      (list_prod_mem fun y hy => hL y (List.mem_cons_of_mem _ hy)),
+      ih fun y hy => hL y (List.mem_cons_of_mem _ hy), List.map_cons, List.sum_cons]
+
+omit [Fintype G] hF in
+theorem pow_o_mem3 {j : ι} (hj : F.w j = 3) : F.x j ^ F.o j ∈ lowerCentralSeries G 3 := by
+  simpa [hj] using F.pow_mem j
+
+/-- Exponents of a product in `γ₄` of letters of weight 3 are divisible by the orders. -/
+theorem zprod_dvd {t : ι → ℤ} (ht : ∀ j, t j ≠ 0 → F.w j = 3)
+    (hm : F.zprod t ∈ lowerCentralSeries G 3) : ∀ j, (F.o j : ℤ) ∣ t j := by
+  have ho : ∀ j, (0 : ℤ) < F.o j := fun j => Int.natCast_pos.mpr (F.o_pos j)
+  set r : ι → ℤ := fun j => t j % F.o j
+  set q : ι → ℤ := fun j => (F.o j : ℤ) * (t j / F.o j)
+  have hrq : t = r + q := funext fun j => by simp [r, q, Int.emod_add_ediv]
+  have hr0 : ∀ j, r j ≠ 0 → 3 ≤ F.w j := fun j hj => by
+    have : t j ≠ 0 := fun h => hj (by simp [r, h])
+    rw [ht j this]
+  have hq0 : ∀ j, q j ≠ 0 → 3 ≤ F.w j := fun j hj => by
+    have : t j ≠ 0 := fun h => hj (by simp [q, h])
+    rw [ht j this]
+  have hqm : F.zprod q ∈ lowerCentralSeries G 3 := by
+    refine list_prod_mem fun y hy => ?_
+    obtain ⟨j, -, rfl⟩ := List.mem_map.mp hy
+    by_cases h : t j = 0
+    · simp [q, h, one_mem]
+    · simp only [q, zpow_mul]
+      exact zpow_mem (by rw [zpow_natCast]; exact pow_o_mem3 (ht j h)) _
+  have hrm : F.zprod r ∈ lowerCentralSeries G 3 := by
+    have e := zprod_add hF hr0 hq0
+    rw [← hrq] at e
+    have : F.zprod r = F.zprod t * (F.zprod q)⁻¹ := by rw [e]; group
+    rw [this]; exact mul_mem hm (inv_mem hqm)
+  have hrn : F.zprod r = F.nprod fun j => (r j).toNat := by
+    rw [← zprod_natCast]; congr 1; funext j
+    simp [r, Int.toNat_of_nonneg (Int.emod_nonneg _ (ho j).ne')]
+  rw [hrn] at hrm
+  have hb : ∀ j, (r j).toNat < F.o j := fun j => by
+    have := Int.emod_lt_of_pos (t j) (ho j)
+    have := Int.emod_nonneg (t j) (ho j).ne'
+    simp only [r]; omega
+  have hz := (F.wt _ hb 3).mp hrm
+  intro j
+  by_cases h : t j = 0
+  · simp [h]
+  · have h1 : (r j).toNat = 0 := hz j (by rw [ht j h])
+    have hrj : r j = 0 := by
+      have h2 : 0 ≤ r j := Int.emod_nonneg (t j) (ho j).ne'
+      omega
+    exact Int.dvd_of_emod_eq_zero hrj
+
 end Frame
 
 end TaharaProof
