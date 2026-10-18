@@ -91,6 +91,52 @@ theorem nsum_zero_of_mem4 {z : G} (hz : z ∈ lowerCentralSeries G 3) : F.nsum z
   · simp [h]
   · rw [zero_add, Φ3_single, if_neg (by have := hn m h; omega), if_pos (hn m h)]
 
+/-! ## Integer ordered products in `γ₃` -/
+
+omit [Fintype G] hF in
+/-- `∏ x_j^{a_j}` with integer exponents. -/
+noncomputable def zprod (F : Frame G ι) (a : ι → ℤ) : G := ((ordL ι).map fun j => F.x j ^ a j).prod
+
+omit [Fintype G] hF in
+theorem zprod_natCast (b : ι → ℕ) : F.zprod (fun j => (b j : ℤ)) = F.nprod b := by
+  simp [zprod, nprod, lprod]
+
+omit [Fintype G] in
+theorem zprod_mem {a : ι → ℤ} (ha : ∀ j, a j ≠ 0 → 3 ≤ F.w j) :
+    F.zprod a ∈ lowerCentralSeries G 2 := by
+  refine list_prod_mem fun y hy => ?_
+  obtain ⟨j, -, rfl⟩ := List.mem_map.mp hy
+  by_cases h : a j = 0
+  · simp [h, one_mem]
+  · exact zpow_mem (lcs_mem_of_le (by have := ha j h; omega) (F.mem j)) _
+
+theorem list_prod_mul_of_mem (L : List ι) (u v : ι → G)
+    (hu : ∀ j ∈ L, u j ∈ lowerCentralSeries G 2) (hv : ∀ j ∈ L, v j ∈ lowerCentralSeries G 2) :
+    (L.map fun j => u j * v j).prod = (L.map u).prod * (L.map v).prod := by
+  induction L with
+  | nil => simp
+  | cons j L ih =>
+    have hPu : (L.map u).prod ∈ lowerCentralSeries G 2 := by
+      refine list_prod_mem fun y hy => ?_
+      obtain ⟨i, hi, rfl⟩ := List.mem_map.mp hy
+      exact hu i (List.mem_cons_of_mem _ hi)
+    simp only [List.map_cons, List.prod_cons]
+    rw [ih (fun i hi => hu i (List.mem_cons_of_mem _ hi)) (fun i hi => hv i (List.mem_cons_of_mem _ hi))]
+    rw [mul_assoc, ← mul_assoc (v j), lcs2_comm hF (hv j List.mem_cons_self) hPu]
+    simp only [mul_assoc]
+
+/-- In `γ₃` the ordered products are multiplicative in the exponents. -/
+theorem zprod_add {a a' : ι → ℤ} (ha : ∀ j, a j ≠ 0 → 3 ≤ F.w j)
+    (ha' : ∀ j, a' j ≠ 0 → 3 ≤ F.w j) : F.zprod (a + a') = F.zprod a * F.zprod a' := by
+  have hm : ∀ (b : ι → ℤ), (∀ j, b j ≠ 0 → 3 ≤ F.w j) → ∀ j, F.x j ^ b j ∈ lowerCentralSeries G 2 :=
+    fun b hb j => by
+      by_cases h : b j = 0
+      · simp [h, one_mem]
+      · exact zpow_mem (lcs_mem_of_le (by have := hb j h; omega) (F.mem j)) _
+  unfold zprod
+  rw [← list_prod_mul_of_mem hF _ _ _ (fun j _ => hm a ha j) (fun j _ => hm a' ha' j)]
+  simp only [Pi.add_apply, zpow_add]
+
 end Frame
 
 end TaharaProof
