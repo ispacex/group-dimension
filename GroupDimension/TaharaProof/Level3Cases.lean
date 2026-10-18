@@ -277,7 +277,100 @@ theorem torsion (hF : F.Class4) {c : ι → ℕ} {z : ι} (hz : c z ≠ 0) (hW :
     have := hp i; have := hp j; have := hp k; have := hp l; have := hp m
     omega
 
+/-! ## The shape of the rest `r = a - d e_x` -/
+
+omit IH in
+theorem sub_eq_r {h : ℕ} (hh : h ≤ F.o x) :
+    a - (F.o x - h) • (Pi.single x 1 : ι → ℕ) = (F.lo a x + hi a x) + h • Pi.single x 1 := by
+  rw [← F.lo_add_hi hx h hh]; abel
+
+omit IH in
+theorem a_eq_r : a = (F.lo a x + hi a x) + F.o x • Pi.single x 1 := by
+  have := sub_eq_r hx (le_refl (F.o x)); rwa [Nat.sub_self, zero_smul, tsub_zero] at this
+
+omit IH in
+/-- If the rest is `cnt (l₁ ++ l₂)` with `l₁ ≤ x < l₂`, then `a_lo = cnt l₁`, `a_hi = cnt l₂`. -/
+theorem lo_hi_split {l₁ l₂ : List ι} (h₁ : ∀ i ∈ l₁, i ≤ x) (h₂ : ∀ i ∈ l₂, x < i)
+    (hr : F.lo a x + hi a x = cnt (l₁ ++ l₂)) : F.lo a x = cnt l₁ ∧ hi a x = cnt l₂ := by
+  have c1 : ∀ i, i ∈ l₂ → ¬ i ≤ x := fun i hi h => absurd (h₂ i hi) (not_lt.2 h)
+  constructor
+  · rw [lo_eq_restrict hx, hr]
+    funext j
+    rw [cnt_append]
+    by_cases hj : j ≤ x
+    · simp only [hj, if_true, Pi.add_apply]
+      have : cnt l₂ j = 0 := List.count_eq_zero.mpr fun hm => c1 j hm hj
+      rw [this, add_zero]
+    · simp only [hj, if_false]
+      exact (List.count_eq_zero.mpr fun hm => hj (h₁ j hm)).symm
+  · rw [hi_eq_restrict (F := F) (a := a) (x := x), hr]
+    funext j
+    rw [cnt_append]
+    by_cases hj : x < j
+    · simp only [hj, if_true, Pi.add_apply]
+      have : cnt l₁ j = 0 := List.count_eq_zero.mpr fun hm => absurd (h₁ j hm) (not_le.2 hj)
+      rw [this, zero_add]
+    · simp only [hj, if_false]
+      exact (List.count_eq_zero.mpr fun hm => hj (h₂ j hm)).symm
+
+omit IH hx in
+theorem W_nsmul_single (m : ℕ) (z : ι) : F.W (m • (Pi.single z 1 : ι → ℕ)) = m * F.w z := by
+  rw [← cnt_replicate, W_cnt]; simp
+
+omit IH hx in
+/-- The rest of weight `≤ 2` is one of a few words. -/
+theorem shape_of_W {r : ι → ℕ} (hr : F.W r ≤ 2) :
+    r = 0 ∨ (∃ i, F.w i = 1 ∧ r = cnt [i]) ∨ (∃ k, F.w k = 2 ∧ r = cnt [k]) ∨
+      (∃ i j, i ≤ j ∧ F.w i = 1 ∧ F.w j = 1 ∧ r = cnt [i, j]) := by
+  have hcnt : r = cnt (word r) := funext fun j => (count_of_word rfl j)
+  have hWw := F.W_eq_word r
+  have hsort := word_pairwise r
+  have hp := F.w_pos
+  generalize word r = l at hcnt hWw hsort
+  match l, hWw, hsort with
+  | [], _, _ => left; rw [hcnt, cnt_nil]
+  | [i], hWw, _ =>
+    simp at hWw
+    rcases (show F.w i = 1 ∨ F.w i = 2 by have := hp i; omega) with h | h
+    · exact Or.inr (Or.inl ⟨i, h, hcnt⟩)
+    · exact Or.inr (Or.inr (Or.inl ⟨i, h, hcnt⟩))
+  | [i, j], hWw, hs =>
+    simp at hWw
+    have := hp i; have := hp j
+    exact Or.inr (Or.inr (Or.inr ⟨i, j, (List.pairwise_cons.mp hs).1 j (by simp), by omega,
+      by omega, hcnt⟩))
+  | i :: j :: k :: t, hWw, _ =>
+    simp at hWw; have := hp i; have := hp j; have := hp k; omega
+
+/-! ## The standard reduction step -/
+
+/-- When all binomial terms have weight `≥ 3`: `ψ(P a) - Φ(a) ≡ vT - ∑_m C(d,m) Φ(r + m e_x)`. -/
+theorem std_case {vT : F.M3}
+    (hT : (F.P (F.lo a x) * E (F.yy x) * F.P (hi a x), vT) ∈ rel3 hF)
+    (h3 : 3 ≤ F.W (F.lo a x + hi a x) + F.w x)
+    (hf4 : ∀ m, 4 ≤ m → F.Φ3 ((F.lo a x + hi a x) + m • Pi.single x 1) = 0)
+    (hid : vT - ((F.o x : ℤ) • F.Φ3 ((F.lo a x + hi a x) + 1 • Pi.single x 1) +
+      (((F.o x).choose 2 : ℤ) • F.Φ3 ((F.lo a x + hi a x) + 2 • Pi.single x 1) +
+        ((F.o x).choose 3 : ℤ) • F.Φ3 ((F.lo a x + hi a x) + 3 • Pi.single x 1))) ∈ F.R5) :
+    (F.P a, F.Φ3 a) ∈ rel3 hF := by
+  refine combine IH hx hT (rel3_sum hF _ _ _ _ (binom_IH IH hx h3)) ?_
+  have e : ∑ h ∈ Finset.range (F.o x - 1), ((F.o x).choose (h + 1) : ℤ) •
+        F.Φ3 (a - (F.o x - (h + 1)) • (Pi.single x 1 : ι → ℕ)) + F.Φ3 a =
+      (F.o x : ℤ) • F.Φ3 ((F.lo a x + hi a x) + 1 • Pi.single x 1) +
+        (((F.o x).choose 2 : ℤ) • F.Φ3 ((F.lo a x + hi a x) + 2 • Pi.single x 1) +
+          ((F.o x).choose 3 : ℤ) • F.Φ3 ((F.lo a x + hi a x) + 3 • Pi.single x 1)) := by
+    have := binom_trunc (fun m => F.Φ3 ((F.lo a x + hi a x) + m • Pi.single x 1)) (F.o_pos x)
+      hf4
+    rw [← this]
+    congr 1
+    · refine Finset.sum_congr rfl fun h hh => ?_
+      rw [Finset.mem_range] at hh
+      rw [sub_eq_r hx (by omega)]
+    · conv_lhs => rw [a_eq_r hx]
+  rw [sub_sub, e]; exact hid
+
 end Step
+
 
 end Frame
 
