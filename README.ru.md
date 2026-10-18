@@ -49,6 +49,9 @@ $[a,b]=a^{-1}b^{-1}ab$ — $[a,b]-1 = a^{-1}b^{-1}\bigl((a-1)(b-1)-(b-1)(a-1)\bi
 | для сюръекции $\gamma_k(H) \subseteq f(\gamma_k(G))$; $\gamma_k(G/\gamma_k G)=1$ | `lowerCentralSeries_le_map_of_surjective`, `lowerCentralSeries_quotient_eq_bot` | `Reduction.lean` |
 | $D_n(G/N)=1 \Rightarrow D_n(G)\subseteq N$ | `D_le_of_D_quotient_eq_bot` | `Reduction.lean` |
 | **сведение**: вопрос $D_5\subseteq\gamma_4$ ⇔ $D_5(Q)=1$ для всех $Q$ класса $\le 3$ | `forall_D_le_iff`, `dimensionQuestion5_iff` | `Reduction.lean` |
+| конечная порождённость: $x\in D_n(G)$ ⇒ $x\in D_n(H)$, $H$ порождена конечным множеством | `finRep_of_mem`, `exists_closure_finset_mem_D` | `FiniteReduction.lean` |
+| **предложение 2.1 статьи**: при теоремах Пасси ($D_4^2\subseteq\gamma_4$) и Грюнберга (гипотезы) вопрос $D_5\subseteq\gamma_4$ ⇔ $D_5(Q)=1$ для всех конечных $2$-групп $Q$ класса $\le3$; при $D_3=\gamma_3$ (гипотеза) — класса ровно $3$ | `dimensionQuestion5_iff_finite_two_groups`, `dimensionQuestion5_iff_class_three` | `FiniteReduction.lean` |
+| **замечание 2.3** (ограниченный вариант): при теореме Пасси (гипотеза) $D_5(Q)=1$ для $2$-групп класса $\le3$ порядка $\le2^k$ ⇒ $D_5(G)\subseteq\gamma_4(G)$ для конечных $G$ с силовской $2$-подгруппой порядка $\le2^k$; при $D_3=\gamma_3$ (гипотеза) — класса ровно $3$ | `D_five_le_of_bounded`, `D_five_le_of_bounded_class_three`, `exists_sylow_two_proj` | `FiniteReduction.lean` |
 | **лемма 5.9 статьи** (центральный корень): $K=H\langle r\rangle$, $r$ централен, $|K:H|=m$, $r^m=g^m$ с $g\in H$ (не обязательно центральным) $\Rightarrow$ $\mathbb Z[H]\cap\Delta(K)^n=\Delta(H)^n$ при всех $n$ и $D_n(K)=D_n(H)$ при $n\ge2$ | `D_n_eq_of_index`; `CentralRoot.iota_mem_augIdeal_pow_iff`, `CentralRoot.D_eq` | `CentralRoot.lean` |
 | **предложение 5.8(1) статьи**, $E=D_8$: $Q=H\circ D_8$ ($a,b$ — инволюции, перестановочные с $H$, $Q=H\langle a,b\rangle$, $a,b,ab\notin H$), $t=[a,b]\in\gamma_2(H)$ $\Rightarrow$ $\mathbb Z[H]\cap\Delta(Q)^n=\Delta(H)^n$ и $D_n(Q)=D_n(H)$ при $n\ge2$ | `D_n_eq_of_dihedral`; `DihedralData.iota_mem_augIdeal_pow_iff` | `CentralD8.lean` |
 | центральный квадратный корень: $K=H\sqcup Hr$, $r$ централен, $c=g^{-2}r^2$, $c^{2^j}-1\in\Delta(H)^{j+2}$ $\Rightarrow$ $\mathbb Z[H]\cap\Delta(K)^n=\Delta(H)^n$, $D_n(K)=D_n(H)$ | `D_n_eq_of_sqrt` | `CentralSqrt.lean` |
@@ -61,13 +64,14 @@ $\Phi\colon\mathbb Z[G]\to T$ с первой координатой $\varepsilo
 $\Phi(g-1)=(0,\bar g)$. Это та же идея, что у авторов в `DegreeTwo.lean` (квадратично-нулевое
 представление).
 
-`#print axioms` для всех 173 доказанных объявлений (`AxiomAudit.lean`) — только `propext`,
+`#print axioms` для всех 188 доказанных объявлений (`AxiomAudit.lean`) — только `propext`,
 `Classical.choice`, `Quot.sound`. Ни `sorry`, ни `axiom` в исходниках нет.
 
-## Только сформулировано (`def … : Prop`, без доказательства и без допущения)
+## Только сформулировано (`def … : Prop`, без доказательства)
 
-Это **формулировки, не доказательства**: ни одна не объявлена как `axiom`, нигде не
-предполагается. Ссылки — в docstring; данные, помеченные †, с оригиналом не сверены.
+Это **формулировки, не доказательства**: ни одна не объявлена как `axiom`, глобально ничего не
+предполагается. Некоторые входят явными гипотезами в теоремы (`FiniteReduction.lean`:
+`PassiDFourSquare`, `GruenbergResidualTwo`, `DThreeEqGammaThree`). Ссылки — в docstring; данные, помеченные †, с оригиналом не сверены.
 
 | `Prop` | Содержание | Литература |
 |---|---|---|
@@ -75,6 +79,7 @@ $\Phi(g-1)=(0,\bar g)$. Это та же идея, что у авторов в `
 | `DThreeEqGammaThree` | $D_3=\gamma_3$ | Higman, Rees (не опубл.), Passi [Pas68]†; [Pas79], [MP09] |
 | `PassiDFourSquare` | $g\in D_4 \Rightarrow g^2\in\gamma_4$ | Passi [Pas68]† |
 | `RipsExample` | $\exists G,\ D_4(G)\ne\gamma_4(G)$ | Rips [Rip72] |
+| `GruenbergResidualTwo` | к.п. нильпотентная $G$, никакая нечётная степень $g$ не равна $1$ $\Rightarrow$ $g\ne1$ в некоторой конечной $2$-фактор-группе | Gruenberg [Gru57] |
 | `TaharaDFiveExponentSix` | $g\in D_5 \Rightarrow g^6\in\gamma_5$ | Tahara [Tah81]†; [MP09] |
 | `GuptaKuzminAbelian` | $[D_n,D_n]\subseteq\gamma_{n+1}$ | [GK92], цит. по [IMP26, §1.2] |
 | `GuptaKuzminDFourCentral` | $[D_4,G]=\gamma_5$ | [GK92], цит. по [IMP26, §1.2] |
@@ -120,5 +125,6 @@ lake env lean AxiomAudit.lean
 * [Pas79] I. B. S. Passi, *Group rings and their augmentation ideals*, LNM 715, 1979.
 * [MP09] R. Mikhailov, I. B. S. Passi, *Lower central and dimension series of groups*, LNM 1952, 2009.
 * [Pas68]† I. B. S. Passi, *Dimension subgroups*, J. Algebra 9 (1968), 152–182.
+* [Gru57] K. W. Gruenberg, Proc. London Math. Soc. (3) 7 (1957), 29–62.
 * [Tah81]† K.-I. Tahara, J. Algebra 71 (1981), 141–173.
 * Quillen 1968† — D. Quillen, *On the associated graded ring of a group ring*, J. Algebra 10 (1968).
