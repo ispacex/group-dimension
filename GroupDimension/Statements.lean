@@ -6,7 +6,9 @@ import GroupDimension.Basic
 Every declaration in this file is a `def … : Prop`. None of them is an `axiom` and none is
 proved here. A theorem that uses one takes it as an explicit hypothesis (`FiniteReduction.lean`
 takes `PassiDFourSquare`, `GruenbergResidualTwo`, `DThreeEqGammaThree`); nothing is assumed
-globally. They record, in Lean, *what* is
+globally. Tahara's description of `D₅` ([Tah81, Thm. 6.1]) is stated the same way, as
+`TaharaFiveOne` in `Tahara.lean`, and is a hypothesis of Theorems 6.6 and 6.8 (`ExpThree.lean`,
+`ExpThreePlus.lean`). They record, in Lean, *what* is
 known or asked, so that later work can be checked against an exact formulation.
 
 Indexing: `D n G` is the literature's `D_n(G)`; Mathlib's `lowerCentralSeries G k` is
@@ -31,7 +33,7 @@ References (bibliographic data marked † were not checked against the original)
 * [Pas68]† I. B. S. Passi, *Dimension subgroups*, J. Algebra 9 (1968), 152–182.
 * [Gru57] K. W. Gruenberg, *Residual properties of infinite soluble groups*, Proc. London
   Math. Soc. (3) 7 (1957), 29–62.
-* [Tah81]† K.-I. Tahara, *The augmentation quotients of group rings and the fifth dimension
+* [Tah81] K.-I. Tahara, *The augmentation quotients of group rings and the fifth dimension
   subgroups*, J. Algebra 71 (1981), 141–173.
 -/
 
@@ -66,7 +68,7 @@ def RipsExample : Prop :=
   ∃ (G : Type) (_ : Group G), D 4 G ≠ lowerCentralSeries G 3
 
 /-- **Tahara**: the exponent of `D₅(G)/γ₅(G)` divides 6 for every group `G`
-([Tah81]†; see [MP09]). Stated elementwise: `g ∈ D₅ ⇒ g⁶ ∈ γ₅`.
+([Tah81, Cor. 6.11]; see [MP09]). Stated elementwise: `g ∈ D₅ ⇒ g⁶ ∈ γ₅`.
 Formulation only, not proved here. -/
 def TaharaDFiveExponentSix : Prop :=
   ∀ (G : Type) [Group G], ∀ g ∈ D 5 G, g ^ 6 ∈ lowerCentralSeries G 4

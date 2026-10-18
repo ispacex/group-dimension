@@ -11,3 +11,6 @@ import GroupDimension.CentralProduct
 import GroupDimension.FiniteReduction
 import GroupDimension.ClassFour
 import GroupDimension.ClassFourOrder
+import GroupDimension.Tahara
+import GroupDimension.ExpThree
+import GroupDimension.ExpThreePlus
