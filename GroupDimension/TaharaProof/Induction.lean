@@ -59,6 +59,23 @@ theorem word_eq [DecidableEq ι] {a : ι → ℕ} {l : List ι} (hl : l.Pairwise
   rw [List.perm_iff_count]
   intro i; rw [count_word, hc]
 
+@[simp] theorem nsmul_single_apply [DecidableEq ι] (m : ℕ) (x j : ι) :
+    (m • (Pi.single x 1 : ι → ℕ)) j = if j = x then m else 0 := by
+  by_cases h : j = x
+  · subst h; simp
+  · simp [Pi.single_eq_of_ne h, h]
+
+theorem single_apply' [DecidableEq ι] (x j : ι) :
+    (Pi.single x 1 : ι → ℕ) j = if j = x then 1 else 0 := by
+  by_cases h : j = x
+  · subst h; simp
+  · simp [Pi.single_eq_of_ne h, h]
+
+theorem sum_nsmul_single (m : ℕ) (x : ι) : ∑ j, (m • (Pi.single x 1 : ι → ℕ)) j = m := by
+  classical
+  simp only [Pi.smul_apply, smul_eq_mul]
+  rw [← Finset.mul_sum, Finset.sum_pi_single']; simp
+
 theorem length_word (a : ι → ℕ) : (word a).length = ∑ j, a j := by
   simp only [word, List.length_flatMap, List.length_replicate]
   exact sum_ordL _
