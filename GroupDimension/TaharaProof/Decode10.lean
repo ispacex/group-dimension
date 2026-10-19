@@ -50,11 +50,9 @@ attribute [-simp] Tframe_o1 Tframe_o2 Tframe_o3 Tframe_o4
 
 variable {p : Fin T.u → ℤ} {U : Fin T.s × Fin T.s → ℤ} {V V' : Fin T.s × Fin T.t → ℤ}
   {W5 W6 W7 : Fin T.s × Fin T.s × Fin T.s → ℤ} {g : G}
-  (hS : (TF).S g = combx h4 hT hy4 p U V V' W5 W6 W7)
 
-include hS
-
-theorem hE3 (a b c : Fin T.s) :
+theorem hE3 (hS : (Tframe h4 hT hy4).S g = combx h4 hT hy4 p U V V' W5 W6 W7)
+    (a b c : Fin T.s) :
     (TF).cE3 (ℓ1 a, ℓ1 b, ℓ1 c) (sII h4 hT hy4 U) +
       (if a ≤ b ∧ b ≤ c then -(W5 (a, b, c) * T.d a) else 0) +
       (if a < b ∧ b ≤ c then -(W6 (a, b, c) * T.d b) else 0) +
@@ -64,7 +62,8 @@ theorem hE3 (a b c : Fin T.s) :
   simp only [map_add, cE3_sI, cE3_sIII, cE3_sIV, cE3_sV, cE3_sVI, cE3_sVII] at h
   linear_combination -h
 
-theorem hE12 (i : Fin T.s) (k : Fin T.t) :
+theorem hE12 (hS : (Tframe h4 hT hy4).S g = combx h4 hT hy4 p U V V' W5 W6 W7)
+    (i : Fin T.s) (k : Fin T.t) :
     (∑ h, if i < h then U (i, h) * T.b h k else 0) -
       (∑ h, if h < i then U (h, i) * (T.q h i * T.b h k) else 0) -
       V (i, k) * T.d i - V' (i, k) * T.e k = 0 := by
@@ -74,7 +73,8 @@ theorem hE12 (i : Fin T.s) (k : Fin T.t) :
     cE12_sVII] at h
   linear_combination -h
 
-theorem hS4 (a b c d : Fin T.s) :
+theorem hS4 (hS : (Tframe h4 hT hy4).S g = combx h4 hT hy4 p U V V' W5 W6 W7)
+    (a b c d : Fin T.s) :
     (TF).cS4 (ℓ1 a) (ℓ1 b) (ℓ1 c) (ℓ1 d) (sII h4 hT hy4 U) +
       (if a = b ∧ a ≤ c ∧ c ≤ d then -((W5 (a, c, d) * ((T.d a).choose 2 : ℤ) : ℤ) : ZMod _)
         else 0) +
@@ -87,7 +87,8 @@ theorem hS4 (a b c d : Fin T.s) :
   simp only [map_add, cS4_sI, cS4_sIII, cS4_sIV, cS4_sV, cS4_sVI, cS4_sVII] at h
   linear_combination -h
 
-theorem hS22 (a b : Fin T.s) (m : Fin T.t) :
+theorem hS22 (hS : (Tframe h4 hT hy4).S g = combx h4 hT hy4 p U V V' W5 W6 W7)
+    (a b : Fin T.s) (m : Fin T.t) :
     (if a = b then -((V (a, m) * ((T.d a).choose 2 : ℤ) : ℤ) : ZMod _) else 0) +
       (∑ h, if h ≤ a ∧ a ≤ b then ((W5 (h, a, b) * T.b h m : ℤ) : ZMod _) else 0) +
       (∑ h, if a < h ∧ h ≤ b then ((W6 (a, h, b) * T.b h m : ℤ) : ZMod _) else 0) +
@@ -99,7 +100,8 @@ theorem hS22 (a b : Fin T.s) (m : Fin T.t) :
     cS22_sVII] at h
   linear_combination -h
 
-theorem hT13 (i : Fin T.s) (l : Fin T.u) :
+theorem hT13 (hS : (Tframe h4 hT hy4).S g = combx h4 hT hy4 p U V V' W5 W6 W7)
+    (i : Fin T.s) (l : Fin T.u) :
     ((∑ h, if i < h then ((U (i, h) * T.c h l : ℤ) : ZMod _) else 0) -
       ∑ h, if h < i then ((U (h, i) * (T.q h i * (T.c h l + T.α h i l)) : ℤ) : ZMod _)
         else 0) +
@@ -114,7 +116,8 @@ theorem hT13 (i : Fin T.s) (l : Fin T.u) :
     cT13_sVII] at h
   linear_combination -h
 
-theorem hS2'_kk (k : Fin T.t) :
+theorem hS2'_kk (hS : (Tframe h4 hT hy4).S g = combx h4 hT hy4 p U V V' W5 W6 W7)
+    (k : Fin T.t) :
     ∑ i, ((V (i, k) * T.b i k : ℤ) : ZMod ((TF).o (ℓ2 k))) = 0 := by
   have h := congrArg ((TF).cS2' (ℓ2 k) (ℓ2 k)) hS
   rw [Frame.cS2'_S, combx_eq] at h
@@ -122,7 +125,8 @@ theorem hS2'_kk (k : Fin T.t) :
     cS2'_sVII] at h
   linear_combination -h
 
-theorem hS2'_km {k m : Fin T.t} (hkm : k < m) :
+theorem hS2'_km (hS : (Tframe h4 hT hy4).S g = combx h4 hT hy4 p U V V' W5 W6 W7)
+    {k m : Fin T.t} (hkm : k < m) :
     (∑ i, ((V (i, k) * T.b i m : ℤ) : ZMod ((TF).o (ℓ2 k)))) +
       ∑ i, ((V (i, m) * T.b i k : ℤ) : ZMod ((TF).o (ℓ2 k))) = 0 := by
   have h := congrArg ((TF).cS2' (ℓ2 k) (ℓ2 m)) hS

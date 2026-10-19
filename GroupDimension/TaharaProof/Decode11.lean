@@ -23,12 +23,10 @@ attribute [-simp] Tframe_o1 Tframe_o2 Tframe_o3 Tframe_o4
 
 variable {p : Fin T.u → ℤ} {U : Fin T.s × Fin T.s → ℤ} {V V' : Fin T.s × Fin T.t → ℤ}
   {W5 W6 W7 : Fin T.s × Fin T.s × Fin T.s → ℤ} {g : G}
-  (hS : (TF).S g = combx h4 hT hy4 p U V V' W5 W6 W7)
-
-include hS
 
 /-- **Tahara's conditions (A)–(F)** for the coefficients of the symbol of `g ∈ D₅`. -/
-theorem admissible_tau : T.Admissible (tau U V V' W5 W6 W7) where
+theorem admissible_tau (hS : (Tframe h4 hT hy4).S g = combx h4 hT hy4 p U V V' W5 W6 W7) :
+    T.Admissible (tau U V V' W5 W6 W7) where
   A₁ i := by
     have h := hE3 h4 hT hy4 hS i i i
     rw [cE3_sII_iii] at h
