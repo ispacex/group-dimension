@@ -6,9 +6,8 @@ import GroupDimension.Basic
 Every declaration in this file is a `def … : Prop`. None of them is an `axiom` and none is
 proved here. A theorem that uses one takes it as an explicit hypothesis (`FiniteReduction.lean`
 takes `PassiDFourSquare`, `GruenbergResidualTwo`, `DThreeEqGammaThree`); nothing is assumed
-globally. Tahara's description of `D₅` ([Tah81, Thm. 6.1]) is stated the same way, as
-`TaharaFiveOne` in `Tahara.lean`, and is a hypothesis of Theorems 6.6 and 6.8 (`ExpThree.lean`,
-`ExpThreePlus.lean`). They record, in Lean, *what* is
+globally. Tahara's description of `D₅` ([Tah81, Thm. 6.1]) is stated as `TaharaFiveOne` in
+`Tahara.lean`; unlike the statements here it is proved (`TaharaTheorem.lean`). They record, in Lean, *what* is
 known or asked, so that later work can be checked against an exact formulation.
 
 Indexing: `D n G` is the literature's `D_n(G)`; Mathlib's `lowerCentralSeries G k` is

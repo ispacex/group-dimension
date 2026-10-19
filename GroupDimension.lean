@@ -14,3 +14,4 @@ import GroupDimension.ClassFourOrder
 import GroupDimension.Tahara
 import GroupDimension.ExpThree
 import GroupDimension.ExpThreePlus
+import GroupDimension.TaharaTheorem

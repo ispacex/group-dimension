@@ -56,9 +56,11 @@ $[a,b]=a^{-1}b^{-1}ab$ — $[a,b]-1 = a^{-1}b^{-1}\bigl((a-1)(b-1)-(b-1)(a-1)\bi
 | **лемма 6.3 статьи**: $p$ нечётно, $\vert\gamma_3/\gamma_4\vert=p$, $\gamma_2/\gamma_3$ порождается не более чем двумя элементами $\Rightarrow$ $[\gamma_2,\gamma_2]\subseteq\gamma_5$ (метабелевость при классе $\le4$); циклический случай без условия на $\gamma_3/\gamma_4$ | `commutator_gamma_two_le_gamma_five`, `metabelian_of_class_four`, `commutator_gamma_two_le_gamma_five_of_cyclic` | `ClassFour.lean`, `ClassFourOrder.lean` |
 | **предложение 6.5 статьи**: $p$ нечётно, $Q$ — $p$-группа класса $\le4$, $Q''\ne1$ $\Rightarrow$ $d(Q)\ge3$, $\vert Q\vert\ge p^{d(Q)+5}$; отсюда (1) метабелевость при $\vert Q\vert\le p^7$ или $\vert Q\vert=p^8$, $d(Q)\ge4$; (2) при $p^9$: $d(Q)\in\{3,4\}$, тип $(4,3,1,1)$ или $(4,2,2,1)$ при $d=4$ | `card_ge_of_not_metabelian`, `metabelian_of_card_le`, `rank_of_card_nine`, `type_of_card_nine` | `ClassFourOrder.lean` |
 | $p$-группа порядка $\le p^n$ порождается $n$ элементами; $H\gamma_2=G\Rightarrow H=G$ в конечной $p$-группе; $G=\langle x,y\rangle\Rightarrow\gamma_2=\langle[x,y]\rangle\gamma_3$ | `exists_generators_card_le`, `eq_top_of_sup_commutator`, `gamma_two_mod_of_pair` | `ClassFourOrder.lean` |
-| **теорема 6.6 статьи** при теореме 6.1 Тахары (гипотеза `TaharaFiveOne`): $G/\gamma_2(G)$ конечна и имеет экспоненту $3$ $\Rightarrow$ $D_5(G)=\gamma_5(G)$; для конечной $Q$ класса $\le4$: $D_5(Q)=1$ | `ExpThree.D_five_eq_gamma_five`, `ExpThree.D_five_eq_bot_of_class_four` | `ExpThree.lean` |
+| **теорема 6.1 Тахары** [Tah81] (включение $\subseteq$): для конечной группы класса $\le4$ и любого базиса единственности с его структурными константами $D_5$ лежит в подгруппе, порождённой элементами $g(u,v,w)$ по целым наборам с условиями (A)–(F) | `taharaFiveOne : TaharaFiveOne` | `TaharaTheorem.lean`, `TaharaProof/` |
+| её доказательство, по Тахаре: рамки (склеенные базисы единственности слоёв, нормальные формы), базис $\mathbb Z[G]$ из базисных произведений и $\Delta^n$ по модулю младших; $D_3=\gamma_3$ для таких групп (теорема 4.1); отображение $\psi_3$ теоремы 5.1 с базисом Лоузи в $W_3^*\oplus W_4$, $\psi_3(\Delta^5)\subseteq R_5^*$; расшифровка координат в (A)–(F) и $g=g(u,v,w)$ | `TaharaProof.Frame.basis`, `TaharaProof.Frame.D_three_le`, `TaharaProof.Frame.rel3_of_mem_Sp5`, `TaharaProof.Frame.S_mem_R5`, `TaharaProof.admissible_tau`, `TaharaProof.eq_gen` | `TaharaProof/` |
+| **теорема 6.6 статьи**: $G/\gamma_2(G)$ конечна и имеет экспоненту $3$ $\Rightarrow$ $D_5(G)=\gamma_5(G)$; для конечной $Q$ класса $\le4$: $D_5(Q)=1$ (доказана из теоремы 6.1 Тахары как гипотезы, гипотеза затем снята) | `D_five_eq_gamma_five_of_exp_three`, `D_five_eq_bot_of_class_four_exp_three`; с гипотезой `TaharaFiveOne`: `ExpThree.D_five_eq_gamma_five`, `ExpThree.D_five_eq_bot_of_class_four` | `TaharaTheorem.lean`, `ExpThree.lean` |
 | вычисление в её основе: в базисе единственности, согласованном с кубическим отображением, все образующие теоремы 6.1 Тахары тривиальны; $G/\gamma_2$ конечна $\Rightarrow$ $G/\gamma_k$ конечна | `ExpThree.Setup.gen_eq_one`, `ExpThree.finite_quotient_lcs` | `ExpThree.lean` |
-| **теорема 6.8 статьи** при `TaharaFiveOne`: $G/\gamma_2(G)$ — конечная $3$-группа с циклической подгруппой кубов ($\cong C_{3^a}\times C_3^{s-1}$) $\Rightarrow$ $D_5(G)=\gamma_5(G)$; тождества $[x^9,y]=[x,y]^9$, $[x^{27},y]=1$, $[b,x^9]=1$ ($b\in\gamma_2$) в классе $\le4$ | `ExpThree.D_five_eq_gamma_five_cyclic`, `ExpThree.D_five_eq_bot_of_class_four_cyclic`, `ExpThree.Setup8.gen_eq_one`; `ExpThree.tc_pow_nine'`, `ExpThree.tc_pow_27`, `ExpThree.tc_L1_pow_nine` | `ExpThreePlus.lean` |
+| **теорема 6.8 статьи**: $G/\gamma_2(G)$ — конечная $3$-группа с циклической подгруппой кубов ($\cong C_{3^a}\times C_3^{s-1}$) $\Rightarrow$ $D_5(G)=\gamma_5(G)$; тождества $[x^9,y]=[x,y]^9$, $[x^{27},y]=1$, $[b,x^9]=1$ ($b\in\gamma_2$) в классе $\le4$ | `D_five_eq_gamma_five_of_cubes_cyclic`, `D_five_eq_bot_of_class_four_cubes_cyclic`; с гипотезой `TaharaFiveOne`: `ExpThree.D_five_eq_gamma_five_cyclic`, `ExpThree.D_five_eq_bot_of_class_four_cyclic`, `ExpThree.Setup8.gen_eq_one`; `ExpThree.tc_pow_nine'`, `ExpThree.tc_pow_27`, `ExpThree.tc_L1_pow_nine` | `TaharaTheorem.lean`, `ExpThreePlus.lean` |
 | **лемма 5.9 статьи** (центральный корень): $K=H\langle r\rangle$, $r$ централен, $|K:H|=m$, $r^m=g^m$ с $g\in H$ (не обязательно центральным) $\Rightarrow$ $\mathbb Z[H]\cap\Delta(K)^n=\Delta(H)^n$ при всех $n$ и $D_n(K)=D_n(H)$ при $n\ge2$ | `D_n_eq_of_index`; `CentralRoot.iota_mem_augIdeal_pow_iff`, `CentralRoot.D_eq` | `CentralRoot.lean` |
 | **предложение 5.8(1) статьи**, $E=D_8$: $Q=H\circ D_8$ ($a,b$ — инволюции, перестановочные с $H$, $Q=H\langle a,b\rangle$, $a,b,ab\notin H$), $t=[a,b]\in\gamma_2(H)$ $\Rightarrow$ $\mathbb Z[H]\cap\Delta(Q)^n=\Delta(H)^n$ и $D_n(Q)=D_n(H)$ при $n\ge2$ | `D_n_eq_of_dihedral`; `DihedralData.iota_mem_augIdeal_pow_iff` | `CentralD8.lean` |
 | центральный квадратный корень: $K=H\sqcup Hr$, $r$ централен, $c=g^{-2}r^2$, $c^{2^j}-1\in\Delta(H)^{j+2}$ $\Rightarrow$ $\mathbb Z[H]\cap\Delta(K)^n=\Delta(H)^n$, $D_n(K)=D_n(H)$ | `D_n_eq_of_sqrt` | `CentralSqrt.lean` |
@@ -71,15 +73,15 @@ $\Phi\colon\mathbb Z[G]\to T$ с первой координатой $\varepsilo
 $\Phi(g-1)=(0,\bar g)$. Это та же идея, что у авторов в `DegreeTwo.lean` (квадратично-нулевое
 представление).
 
-`#print axioms` для всех 399 доказанных объявлений (`AxiomAudit.lean`) — только `propext`,
+`#print axioms` для всех 1117 доказанных объявлений (`AxiomAudit.lean`) — только `propext`,
 `Classical.choice`, `Quot.sound`. Ни `sorry`, ни `axiom` в исходниках нет.
 
 ## Только сформулировано (`def … : Prop`, без доказательства)
 
 Это **формулировки, не доказательства**: ни одна не объявлена как `axiom`, глобально ничего не
 предполагается. Некоторые входят явными гипотезами в теоремы (`FiniteReduction.lean`:
-`PassiDFourSquare`, `GruenbergResidualTwo`, `DThreeEqGammaThree`; `ExpThree.lean`,
-`ExpThreePlus.lean`: `TaharaFiveOne`). Ссылки — в docstring; данные, помеченные †, с оригиналом не сверены.
+`PassiDFourSquare`, `GruenbergResidualTwo`, `DThreeEqGammaThree`). `TaharaFiveOne`
+(`Tahara.lean`) стоит здесь как утверждение из литературы, но оно доказано (`TaharaTheorem.lean`). Ссылки — в docstring; данные, помеченные †, с оригиналом не сверены.
 
 | `Prop` | Содержание | Литература |
 |---|---|---|
@@ -89,7 +91,7 @@ $\Phi(g-1)=(0,\bar g)$. Это та же идея, что у авторов в `
 | `RipsExample` | $\exists G,\ D_4(G)\ne\gamma_4(G)$ | Rips [Rip72] |
 | `GruenbergResidualTwo` | к.п. нильпотентная $G$, никакая нечётная степень $g$ не равна $1$ $\Rightarrow$ $g\ne1$ в некоторой конечной $2$-фактор-группе | Gruenberg [Gru57] |
 | `TaharaDFiveExponentSix` | $g\in D_5 \Rightarrow g^6\in\gamma_5$ | Тахара [Tah81, сл. 6.11]; [MP09] |
-| `TaharaFiveOne` (`Tahara.lean`) | описание $D_5$ у Тахары для конечных групп класса $\le4$: $D_5$ лежит в подгруппе, порождённой элементами $g(u,v,w)$ по целым наборам с условиями (A)–(F), для любого базиса единственности с его структурными константами (сверено со сканом, с. 143, 150, 159–161) | Тахара [Tah81, т. 6.1] |
+| `TaharaFiveOne` (`Tahara.lean`) | описание $D_5$ у Тахары для конечных групп класса $\le4$: $D_5$ лежит в подгруппе, порождённой элементами $g(u,v,w)$ по целым наборам с условиями (A)–(F), для любого базиса единственности с его структурными константами (сверено со сканом, с. 143, 150, 159–161) — **доказано**: `taharaFiveOne` | Тахара [Tah81, т. 6.1] |
 | `GuptaKuzminAbelian` | $[D_n,D_n]\subseteq\gamma_{n+1}$ | [GK92], цит. по [IMP26, §1.2] |
 | `GuptaKuzminDFourCentral` | $[D_4,G]=\gamma_5$ | [GK92], цит. по [IMP26, §1.2] |
 | `LieComparison.FifthDimensionSquare` | $g\in D_5 \Rightarrow g^2\in G''\gamma_5$ | [MP09, Thm 2.28], цит. по [IMP26, §3.3] |

@@ -2,11 +2,12 @@ import GroupDimension.Tahara
 import GroupDimension.ClassFour
 
 /-!
-# `D₅ = γ₅` when `G/γ₂(G)` has exponent `3` (Theorem 6.6), modulo Tahara's Theorem 6.1
+# `D₅ = γ₅` when `G/γ₂(G)` has exponent `3` (Theorem 6.6), given Tahara's Theorem 6.1
 
 **Theorem 6.6** of the paper: if `G/γ₂(G)` is finite of exponent `3`, then `D₅(G) = γ₅(G)`
 (`D_five_eq_gamma_five`). The proof takes Tahara's Theorem 6.1 (`TaharaFiveOne`,
-`Tahara.lean`) as an explicit hypothesis and follows the wiki page 690 (MATH-127) and the paper:
+`Tahara.lean`) as an explicit hypothesis, discharged in `TaharaTheorem.lean`
+(`D_five_eq_gamma_five_of_exp_three`), and follows the wiki page 690 (MATH-127) and the paper:
 
 * reduction to a finite group `Q = G/γ₅(G)` of class `≤ 4` (`finite_quotient_lcs`,
   `D_five_eq_bot_of_class_four`);
