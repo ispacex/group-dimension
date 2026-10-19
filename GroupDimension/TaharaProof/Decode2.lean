@@ -42,26 +42,26 @@ def cE3' (F : Frame G ι) (p : ι) : F.M3 →+ ℤ where
   map_add' _ _ := rfl
 
 /-- The coordinate `S4` at `p`. -/
-def cS4 (F : Frame G ι) (p : ι × ι × ι × ι) : F.M3 →+ ZMod (F.o p.1) where
-  toFun m := m.2.1 p
+def cS4 (F : Frame G ι) (a b c d : ι) : F.M3 →+ ZMod (F.o a) where
+  toFun m := m.2.1 (a, b, c, d)
   map_zero' := rfl
   map_add' _ _ := rfl
 
 /-- The coordinate `S22` at `p`. -/
-def cS22 (F : Frame G ι) (p : ι × ι × ι) : F.M3 →+ ZMod (Nat.gcd (F.o p.1) (F.o p.2.2)) where
-  toFun m := m.2.2.1 p
+def cS22 (F : Frame G ι) (a b c : ι) : F.M3 →+ ZMod (Nat.gcd (F.o a) (F.o c)) where
+  toFun m := m.2.2.1 (a, b, c)
   map_zero' := rfl
   map_add' _ _ := rfl
 
 /-- The coordinate `T13` at `p`. -/
-def cT13 (F : Frame G ι) (p : ι × ι) : F.M3 →+ ZMod (Nat.gcd (F.o p.1) (F.o p.2)) where
-  toFun m := m.2.2.2.1 p
+def cT13 (F : Frame G ι) (a l : ι) : F.M3 →+ ZMod (Nat.gcd (F.o a) (F.o l)) where
+  toFun m := m.2.2.2.1 (a, l)
   map_zero' := rfl
   map_add' _ _ := rfl
 
 /-- The coordinate `S2'` at `p`. -/
-def cS2' (F : Frame G ι) (p : ι × ι) : F.M3 →+ ZMod (F.o p.1) where
-  toFun m := m.2.2.2.2.1 p
+def cS2' (F : Frame G ι) (k l : ι) : F.M3 →+ ZMod (F.o k) where
+  toFun m := m.2.2.2.2.1 (k, l)
   map_zero' := rfl
   map_add' _ _ := rfl
 
@@ -143,112 +143,112 @@ def cA4 (F : Frame G ι) : F.M3 →+ Additive (Layer G 3) where
 @[simp] theorem cE3'_A4 {g : G} (p : ι) : F.cE3' p (F.A4 g) = 0 := by
   simp [cE3', A4]
 
-@[simp] theorem cS4_E3 {i : ι} {j : ι} {k : ι} (p : ι × ι × ι × ι) : F.cS4 p (F.E3 i j k) = 0 := by
+@[simp] theorem cS4_E3 {i : ι} {j : ι} {k : ι} (a b c d : ι) : F.cS4 a b c d (F.E3 i j k) = 0 := by
   simp [cS4, E3]
 
-@[simp] theorem cS4_E12 {i : ι} {k : ι} (p : ι × ι × ι × ι) : F.cS4 p (F.E12 i k) = 0 := by
+@[simp] theorem cS4_E12 {i : ι} {k : ι} (a b c d : ι) : F.cS4 a b c d (F.E12 i k) = 0 := by
   simp [cS4, E12]
 
-@[simp] theorem cS4_E3p {l : ι} (p : ι × ι × ι × ι) : F.cS4 p (F.E3' l) = 0 := by
+@[simp] theorem cS4_E3p {l : ι} (a b c d : ι) : F.cS4 a b c d (F.E3' l) = 0 := by
   simp [cS4, E3']
 
-@[simp] theorem cS4_S4 {i : ι} {j : ι} {k : ι} {l : ι} (p : ι × ι × ι × ι) : F.cS4 p (F.S4 i j k l) = if p = (i, j, k, l) then 1 else 0 := by
+@[simp] theorem cS4_S4 {i : ι} {j : ι} {k : ι} {l : ι} (a b c d : ι) : F.cS4 a b c d (F.S4 i j k l) = if (a, b, c, d) = (i, j, k, l) then 1 else 0 := by
   simp only [cS4, S4, AddMonoidHom.coe_mk, ZeroHom.coe_mk]
   split_ifs with h
-  · subst h; simp
+  · cases h; simp
   · simp [Pi.single_eq_of_ne h]
 
-@[simp] theorem cS4_S22 {i : ι} {j : ι} {k : ι} (p : ι × ι × ι × ι) : F.cS4 p (F.S22 i j k) = 0 := by
+@[simp] theorem cS4_S22 {i : ι} {j : ι} {k : ι} (a b c d : ι) : F.cS4 a b c d (F.S22 i j k) = 0 := by
   simp [cS4, S22]
 
-@[simp] theorem cS4_T13 {i : ι} {l : ι} (p : ι × ι × ι × ι) : F.cS4 p (F.T13 i l) = 0 := by
+@[simp] theorem cS4_T13 {i : ι} {l : ι} (a b c d : ι) : F.cS4 a b c d (F.T13 i l) = 0 := by
   simp [cS4, T13]
 
-@[simp] theorem cS4_S2p {k : ι} {l : ι} (p : ι × ι × ι × ι) : F.cS4 p (F.S2' k l) = 0 := by
+@[simp] theorem cS4_S2p {k : ι} {l : ι} (a b c d : ι) : F.cS4 a b c d (F.S2' k l) = 0 := by
   simp [cS4, S2']
 
-@[simp] theorem cS4_A4 {g : G} (p : ι × ι × ι × ι) : F.cS4 p (F.A4 g) = 0 := by
+@[simp] theorem cS4_A4 {g : G} (a b c d : ι) : F.cS4 a b c d (F.A4 g) = 0 := by
   simp [cS4, A4]
 
-@[simp] theorem cS22_E3 {i : ι} {j : ι} {k : ι} (p : ι × ι × ι) : F.cS22 p (F.E3 i j k) = 0 := by
+@[simp] theorem cS22_E3 {i : ι} {j : ι} {k : ι} (a b c : ι) : F.cS22 a b c (F.E3 i j k) = 0 := by
   simp [cS22, E3]
 
-@[simp] theorem cS22_E12 {i : ι} {k : ι} (p : ι × ι × ι) : F.cS22 p (F.E12 i k) = 0 := by
+@[simp] theorem cS22_E12 {i : ι} {k : ι} (a b c : ι) : F.cS22 a b c (F.E12 i k) = 0 := by
   simp [cS22, E12]
 
-@[simp] theorem cS22_E3p {l : ι} (p : ι × ι × ι) : F.cS22 p (F.E3' l) = 0 := by
+@[simp] theorem cS22_E3p {l : ι} (a b c : ι) : F.cS22 a b c (F.E3' l) = 0 := by
   simp [cS22, E3']
 
-@[simp] theorem cS22_S4 {i : ι} {j : ι} {k : ι} {l : ι} (p : ι × ι × ι) : F.cS22 p (F.S4 i j k l) = 0 := by
+@[simp] theorem cS22_S4 {i : ι} {j : ι} {k : ι} {l : ι} (a b c : ι) : F.cS22 a b c (F.S4 i j k l) = 0 := by
   simp [cS22, S4]
 
-@[simp] theorem cS22_S22 {i : ι} {j : ι} {k : ι} (p : ι × ι × ι) : F.cS22 p (F.S22 i j k) = if p = (i, j, k) then 1 else 0 := by
+@[simp] theorem cS22_S22 {i : ι} {j : ι} {k : ι} (a b c : ι) : F.cS22 a b c (F.S22 i j k) = if (a, b, c) = (i, j, k) then 1 else 0 := by
   simp only [cS22, S22, AddMonoidHom.coe_mk, ZeroHom.coe_mk]
   split_ifs with h
-  · subst h; simp
+  · cases h; simp
   · simp [Pi.single_eq_of_ne h]
 
-@[simp] theorem cS22_T13 {i : ι} {l : ι} (p : ι × ι × ι) : F.cS22 p (F.T13 i l) = 0 := by
+@[simp] theorem cS22_T13 {i : ι} {l : ι} (a b c : ι) : F.cS22 a b c (F.T13 i l) = 0 := by
   simp [cS22, T13]
 
-@[simp] theorem cS22_S2p {k : ι} {l : ι} (p : ι × ι × ι) : F.cS22 p (F.S2' k l) = 0 := by
+@[simp] theorem cS22_S2p {k : ι} {l : ι} (a b c : ι) : F.cS22 a b c (F.S2' k l) = 0 := by
   simp [cS22, S2']
 
-@[simp] theorem cS22_A4 {g : G} (p : ι × ι × ι) : F.cS22 p (F.A4 g) = 0 := by
+@[simp] theorem cS22_A4 {g : G} (a b c : ι) : F.cS22 a b c (F.A4 g) = 0 := by
   simp [cS22, A4]
 
-@[simp] theorem cT13_E3 {i : ι} {j : ι} {k : ι} (p : ι × ι) : F.cT13 p (F.E3 i j k) = 0 := by
+@[simp] theorem cT13_E3 {i : ι} {j : ι} {k : ι} (a l' : ι) : F.cT13 a l' (F.E3 i j k) = 0 := by
   simp [cT13, E3]
 
-@[simp] theorem cT13_E12 {i : ι} {k : ι} (p : ι × ι) : F.cT13 p (F.E12 i k) = 0 := by
+@[simp] theorem cT13_E12 {i : ι} {k : ι} (a l' : ι) : F.cT13 a l' (F.E12 i k) = 0 := by
   simp [cT13, E12]
 
-@[simp] theorem cT13_E3p {l : ι} (p : ι × ι) : F.cT13 p (F.E3' l) = 0 := by
+@[simp] theorem cT13_E3p {l : ι} (a l' : ι) : F.cT13 a l' (F.E3' l) = 0 := by
   simp [cT13, E3']
 
-@[simp] theorem cT13_S4 {i : ι} {j : ι} {k : ι} {l : ι} (p : ι × ι) : F.cT13 p (F.S4 i j k l) = 0 := by
+@[simp] theorem cT13_S4 {i : ι} {j : ι} {k : ι} {l : ι} (a l' : ι) : F.cT13 a l' (F.S4 i j k l) = 0 := by
   simp [cT13, S4]
 
-@[simp] theorem cT13_S22 {i : ι} {j : ι} {k : ι} (p : ι × ι) : F.cT13 p (F.S22 i j k) = 0 := by
+@[simp] theorem cT13_S22 {i : ι} {j : ι} {k : ι} (a l' : ι) : F.cT13 a l' (F.S22 i j k) = 0 := by
   simp [cT13, S22]
 
-@[simp] theorem cT13_T13 {i : ι} {l : ι} (p : ι × ι) : F.cT13 p (F.T13 i l) = if p = (i, l) then 1 else 0 := by
+@[simp] theorem cT13_T13 {i : ι} {l : ι} (a l' : ι) : F.cT13 a l' (F.T13 i l) = if (a, l') = (i, l) then 1 else 0 := by
   simp only [cT13, T13, AddMonoidHom.coe_mk, ZeroHom.coe_mk]
   split_ifs with h
-  · subst h; simp
+  · cases h; simp
   · simp [Pi.single_eq_of_ne h]
 
-@[simp] theorem cT13_S2p {k : ι} {l : ι} (p : ι × ι) : F.cT13 p (F.S2' k l) = 0 := by
+@[simp] theorem cT13_S2p {k : ι} {l : ι} (a l' : ι) : F.cT13 a l' (F.S2' k l) = 0 := by
   simp [cT13, S2']
 
-@[simp] theorem cT13_A4 {g : G} (p : ι × ι) : F.cT13 p (F.A4 g) = 0 := by
+@[simp] theorem cT13_A4 {g : G} (a l' : ι) : F.cT13 a l' (F.A4 g) = 0 := by
   simp [cT13, A4]
 
-@[simp] theorem cS2'_E3 {i : ι} {j : ι} {k : ι} (p : ι × ι) : F.cS2' p (F.E3 i j k) = 0 := by
+@[simp] theorem cS2'_E3 {i : ι} {j : ι} {k : ι} (k' l' : ι) : F.cS2' k' l' (F.E3 i j k) = 0 := by
   simp [cS2', E3]
 
-@[simp] theorem cS2'_E12 {i : ι} {k : ι} (p : ι × ι) : F.cS2' p (F.E12 i k) = 0 := by
+@[simp] theorem cS2'_E12 {i : ι} {k : ι} (k' l' : ι) : F.cS2' k' l' (F.E12 i k) = 0 := by
   simp [cS2', E12]
 
-@[simp] theorem cS2'_E3p {l : ι} (p : ι × ι) : F.cS2' p (F.E3' l) = 0 := by
+@[simp] theorem cS2'_E3p {l : ι} (k' l' : ι) : F.cS2' k' l' (F.E3' l) = 0 := by
   simp [cS2', E3']
 
-@[simp] theorem cS2'_S4 {i : ι} {j : ι} {k : ι} {l : ι} (p : ι × ι) : F.cS2' p (F.S4 i j k l) = 0 := by
+@[simp] theorem cS2'_S4 {i : ι} {j : ι} {k : ι} {l : ι} (k' l' : ι) : F.cS2' k' l' (F.S4 i j k l) = 0 := by
   simp [cS2', S4]
 
-@[simp] theorem cS2'_S22 {i : ι} {j : ι} {k : ι} (p : ι × ι) : F.cS2' p (F.S22 i j k) = 0 := by
+@[simp] theorem cS2'_S22 {i : ι} {j : ι} {k : ι} (k' l' : ι) : F.cS2' k' l' (F.S22 i j k) = 0 := by
   simp [cS2', S22]
 
-@[simp] theorem cS2'_T13 {i : ι} {l : ι} (p : ι × ι) : F.cS2' p (F.T13 i l) = 0 := by
+@[simp] theorem cS2'_T13 {i : ι} {l : ι} (k' l' : ι) : F.cS2' k' l' (F.T13 i l) = 0 := by
   simp [cS2', T13]
 
-@[simp] theorem cS2'_S2p {k : ι} {l : ι} (p : ι × ι) : F.cS2' p (F.S2' k l) = if p = (k, l) then 1 else 0 := by
+@[simp] theorem cS2'_S2p {k : ι} {l : ι} (k' l' : ι) : F.cS2' k' l' (F.S2' k l) = if (k', l') = (k, l) then 1 else 0 := by
   simp only [cS2', S2', AddMonoidHom.coe_mk, ZeroHom.coe_mk]
   split_ifs with h
-  · subst h; simp
+  · cases h; simp
   · simp [Pi.single_eq_of_ne h]
 
-@[simp] theorem cS2'_A4 {g : G} (p : ι × ι) : F.cS2' p (F.A4 g) = 0 := by
+@[simp] theorem cS2'_A4 {g : G} (k' l' : ι) : F.cS2' k' l' (F.A4 g) = 0 := by
   simp [cS2', A4]
 
 @[simp] theorem cA4_E3 {i : ι} {j : ι} {k : ι} : F.cA4 (F.E3 i j k) = 0 := by
