@@ -1,6 +1,25 @@
 English version: [README.md](README.md).
 
-# groups — размерные подгруппы групп в Lean
+# group-dimension — размерные подгруппы групп в Lean
+
+[![CI](https://github.com/ispacex/group-dimension/actions/workflows/ci.yml/badge.svg)](https://github.com/ispacex/group-dimension/actions/workflows/ci.yml)
+
+Lean-формализация к статье «Задача о $D_5$» (PDF:
+[русская версия](https://ispacex.github.io/d5/paper/d5-ru.pdf), [английская](https://ispacex.github.io/d5/paper/d5.pdf);
+сайт <https://ispacex.github.io/d5>). Вычисления, заметки и аудит формализации — в
+<https://github.com/ispacex/dimension-subrings>, где этот пакет подключён подмодулем `groups/` (разрабатывался он там же; история
+сохранена здесь).
+
+## Подключение как зависимости
+
+```toml
+[[require]]
+name = "group-dimension"
+git = "https://github.com/ispacex/group-dimension"
+rev = "main"
+```
+
+затем `import GroupDimension`.
 
 Постановка задачи Коуровской тетради 20.84 — **верно ли $D_5(G) \subseteq \gamma_4(G)$ для всякой
 группы $G$?** — в Lean 4 / Mathlib, с базовыми фактами, доказанными полностью, и сравнением с
@@ -9,7 +28,7 @@ English version: [README.md](README.md).
 
 Lean `v4.29.0`, Mathlib `v4.29.0` (rev `8a17838`), та же версия, что у авторов. Пакет авторов
 `lie-rings` подключён через `require` на проверенном коммите `ed3d9fb` (тот же, что в подмодуле
-`upstream/lie-algebras`); нужен только файлу `LieComparison.lean`.
+`upstream/lie-algebras` репозитория [dimension-subrings](https://github.com/ispacex/dimension-subrings)); нужен только файлу `LieComparison.lean`.
 
 ## Определения (`GroupDimension/Basic.lean`)
 
@@ -118,14 +137,13 @@ $\Phi(g-1)=(0,\bar g)$. Это та же идея, что у авторов в `
 ## Сборка
 
 ```bash
-cd groups
 lake exe cache get          # Mathlib из кэша
 lake build                  # GroupDimension + нужная часть lie-rings
 lake env lean AxiomAudit.lean
 ```
 
 С нуля, кроме Mathlib из кэша, собирается пакет авторов — около 4 мин на 16 ядрах
-(см. аудит, [`../notes/formalization-audit.ru.md`](../notes/formalization-audit.ru.md)).
+(см. аудит, [`notes/formalization-audit.ru.md`](https://github.com/ispacex/dimension-subrings/blob/main/notes/formalization-audit.ru.md) в dimension-subrings).
 
 ## Литература
 

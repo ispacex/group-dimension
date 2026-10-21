@@ -1,0 +1,37 @@
+# Builds the package (Mathlib from the cache) and runs the axiom audit: every `#print axioms` in
+# AxiomAudit.lean must report only propext, Classical.choice, Quot.sound (no sorryAx, no axiom).
+name: CI
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: leanprover/lean-action@v1
+        with:
+          build: true
+          test: false
+          lint: false
+          use-mathlib-cache: true
+      - name: axiom audit
+        run: |
+          set -o pipefail
+          lake env lean AxiomAudit.lean 2>&1 | tee audit.log
+          want=$(grep -c '^#print axioms' AxiomAudit.lean)
+          got=$(grep -c "depends on axioms\|does not depend on any axioms" audit.log || true)
+          echo "declarations: $want, reported: $got"
+          [ "$want" = "$got" ] || { echo "::error::audit reported $got of $want declarations"; exit 1; }
+          # the list may be wrapped over several lines: join them first
+          bad=$(tr '\n' ' ' < audit.log | grep -o 'depends on axioms: \[[^]]*\]' \
+                | sed 's/.*\[\(.*\)\]/\1/' | tr ',' '\n' | tr -d ' ' \
+                | grep -v -x -e propext -e Classical.choice -e Quot.sound | sort -u || true)
+          if [ -n "$bad" ]; then echo "::error::unexpected axioms: $bad"; exit 1; fi
+          if grep -q ': error' audit.log; then echo "::error::errors in the audit"; exit 1; fi
+          echo "audit: $got declarations, only propext / Classical.choice / Quot.sound"

@@ -1,6 +1,25 @@
 Русская версия: [README.ru.md](README.ru.md).
 
-# groups — dimension subgroups of groups in Lean
+# group-dimension — dimension subgroups of groups in Lean
+
+[![CI](https://github.com/ispacex/group-dimension/actions/workflows/ci.yml/badge.svg)](https://github.com/ispacex/group-dimension/actions/workflows/ci.yml)
+
+The Lean formalization accompanying the paper *The $D_5$ problem* (PDF:
+[English](https://ispacex.github.io/d5/paper/d5.pdf), [Russian](https://ispacex.github.io/d5/paper/d5-ru.pdf);
+site <https://ispacex.github.io/d5>). The computations, notes and the formalization audit are in
+<https://github.com/ispacex/dimension-subrings>, where this package is the submodule `groups/` (it was developed there; the history
+is kept here).
+
+## Use as a dependency
+
+```toml
+[[require]]
+name = "group-dimension"
+git = "https://github.com/ispacex/group-dimension"
+rev = "main"
+```
+
+then `import GroupDimension`.
 
 The statement of Problem 20.84 of the Kourovka notebook — **is $D_5(G) \subseteq \gamma_4(G)$ for
 every group $G$?** — in Lean 4 / Mathlib, with the basic facts fully proved and a comparison with
@@ -9,7 +28,7 @@ the Lie ring case, which is proved and formalized in [IMP26] (arXiv:2610.02042, 
 
 Lean `v4.29.0`, Mathlib `v4.29.0` (rev `8a17838`), the same version as the authors'. The authors'
 package `lie-rings` is pulled in by `require` at the audited commit `ed3d9fb` (the same as in the
-submodule `upstream/lie-algebras`); only `LieComparison.lean` needs it.
+submodule `upstream/lie-algebras` of [dimension-subrings](https://github.com/ispacex/dimension-subrings)); only `LieComparison.lean` needs it.
 
 ## Definitions (`GroupDimension/Basic.lean`)
 
@@ -117,14 +136,13 @@ in a comment which steps of §§5–6 of the paper carry over. In short:
 ## Build
 
 ```bash
-cd groups
 lake exe cache get          # Mathlib from the cache
 lake build                  # GroupDimension + the needed part of lie-rings
 lake env lean AxiomAudit.lean
 ```
 
 From scratch, besides Mathlib from the cache, the authors' package is built — about 4 min on 16
-cores (see the audit, [`../notes/formalization-audit.md`](../notes/formalization-audit.md)).
+cores (see the audit, [`notes/formalization-audit.md`](https://github.com/ispacex/dimension-subrings/blob/main/notes/formalization-audit.md) in dimension-subrings).
 
 ## Literature
 
