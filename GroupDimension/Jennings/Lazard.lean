@@ -10,7 +10,9 @@ For a prime `p` and a group `G`, `lazard p G n` is defined by strong recursion:
 
 By construction it is a restricted N-series: `S` is normal and decreasing,
 `[S_a, S_b] ≤ S_{a+b}` (`lazard_comm`) and `S_a^p ≤ S_{pa}` (`lazard_pow`); every restricted
-N-series contains it. For a finite `p`-group it reaches `1` (`lazard_eventually_bot`): `S_n` lies
+N-series contains it (`lazard_le_of_restrictedSeries`, `Theorem.lean`). The general facts on
+`powSubgroup` and `iSup` proved here (`normal_iSup`, `powSubgroup_mono`, `map_powSubgroup`) are
+used only for this series. For a finite `p`-group it reaches `1` (`lazard_eventually_bot`): `S_n` lies
 in the term `P_{m+1}` of the lower exponent-`p` central series when `p^m ≤ n`, and `P` reaches `1`.
 
 This is the series used for Jennings' theorem (D5-32): the Jennings basis of `𝔽_p[G]` gives

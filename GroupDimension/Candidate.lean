@@ -9,12 +9,12 @@ Notation of §5 of the paper.
 * `expCentral p n G` is the lower exponent-`p` central series in the paper's numbering:
   `P₁ = G`, `P_{i+1} = [P_i, G] P_i^p` (and `P₀ = G`, as for `D`). For `p = 2` the `2`-class of
   `G` is the least `c` with `P_{c+1} = 1`.
-* `jennings p n G` is `M_n(G) = ∏_{i p^j ≥ n} γ_i^{p^j}` (`i ≥ 1`, `j ≥ 0`), with `γ_i` Mathlib's
+* `jennings p G n` is `M_n(G) = ∏_{i p^j ≥ n} γ_i^{p^j}` (`i ≥ 1`, `j ≥ 0`), with `γ_i` Mathlib's
   `lowerCentralSeries G (i - 1)`. The paper defines `M_n(Q) = Q ∩ (1 + Δ_{𝔽₂}(Q)^n)` and quotes
   this product formula as a theorem (Jennings [Jen41], Lazard [Laz54]); here the formula is the
-  definition. The hard inclusion of Jennings' theorem, which feeds `IsCandidate` from Lemma 5.2
-  (`n ∈ D₅ ⊆ Q ∩ (1 + Δ_{𝔽₂}^5)`), is `mem_jennings_of_sub_one_mem` (`Jennings/Theorem.lean`) for
-  `p = 2`, `n = 5`, class `≤ 3`.
+  definition. For `p = 2` and class `≤ 3`, `D₅(Q) ≤ M₅ ≤ jennings 2 Q 5` is
+  `D_five_le_jennings` (`Jennings/Theorem.lean`): reduction `ℤ[Q] → 𝔽₂[Q]` and the hard inclusion
+  of Jennings' theorem; this is what feeds `IsCandidate` from Lemma 5.2.
 * `IsCandidate Q n`: `Q` is a finite `2`-group of class exactly `3` (`γ₄ = 1 ≠ γ₃`) with cyclic centre whose involution `n` lies
   in `γ₃(Q) ∩ M₅(Q)`, of `2`-class `c ≥ 4` with `P_c(Q) = ⟨n⟩` (the paragraph before
   Lemma 5.6).

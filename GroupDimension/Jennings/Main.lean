@@ -95,10 +95,10 @@ theorem mem_succ (F : JFrame T ι) {g : G} {k : ℕ} (hk : 1 ≤ k) (hg : g ∈ 
 end JFrame
 
 /-- **Jennings' theorem** (the hard inclusion): for a restricted N-series `S` of a finite
-`p`-group, `G ∩ (1 + Δ_{𝔽_p}^n) ≤ S n` for `n ≥ 1`. (The hypothesis `IsPGroup p G` is not used:
-a finite group with a restricted N-series is automatically a `p`-group.) -/
+`p`-group, `G ∩ (1 + Δ_{𝔽_p}^n) ≤ S n` for `n ≥ 1`. (No `p`-group hypothesis is needed: a finite
+group with a restricted N-series is automatically a `p`-group.) -/
 theorem RestrictedSeries.mem_of_sub_one_mem {p : ℕ} [Fact p.Prime] {G : Type*} [Group G]
-    [Finite G] (_hG : IsPGroup p G) (T : RestrictedSeries p G) {g : G} {n : ℕ} (hn : 1 ≤ n)
+    [Finite G] (T : RestrictedSeries p G) {g : G} {n : ℕ} (hn : 1 ≤ n)
     (h : MonoidAlgebra.of (ZMod p) G g - 1 ∈ augIdealP p G ^ n) : g ∈ T.S n := by
   classical
   haveI := Fintype.ofFinite G

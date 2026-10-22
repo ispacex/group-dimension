@@ -1332,3 +1332,10 @@ open GroupDimension
 #print axioms GroupDimension.Jennings.of_sub_one_mem_augIdealP
 #print axioms GroupDimension.mem_jennings_of_sub_one_mem
 #print axioms GroupDimension.mem_lazard_of_sub_one_mem
+#print axioms GroupDimension.lazardSeries
+#print axioms GroupDimension.lazard_le_of_restrictedSeries
+#print axioms GroupDimension.modP_of
+#print axioms GroupDimension.augmentationP_modP
+#print axioms GroupDimension.modP_mem_augIdealP_pow
+#print axioms GroupDimension.sub_one_mem_augIdealP_pow_of_mem_D
+#print axioms GroupDimension.D_five_le_jennings
