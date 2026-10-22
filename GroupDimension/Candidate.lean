@@ -12,9 +12,9 @@ Notation of §5 of the paper.
 * `jennings p n G` is `M_n(G) = ∏_{i p^j ≥ n} γ_i^{p^j}` (`i ≥ 1`, `j ≥ 0`), with `γ_i` Mathlib's
   `lowerCentralSeries G (i - 1)`. The paper defines `M_n(Q) = Q ∩ (1 + Δ_{𝔽₂}(Q)^n)` and quotes
   this product formula as a theorem (Jennings [Jen41], Lazard [Laz54]); here the formula is the
-  definition, and Jennings' theorem is **not** formalized. Hence `IsCandidate` is formally
-  stronger than the paper's notion; to feed it from Lemma 5.2 (`n ∈ D₅ ⊆ Q ∩ (1 + Δ_{𝔽₂}^5)`) one
-  needs the hard inclusion of Jennings' theorem, `Q ∩ (1 + Δ_{𝔽₂}^n) ⊆ ∏ γ_i^{p^j}`.
+  definition. The hard inclusion of Jennings' theorem, which feeds `IsCandidate` from Lemma 5.2
+  (`n ∈ D₅ ⊆ Q ∩ (1 + Δ_{𝔽₂}^5)`), is `mem_jennings_of_sub_one_mem` (`Jennings/Theorem.lean`) for
+  `p = 2`, `n = 5`, class `≤ 3`.
 * `IsCandidate Q n`: `Q` is a finite `2`-group of class exactly `3` (`γ₄ = 1 ≠ γ₃`) with cyclic centre whose involution `n` lies
   in `γ₃(Q) ∩ M₅(Q)`, of `2`-class `c ≥ 4` with `P_c(Q) = ⟨n⟩` (the paragraph before
   Lemma 5.6).
@@ -75,8 +75,9 @@ def expCentral (p : ℕ) (G : Type*) [Group G] (n : ℕ) : Subgroup G :=
 
 /-- The Jennings subgroups `M_n(G) = ∏_{i p^j ≥ n} γ_i(G)^{p^j}` over `i ≥ 1`, `j ≥ 0`; the
 index `i` below is Mathlib's, `lowerCentralSeries G i = γ_{i+1}(G)`. The paper's definition is
-`G ∩ (1 + Δ_{𝔽_p}(G)^n)`; the two agree by Jennings' theorem, which is not formalized here (only
-this formula is used). -/
+`G ∩ (1 + Δ_{𝔽_p}(G)^n)`; the two agree by Jennings' theorem. The inclusion of the paper's `M₅`
+into this product, for `p = 2` and class `≤ 3`, is `mem_jennings_of_sub_one_mem`
+(`Jennings/Theorem.lean`); the general equality is not formalized. -/
 def jennings (p : ℕ) (G : Type*) [Group G] (n : ℕ) : Subgroup G :=
   ⨆ (i : ℕ) (j : ℕ) (_ : n ≤ (i + 1) * p ^ j), powSubgroup (lowerCentralSeries G i) (p ^ j)
 
