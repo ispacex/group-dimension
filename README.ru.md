@@ -89,6 +89,7 @@ $[a,b]=a^{-1}b^{-1}ab$ — $[a,b]-1 = a^{-1}b^{-1}\bigl((a-1)(b-1)-(b-1)(a-1)\bi
 | центральный квадратный корень: $K=H\sqcup Hr$, $r$ централен, $c=g^{-2}r^2$, $c^{2^j}-1\in\Delta(H)^{j+2}$ $\Rightarrow$ $\mathbb Z[H]\cap\Delta(K)^n=\Delta(H)^n$, $D_n(K)=D_n(H)$ | `D_n_eq_of_sqrt` | `CentralSqrt.lean` |
 | **предложение 5.8 статьи** целиком: $Q=H\circ E$, $E/Z(E)\cong(\mathbb Z/2)^2$ ($s=\alpha^2$, $\beta^2=s^e$, $t=[\alpha,\beta]\in\gamma_2(H)$, $c=g^{-2}s$, $c^{2^j}-1\in\Delta(H)^{j+2}$) $\Rightarrow$ $\mathbb Z[H]\cap\Delta(Q)^n=\Delta(H)^n$ и $D_n(Q)=D_n(H)$ при $n\ge2$ (для $Q$ в нормальной форме $H\sqcup H\alpha\sqcup H\beta\sqcup H\alpha\beta$); случаи $Q_8$, $M_{2^{k+2}}$ с $s=g^2$, с $s\in\gamma_2$, $s^2\in\gamma_3$, $s^4=1$ и с $c^{2^j}\in\gamma_{j+2}(H)$ | `D_n_eq_of_central_product`; `D_n_eq_of_quaternion`, `D_n_eq_of_modular_sq`, `D_n_eq_of_modular_comm`, `D_n_eq_of_central_product_of_gamma` | `CentralProduct.lean` |
 | **лемма 5.6 статьи**: нет кандидата $Q$ порядка $2^{11}$ с $Q/P_3(Q)\cong\mathbb Z/4\times(\mathbb Z/2)^7$; ряд $P_n$ нормален и убывает | `not_isCandidate_of_quotient_z4`; `expCentral_normal`, `expCentral_antitone`, `expCentral_succ` | `Candidate.lean` |
+| **предложение 5.7 статьи** (в форме MATH-320): нет кандидата $Q$ порядка $2^{11}$ ранга $d(Q)\ge8$; доказательство элементарное, без классификации групп порядка $2^9$ ранга $8$ и без компьютера. Попутно: $P_2$ лежит в каждой максимальной подгруппе конечной $p$-группы, поэтому $d(G)\le n$ при $\vert G/P_2\vert\le p^n$; $\gamma_k\le P_k$; $P_k$ строго убывает до $1$ | `not_isCandidate_of_rank`; `false_of_gamma_two_le` (ядро леммы 5.6: $\gamma_2\le P_3$ невозможно); `rank_le_of_index_expCentral_two`, `lowerCentralSeries_le_expCentral`, `expCentral_lt` | `Candidate.lean` |
 | лиевский $D_5(L)\subseteq\gamma_4(L)$ (из `corollaryD` авторов) | `LieComparison.lieDimensionQuestion5` | `LieComparison.lean` |
 
 $D_2 = \gamma_2$ доказано через тривиальное квадратично-нулевое расширение
@@ -97,7 +98,7 @@ $\Phi\colon\mathbb Z[G]\to T$ с первой координатой $\varepsilo
 $\Phi(g-1)=(0,\bar g)$. Это та же идея, что у авторов в `DegreeTwo.lean` (квадратично-нулевое
 представление).
 
-`#print axioms` для всех 1130 доказанных объявлений (`AxiomAudit.lean`) — только `propext`,
+`#print axioms` для всех 1140 доказанных объявлений (`AxiomAudit.lean`) — только `propext`,
 `Classical.choice`, `Quot.sound`. Ни `sorry`, ни `axiom` в исходниках нет.
 
 ## Только сформулировано (`def … : Prop`, без доказательства)

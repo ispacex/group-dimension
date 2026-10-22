@@ -1137,3 +1137,13 @@ open GroupDimension
 #print axioms GroupDimension.card_Z4Z2pow7
 #print axioms GroupDimension.pow_four_Z4Z2pow7
 #print axioms GroupDimension.not_isCandidate_of_quotient_z4
+#print axioms GroupDimension.pow_pow_mem_expCentral
+#print axioms GroupDimension.commutator_mem_expCentral_succ
+#print axioms GroupDimension.lowerCentralSeries_le_expCentral
+#print axioms GroupDimension.expCentral_lt
+#print axioms GroupDimension.pow_mem_of_isCoatom
+#print axioms GroupDimension.expCentral_two_le_of_isCoatom
+#print axioms GroupDimension.eq_top_of_sup_expCentral_two
+#print axioms GroupDimension.rank_le_of_index_expCentral_two
+#print axioms GroupDimension.false_of_gamma_two_le
+#print axioms GroupDimension.not_isCandidate_of_rank
