@@ -41,7 +41,7 @@ Lean `v4.29.0`, Mathlib `v4.29.0` (rev `8a17838`), та же версия, чт�
 | $\gamma_n(G)$, $\gamma_1=G$ | Mathlib `lowerCentralSeries G (n-1)` |
 | $H^m$, подгруппа, порождённая $m$-ми степенями | `powSubgroup H m` |
 | $P_n(G)$, нижний экспоненциально-$p$-центральный ряд: $P_1=G$, $P_{i+1}=[P_i,G]P_i^p$ | `expCentral p G n` (и $P_0=G$) |
-| $M_n(G)=\prod_{ip^j\ge n}\gamma_i^{p^j}$ | `jennings p G n` — **формула Дженнингса–Лазара взята за определение**; её совпадение с $G\cap(1+\Delta_{\mathbb F_p}(G)^n)$ (определение статьи) — теорема Дженнингса, не формализована |
+| $M_n(G)=\prod_{ip^j\ge n}\gamma_i^{p^j}$ | `jennings p G n` — **формула Дженнингса–Лазара взята за определение**; её совпадение с $G\cap(1+\Delta_{\mathbb F_p}(G)^n)$ (определение статьи) — теорема Дженнингса, не формализована; поэтому чтобы применить лемму 5.6 после леммы 5.2 ($n\in D_5$), нужно её трудное включение |
 | кандидат (§5, перед леммой 5.6) | `IsCandidate Q n` (`Candidate.lean`) |
 
 **Нумерация нижнего центрального ряда.** В Mathlib (`Mathlib/GroupTheory/Nilpotent.lean`)
@@ -97,7 +97,7 @@ $\Phi\colon\mathbb Z[G]\to T$ с первой координатой $\varepsilo
 $\Phi(g-1)=(0,\bar g)$. Это та же идея, что у авторов в `DegreeTwo.lean` (квадратично-нулевое
 представление).
 
-`#print axioms` для всех 1132 доказанных объявлений (`AxiomAudit.lean`) — только `propext`,
+`#print axioms` для всех 1130 доказанных объявлений (`AxiomAudit.lean`) — только `propext`,
 `Classical.choice`, `Quot.sound`. Ни `sorry`, ни `axiom` в исходниках нет.
 
 ## Только сформулировано (`def … : Prop`, без доказательства)

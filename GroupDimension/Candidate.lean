@@ -12,8 +12,10 @@ Notation of §5 of the paper.
 * `jennings p n G` is `M_n(G) = ∏_{i p^j ≥ n} γ_i^{p^j}` (`i ≥ 1`, `j ≥ 0`), with `γ_i` Mathlib's
   `lowerCentralSeries G (i - 1)`. The paper defines `M_n(Q) = Q ∩ (1 + Δ_{𝔽₂}(Q)^n)` and quotes
   this product formula as a theorem (Jennings [Jen41], Lazard [Laz54]); here the formula is the
-  definition, and Jennings' theorem is **not** formalized.
-* `IsCandidate Q n`: `Q` is a `2`-group of class `3` with cyclic centre whose involution `n` lies
+  definition, and Jennings' theorem is **not** formalized. Hence `IsCandidate` is formally
+  stronger than the paper's notion; to feed it from Lemma 5.2 (`n ∈ D₅ ⊆ Q ∩ (1 + Δ_{𝔽₂}^5)`) one
+  needs the hard inclusion of Jennings' theorem, `Q ∩ (1 + Δ_{𝔽₂}^n) ⊆ ∏ γ_i^{p^j}`.
+* `IsCandidate Q n`: `Q` is a finite `2`-group of class exactly `3` (`γ₄ = 1 ≠ γ₃`) with cyclic centre whose involution `n` lies
   in `γ₃(Q) ∩ M₅(Q)`, of `2`-class `c ≥ 4` with `P_c(Q) = ⟨n⟩` (the paragraph before
   Lemma 5.6).
 
@@ -66,7 +68,9 @@ def expCentral (p : ℕ) (G : Type*) [Group G] (n : ℕ) : Subgroup G :=
   expCentralAux p G (n - 1)
 
 /-- The Jennings subgroups `M_n(G) = ∏_{i p^j ≥ n} γ_i(G)^{p^j}` over `i ≥ 1`, `j ≥ 0`; the
-index `i` below is Mathlib's, `lowerCentralSeries G i = γ_{i+1}(G)`. -/
+index `i` below is Mathlib's, `lowerCentralSeries G i = γ_{i+1}(G)`. The paper's definition is
+`G ∩ (1 + Δ_{𝔽_p}(G)^n)`; the two agree by Jennings' theorem, which is not formalized here (only
+this formula is used). -/
 def jennings (p : ℕ) (G : Type*) [Group G] (n : ℕ) : Subgroup G :=
   ⨆ (i : ℕ) (j : ℕ) (_ : n ≤ (i + 1) * p ^ j), powSubgroup (lowerCentralSeries G i) (p ^ j)
 
@@ -106,10 +110,11 @@ theorem pow_mem_expCentral_succ {n : ℕ} (hn : 1 ≤ n) {x : G} (hx : x ∈ exp
 
 /-! ## Candidates -/
 
-/-- A *candidate* (§5 of the paper, before Lemma 5.6), with its involution `n`: a `2`-group of
-class `3` with cyclic centre, whose central involution `n` lies in `γ₃ ∩ M₅`, and of `2`-class
+/-- A *candidate* (§5 of the paper, before Lemma 5.6), with its involution `n`: a finite
+`2`-group of class exactly `3` (`γ₄ = 1 ≠ γ₃`) with cyclic centre, whose central involution `n` lies in `γ₃ ∩ M₅`, and of `2`-class
 `c ≥ 4` with `P_c = ⟨n⟩`. -/
 structure IsCandidate (G : Type*) [Group G] (n : G) : Prop where
+  finite : Finite G
   isPGroup : IsPGroup 2 G
   gamma_four_eq_bot : lowerCentralSeries G 3 = ⊥
   gamma_three_ne_bot : lowerCentralSeries G 2 ≠ ⊥
@@ -120,12 +125,12 @@ structure IsCandidate (G : Type*) [Group G] (n : G) : Prop where
   mem_jennings : n ∈ jennings 2 G 5
   twoClass : ∃ c ≥ 4, expCentral 2 G (c + 1) = ⊥ ∧ expCentral 2 G c = zpowers n
 
-theorem pow_card_eq_one_of_mem {H : Subgroup G} [Finite H] {h : G} (hh : h ∈ H) :
+private theorem pow_card_eq_one_of_mem {H : Subgroup G} [Finite H] {h : G} (hh : h ∈ H) :
     h ^ Nat.card H = 1 := by
   have h1 : (⟨h, hh⟩ : H) ^ Nat.card H = 1 := pow_card_eq_one'
   exact congrArg Subtype.val h1
 
-theorem pow_eq_one_of_dvd {g : G} {a b : ℕ} (hg : g ^ a = 1) (hab : a ∣ b) : g ^ b = 1 := by
+private theorem pow_eq_one_of_dvd {g : G} {a b : ℕ} (hg : g ^ a = 1) (hab : a ∣ b) : g ^ b = 1 := by
   obtain ⟨t, rfl⟩ := hab
   rw [pow_mul, hg, one_pow]
 

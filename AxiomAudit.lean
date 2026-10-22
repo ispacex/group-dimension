@@ -1134,8 +1134,6 @@ open GroupDimension
 #print axioms GroupDimension.expCentral_one
 #print axioms GroupDimension.expCentral_succ
 #print axioms GroupDimension.pow_mem_expCentral_succ
-#print axioms GroupDimension.pow_card_eq_one_of_mem
-#print axioms GroupDimension.pow_eq_one_of_dvd
 #print axioms GroupDimension.card_Z4Z2pow7
 #print axioms GroupDimension.pow_four_Z4Z2pow7
 #print axioms GroupDimension.not_isCandidate_of_quotient_z4
