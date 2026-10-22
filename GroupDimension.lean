@@ -17,3 +17,4 @@ import GroupDimension.ExpThreePlus
 import GroupDimension.TaharaTheorem
 import GroupDimension.Candidate
 import GroupDimension.Jennings.Theorem
+import GroupDimension.MinimalCounterexample

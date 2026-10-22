@@ -91,6 +91,7 @@ $[a,b]=a^{-1}b^{-1}ab$ — $[a,b]-1 = a^{-1}b^{-1}\bigl((a-1)(b-1)-(b-1)(a-1)\bi
 | **лемма 5.6 статьи**: нет кандидата $Q$ порядка $2^{11}$ с $Q/P_3(Q)\cong\mathbb Z/4\times(\mathbb Z/2)^7$; ряд $P_n$ нормален и убывает | `not_isCandidate_of_quotient_z4`; `expCentral_normal`, `expCentral_antitone`, `expCentral_succ` | `Candidate.lean` |
 | **предложение 5.7 статьи** (в форме MATH-320): нет кандидата $Q$ порядка $2^{11}$ ранга $d(Q)\ge8$; доказательство элементарное, без классификации групп порядка $2^9$ ранга $8$ и без компьютера. Попутно: $P_2$ лежит в каждой максимальной подгруппе конечной $p$-группы, поэтому $d(G)\le n$ при $\vert G/P_2\vert\le p^n$; $\gamma_k\le P_k$; $P_k$ строго убывает до $1$ | `not_isCandidate_of_rank`; `false_of_card_expCentral_two_le` (у всякого кандидата $\vert P_2\vert\ge16$, т.е. $\vert\Phi(Q)\vert\ge16$); `false_of_gamma_two_le` (ядро леммы 5.6: $\gamma_2\le P_3$ невозможно для кандидата с $\vert P_3\vert=4$, $P_4=\langle n\rangle$); `rank_le_of_index_expCentral_two`, `expCentral_two_le_of_isCoatom`, `pow_mem_of_isCoatom`, `lowerCentralSeries_le_expCentral`, `expCentral_lt` | `Candidate.lean` |
 | **теорема Дженнингса**, трудное включение (D5-32): для конечной $p$-группы и всякого ограниченного N-ряда $S$ ($[S_a,S_b]\le S_{a+b}$, $S_a^p\le S_{pa}$) $G\cap(1+\Delta_{\mathbb F_p}(G)^n)\le S_n$, через базис Дженнингса $\prod(x_i-1)^{a_i}$ алгебры $\mathbb F_p[G]$; ряд Лазара (наименьший такой) доходит до $1$; при $p=2$ и ступени $\le3$ $S_5\le G^8\gamma_2^4\gamma_3^2$ | `Jennings.RestrictedSeries.mem_of_sub_one_mem`, `mem_lazard_of_sub_one_mem`, `lazard_le_of_restrictedSeries`, `lazard_eventually_bot`, `ClassThree.lazard_five_le_jennings`, `mem_jennings_of_sub_one_mem`; через $\mathbb Z[G]\to\mathbb F_p[G]$: $D_5(G)\le G^8\gamma_2^4\gamma_3^2$ (`D_five_le_jennings`) | `Jennings/` |
+| **лемма 5.2 статьи** (a)–(c), D5-33: конечная $2$-группа ступени $3$ с $D_5(Q/N)=1$ для всякой центральной $N$ порядка $2$ и $D_5(Q)\ne1$ — кандидат, причём $D_5(Q)=\langle n\rangle$ (при $D_3=\gamma_3$); попутно: абелева $2$-группа с одной инволюцией циклична. **Предложение 5.7 в форме $D_5$**: при гипотезах $D_3=\gamma_3$ и предложения 5.3 ($D_5=1$ на порядке $2^{10}$, ступень $\le3$; вычисление) $D_5(Q)=1$ при $\vert Q\vert=2^{11}$, ступени $\le3$, $d(Q)\ge8$ | `isCandidate_of_minimal`, `isCyclic_of_unique_involution`, `D_five_eq_bot_of_rank` | `MinimalCounterexample.lean` |
 | лиевский $D_5(L)\subseteq\gamma_4(L)$ (из `corollaryD` авторов) | `LieComparison.lieDimensionQuestion5` | `LieComparison.lean` |
 
 $D_2 = \gamma_2$ доказано через тривиальное квадратично-нулевое расширение
@@ -99,7 +100,7 @@ $\Phi\colon\mathbb Z[G]\to T$ с первой координатой $\varepsilo
 $\Phi(g-1)=(0,\bar g)$. Это та же идея, что у авторов в `DegreeTwo.lean` (квадратично-нулевое
 представление).
 
-`#print axioms` для всех 1332 доказанных объявлений (`AxiomAudit.lean`) — только `propext`,
+`#print axioms` для всех 1337 доказанных объявлений (`AxiomAudit.lean`) — только `propext`,
 `Classical.choice`, `Quot.sound`. Ни `sorry`, ни `axiom` в исходниках нет.
 
 ## Только сформулировано (`def … : Prop`, без доказательства)
