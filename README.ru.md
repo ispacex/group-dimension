@@ -39,6 +39,10 @@ Lean `v4.29.0`, Mathlib `v4.29.0` (rev `8a17838`), та же версия, чт�
 | $\Delta(G)=\ker\varepsilon$ | `augIdeal G := RingHom.ker (augmentation G)` — `Ideal`, с экземпляром `IsTwoSided` |
 | $D_n(G)=\{g \mid g-1\in\Delta^n\}$ | `D n G : Subgroup G`, `mem_D` — по определению (`Iff.rfl`) |
 | $\gamma_n(G)$, $\gamma_1=G$ | Mathlib `lowerCentralSeries G (n-1)` |
+| $H^m$, подгруппа, порождённая $m$-ми степенями | `powSubgroup H m` |
+| $P_n(G)$, нижний экспоненциально-$p$-центральный ряд: $P_1=G$, $P_{i+1}=[P_i,G]P_i^p$ | `expCentral p G n` (и $P_0=G$) |
+| $M_n(G)=\prod_{ip^j\ge n}\gamma_i^{p^j}$ | `jennings p G n` — **формула Дженнингса–Лазара взята за определение**; её совпадение с $G\cap(1+\Delta_{\mathbb F_p}(G)^n)$ (определение статьи) — теорема Дженнингса, не формализована |
+| кандидат (§5, перед леммой 5.6) | `IsCandidate Q n` (`Candidate.lean`) |
 
 **Нумерация нижнего центрального ряда.** В Mathlib (`Mathlib/GroupTheory/Nilpotent.lean`)
 `lowerCentralSeries G 0 = ⊤`, `lowerCentralSeries G (k+1) = ⁅lowerCentralSeries G k, ⊤⁆`,
@@ -84,6 +88,7 @@ $[a,b]=a^{-1}b^{-1}ab$ — $[a,b]-1 = a^{-1}b^{-1}\bigl((a-1)(b-1)-(b-1)(a-1)\bi
 | **предложение 5.8(1) статьи**, $E=D_8$: $Q=H\circ D_8$ ($a,b$ — инволюции, перестановочные с $H$, $Q=H\langle a,b\rangle$, $a,b,ab\notin H$), $t=[a,b]\in\gamma_2(H)$ $\Rightarrow$ $\mathbb Z[H]\cap\Delta(Q)^n=\Delta(H)^n$ и $D_n(Q)=D_n(H)$ при $n\ge2$ | `D_n_eq_of_dihedral`; `DihedralData.iota_mem_augIdeal_pow_iff` | `CentralD8.lean` |
 | центральный квадратный корень: $K=H\sqcup Hr$, $r$ централен, $c=g^{-2}r^2$, $c^{2^j}-1\in\Delta(H)^{j+2}$ $\Rightarrow$ $\mathbb Z[H]\cap\Delta(K)^n=\Delta(H)^n$, $D_n(K)=D_n(H)$ | `D_n_eq_of_sqrt` | `CentralSqrt.lean` |
 | **предложение 5.8 статьи** целиком: $Q=H\circ E$, $E/Z(E)\cong(\mathbb Z/2)^2$ ($s=\alpha^2$, $\beta^2=s^e$, $t=[\alpha,\beta]\in\gamma_2(H)$, $c=g^{-2}s$, $c^{2^j}-1\in\Delta(H)^{j+2}$) $\Rightarrow$ $\mathbb Z[H]\cap\Delta(Q)^n=\Delta(H)^n$ и $D_n(Q)=D_n(H)$ при $n\ge2$ (для $Q$ в нормальной форме $H\sqcup H\alpha\sqcup H\beta\sqcup H\alpha\beta$); случаи $Q_8$, $M_{2^{k+2}}$ с $s=g^2$, с $s\in\gamma_2$, $s^2\in\gamma_3$, $s^4=1$ и с $c^{2^j}\in\gamma_{j+2}(H)$ | `D_n_eq_of_central_product`; `D_n_eq_of_quaternion`, `D_n_eq_of_modular_sq`, `D_n_eq_of_modular_comm`, `D_n_eq_of_central_product_of_gamma` | `CentralProduct.lean` |
+| **лемма 5.6 статьи**: нет кандидата $Q$ порядка $2^{11}$ с $Q/P_3(Q)\cong\mathbb Z/4\times(\mathbb Z/2)^7$; ряд $P_n$ нормален и убывает | `not_isCandidate_of_quotient_z4`; `expCentral_normal`, `expCentral_antitone`, `expCentral_succ` | `Candidate.lean` |
 | лиевский $D_5(L)\subseteq\gamma_4(L)$ (из `corollaryD` авторов) | `LieComparison.lieDimensionQuestion5` | `LieComparison.lean` |
 
 $D_2 = \gamma_2$ доказано через тривиальное квадратично-нулевое расширение
@@ -92,7 +97,7 @@ $\Phi\colon\mathbb Z[G]\to T$ с первой координатой $\varepsilo
 $\Phi(g-1)=(0,\bar g)$. Это та же идея, что у авторов в `DegreeTwo.lean` (квадратично-нулевое
 представление).
 
-`#print axioms` для всех 1117 доказанных объявлений (`AxiomAudit.lean`) — только `propext`,
+`#print axioms` для всех 1132 доказанных объявлений (`AxiomAudit.lean`) — только `propext`,
 `Classical.choice`, `Quot.sound`. Ни `sorry`, ни `axiom` в исходниках нет.
 
 ## Только сформулировано (`def … : Prop`, без доказательства)
