@@ -1124,3 +1124,16 @@ open GroupDimension
 #print axioms GroupDimension.D_five_eq_bot_of_class_four_exp_three
 #print axioms GroupDimension.D_five_eq_gamma_five_of_cubes_cyclic
 #print axioms GroupDimension.D_five_eq_bot_of_class_four_cubes_cyclic
+#print axioms GroupDimension.pow_mem_powSubgroup
+#print axioms GroupDimension.powSubgroup_le
+#print axioms GroupDimension.powSubgroup_normal
+#print axioms GroupDimension.expCentralAux_normal
+#print axioms GroupDimension.expCentral_normal
+#print axioms GroupDimension.expCentralAux_antitone
+#print axioms GroupDimension.expCentral_antitone
+#print axioms GroupDimension.expCentral_one
+#print axioms GroupDimension.expCentral_succ
+#print axioms GroupDimension.pow_mem_expCentral_succ
+#print axioms GroupDimension.card_Z4Z2pow7
+#print axioms GroupDimension.pow_four_Z4Z2pow7
+#print axioms GroupDimension.not_isCandidate_of_quotient_z4
