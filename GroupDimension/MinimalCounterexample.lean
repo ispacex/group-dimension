@@ -22,6 +22,7 @@ open Subgroup MonoidAlgebra
 
 /-! ## Abelian `2`-groups with one involution are cyclic -/
 
+/-- A finite abelian `2`-group with at most one involution is cyclic. -/
 theorem isCyclic_of_unique_involution {A : Type*} [Group A] [Finite A] (hA : IsPGroup 2 A)
     (hcomm : ∀ a b : A, a * b = b * a)
     (huniq : ∀ y z : A, orderOf y = 2 → orderOf z = 2 → y = z) : IsCyclic A := by
@@ -230,7 +231,9 @@ theorem isCandidate_of_minimal (hD3 : DThreeEqGammaThree) {Q : Type} [Group Q] [
 /-- **Proposition 5.7 of the paper**, the `D₅` form: given `D₃ = γ₃` and Proposition 5.3
 (`D₅ = 1` for the `2`-groups of order `2¹⁰` and class `≤ 3`, a computation), `D₅(Q) = 1` for every
 `2`-group `Q` of order `2¹¹`, class `≤ 3` and rank `d(Q) ≥ 8`. By Lemma 5.2 a counterexample would
-be a candidate, and there is none (`not_isCandidate_of_rank`). -/
+be a candidate, and there is none (`not_isCandidate_of_rank`). The hypothesis `h1024` allows
+class `≤ 2` as well, which is immediate from `D₃ = γ₃`, so given `hD3` it is Proposition 5.3.
+Neither `hD3` nor `h1024` is proved here. -/
 theorem D_five_eq_bot_of_rank (hD3 : DThreeEqGammaThree)
     (h1024 : ∀ (R : Type) [Group R] [Finite R], Nat.card R = 2 ^ 10 →
       lowerCentralSeries R 3 = ⊥ → D 5 R = ⊥)
