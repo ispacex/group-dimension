@@ -1339,3 +1339,8 @@ open GroupDimension
 #print axioms GroupDimension.modP_mem_augIdealP_pow
 #print axioms GroupDimension.sub_one_mem_augIdealP_pow_of_mem_D
 #print axioms GroupDimension.D_five_le_jennings
+#print axioms GroupDimension.isCyclic_of_unique_involution
+#print axioms GroupDimension.eq_one_or_eq_of_mem_zpowers_two
+#print axioms GroupDimension.normal_of_le_center
+#print axioms GroupDimension.isCandidate_of_minimal
+#print axioms GroupDimension.D_five_eq_bot_of_rank
