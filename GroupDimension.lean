@@ -18,3 +18,7 @@ import GroupDimension.TaharaTheorem
 import GroupDimension.Candidate
 import GroupDimension.Jennings.Theorem
 import GroupDimension.MinimalCounterexample
+import GroupDimension.Cert1024.Nilpotent
+import GroupDimension.Cert1024.PcBound
+import GroupDimension.Cert1024.Check
+import GroupDimension.Cert1024.Decode

@@ -16,6 +16,12 @@ rev = "v4.29.0"
 [[lean_lib]]
 name = "GroupDimension"
 
+# D5-34: the certificate checker of Prop. 5.3 (core Lean only), compiled to native code so that
+# `native_decide` in `GroupDimension/Cert1024/Data` runs it natively.
+[[lean_lib]]
+name = "Cert1024Comp"
+precompileModules = true
+
 # The authors' formalization of the Lie-ring case (IMP26), pinned to the audited commit
 # (the same one as the submodule `upstream/lie-algebras`); used only by `LieComparison`.
 [[require]]

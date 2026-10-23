@@ -1344,3 +1344,8 @@ open GroupDimension
 #print axioms GroupDimension.normal_of_le_center
 #print axioms GroupDimension.isCandidate_of_minimal
 #print axioms GroupDimension.D_five_eq_bot_of_rank
+#print axioms GroupDimension.Cert1024.map_eq_one_of_mem_D
+#print axioms GroupDimension.Cert1024.exists_nwFrom_zero
+#print axioms GroupDimension.Cert1024.D_four_eq_bot_of_checkAux
+#print axioms GroupDimension.Cert1024.D_five_eq_bot_of_checkAux
+#print axioms GroupDimension.Cert1024.D_five_candGroup
