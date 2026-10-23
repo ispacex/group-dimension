@@ -13,7 +13,8 @@ public import GroupDimension.Statements
 such that `D₅(Q/N) = 1` for every central subgroup `N` of order `2`. If `D₅(Q) ≠ 1`, then
 `D₅(Q) = ⟨n⟩` for a candidate `Q` with involution `n` (`IsCandidate`, `Candidate.lean`):
 (a) `Z(Q)` is cyclic and `D₅(Q) = Ω₁(Z(Q))`; (b) `n ∈ γ₃ ∩ M₅`; (c) the `2`-class `c` is `≥ 4`
-and `P_c = ⟨n⟩`. Part (d) of the lemma (the immediate descendant) is not formalized.
+and `P_c = ⟨n⟩`. Part (d) of the lemma (the immediate descendant) is in `Descendants.lean`
+(`isDescendant_of_minimal`).
 
 `D₅ ≤ D₃ = γ₃` uses `DThreeEqGammaThree` as a hypothesis (as in `FiniteReduction.lean`).
 `n ∈ M₅` uses Jennings' theorem (`mem_jennings_of_sub_one_mem`): `D₅` maps into

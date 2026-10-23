@@ -40,7 +40,7 @@ Indexing: Mathlib's `(⊤ : Subgroup G).lowerCentralSeries k` is `γ_{k+1}(G)`.
 
 | Paper | Hypotheses | Lean |
 |---|---|---|
-| Prop 2.1 (1) ⇔ (3) | `D₃ = γ₃`, Passi's `D₄² ⊆ γ₄`, Gruenberg's theorem; "metabelian" dropped (Remark 2.2 not formalized) | `dimensionQuestion5_iff_class_three` |
+| Prop 2.1 (1) ⇔ (3) | `D₃ = γ₃`, Passi's `D₄² ⊆ γ₄`, Gruenberg's theorem; "metabelian" dropped (Remark 2.2, `metabelian_of_class_three`) | `dimensionQuestion5_iff_class_three` |
 | Lemma 5.2 (a)–(c) | `D₃ = γ₃` | `isCandidate_of_minimal` |
 | Prop 5.7, `D₅` form | `D₃ = γ₃`; Prop 5.3 at order `2^10`, which the paper proves by computer | `D_five_eq_bot_of_rank` |
 
@@ -56,7 +56,7 @@ Indexing: Mathlib's `(⊤ : Subgroup G).lowerCentralSeries k` is `γ_{k+1}(G)`.
   non-existence results for candidates are at least as strong as the paper's. Lemma 5.2 (b),
   in contrast, gives `n ∈ M₅` only in the product sense.
 * The paper's computer results (Props 5.1, 5.3, 5.10, Thms 5.4, 6.14) and its paper-only results
-  (Lemmas 6.1, 6.2, 6.9, Thm 6.12) are not submitted. Proposition 5.8, Lemma 5.9,
-  Lemma 6.3, Proposition 6.5, Theorem 6.10 (for central extensions by a subgroup of exponent
-  `p`) and the inclusion part of Tahara's Theorem 6.1 are formalized in the development but are
-  not compared statements.
+  (Lemmas 6.1, 6.2, Thm 6.12) are not submitted. Remark 2.2, Lemma 5.2 (d), Proposition 5.8,
+  Lemma 5.9, Lemma 6.3, Proposition 6.5, Lemma 6.9, Theorem 6.10 (for central extensions by a
+  subgroup of exponent `p`) and the inclusion part of Tahara's Theorem 6.1 are formalized in the
+  development but are not compared statements.

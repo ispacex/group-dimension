@@ -98,12 +98,11 @@ status:
     D_5 is); the paper's computer results (Propositions 5.1, 5.3, 5.10, Theorems 5.4, 6.14),
     of which Proposition 5.3 enters D_five_eq_bot_of_rank as an explicit hypothesis; the
     classical results D_3 = γ_3, Passi's D_4^2 ⊆ γ_4 and Gruenberg's theorem, which enter as
-    explicit hypotheses; the paper's Remark 2.2 (restriction to metabelian groups in
-    Proposition 2.1) and Lemma 5.2 (d); the paper-only results (Lemmas 6.1, 6.2, 6.9,
-    Theorem 6.12). Formalized in the development but not compared here: Proposition 5.8,
-    Lemma 5.9, Lemma 6.3, Proposition 6.5, Theorem 6.10 (for central extensions by a subgroup of
-    exponent p, since Mathlib has no p-covering group) and the inclusion part of Tahara's
-    Theorem 6.1.
+    explicit hypotheses; the paper-only results (Lemmas 6.1, 6.2, Theorem 6.12). Formalized in
+    the development but not compared here: Remark 2.2, Lemma 5.2 (d), Proposition 5.8,
+    Lemma 5.9, Lemma 6.3, Proposition 6.5, Lemma 6.9 (for quotients E/U of any group E),
+    Theorem 6.10 (for central extensions by a subgroup of exponent p, since Mathlib has no
+    p-covering group) and the inclusion part of Tahara's Theorem 6.1.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: ["propext", "Classical.choice", "Quot.sound"]
@@ -144,8 +143,9 @@ fidelity:
     non-existence results for candidates (Lemma 5.6, Proposition 5.7) are at least as strong
     as the paper's, while Lemma 5.2 (b) gives n ∈ M_5 only in the product sense. (3) Proposition 2.1 is proved with
     D_3 = γ_3, Passi's theorem and Gruenberg's theorem as explicit hypotheses, and with
-    "metabelian" omitted, which is automatic for class ≤ 3 (Remark 2.2, not formalized). (4) Lemma 5.2 is formalized in
-    parts (a)-(c) only, assuming D_3 = γ_3. (5) The D_5 form of Proposition 5.7 assumes
+    "metabelian" omitted, which is automatic for class ≤ 3 (Remark 2.2, metabelian_of_class_three). (4) Lemma 5.2 is compared in
+    parts (a)-(c), assuming D_3 = γ_3; part (d) is formalized as isDescendant_of_minimal but not
+    compared. (5) The D_5 form of Proposition 5.7 assumes
     D_3 = γ_3 and the order-2^10 statement of Proposition 5.3 for class ≤ 3 (class exactly 3
     is the paper's Proposition 5.3, [computer + paper]; class ≤ 2 follows from D_3 = γ_3). (6) In Lemma 5.6 the isomorphism Q/P_3(Q) ≅ Z/4 × (Z/2)^7 is given as a
     surjective homomorphism with kernel P_3(Q). (7) In Theorem 6.8 "the cubes of G/γ_2 form
