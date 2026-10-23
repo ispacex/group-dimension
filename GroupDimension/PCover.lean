@@ -20,7 +20,7 @@ of exponent `p`. So the formal statement is about every such extension:
   `Q'' ≤ γ₅(Q) = 1`. (The paper splits the first case into `z ∉ γ₂(Q)` and
   `z ∈ γ₂(Q) \ γ₄(Q)`; both are `ker π ∩ γ₄(Q) = 1`.)
 * `metabelian_of_central_quotient`: the same for `P = Q/Z`, `Z` central of order `p`. These `Q`
-  include all immediate descendants of step size `1` of `P` (`Z = P_c(Q)`).
+  include all immediate descendants of step size `1` of `P` (`Z = P_{c+1}(Q)` for `P` of `p`-class `c`).
 * `metabelian_of_central_elementary` (**Theorem 6.10**): `Q/M` as above with `M` central of
   exponent `p` (for instance `Q = P*`) implies `Q'' = 1`. As in the paper, `Q'' ≤ M` and the
   subgroups `U` of index `p` in `M` intersect trivially; for each, `Q/U → Q/M` is an extension of
