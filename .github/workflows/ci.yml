@@ -1,5 +1,8 @@
 # Builds the package (Mathlib from the cache) and runs the axiom audit: every `#print axioms` in
 # AxiomAudit.lean must report only propext, Classical.choice, Quot.sound (no sorryAx, no axiom).
+# Then the certificates of Prop. 5.3 (D5-34): the negative controls (Test/Tamper.lean), the data
+# (GroupDimension.Cert1024.Prop1024) and their audit AxiomAuditCert1024.lean, which may in addition
+# show only the axioms that `native_decide` introduces for the 34 data chunks.
 name: CI
 on:
   push:
@@ -39,3 +42,34 @@ jobs:
             <(tr '\n' ' ' < audit.log | sed 's/  */ /g') \
             || { echo "::error::audit does not see proof bodies"; exit 1; }
           echo "audit: $got declarations, only propext / Classical.choice / Quot.sound"
+      - name: certificate checker, negative controls (Test/Tamper.lean)
+        run: lake build GroupDimension.Cert1024.Test.Tamper
+      - name: certificate data (Prop. 5.3, 34 native_decide)
+        run: lake build GroupDimension.Cert1024.Prop1024
+      - name: axiom audit of the certificates
+        run: |
+          set -o pipefail
+          lake env lean AxiomAuditCert1024.lean 2>&1 | tee audit-cert.log
+          want=$(grep -c '^#print axioms' AxiomAuditCert1024.lean)
+          got=$(grep -c "depends on axioms\|does not depend on any axioms" audit-cert.log || true)
+          echo "declarations: $want, reported: $got"
+          [ "$want" = "$got" ] || { echo "::error::audit reported $got of $want declarations"; exit 1; }
+          if grep -q ': error' audit-cert.log; then echo "::error::errors in the audit"; exit 1; fi
+          # the list may be wrapped over several lines: join them first
+          tr '\n' ' ' < audit-cert.log | sed 's/  */ /g' > audit-cert.flat
+          axioms=$(grep -o 'depends on axioms: \[[^]]*\]' audit-cert.flat \
+                | sed 's/.*\[\(.*\)\]/\1/' | tr ',' '\n' | tr -d ' ' | sort -u)
+          # allowed: the three standard axioms, and the axiom `native_decide` adds for a data chunk
+          # (chunk CNN, NN < 34, and its own theorem cNN_ok)
+          native='^_private\.GroupDimension\.Cert1024\.Data\.C([0-2][0-9]|3[0-3])\.0\.GroupDimension\.Cert1024\.Data\.c\1_ok\._native\.native_decide\.ax_[0-9_]+$'
+          bad=$(echo "$axioms" | grep -v -x -e propext -e Classical.choice -e Quot.sound | grep -v -E "$native" || true)
+          if [ -n "$bad" ]; then echo "::error::unexpected axioms: $bad"; exit 1; fi
+          # guard against a vacuous audit: `prop_1024` must see all 34 chunks and the standard axioms
+          p=$(grep -o -E "'?GroupDimension\.Cert1024\.prop_1024'? depends on axioms: \[[^]]*\]" audit-cert.flat || true)
+          [ -n "$p" ] || { echo "::error::no axioms reported for prop_1024"; exit 1; }
+          n=$(echo "$p" | grep -o -E 'Data\.c[0-9][0-9]_ok\._native' | sort -u | wc -l | tr -d ' ')
+          for ax in propext Classical.choice Quot.sound; do
+            echo "$p" | grep -q -E "[[ ]$ax[],]" || { echo "::error::prop_1024 does not show $ax"; exit 1; }
+          done
+          [ "$n" = 34 ] || { echo "::error::prop_1024 shows $n of the 34 native_decide chunks"; exit 1; }
+          echo "certificate audit: $got declarations; standard axioms and the 34 native_decide chunks only"

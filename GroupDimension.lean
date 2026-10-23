@@ -24,6 +24,5 @@ public import GroupDimension.Cert1024.Nilpotent
 public import GroupDimension.Cert1024.PcBound
 public import GroupDimension.Cert1024.Check
 public import GroupDimension.Cert1024.Decode
-public import GroupDimension.Cert1024.Test.Tamper
 
 @[expose] public section
