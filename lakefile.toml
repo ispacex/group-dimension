@@ -22,3 +22,9 @@ name = "Challenge"
 
 [[lean_lib]]
 name = "Solution"
+
+# D5-34: the certificate checker of Prop. 5.3 (core Lean only), compiled to native code so that
+# `native_decide` in `GroupDimension/Cert1024/Data` runs it natively.
+[[lean_lib]]
+name = "Cert1024Comp"
+precompileModules = true
