@@ -1418,3 +1418,6 @@ open GroupDimension
 #print axioms GroupDimension.Cert1024.card_candGroup
 #print axioms GroupDimension.Cert1024.card_eq_of_checkAux
 #print axioms GroupDimension.Cert1024.nilSpan_sound
+#print axioms GroupDimension.D_le_derivedSeries_two
+#print axioms GroupDimension.mem_of_mem_D_add_two
+#print axioms GroupDimension.rank_ge_three_of_D_five_ne_bot
