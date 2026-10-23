@@ -121,8 +121,8 @@ def lineDepths (s : String) : Option (List Nat) :=
 theorem real_depths : lineDepths real = some [4, 5] := by native_decide
 
 /-- The certificate of `447001` with `C_0` replaced by the `3`-cycle `e_0 ↦ e_1 ↦ e_2 ↦ e_0` (well
-defined: `a_0 = a_1 = a_2`; of order `3`, so `C_0 - 1` is not nilpotent). Only `nilOK` and
-`genOK` can fail; `nilOK` (and `nilFull`) must. -/
+defined: `a_0 = a_1 = a_2`; of order `3`, so `C_0 - 1` is not nilpotent): `nilOK` (and
+`nilFull`) must fail. -/
 def real3cycle : Bool × Bool :=
   let s := real
   let av := modsOf s
