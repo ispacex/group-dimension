@@ -14,6 +14,7 @@ public import GroupDimension.FiniteReduction
 public import GroupDimension.ClassFour
 public import GroupDimension.ClassFourOrder
 public import GroupDimension.PCover
+public import GroupDimension.Descendants
 public import GroupDimension.Tahara
 public import GroupDimension.ExpThree
 public import GroupDimension.ExpThreePlus
