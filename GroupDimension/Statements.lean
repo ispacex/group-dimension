@@ -40,6 +40,8 @@ References (bibliographic data marked † were not checked against the original)
   Math. Soc. (3) 7 (1957), 29–62.
 * [GT85] N. Gupta, K.-I. Tahara, *Dimension and lower central subgroups of metabelian
   `p`-groups*, Nagoya Math. J. 100 (1985), 127–133.
+* [Gup91] N. Gupta, *A solution of the dimension subgroup problem*, J. Algebra 138 (1991),
+  479–490.
 * [Tah81] K.-I. Tahara, *The augmentation quotients of group rings and the fifth dimension
   subgroups*, J. Algebra 71 (1981), 141–173.
 -/
@@ -105,8 +107,9 @@ def GruenbergResidualTwo : Prop :=
 
 /-- **Gupta–Tahara** [GT85, Thm. 3.2(c)]: for an odd prime `p` and a finitely generated
 metabelian `p`-group `G`, `D_{p+2}(G) = γ_{p+2}(G)`. Stated for finite `p`-groups, a special
-case; "metabelian" is `G'' = 1` (`derivedSeries G 2 = ⊥`). For `p` odd, `Dₙ = γₙ` holds for
-metabelian `p`-groups and every `n` (N. Gupta, 1991), which is not used.
+case, which loses nothing (a finitely generated metabelian `p`-group is finite); "metabelian"
+is `G'' = 1` (`derivedSeries G 2 = ⊥`). For `p` odd, `Dₙ = γₙ` holds for finitely generated
+metabelian `p`-groups and every `n` [Gup91]; that is not used.
 Formulation only, not proved here. -/
 def GuptaTaharaMetabelian : Prop :=
   ∀ (p : ℕ), p.Prime → p ≠ 2 → ∀ (G : Type) [Group G] [Finite G], IsPGroup p G →

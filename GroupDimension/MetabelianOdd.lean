@@ -19,7 +19,10 @@ public import GroupDimension.Statements
 `p`-groups, `p` odd) as the explicit hypothesis `GuptaTaharaMetabelian`, applied to `Q/Q''`
 (`D_le_derivedSeries_two`). `D_n ⊆ M_n` is the reduction `ℤ[Q] → 𝔽_p[Q]`
 (`sub_one_mem_augIdealP_pow_of_mem_D`). `d(Q) ≥ 3` for `Q'' ≠ 1` is `card_ge_of_not_metabelian`
-(the cyclic case of Lemma 6.3).
+(Proposition 6.5, via the cyclic case of Lemma 6.3).
+
+Here `M_n` is `Q ∩ (1 + Δ_{𝔽_p}(Q)^n)`; that it equals `∏_{i p^j ≥ n} γ_i^{p^j}` (Jennings) is
+formalized only in the inclusion needed for `p = 2`, `n = 5` (`Jennings/`).
 -/
 
 namespace GroupDimension
