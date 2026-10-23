@@ -151,7 +151,7 @@ $D_5 = 1$ — проверяется в Lean по сертификатам, не
   с леммой 5.2(d), он не сертифицирован). `D_five_eq_bot_of_rank_of_complete` — предложение 5.7,
   где `h1024` заменена этими гипотезами.
 * **Сборка**: данные не импортируются в `GroupDimension.lean`, и CI их не собирает. Команды:
-  `lake build GroupDimension.Cert1024.Prop1024`, затем `lake env lean AxiomAuditCert1024.lean`. Аудит показывает `propext`, `Classical.choice`, `Quot.sound` и 34 аксиомы `Data.cXX_ok._native.native_decide.ax_1_1`, которые вводит `native_decide`, по одной на часть.
+  `lake build GroupDimension.Cert1024.Prop1024`, затем `lake env lean AxiomAuditCert1024.lean`. Аудит показывает `propext`, `Classical.choice`, `Quot.sound` и 34 аксиомы `native_decide` axioms (named `_private.GroupDimension.Cert1024.Data.CXX.0.….native_decide.ax_1_1` under Lean v4.35), которые вводит `native_decide`, по одной на часть.
 
 ## Только сформулировано (`def … : Prop`, без доказательства)
 
