@@ -109,8 +109,9 @@ abbrev Z4Z2pow7 := Multiplicative (ZMod 4 × (Fin 7 → ZMod 2))
 /-! ## Named statements used only as hypotheses
 
 Each is a `Prop`; none is assumed globally and none is proved here. A theorem that needs one
-takes it as an explicit argument. They quantify over groups `G : Type` (universe 0); this is no
-loss for statements about single groups and keeps them in `Prop` without universe parameters. -/
+takes it as an explicit argument. They quantify over groups `G : Type` (universe 0), which keeps them in `Prop` without universe
+parameters. For `DimensionQuestion5` this is no loss: a counterexample `g ∈ D₅(G) \ γ₄(G)` already
+lives in a finitely generated subgroup, which is isomorphic to a group in `Type`. -/
 
 /-- Kourovka Problem 20.84 (**open**): `D₅(G) ⊆ γ₄(G)` for every group `G`. -/
 def DimensionQuestion5 : Prop :=

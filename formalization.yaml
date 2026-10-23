@@ -141,8 +141,8 @@ fidelity:
     G ∩ (1 + Δ_{F_2}(G)^5) ⊆ M_5 (class ≤ 3) is proved, the reverse is not. Hence the
     non-existence results for candidates (Lemma 5.6, Proposition 5.7) are at least as strong
     as the paper's, while Lemma 5.2 (b) gives n ∈ M_5 only in the product sense. (3) Proposition 2.1 is proved with
-    D_3 = γ_3, Passi's theorem and Gruenberg's theorem as explicit hypotheses, and without
-    the paper's restriction to metabelian groups (Remark 2.2). (4) Lemma 5.2 is formalized in
+    D_3 = γ_3, Passi's theorem and Gruenberg's theorem as explicit hypotheses, and with
+    "metabelian" omitted, which is automatic for class ≤ 3 (Remark 2.2, not formalized). (4) Lemma 5.2 is formalized in
     parts (a)-(c) only, assuming D_3 = γ_3. (5) The D_5 form of Proposition 5.7 assumes
     D_3 = γ_3 and the order-2^10 statement of Proposition 5.3 for class ≤ 3 (class exactly 3
     is the paper's Proposition 5.3, [computer + paper]; class ≤ 2 follows from D_3 = γ_3). (6) In Lemma 5.6 the isomorphism Q/P_3(Q) ≅ Z/4 × (Z/2)^7 is given as a
