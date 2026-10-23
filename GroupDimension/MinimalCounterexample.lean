@@ -16,7 +16,8 @@ such that `D₅(Q/N) = 1` for every central subgroup `N` of order `2`. If `D₅(
 and `P_c = ⟨n⟩`. Part (d) of the lemma (the immediate descendant) is in `Descendants.lean`
 (`isDescendant_of_minimal`).
 
-`D₅ ≤ D₃ = γ₃` uses `DThreeEqGammaThree` as a hypothesis (as in `FiniteReduction.lean`).
+`D₅ ≤ D₃ = γ₃` uses `DThreeEqGammaThree` as a hypothesis (as in `FiniteReduction.lean`); it is
+proved in `DThree.lean`, and `DThreeCorollaries.lean` has the versions without it.
 `n ∈ M₅` uses Jennings' theorem (`mem_jennings_of_sub_one_mem`): `D₅` maps into
 `G ∩ (1 + Δ_{𝔽₂}^5)` under `ℤ[Q] → 𝔽₂[Q]` (`modP`).
 -/

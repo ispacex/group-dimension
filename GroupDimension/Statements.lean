@@ -11,7 +11,8 @@ Every declaration in this file is a `def … : Prop`. None of them is an `axiom`
 proved here. A theorem that uses one takes it as an explicit hypothesis (`FiniteReduction.lean`
 takes `PassiDFourSquare`, `GruenbergResidualTwo`, `DThreeEqGammaThree`); nothing is assumed
 globally. Tahara's description of `D₅` ([Tah81, Thm. 6.1]) is stated as `TaharaFiveOne` in
-`Tahara.lean`; unlike the statements here it is proved (`TaharaTheorem.lean`). They record, in Lean, *what* is
+`Tahara.lean`; unlike the statements here it is proved (`TaharaTheorem.lean`), and so is
+`DThreeEqGammaThree` (`dThreeEqGammaThree`, `DThree.lean`). They record, in Lean, *what* is
 known or asked, so that later work can be checked against an exact formulation.
 
 Indexing: `D n G` is the literature's `D_n(G)`; Mathlib's `(⊤ : Subgroup G).lowerCentralSeries k` is
@@ -53,7 +54,8 @@ def DimensionQuestion5 : Prop :=
 
 /-- **`D₃(G) = γ₃(G)` for every group** — classical; attributed to G. Higman and R. Rees
 (unpublished) and to Passi [Pas68]†; see [Pas79, Ch. III], [MP09, §1.3]†.
-Formulation only, not proved here. (Our `D_two` proves the degree-2 case.) -/
+Proved in `DThree.lean` (`dThreeEqGammaThree`); the theorems that take it as a hypothesis have
+versions without it (`DThreeCorollaries.lean`, `prop_1024'`). (`D_two` is the degree-2 case.) -/
 def DThreeEqGammaThree : Prop :=
   ∀ (G : Type) [Group G], D 3 G = (⊤ : Subgroup G).lowerCentralSeries 2
 

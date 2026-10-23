@@ -2,6 +2,7 @@ module
 
 public import GroupDimension.Cert1024.Data.All
 public import GroupDimension.MinimalCounterexample
+public import GroupDimension.DThree
 
 @[expose] public section
 
@@ -13,7 +14,8 @@ order `2¹⁰`, so `D₅(candidate i) = 1` for every `i` (`D_five_cand`). Here t
 Lemma 5.2 (`isCandidate_of_minimal`) into Proposition 5.3 in the form used by
 `D_five_eq_bot_of_rank` (`h1024`). Three statements are hypotheses:
 
-* `hD3`: `D₃ = γ₃` (Passi; as in `MinimalCounterexample.lean`);
+* `hD3`: `D₃ = γ₃` (Passi; as in `MinimalCounterexample.lean`), proved in `DThree.lean`: `prop_1024'`
+  and `D_five_eq_bot_of_rank_of_complete'` are the versions without it;
 * `h512`: Proposition 5.1 at order `2⁹` (`D₅ = 1` for the groups of order `2⁹` and class `≤ 3`),
   a computation;
 * `hcomplete`: the completeness of the list — every candidate of order `2¹⁰` is isomorphic to one
@@ -94,5 +96,27 @@ theorem D_five_eq_bot_of_rank_of_complete (hD3 : DThreeEqGammaThree)
     {Q : Type} [Group Q] [Finite Q] (hcard : Nat.card Q = 2 ^ 11)
     (h4 : (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥) (hrank : 8 ≤ Group.rank Q) : D 5 Q = ⊥ :=
   D_five_eq_bot_of_rank hD3 (fun R _ _ => prop_1024 hD3 h512 hcomplete R) hcard h4 hrank
+
+/-- **Proposition 5.3** with `D₃ = γ₃` proved (`dThreeEqGammaThree`): what remains assumed is
+Proposition 5.1 at order `2⁹` and the completeness of the candidate list. -/
+theorem prop_1024'
+    (h512 : ∀ (R : Type) [Group R] [Finite R], Nat.card R = 2 ^ 9 →
+      (⊤ : Subgroup R).lowerCentralSeries 3 = ⊥ → D 5 R = ⊥)
+    (hcomplete : ∀ (Q : Type) [Group Q] [Finite Q] (n : Q), Nat.card Q = 2 ^ 10 →
+      IsCandidate Q n → ∃ i : Fin 3400, Nonempty (Q ≃* cand i))
+    (R : Type) [Group R] [Finite R] (hcard : Nat.card R = 2 ^ 10)
+    (h4 : (⊤ : Subgroup R).lowerCentralSeries 3 = ⊥) : D 5 R = ⊥ :=
+  prop_1024 dThreeEqGammaThree h512 hcomplete R hcard h4
+
+/-- **Proposition 5.7** with `D₃ = γ₃` proved: given Proposition 5.1 at order `2⁹` and the
+completeness of the order-`2¹⁰` candidate list. -/
+theorem D_five_eq_bot_of_rank_of_complete'
+    (h512 : ∀ (R : Type) [Group R] [Finite R], Nat.card R = 2 ^ 9 →
+      (⊤ : Subgroup R).lowerCentralSeries 3 = ⊥ → D 5 R = ⊥)
+    (hcomplete : ∀ (Q : Type) [Group Q] [Finite Q] (n : Q), Nat.card Q = 2 ^ 10 →
+      IsCandidate Q n → ∃ i : Fin 3400, Nonempty (Q ≃* cand i))
+    {Q : Type} [Group Q] [Finite Q] (hcard : Nat.card Q = 2 ^ 11)
+    (h4 : (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥) (hrank : 8 ≤ Group.rank Q) : D 5 Q = ⊥ :=
+  D_five_eq_bot_of_rank_of_complete dThreeEqGammaThree h512 hcomplete hcard h4 hrank
 
 end GroupDimension.Cert1024

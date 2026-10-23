@@ -55,6 +55,9 @@ Indexing: Mathlib's `(⊤ : Subgroup G).lowerCentralSeries k` is `γ_{k+1}(G)`.
 * Because the formalized inclusion is `G ∩ (1 + Δ_{𝔽₂}(G)^5) ⊆ jennings 2 G 5` (class ≤ 3), the
   non-existence results for candidates are at least as strong as the paper's. Lemma 5.2 (b),
   in contrast, gives `n ∈ M₅` only in the product sense.
+* `D₃ = γ₃` is a hypothesis of three compared statements above; it is now proved in the
+  development (`dThreeEqGammaThree`, `DThree.lean`), with versions of these theorems without it
+  (`DThreeCorollaries.lean`). The compared statements are unchanged.
 * The paper's computer results (Props 5.1, 5.3, 5.10, Thms 5.4, 6.14) and its paper-only results
   (Lemmas 6.1, 6.2, Thm 6.12) are not submitted. Remark 2.2, Lemma 5.2 (d), Proposition 5.8,
   Lemma 5.9, Lemma 6.3, Proposition 6.5, Lemma 6.9, Theorem 6.10 (for central extensions by a
