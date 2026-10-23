@@ -41,7 +41,11 @@ central series. Kourovka Problem 20.84 asks whether `D₅(G) ⊆ γ₄(G)` for e
 `M_n(G) = G ∩ (1 + Δ_{𝔽_p}(G)^n)`; the two agree by Jennings' theorem, which is not formalized
 in general. What is formalized is the inclusion that matters for `D₅`:
 `D₅(G) ⊆ jennings 2 G 5` for a finite 2-group of class `≤ 3` (`D_five_le_jennings`), so the
-condition `n ∈ M₅` of a candidate is met by the elements of `D₅`.
+condition `n ∈ M₅` of a candidate is met by the elements of `D₅`. Since the formalized inclusion
+is `G ∩ (1 + Δ_{𝔽₂}(G)^5) ⊆ jennings 2 G 5` (class `≤ 3`), the non-existence results for
+candidates (Lemma 5.6, Proposition 5.7) are at least as strong as the paper's; conversely
+`isCandidate_of_minimal` (Lemma 5.2 (b)) yields `n ∈ jennings 2 Q 5`, which is the paper's
+`n ∈ M₅` only via the unformalized direction of Jennings' theorem.
 -/
 
 namespace GroupDimension.Palomar
@@ -105,7 +109,8 @@ abbrev Z4Z2pow7 := Multiplicative (ZMod 4 × (Fin 7 → ZMod 2))
 /-! ## Named statements used only as hypotheses
 
 Each is a `Prop`; none is assumed globally and none is proved here. A theorem that needs one
-takes it as an explicit argument. -/
+takes it as an explicit argument. They quantify over groups `G : Type` (universe 0); this is no
+loss for statements about single groups and keeps them in `Prop` without universe parameters. -/
 
 /-- Kourovka Problem 20.84 (**open**): `D₅(G) ⊆ γ₄(G)` for every group `G`. -/
 def DimensionQuestion5 : Prop :=
@@ -182,8 +187,8 @@ theorem not_isCandidate_of_rank {Q : Type*} [Group Q] [Finite Q] (hcard : Nat.ca
 /-- **Paper, Proposition 2.1, (1) ⇔ (3), conditional.** *Assuming* `D₃ = γ₃`, Passi's
 `D₄² ⊆ γ₄` and Gruenberg's theorem (the three explicit hypotheses), Problem 20.84 has a
 positive answer if and only if `D₅(Q) = 1` for every finite 2-group `Q` of class exactly 3.
-The paper's version also restricts to metabelian `Q` (its Remark 2.2); that refinement is not
-formalized, so the right-hand side here quantifies over all such `Q`. -/
+The paper's (3) also says "metabelian"; a group of class `≤ 3` is automatically metabelian
+(`[γ₂, γ₂] ⊆ γ₄`, the paper's Remark 2.2, not formalized), so the word is omitted here. -/
 theorem dimensionQuestion5_iff_class_three (hD3 : DThreeEqGammaThree) (hP : PassiDFourSquare)
     (hG : GruenbergResidualTwo) :
     DimensionQuestion5 ↔
@@ -203,10 +208,11 @@ theorem isCandidate_of_minimal (hD3 : DThreeEqGammaThree) {Q : Type} [Group Q] [
     ∃ n, IsCandidate Q n ∧ DSet 5 Q = (Subgroup.zpowers n : Set Q) := by
   sorry
 
-/-- **Paper, Proposition 5.7, `D₅` form, conditional.** *Assuming* `D₃ = γ₃` and the statement
-of the paper's Proposition 5.3 for order `2^10` (every group of order `2^10` and class `≤ 3` has
-`D₅ = 1`; in the paper this is a computer result), every group of order `2^11`, class `≤ 3` and
-rank `≥ 8` has `D₅ = 1`. Both assumptions are explicit hypotheses. -/
+/-- **Paper, Proposition 5.7, `D₅` form, conditional.** *Assuming* `D₃ = γ₃` and `h1024`: every
+group of order `2^10` and class `≤ 3` has `D₅ = 1`. For class exactly 3 this is the paper's
+Proposition 5.3 (proved there by computer plus paper argument, [computer + paper]); for class
+`≤ 2` it follows from `D₃ = γ₃`. Conclusion: every group of order `2^11`, class `≤ 3` and rank
+`≥ 8` has `D₅ = 1`. Both assumptions are explicit hypotheses. -/
 theorem D_five_eq_bot_of_rank (hD3 : DThreeEqGammaThree)
     (h1024 : ∀ (R : Type) [Group R] [Finite R], Nat.card R = 2 ^ 10 →
       (⊤ : Subgroup R).lowerCentralSeries 3 = ⊥ → DSet 5 R = {1})

@@ -47,7 +47,7 @@ is `D₅(G) ⊆ γ₄(G)` for every group `G`?
 
 This is an **open question**. It is a formulation, not a claim: nothing in this project
 assumes it or its negation. The Lie-ring analogue `D₅(L) ⊆ γ₄(L)` is [IMP26, Corollary D],
-proved in Lean by the authors (see `GroupDimension.LieComparison`). -/
+proved in Lean by the authors in their own repository (quoted in `GroupDimension.LieComparison`). -/
 def DimensionQuestion5 : Prop :=
   ∀ (G : Type) [Group G], D 5 G ≤ (⊤ : Subgroup G).lowerCentralSeries 3
 

@@ -113,7 +113,8 @@ $\Phi(g-1)=(0,\bar g)$. Это та же идея, что у авторов в `
 
 `#print axioms` для всех 1345 доказанных объявлений (`AxiomAudit.lean`: 1336 из разработки и
 9 сравниваемых теорем Palomar из `Solution.lean`) — только `propext`,
-`Classical.choice`, `Quot.sound`. Ни `sorry`, ни `axiom` в исходниках нет.
+`Classical.choice`, `Quot.sound`. Ни `sorry`, ни `axiom` нет ни в разработке, ни в `Solution.lean`;
+`Challenge.lean` формулирует подаваемые результаты с `sorry` намеренно.
 
 ## Только сформулировано (`def … : Prop`, без доказательства)
 

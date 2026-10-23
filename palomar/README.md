@@ -52,10 +52,10 @@ Indexing: Mathlib's `(⊤ : Subgroup G).lowerCentralSeries k` is `γ_{k+1}(G)`.
   it as `G ∩ (1 + Δ_{𝔽₂}(G)^5)`. The two agree by Jennings' theorem, which is formalized only in the
   needed direction for `D₅` (`D_five_le_jennings`).
 * Lemma 5.6 states the isomorphism as a surjective homomorphism with kernel `P₃(Q)`.
+* Because the formalized inclusion is `G ∩ (1 + Δ_{𝔽₂}(G)^5) ⊆ jennings 2 G 5` (class ≤ 3), the
+  non-existence results for candidates are at least as strong as the paper's. Lemma 5.2 (b),
+  in contrast, gives `n ∈ M₅` only in the product sense.
 * The paper's computer results (Props 5.1, 5.3, 5.10, Thms 5.4, 6.14) and its paper-only results
-  (Thms 6.10, 6.12) are not submitted.
-
-## Status
-
-See issue D5-35 in the project tracker for the submission record: commit, preflight run,
-submission id and the review.
+  (Lemmas 6.1, 6.2, 6.9, Thms 6.10, 6.12) are not submitted. Proposition 5.8, Lemma 5.9,
+  Lemma 6.3, Proposition 6.5 and the inclusion part of Tahara's Theorem 6.1 are formalized in
+  the development but are not compared statements.

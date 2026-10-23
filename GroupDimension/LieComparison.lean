@@ -53,7 +53,8 @@ generated subrings), then Corollary 6.14 (pass to `L/(γ_{c+1}(L) + L'')`).
    standard, not formalized here).
 2. **Lemma 6.13, finite generation.** An identity `g - 1 = Σ ±(x₁ - 1)⋯(x_m - 1)` with
    `m ≥ n` involves finitely many group elements, so it already holds in `ℤ[H]` for a finitely
-   generated `H ≤ G`. Not formalized here, but the argument is the same.
+   generated `H ≤ G`. For groups this is formalized in `FiniteReduction.lean`
+   (`exists_closure_finset_mem_D`).
 3. **Step 1 of §6, the central extension `T = L ×_{L_ab} P`.** The fibre product
    `T = G ×_{G_ab} P` with `P` free abelian onto `G_ab` is again a central extension with
    `γ_i(T) ≅ γ_i(G)` for `i ≥ 2`, and `1 → T' → T → P → 1` splits — but as a semidirect

@@ -112,7 +112,8 @@ same idea as the authors' `DegreeTwo.lean` (a square-zero representation).
 
 `#print axioms` for all 1345 proved declarations (`AxiomAudit.lean`: 1336 of the development and the
 9 compared Palomar theorems of `Solution.lean`) — only `propext`,
-`Classical.choice`, `Quot.sound`. No `sorry` and no `axiom` in the sources.
+`Classical.choice`, `Quot.sound`. No `sorry` and no `axiom` in the development or in `Solution.lean`;
+`Challenge.lean` states the submitted results with `sorry` by design.
 
 ## Only stated (`def … : Prop`, no proof)
 

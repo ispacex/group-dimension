@@ -2,7 +2,7 @@
 version: "v0.4"
 
 project:
-  name: "Fifth dimension subgroups: D₅ = γ₅ for small abelianization of exponent 3, candidates for a counterexample, and a reduction of Kourovka 20.84"
+  name: "Fifth dimension subgroups: D₅ = γ₅ when G/γ₂ is finite of exponent 3, candidates for a counterexample, and a reduction of Kourovka 20.84"
   description: >-
     Lean 4 / Mathlib formalization accompanying S. Vorobev, "On the inclusion
     D_5(G) ⊆ γ_4(G): reductions, the Lie-ring proof, and evidence" (preprint, 2026;
@@ -41,14 +41,18 @@ sources:
     relationship: formalizes
     note: >-
       The paper and this formalization were developed together; the paper marks each
-      statement [paper], [Lean] or [computer]. The paper was submitted to arXiv (math.GR)
-      on 2026-10-22; its arXiv identifier was not yet assigned when this commit was made.
-      Departures from the paper are listed under fidelity.
+      statement [paper], [Lean] or [computer]. The version cited is the one of 2026-10-22,
+      submitted to arXiv (math.GR) that day; its arXiv identifier was not yet assigned when
+      this commit was made. The paper's formalization section describes this repository at
+      commit e58aa2b (tag lean-v4.29, Lean 4.29); since then the Lie-ring comparison theorem
+      lieDimensionQuestion5 has been removed (see related_formalizations) and the code was
+      ported to Lean 4.35; the paper's [Lean] markers otherwise apply unchanged. Departures
+      from the paper are listed under fidelity.
     author_endorsement: participated
   - title: "S. A. Jennings, The structure of the group ring of a p-group over a modular field, Trans. Amer. Math. Soc. 50 (1941) 175-185"
     authors: ["S. A. Jennings"]
     type: paper
-    relationship: formalizes
+    relationship: adapts
     note: >-
       D_five_le_jennings formalizes the case needed by the paper (p = 2, n = 5, class at most 3)
       of the inclusion G ∩ (1 + Δ_{F_p}(G)^n) ⊆ ∏_{i p^j ≥ n} γ_i(G)^{p^j} of Jennings'
@@ -57,7 +61,7 @@ sources:
     authors: ["Ken-Ichi Tahara"]
     type: paper
     location: "Theorem 6.1 (the inclusion part)"
-    relationship: background
+    relationship: other
     note: >-
       The inclusion part of Tahara's Theorem 6.1 is formalized in the development
       (taharaFiveOne) and is the main ingredient of the proofs of Theorems 6.6 and 6.8. It is
@@ -95,7 +99,9 @@ status:
     of which Proposition 5.3 enters D_five_eq_bot_of_rank as an explicit hypothesis; the
     classical results D_3 = γ_3, Passi's D_4^2 ⊆ γ_4 and Gruenberg's theorem, which enter as
     explicit hypotheses; the paper's Remark 2.2 (restriction to metabelian groups in
-    Proposition 2.1) and Lemma 5.2 (d); Theorems 6.10 and 6.12 (paper only).
+    Proposition 2.1) and Lemma 5.2 (d); the paper-only results (Lemmas 6.1, 6.2, 6.9,
+    Theorems 6.10, 6.12). Formalized in the development but not compared here: Proposition 5.8,
+    Lemma 5.9, Lemma 6.3, Proposition 6.5 and the inclusion part of Tahara's Theorem 6.1.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: ["propext", "Classical.choice", "Quot.sound"]
@@ -124,20 +130,22 @@ automation:
   notes: >-
     The Lean code is AI-written. The human author directed the work and is responsible for
     it, but did not write or line-by-line review the Lean proofs. Correctness rests on the
-    Lean kernel. Faithfulness of the statements rests on the agent reviews described under
-    review and on this submission's editorial review.
+    Lean kernel; faithfulness of the statements rests on the agent reviews described under
+    review.
 
 fidelity:
   divergences: >-
     (1) D_n is stated in the Challenge as a set; the development defines it as a normal
     subgroup, and Solution.lean proves they agree. (2) M_n in a candidate is defined by
-    Jennings' product formula, not as G ∩ (1 + Δ_{F_2}(G)^n); the inclusion that matters
-    (D_5 ⊆ M_5) is proved, the general equality is not. (3) Proposition 2.1 is proved with
+    Jennings' product formula, not as G ∩ (1 + Δ_{F_2}(G)^n); the inclusion
+    G ∩ (1 + Δ_{F_2}(G)^5) ⊆ M_5 (class ≤ 3) is proved, the reverse is not. Hence the
+    non-existence results for candidates (Lemma 5.6, Proposition 5.7) are at least as strong
+    as the paper's, while Lemma 5.2 (b) gives n ∈ M_5 only in the product sense. (3) Proposition 2.1 is proved with
     D_3 = γ_3, Passi's theorem and Gruenberg's theorem as explicit hypotheses, and without
     the paper's restriction to metabelian groups (Remark 2.2). (4) Lemma 5.2 is formalized in
     parts (a)-(c) only, assuming D_3 = γ_3. (5) The D_5 form of Proposition 5.7 assumes
-    D_3 = γ_3 and the order-2^10 statement of Proposition 5.3, which the paper establishes by
-    computer. (6) In Lemma 5.6 the isomorphism Q/P_3(Q) ≅ Z/4 × (Z/2)^7 is given as a
+    D_3 = γ_3 and the order-2^10 statement of Proposition 5.3 for class ≤ 3 (class exactly 3
+    is the paper's Proposition 5.3, [computer + paper]; class ≤ 2 follows from D_3 = γ_3). (6) In Lemma 5.6 the isomorphism Q/P_3(Q) ≅ Z/4 × (Z/2)^7 is given as a
     surjective homomorphism with kernel P_3(Q). (7) In Theorem 6.8 "the cubes of G/γ_2 form
     a cyclic group" is stated as: for some t, every x^3 is congruent modulo γ_2 to a power
     of t^3.
@@ -146,8 +154,9 @@ review:
   status: "agent-reviewed"
   reviewers: ["independent Claude Code reviewer agents (one per change), not human experts"]
   notes: >-
-    Every change to the development was reviewed before merging by a separate agent that saw
-    only the diff, checking the statements against the paper and the cited sources (for
+    Every change to the development was reviewed before merging by a separate agent, given the
+    diff, the paper and the sources but not the author agent's notes, checking the statements
+    against the paper and the cited sources (for
     example Tahara's condition (C_2) against Tahara 1981, p. 160). An axiom audit
     (AxiomAudit.lean, run in CI) prints the axioms of every declaration of the development;
     all depend only on propext, Classical.choice and Quot.sound. No human expert has
