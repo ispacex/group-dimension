@@ -8,7 +8,7 @@ public import GroupDimension.PCover
 # Theorem 6.12, necessity: a nonterminal group of type `(d, 2, 1)` satisfies (N1)–(N4)
 
 Let `p` be an odd prime and `P` a group of type `(d, 2, 1)` with `P/γ₂(P)` elementary abelian:
-`γ₄(P) = 1`, `|γ₂(P)/γ₃(P)| = p²`, `|γ₃(P)| = p` and `x^p ∈ γ₂(P)` for all `x`. By Lemma 10.1 of
+`γ₄(P) = 1`, `|γ₂(P)/γ₃(P)| = p²`, `|γ₃(P)| = p` and `x^p ∈ γ₂(P)` for all `x`. By Lemma C.1 of
 the paper, `P` is nonterminal if and only if there is a group `Q` with a central subgroup `⟨z⟩` of
 order `p`, `Q/⟨z⟩ ≅ P` and `γ₄(Q) ≠ 1`. This existence is what "nonterminal" means here: we take
 `π : Q →* P` onto with `ker π = ⟨z⟩`, `z` central of order `p`, and `γ₄(Q) ≠ 1`. (That it is
@@ -23,7 +23,8 @@ equivalent to a nontrivial nucleus is O'Brien's theory and is not formalized.)
   `x_i^p = v^{α_i} w^{β_i}` and `[u,x_i] = w^{f_i}`, the linear system (E)+(J) (`SystemEJ`) has a
   solution with `c = 1`. The `x_i` need not generate `P`.
 
-The proof is the paper's. `Q'' = 1` (Theorem 6.10, `metabelian_of_central_ext_card`),
+The proof is the paper's. `Q'' = 1` (the paper cites Lemma 6.3; here via Theorem 6.10,
+`metabelian_of_central_ext_card`),
 `γ₄(Q) = ⟨z⟩`, and `γ₃(Q)` has exponent `p` (`pow_p_lcs2`). For `ℓ ∈ γ₂(Q)`,
 `[[ℓ,x],y] = [[ℓ,y],x]` (`pc_pc_symm`, the Jacobi identity with `[ℓ,[x,y]] = 1`), which gives
 `ψ = c f` with `c ≠ 0`, where `[w,x] = z^{ψ(x)}`. The Hall–Witt identity becomes
@@ -122,7 +123,8 @@ theorem choose_two_succ (n : ℕ) : (n + 1).choose 2 = n + n.choose 2 := by
 theorem choose_three_succ (n : ℕ) : (n + 1).choose 3 = n.choose 2 + n.choose 3 := by
   rw [show (3 : ℕ) = 2 + 1 from rfl, Nat.choose_succ_succ']
 
-/-- `x^{-n} a x^n = a b^n c^{\binom n2}` for `b = [a,x]` and `c = [b,x]` commuting with `x`. -/
+/-- `x^{-n} a x^n = a b^n c^{\binom n2}` for `b = [a,x]` and `c = [b,x]`, when `c` commutes with `x`
+and with `b`. -/
 theorem conj_pow_formula {a b c x : G} (hb : pc a x = b) (hc : pc b x = c) (hcx : pc c x = 1)
     (hbc : Commute b c) (n : ℕ) : (x ^ n)⁻¹ * a * x ^ n = a * b ^ n * c ^ n.choose 2 := by
   have ha' : x⁻¹ * a * x = a * b := by rw [conj_eq_mul_pc, hb]
@@ -857,7 +859,7 @@ end Nonterminal
 open Nonterminal in
 /-- **Theorem 6.12, "⇒"** (Appendix, Steps 2 and 4). Let `p` be an odd prime and `P` a group with
 `γ₄(P) = 1`, `|γ₂(P)/γ₃(P)| = p²`, `|γ₃(P)| = p` and `P/γ₂(P)` of exponent `p`. Suppose `P` is
-nonterminal in the sense of Lemma 10.1: there are a group `Q`, `π : Q →* P` onto with
+nonterminal in the sense of Lemma C.1: there are a group `Q`, `π : Q →* P` onto with
 `ker π = ⟨z⟩`, `z` central of order `p`, and `γ₄(Q) ≠ 1`. Then
 (N1) `|Z(P) ∩ γ₂(P)| = p²`, (N2) `γ₂(P)` is elementary abelian, (N3) `x^p ∈ Z(P)` for all `x`,
 and (N4): for every `w` generating `γ₃(P)`, `v ∈ Z(P) ∩ γ₂(P) \ γ₃(P)`, `u ∈ γ₂(P) \ Z(P)` and
