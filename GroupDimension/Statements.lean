@@ -9,11 +9,12 @@ public import GroupDimension.Basic
 
 Every declaration in this file is a `def … : Prop`. None of them is an `axiom` and none is
 proved here. A theorem that uses one takes it as an explicit hypothesis (`FiniteReduction.lean`
-takes `PassiDFourSquare`, `GruenbergResidualTwo`, `DThreeEqGammaThree`); nothing is assumed
-globally. Tahara's description of `D₅` ([Tah81, Thm. 6.1]) is stated as `TaharaFiveOne` in
-`Tahara.lean`; unlike the statements here it is proved (`TaharaTheorem.lean`), and so is
-`DThreeEqGammaThree` (`dThreeEqGammaThree`, `DThree.lean`). They record, in Lean, *what* is
-known or asked, so that later work can be checked against an exact formulation.
+takes `PassiDFourSquare`, `GruenbergResidualTwo`, `DThreeEqGammaThree`; `MetabelianOdd.lean`
+takes `GuptaTaharaMetabelian`); nothing is assumed globally. Tahara's description of `D₅`
+([Tah81, Thm. 6.1]) is stated as `TaharaFiveOne` in `Tahara.lean`; unlike the statements here
+it is proved (`TaharaTheorem.lean`), and so is `DThreeEqGammaThree` (`dThreeEqGammaThree`,
+`DThree.lean`). They record, in Lean, *what* is known or asked, so that later work can be
+checked against an exact formulation.
 
 Indexing: `D n G` is the literature's `D_n(G)`; Mathlib's `(⊤ : Subgroup G).lowerCentralSeries k` is
 `γ_{k+1}(G)`. So `γ₃ = (⊤ : Subgroup G).lowerCentralSeries 2`, `γ₄ = (⊤ : Subgroup G).lowerCentralSeries 3`,
@@ -37,6 +38,8 @@ References (bibliographic data marked † were not checked against the original)
 * [Pas68]† I. B. S. Passi, *Dimension subgroups*, J. Algebra 9 (1968), 152–182.
 * [Gru57] K. W. Gruenberg, *Residual properties of infinite soluble groups*, Proc. London
   Math. Soc. (3) 7 (1957), 29–62.
+* [GT85] N. Gupta, K.-I. Tahara, *Dimension and lower central subgroups of metabelian
+  `p`-groups*, Nagoya Math. J. 100 (1985), 127–133.
 * [Tah81] K.-I. Tahara, *The augmentation quotients of group rings and the fifth dimension
   subgroups*, J. Algebra 71 (1981), 141–173.
 -/
@@ -99,5 +102,14 @@ def GruenbergResidualTwo : Prop :=
   ∀ (G : Type) [Group G], Group.FG G → Group.IsNilpotent G →
     ∀ g : G, (∀ m : ℕ, Odd m → g ^ m ≠ 1) →
       ∃ (N : Subgroup G) (_ : N.Normal), Finite (G ⧸ N) ∧ IsPGroup 2 (G ⧸ N) ∧ g ∉ N
+
+/-- **Gupta–Tahara** [GT85, Thm. 3.2(c)]: for an odd prime `p` and a finitely generated
+metabelian `p`-group `G`, `D_{p+2}(G) = γ_{p+2}(G)`. Stated for finite `p`-groups, a special
+case; "metabelian" is `G'' = 1` (`derivedSeries G 2 = ⊥`). For `p` odd, `Dₙ = γₙ` holds for
+metabelian `p`-groups and every `n` (N. Gupta, 1991), which is not used.
+Formulation only, not proved here. -/
+def GuptaTaharaMetabelian : Prop :=
+  ∀ (p : ℕ), p.Prime → p ≠ 2 → ∀ (G : Type) [Group G] [Finite G], IsPGroup p G →
+    derivedSeries G 2 = ⊥ → D (p + 2) G = (⊤ : Subgroup G).lowerCentralSeries (p + 1)
 
 end GroupDimension

@@ -92,6 +92,7 @@ $[a,b]=a^{-1}b^{-1}ab$ — $[a,b]-1 = a^{-1}b^{-1}\bigl((a-1)(b-1)-(b-1)(a-1)\bi
 | **замечание 2.3** (ограниченный вариант): при теореме Пасси (гипотеза) $D_5(Q)=1$ для $2$-групп класса $\le3$ порядка $\le2^k$ ⇒ $D_5(G)\subseteq\gamma_4(G)$ для конечных $G$ с силовской $2$-подгруппой порядка $\le2^k$; при $D_3=\gamma_3$ (гипотеза) — класса ровно $3$ | `D_five_le_of_bounded`, `D_five_le_of_bounded_class_three`, `exists_sylow_two_proj` | `FiniteReduction.lean` |
 | $[\gamma_i,\gamma_j]\subseteq\gamma_{i+j}$; тождество Холла–Витта | `commutator_lcs_le`, `hall_witt` | `ClassFour.lean` |
 | **лемма 6.3 статьи**: $p$ нечётно, $\vert\gamma_3/\gamma_4\vert=p$, $\gamma_2/\gamma_3$ порождается не более чем двумя элементами $\Rightarrow$ $[\gamma_2,\gamma_2]\subseteq\gamma_5$ (метабелевость при классе $\le4$); циклический случай без условия на $\gamma_3/\gamma_4$ | `commutator_gamma_two_le_gamma_five`, `metabelian_of_class_four`, `commutator_gamma_two_le_gamma_five_of_cyclic` | `ClassFour.lean`, `ClassFourOrder.lean` |
+| **лемма 6.1 статьи** (MATH-378): $p$ нечётно, $Q$ — конечная $p$-группа класса $\le p+1$, при теореме Гупты–Тахары (гипотеза `GuptaTaharaMetabelian`) $\Rightarrow$ $D_{p+2}(Q)\subseteq Q''\cap M_{p+2}(Q)$, $M_n=Q\cap(1+\Delta_{\mathbb F_p}^n)$; при $p=3$, классе $\le4$: $D_5\ne1\Rightarrow Q''\ne1$, $d(Q)\ge3$ | `D_le_derivedSeries_two`, `mem_of_mem_D_add_two`, `rank_ge_three_of_D_five_ne_bot` | `MetabelianOdd.lean` |
 | **предложение 6.5 статьи**: $p$ нечётно, $Q$ — $p$-группа класса $\le4$, $Q''\ne1$ $\Rightarrow$ $d(Q)\ge3$, $\vert Q\vert\ge p^{d(Q)+5}$; отсюда (1) метабелевость при $\vert Q\vert\le p^7$ или $\vert Q\vert=p^8$, $d(Q)\ge4$; (2) при $p^9$: $d(Q)\in\{3,4\}$, тип $(4,3,1,1)$ или $(4,2,2,1)$ при $d=4$ | `card_ge_of_not_metabelian`, `metabelian_of_card_le`, `rank_of_card_nine`, `type_of_card_nine` | `ClassFourOrder.lean` |
 | $p$-группа порядка $\le p^n$ порождается $n$ элементами; $H\gamma_2=G\Rightarrow H=G$ в конечной $p$-группе; $G=\langle x,y\rangle\Rightarrow\gamma_2=\langle[x,y]\rangle\gamma_3$ | `exists_generators_card_le`, `eq_top_of_sup_commutator`, `gamma_two_mod_of_pair` | `ClassFourOrder.lean` |
 | **теорема 6.1 Тахары** [Tah81] (включение $\subseteq$): для конечной группы класса $\le4$ и любого базиса единственности с его структурными константами $D_5$ лежит в подгруппе, порождённой элементами $g(u,v,w)$ по целым наборам с условиями (A)–(F) | `taharaFiveOne : TaharaFiveOne` | `TaharaTheorem.lean`, `TaharaProof/` |
@@ -172,7 +173,7 @@ $D_5 = 1$ — проверяется в Lean по сертификатам, не
 Это **формулировки, не доказательства**: ни одна не объявлена как `axiom`, глобально ничего не
 предполагается. Некоторые входят явными гипотезами в теоремы (`FiniteReduction.lean`:
 `PassiDFourSquare`, `GruenbergResidualTwo`, `DThreeEqGammaThree`; `MinimalCounterexample.lean`:
-`DThreeEqGammaThree` и, как явная гипотеза `h1024` теоремы `D_five_eq_bot_of_rank`, предложение 5.3). `TaharaFiveOne`
+`DThreeEqGammaThree` и, как явная гипотеза `h1024` теоремы `D_five_eq_bot_of_rank`, предложение 5.3; `MetabelianOdd.lean`: `GuptaTaharaMetabelian`). `TaharaFiveOne`
 (`Tahara.lean`) стоит здесь как утверждение из литературы, но оно доказано (`TaharaTheorem.lean`); доказано и `DThreeEqGammaThree` (`dThreeEqGammaThree`, `DThree.lean`). Ссылки — в docstring; данные, помеченные †, с оригиналом не сверены.
 
 | `Prop` | Содержание | Литература |
@@ -182,6 +183,7 @@ $D_5 = 1$ — проверяется в Lean по сертификатам, не
 | `PassiDFourSquare` | $g\in D_4 \Rightarrow g^2\in\gamma_4$ | Passi [Pas68]† |
 | `RipsExample` | $\exists G,\ D_4(G)\ne\gamma_4(G)$ | Rips [Rip72] |
 | `GruenbergResidualTwo` | к.п. нильпотентная $G$, никакая нечётная степень $g$ не равна $1$ $\Rightarrow$ $g\ne1$ в некоторой конечной $2$-фактор-группе | Gruenberg [Gru57] |
+| `GuptaTaharaMetabelian` | $p$ нечётно, $G$ — конечная метабелева $p$-группа $\Rightarrow$ $D_{p+2}(G)=\gamma_{p+2}(G)$ | Гупта–Тахара [GT85, теорема 3.2(c)] (там для конечно порождённых $G$) |
 | `TaharaDFiveExponentSix` | $g\in D_5 \Rightarrow g^6\in\gamma_5$ | Тахара [Tah81, сл. 6.11]; [MP09] |
 | `TaharaFiveOne` (`Tahara.lean`) | описание $D_5$ у Тахары для конечных групп класса $\le4$: $D_5$ лежит в подгруппе, порождённой элементами $g(u,v,w)$ по целым наборам с условиями (A)–(F), для любого базиса единственности с его структурными константами (сверено со сканом, с. 143, 150, 159–161; условие (C₂) повторно сверено с с. 160 после исправления опечатки в MATH-226) — **доказано**: `taharaFiveOne` | Тахара [Tah81, т. 6.1] |
 | `GuptaKuzminAbelian` | $[D_n,D_n]\subseteq\gamma_{n+1}$ | [GK92], цит. по [IMP26, §1.2] |
@@ -240,5 +242,6 @@ lake env lean AxiomAudit.lean
 * [MP09] R. Mikhailov, I. B. S. Passi, *Lower central and dimension series of groups*, LNM 1952, 2009.
 * [Pas68]† I. B. S. Passi, *Dimension subgroups*, J. Algebra 9 (1968), 152–182.
 * [Gru57] K. W. Gruenberg, Proc. London Math. Soc. (3) 7 (1957), 29–62.
+* [GT85] N. Gupta, K.-I. Tahara, Nagoya Math. J. 100 (1985), 127–133.
 * [Tah81] K.-I. Tahara, J. Algebra 71 (1981), 141–173.
 * Quillen 1968† — D. Quillen, *On the associated graded ring of a group ring*, J. Algebra 10 (1968).
