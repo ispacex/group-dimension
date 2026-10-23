@@ -1,6 +1,10 @@
-import GroupDimension.Jennings.Main
-import GroupDimension.Jennings.ClassThree
-import GroupDimension.Basic
+module
+
+public import GroupDimension.Jennings.Main
+public import GroupDimension.Jennings.ClassThree
+public import GroupDimension.Basic
+
+@[expose] public section
 
 /-!
 # Jennings' theorem, the hard inclusion (D5-32)
@@ -116,7 +120,7 @@ theorem mem_lazard_of_sub_one_mem (hG : IsPGroup p G) {g : G} {n : ℕ} (hn : 1 
   (lazardSeries p hG).mem_of_sub_one_mem hn h
 
 /-- For a finite `2`-group of class `≤ 3`: `M₅ = G ∩ (1 + Δ_{𝔽₂}^5) ≤ G⁸ γ₂⁴ γ₃²`. -/
-theorem mem_jennings_of_sub_one_mem (hG : IsPGroup 2 G) (h4 : lowerCentralSeries G 3 = ⊥)
+theorem mem_jennings_of_sub_one_mem (hG : IsPGroup 2 G) (h4 : (⊤ : Subgroup G).lowerCentralSeries 3 = ⊥)
     {g : G} (h : MonoidAlgebra.of (ZMod 2) G g - 1 ∈ Jennings.augIdealP 2 G ^ 5) :
     g ∈ jennings 2 G 5 :=
   ClassThree.lazard_five_le_jennings h4 (mem_lazard_of_sub_one_mem hG (by norm_num) h)
@@ -124,7 +128,7 @@ theorem mem_jennings_of_sub_one_mem (hG : IsPGroup 2 G) (h4 : lowerCentralSeries
 
 /-- For a finite `2`-group of class `≤ 3`, `D₅(G) ≤ G⁸ γ₂⁴ γ₃²` (via `M₅`). -/
 theorem D_five_le_jennings {G : Type*} [Group G] [Finite G] (hG : IsPGroup 2 G)
-    (h4 : lowerCentralSeries G 3 = ⊥) : D 5 G ≤ jennings 2 G 5 := fun _ hg =>
+    (h4 : (⊤ : Subgroup G).lowerCentralSeries 3 = ⊥) : D 5 G ≤ jennings 2 G 5 := fun _ hg =>
   mem_jennings_of_sub_one_mem hG h4 (sub_one_mem_augIdealP_pow_of_mem_D hg)
 
 end GroupDimension

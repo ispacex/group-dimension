@@ -1,4 +1,8 @@
-import GroupDimension.Jennings.Frame
+module
+
+public import GroupDimension.Jennings.Frame
+
+@[expose] public section
 
 /-!
 # The Jennings basis of `𝔽_p[G]`
@@ -205,7 +209,8 @@ variable [Fact p.Prime] [Fintype G]
 theorem P_linearIndependent :
     LinearIndependent (ZMod p) fun b : F.Basic => F.P (bval b) := by
   refine linearIndependent_of_top_le_span_of_card_eq_finrank F.P_span ?_
-  have h := (Finsupp.linearEquivFunOnFinite (ZMod p) (ZMod p) G).finrank_eq
+  have h := ((MonoidAlgebra.coeffLinearEquiv (ZMod p)).trans
+    (Finsupp.linearEquivFunOnFinite (ZMod p) (ZMod p) G)).finrank_eq
   rw [Module.finrank_fintype_fun_eq_card] at h
   rw [Fintype.card_congr F.nfEquiv]; exact h.symm
 

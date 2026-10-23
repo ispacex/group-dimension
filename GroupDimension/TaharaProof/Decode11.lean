@@ -1,4 +1,8 @@
-import GroupDimension.TaharaProof.Decode10
+module
+
+public import GroupDimension.TaharaProof.Decode10
+
+@[expose] public section
 
 /-!
 # The family `τ` satisfies (A)–(F)
@@ -14,7 +18,7 @@ variable {G : Type*} [Group G]
 
 section TFrame
 
-variable [Fintype G] (h4 : lowerCentralSeries G 4 = ⊥) {T : Data G} (hT : T.Valid)
+variable [Fintype G] (h4 : (⊤ : Subgroup G).lowerCentralSeries 4 = ⊥) {T : Data G} (hT : T.Valid)
   {v : ℕ} {y4 : Fin v → G} {o4 : Fin v → ℕ} (hy4 : LayerNF 3 y4 o4)
 
 local notation "TF" => Tframe h4 hT hy4

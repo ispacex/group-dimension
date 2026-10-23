@@ -1,4 +1,8 @@
-import GroupDimension.Jennings.Basis
+module
+
+public import GroupDimension.Jennings.Basis
+
+@[expose] public section
 
 /-!
 # A frame of a restricted N-series

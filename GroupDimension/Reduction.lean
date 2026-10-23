@@ -1,5 +1,9 @@
-import GroupDimension.LowerCentral
-import GroupDimension.Statements
+module
+
+public import GroupDimension.LowerCentral
+public import GroupDimension.Statements
+
+@[expose] public section
 
 /-!
 # Reducing the `D₅ ⊆ γ₄` question to nilpotent groups of class ≤ 3
@@ -23,20 +27,20 @@ variable {G H : Type*} [Group G] [Group H]
 /-- For a surjection `f : G → H`, `γ_{k+1}(H) ⊆ f(γ_{k+1}(G))` (the reverse of Mathlib's
 `lowerCentralSeries.map`). -/
 theorem lowerCentralSeries_le_map_of_surjective (f : G →* H) (hf : Function.Surjective f)
-    (k : ℕ) : lowerCentralSeries H k ≤ (lowerCentralSeries G k).map f := by
+    (k : ℕ) : (⊤ : Subgroup H).lowerCentralSeries k ≤ ((⊤ : Subgroup G).lowerCentralSeries k).map f := by
   induction k with
   | zero => simp [Subgroup.map_top_of_surjective f hf]
   | succ k ih =>
-    change ⁅lowerCentralSeries H k, ⊤⁆ ≤ (⁅lowerCentralSeries G k, ⊤⁆ : Subgroup G).map f
+    change ⁅(⊤ : Subgroup H).lowerCentralSeries k, ⊤⁆ ≤ (⁅(⊤ : Subgroup G).lowerCentralSeries k, ⊤⁆ : Subgroup G).map f
     rw [Subgroup.map_commutator, Subgroup.map_top_of_surjective f hf]
     exact Subgroup.commutator_mono ih le_rfl
 
 /-- In `G / γ_{k+1}(G)` the term `γ_{k+1}` is trivial. -/
 theorem lowerCentralSeries_quotient_eq_bot (k : ℕ) :
-    lowerCentralSeries (G ⧸ lowerCentralSeries G k) k = ⊥ := by
+    (⊤ : Subgroup (G ⧸ (⊤ : Subgroup G).lowerCentralSeries k)).lowerCentralSeries k = ⊥ := by
   apply le_bot_iff.mp
-  calc lowerCentralSeries (G ⧸ lowerCentralSeries G k) k
-      ≤ (lowerCentralSeries G k).map (QuotientGroup.mk' (lowerCentralSeries G k)) :=
+  calc (⊤ : Subgroup (G ⧸ (⊤ : Subgroup G).lowerCentralSeries k)).lowerCentralSeries k
+      ≤ ((⊤ : Subgroup G).lowerCentralSeries k).map (QuotientGroup.mk' ((⊤ : Subgroup G).lowerCentralSeries k)) :=
         lowerCentralSeries_le_map_of_surjective _ (QuotientGroup.mk'_surjective _) k
     _ = ⊥ := QuotientGroup.map_mk'_self _
 
@@ -51,8 +55,8 @@ theorem D_le_of_D_quotient_eq_bot (N : Subgroup G) [N.Normal] (n : ℕ)
 /-- **Reduction.** `D_n ⊆ γ_{k+1}` holds for all groups iff `D_n` vanishes on all groups with
 `γ_{k+1} = 1` (nilpotent of class `≤ k`). -/
 theorem forall_D_le_iff (n k : ℕ) :
-    (∀ (G : Type) [Group G], D n G ≤ lowerCentralSeries G k) ↔
-      ∀ (Q : Type) [Group Q], lowerCentralSeries Q k = ⊥ → D n Q = ⊥ := by
+    (∀ (G : Type) [Group G], D n G ≤ (⊤ : Subgroup G).lowerCentralSeries k) ↔
+      ∀ (Q : Type) [Group Q], (⊤ : Subgroup Q).lowerCentralSeries k = ⊥ → D n Q = ⊥ := by
   constructor
   · intro h Q _ hQ
     exact le_bot_iff.mp (hQ ▸ h Q)
@@ -62,7 +66,7 @@ theorem forall_D_le_iff (n k : ℕ) :
 /-- **`DimensionQuestion5` ⇔ every nilpotent group of class ≤ 3 has `D₅ = 1`.** -/
 theorem dimensionQuestion5_iff :
     DimensionQuestion5 ↔
-      ∀ (Q : Type) [Group Q], lowerCentralSeries Q 3 = ⊥ → D 5 Q = ⊥ :=
+      ∀ (Q : Type) [Group Q], (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥ → D 5 Q = ⊥ :=
   forall_D_le_iff 5 3
 
 end GroupDimension

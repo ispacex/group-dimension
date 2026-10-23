@@ -1,4 +1,8 @@
-import GroupDimension.TaharaProof.Level3Cases
+module
+
+public import GroupDimension.TaharaProof.Level3Cases
+
+@[expose] public section
 
 /-!
 # The frame of Tahara's data
@@ -30,7 +34,7 @@ theorem exists_layer4 [Finite G] :
   let E : Additive (Layer G 3) ≃+ ((i : κ) → ZMod (n i)) :=
     e.trans (DirectSum.linearEquivFunOnFintype ℤ κ fun i => ZMod (n i)).toAddEquiv
   obtain ⟨σ, -⟩ : ∃ σ : Fin (Fintype.card κ) ≃ κ, True := ⟨(Fintype.equivFin κ).symm, trivial⟩
-  have hy : ∀ q : Fin (Fintype.card κ), ∃ g ∈ lowerCentralSeries G 3,
+  have hy : ∀ q : Fin (Fintype.card κ), ∃ g ∈ (⊤ : Subgroup G).lowerCentralSeries 3,
       cl G 3 g = E.symm (Pi.single (σ q) 1) := fun q => cl_surj 3 _
   choose y hy1 hy2 using hy
   have hcl : ∀ a : Fin (Fintype.card κ) → ℤ,
@@ -80,6 +84,12 @@ theorem exists_layer4 [Finite G] :
 /-- The letters of Tahara's frame: the four layers in order. -/
 abbrev TIdx (s t u v : ℕ) := Fin s ⊕ₗ (Fin t ⊕ₗ (Fin u ⊕ₗ (Fin v ⊕ₗ Fin 0)))
 
+/-- Decidable equality on `TIdx` taken from its linear order, so that `Pi.single` written here
+agrees with the `Pi.single` in the generic statements over `[LinearOrder ι]` (Mathlib also has a
+direct `DecidableEq` instance on `Lex` sums, which is not syntactically the same). -/
+instance (priority := high) TIdx.decidableEq (s t u v : ℕ) : DecidableEq (TIdx s t u v) :=
+  LinearOrder.toDecidableEq
+
 section TFrame
 
 variable {s t u v : ℕ}
@@ -110,7 +120,7 @@ theorem ℓ2_le_ℓ2 {i j : Fin t} : (ℓ2 i : TIdx s t u v) ≤ ℓ2 j ↔ i �
 theorem ℓ2_lt_ℓ2 {i j : Fin t} : (ℓ2 i : TIdx s t u v) < ℓ2 j ↔ i < j := by
   simp [ℓ2, Sum.Lex.inr_lt_inr_iff, Sum.Lex.inl_lt_inl_iff]
 
-variable [Finite G] (h4 : lowerCentralSeries G 4 = ⊥) {T : Data G} (hT : T.Valid)
+variable [Finite G] (h4 : (⊤ : Subgroup G).lowerCentralSeries 4 = ⊥) {T : Data G} (hT : T.Valid)
   {y4 : Fin v → G} {o4 : Fin v → ℕ} (hy4 : LayerNF 3 y4 o4)
 
 /-- Tahara's frame, glued from the layers `γ₁/γ₂, …, γ₄`. -/

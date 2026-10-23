@@ -1,4 +1,8 @@
-import GroupDimension.TaharaProof.Level3Basis
+module
+
+public import GroupDimension.TaharaProof.Level3Basis
+
+@[expose] public section
 
 /-!
 # `ψ₃(Λ₅) ⊆ R₅*` ([Tah81, Lemmas 5.3–5.6])
@@ -57,7 +61,7 @@ theorem X_mem_Ioi {x m : ι} (h : x < m) : F.X m ∈ F.Sp (F.w m) (Set.Ioi x) :=
   · exact hjm ▸ h
   · simp [Pi.single_eq_of_ne hjm] at hj
 
-theorem E_mem_Ioi {x : ι} {g : G} {k : ℕ} (hg : g ∈ lowerCentralSeries G (k - 1))
+theorem E_mem_Ioi {x : ι} {g : G} {k : ℕ} (hg : g ∈ (⊤ : Subgroup G).lowerCentralSeries (k - 1))
     (hk : F.w x < k) : E g ∈ F.Sp k (Set.Ioi x) :=
   F.of_sub_one_mem hg _ fun j hj => F.lt_of_w_lt (by omega)
 
@@ -136,7 +140,7 @@ theorem sorted {β : ι → ℕ} (hβ : ∀ j, β j ≠ 0 → x < j) (hW : 3 ≤
 /-- **First order**: `P(a_lo) P(β) (g - 1) ≡ ∑_m n_g(m) Φ(a_lo + β + e_m)`, for `g ∈ γ_k` with
 `k` above `w_x` and the weights of the letters of `β`. -/
 theorem first_order {β : ι → ℕ} (hβ : ∀ j, β j ≠ 0 → x < j) {g : G} {k : ℕ}
-    (hg : g ∈ lowerCentralSeries G (k - 1)) (hkx : F.w x < k)
+    (hg : g ∈ (⊤ : Subgroup G).lowerCentralSeries (k - 1)) (hkx : F.w x < k)
     (hkβ : ∀ j, β j ≠ 0 → F.w j < k) (h3 : 3 ≤ F.W (F.lo a x) + F.W β + k)
     (h5 : 5 ≤ F.W (F.lo a x) + F.W β + 2 * k) :
     (F.P (F.lo a x) * F.P β * E g, F.nsum g (F.lo a x + β)) ∈ rel3 hF := by
@@ -226,7 +230,7 @@ theorem rel3_of_sub {u u' : MonoidAlgebra ℤ G} {v : F.M3} {K : ℕ}
 
 omit IH hx in
 /-- `y = x^{o(x)}` lies in `γ_{w(x)+1}`. -/
-theorem yy_mem : F.yy x ∈ lowerCentralSeries G (F.w x + 1 - 1) := by
+theorem yy_mem : F.yy x ∈ (⊤ : Subgroup G).lowerCentralSeries (F.w x + 1 - 1) := by
   simpa [yy] using F.pow_mem x
 
 omit IH hx in
@@ -248,7 +252,7 @@ theorem W_zero : F.W 0 = 0 := by simp [W]
 
 omit IH hx in
 theorem cc_mem (hwx : F.w x = 1) (k : ι) (hk : F.w k = 1) :
-    F.cc x k ∈ lowerCentralSeries G 2 :=
+    F.cc x k ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
   ExpThree.tc_mem (i := 1) (j := 0) (by norm_num) (by simpa [hwx] using yy_mem (F := F) (x := x))
     (by simpa [hk] using F.mem k)
 
@@ -317,7 +321,7 @@ theorem TE3 (hwx : F.w x = 1) {j k : ι} (hj : F.w j = 1) (hk : F.w k = 1) (hxj 
   have hPk : F.P (cnt [k]) = F.X k := by rw [cnt_single, F.P_single]
   have hcj := cc_mem (F := F) (x := x) hwx j hj
   have hck := cc_mem (F := F) (x := x) hwx k hk
-  have hc' : tc (F.cc x j) (F.x k) ∈ lowerCentralSeries G 3 :=
+  have hc' : tc (F.cc x j) (F.x k) ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
     ExpThree.tc_mem (i := 2) (j := 0) (by norm_num) hcj (by simpa [hk] using F.mem k)
   have hEy := E_yy_mem (F := F) (x := x)
   rw [hwx] at hEy
@@ -427,7 +431,7 @@ theorem TE4 (hwx : F.w x = 1) {k : ι} (hk : F.w k = 2) (hxk : x < k)
       rwa [hP] at this
     · rw [if_pos hkm]
       set c := tc (F.x m) (F.x k)
-      have hc : c ∈ lowerCentralSeries G (F.w m + 2 - 1) :=
+      have hc : c ∈ (⊤ : Subgroup G).lowerCentralSeries (F.w m + 2 - 1) :=
         ExpThree.tc_mem (i := F.w m - 1) (j := 1) (by omega) (F.mem m) (by simpa [hk] using F.mem k)
       have hXm : E (F.x m) ∈ F.Sp (F.w m) (Set.Ioi x) := by rw [← X_eq_E]; exact F.X_mem_Ioi hxm
       have hEc : E c ∈ F.Sp (F.w m + 2) (Set.Ioi x) := F.E_mem_Ioi hc (by omega)

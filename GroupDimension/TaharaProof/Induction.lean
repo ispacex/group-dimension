@@ -1,4 +1,8 @@
-import GroupDimension.TaharaProof.Layers
+module
+
+public import GroupDimension.TaharaProof.Layers
+
+@[expose] public section
 
 /-!
 # Reduction of non-basic proper products ([Tah81, proof of Lemma 3.5])

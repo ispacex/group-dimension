@@ -1,18 +1,27 @@
-import LieRings.Publication.Results
-import GroupDimension.DTwo
-import GroupDimension.Reduction
+module
+
+public import GroupDimension.DTwo
+public import GroupDimension.Reduction
+
+@[expose] public section
 
 /-!
 # The group question next to the Lie-ring theorem
 
-This file imports the authors' formalization [IMP26] (package `lie-rings`, commit `ed3d9fb`,
-the same commit as the submodule `upstream/lie-algebras`) and puts the two settings side by side.
+This file puts the Lie-ring setting of [IMP26] and the group setting side by side.
+The `LieRings.*` names below refer to the authors' formalization
+(https://github.com/TimmPeterson/lie-algebras, commit `ed3d9fb`, Lean 4.29). Up to commit
+`e58aa2b` of this repository (Lean 4.29) this file imported that package and derived
+`lieDimensionQuestion5 : ∀ L, D₅(L) ≤ γ₄(L)` from `corollaryD`. Since the move to Lean 4.35 and
+the module system, the package is no longer a dependency: it is on Lean 4.29, it carries no
+licence file (so it cannot be vendored here), and it would have to be ported as well. The Lie
+side is therefore only quoted below; the group-side formulations are unchanged.
 
 | | Lie rings (`LieRings`, proved by the authors) | groups (this project) |
 |---|---|---|
 | filtration ring | `U(L)`, augmentation ideal `ϖ(L)` | `ℤ[G]`, augmentation ideal `Δ(G)` |
 | `D_n` | `LieRings.dimensionSubring ℤ L n` | `GroupDimension.D n G` |
-| `γ_{k+1}` | `LieRings.lowerCentralSeries ℤ L k` | `lowerCentralSeries G k` |
+| `γ_{k+1}` | `LieRings.lowerCentralSeries ℤ L k` | `(⊤ : Subgroup G).lowerCentralSeries k` |
 | `γ_n ⊆ D_n` | `LieRings.lowerCentralSeries_le_dimensionSubring` | `GroupDimension.lowerCentralSeries_le_D` |
 | functoriality | `LieRings.map_dimensionSubring_le` | `GroupDimension.map_D_le` |
 | `D₂ = γ₂` | `LieRings.dimensionSubring_two_eq_lowerCentralSeries_one` | `GroupDimension.D_two` |
@@ -86,17 +95,9 @@ namespace GroupDimension.LieComparison
 
 open GroupDimension
 
-/-- The Lie-ring form of the question, `D₅(L) ⊆ γ₄(L)` for every Lie ring. -/
-def LieDimensionQuestion5 : Prop :=
-  ∀ (L : Type) [LieRing L], LieRings.dimensionSubring ℤ L 5 ≤ LieRings.lowerCentralSeries ℤ L 3
-
-/-- The Lie-ring form **holds**: this is the second half of the authors' Corollary D. -/
-theorem lieDimensionQuestion5 : LieDimensionQuestion5 :=
-  fun L _ => (LieRings.Publication.corollaryD 3 L (by norm_num)).2
-
 /-- The group form, for comparison: this is `GroupDimension.DimensionQuestion5`, open. -/
 theorem groupQuestion_def :
-    DimensionQuestion5 = ∀ (G : Type) [Group G], D 5 G ≤ lowerCentralSeries G 3 := rfl
+    DimensionQuestion5 = ∀ (G : Type) [Group G], D 5 G ≤ (⊤ : Subgroup G).lowerCentralSeries 3 := rfl
 
 /-- The group analogue of the general Corollary D,
 `D_{2c-1}(G) ⊆ γ_{c+1}(G) G''` (Mathlib: `derivedSeries G 2 = G''`).
@@ -104,18 +105,18 @@ For `c = 2` it follows from `D₃ = γ₃`; for `c = 3` it is equivalent to
 `DimensionQuestion5`, since `G'' ⊆ γ₄`. Formulation only: we do not know its status for
 `c ≥ 4`, and nothing here assumes it. -/
 def GroupCorollaryD (c : ℕ) : Prop :=
-  ∀ (G : Type) [Group G], D (2 * c - 1) G ≤ lowerCentralSeries G c ⊔ derivedSeries G 2
+  ∀ (G : Type) [Group G], D (2 * c - 1) G ≤ (⊤ : Subgroup G).lowerCentralSeries c ⊔ derivedSeries G 2
 
 /-- The group analogue of Theorem C: a metabelian group of class `≤ c` has `D_{2c-1} = 1`.
 Formulation only, no claim about its truth. -/
 def GroupTheoremC (c : ℕ) : Prop :=
-  ∀ (G : Type) [Group G], derivedSeries G 2 = ⊥ → lowerCentralSeries G c = ⊥ →
+  ∀ (G : Type) [Group G], derivedSeries G 2 = ⊥ → (⊤ : Subgroup G).lowerCentralSeries c = ⊥ →
     D (2 * c - 1) G = ⊥
 
 /-- **The fifth-dimension-subgroup theorem** for groups, `D₅(G)² ⊆ G'' γ₅(G)`
 ([MP09, Theorem 2.28], as quoted in [IMP26, §3.3]); stated elementwise.
 Formulation only, not proved here. -/
 def FifthDimensionSquare : Prop :=
-  ∀ (G : Type) [Group G], ∀ g ∈ D 5 G, g ^ 2 ∈ derivedSeries G 2 ⊔ lowerCentralSeries G 4
+  ∀ (G : Type) [Group G], ∀ g ∈ D 5 G, g ^ 2 ∈ derivedSeries G 2 ⊔ (⊤ : Subgroup G).lowerCentralSeries 4
 
 end GroupDimension.LieComparison

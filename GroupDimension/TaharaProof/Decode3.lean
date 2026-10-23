@@ -1,4 +1,8 @@
-import GroupDimension.TaharaProof.Decode2
+module
+
+public import GroupDimension.TaharaProof.Decode2
+
+@[expose] public section
 
 /-!
 # Decoding for Tahara's frame: structure constants and the shape of the relations
@@ -51,7 +55,7 @@ end TIdx
 
 section TFrame
 
-variable [Finite G] [Fintype G] (h4 : lowerCentralSeries G 4 = ⊥) {T : Data G} (hT : T.Valid)
+variable [Finite G] [Fintype G] (h4 : (⊤ : Subgroup G).lowerCentralSeries 4 = ⊥) {T : Data G} (hT : T.Valid)
   {v : ℕ} {y4 : Fin v → G} {o4 : Fin v → ℕ} (hy4 : LayerNF 3 y4 o4)
 
 /-- The normal form in Tahara's frame, layer by layer. -/
@@ -73,9 +77,9 @@ theorem lprod_eq_oprod_toNat {n : ℕ} (y : Fin n → G) {β : Fin n → ℤ} (h
   rw [lprod_fin_eq_oprod]; congr 1; funext k; simp [Int.toNat_of_nonneg (hβ k)]
 
 /-- **The coordinates in layers 2, 3** of `z ∈ γ₂` with `z ≡ ∏ x_2^β ∏ x_3^γ (mod γ₄)`. -/
-theorem nfc_23 {z : G} (hz : z ∈ lowerCentralSeries G 1) {β : Fin T.t → ℤ} {γ : Fin T.u → ℤ}
+theorem nfc_23 {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 1) {β : Fin T.t → ℤ} {γ : Fin T.u → ℤ}
     (hβ : ∀ k, 0 ≤ β k ∧ β k < T.e k) (hγ : ∀ l, 0 ≤ γ l ∧ γ l < T.f l)
-    (h : (oprod T.x₂ β * oprod T.x₃ γ)⁻¹ * z ∈ lowerCentralSeries G 3) :
+    (h : (oprod T.x₂ β * oprod T.x₃ γ)⁻¹ * z ∈ (⊤ : Subgroup G).lowerCentralSeries 3) :
     (∀ k, ((Tframe h4 hT hy4).nfc z (ℓ2 k) : ℤ) = β k) ∧
       (∀ l, ((Tframe h4 hT hy4).nfc z (ℓ3 l) : ℤ) = γ l) := by
   set F := Tframe h4 hT hy4
@@ -91,15 +95,15 @@ theorem nfc_23 {z : G} (hz : z ∈ lowerCentralSeries G 1) {β : Fin T.t → ℤ
   set L2 := lprod (ordL (Fin T.t)) T.x₂ (fun k => n (ℓ2 k))
   set L3 := lprod (ordL (Fin T.u)) T.x₃ (fun l => n (ℓ3 l))
   set L4 := lprod (ordL (Fin v)) y4 (fun q => n (ℓ4 q))
-  have hL2 : L2 ∈ lowerCentralSeries G 1 := (IsLayerBasis.layerNF hT.basis₂).lprod_mem _
-  have hL3 : L3 ∈ lowerCentralSeries G 2 := (IsLayerBasis.layerNF hT.basis₃).lprod_mem _
-  have hL4 : L4 ∈ lowerCentralSeries G 3 := hy4.lprod_mem _
+  have hL2 : L2 ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := (IsLayerBasis.layerNF hT.basis₂).lprod_mem _
+  have hL3 : L3 ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := (IsLayerBasis.layerNF hT.basis₃).lprod_mem _
+  have hL4 : L4 ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := hy4.lprod_mem _
   set A := lprod (ordL (Fin T.t)) T.x₂ (fun k => (β k).toNat)
   set C := lprod (ordL (Fin T.u)) T.x₃ (fun l => (γ l).toNat)
   rw [lprod_eq_oprod_toNat T.x₂ (fun k => (hβ k).1),
     lprod_eq_oprod_toNat T.x₃ (fun l => (hγ l).1)] at h
   change (A * C)⁻¹ * z ∈ _ at h
-  have hC : C ∈ lowerCentralSeries G 2 := (IsLayerBasis.layerNF hT.basis₃).lprod_mem _
+  have hC : C ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := (IsLayerBasis.layerNF hT.basis₃).lprod_mem _
   -- layer 2
   have e2 : (fun k => n (ℓ2 k)) = fun k => (β k).toNat := by
     refine (IsLayerBasis.layerNF hT.basis₂).nf_unique (fun k => F.nfc_lt z (ℓ2 k))
@@ -117,15 +121,15 @@ theorem nfc_23 {z : G} (hz : z ∈ lowerCentralSeries G 1) {β : Fin T.t → ℤ
     refine (IsLayerBasis.layerNF hT.basis₃).nf_unique (fun l => F.nfc_lt z (ℓ3 l))
       (fun l => by have := hγ l; omega) ?_
     have : L3⁻¹ * C = (C⁻¹ * L3 * L4 * L4⁻¹)⁻¹ := by group
-    have h' : C⁻¹ * L3 * L4 ∈ lowerCentralSeries G 3 := by
+    have h' : C⁻¹ * L3 * L4 ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by
       have : C⁻¹ * L3 * L4 = (A * C)⁻¹ * z := by rw [← hz', ← hLA]; group
       rw [this]; exact h
     change L3⁻¹ * C ∈ _
     rw [this]
     exact inv_mem (mul_mem h' (inv_mem hL4))
   refine ⟨fun k => ?_, fun l => ?_⟩
-  · have := congrFun e2 k; simp only at this; rw [this, Int.toNat_of_nonneg (hβ k).1]
-  · have := congrFun e3 l; simp only at this; rw [this, Int.toNat_of_nonneg (hγ l).1]
+  · have := congrFun e2 k; rw [this, Int.toNat_of_nonneg (hβ k).1]
+  · have := congrFun e3 l; rw [this, Int.toNat_of_nonneg (hγ l).1]
 
 /-! ## Tahara's structure constants -/
 
@@ -156,7 +160,7 @@ theorem nfc_yy2 (k : Fin T.t) (l : Fin T.u) :
 theorem nfc_cc {g h : Fin T.s} (hgh : g ≤ h) (l : Fin T.u) :
     ((Tframe h4 hT hy4).nfc ((Tframe h4 hT hy4).cc (ℓ1 g) (ℓ1 h)) (ℓ3 l) : ℤ) = T.α g h l := by
   rw [cc_ℓ1]
-  have hm : tc (T.x₁ g ^ T.d g) (T.x₁ h) ∈ lowerCentralSeries G 2 :=
+  have hm : tc (T.x₁ g ^ T.d g) (T.x₁ h) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
     ExpThree.tc_mem (i := 1) (j := 0) (by norm_num) ((IsLayerBasis.layerNF hT.basis₁).pow_mem g)
       (hT.basis₁.mem h)
   refine (nfc_23 h4 hT hy4 (β := 0) (lcs_mem_of_le (by norm_num) hm) (fun k' => ⟨le_rfl, by
@@ -167,14 +171,14 @@ theorem nfc_cc {g h : Fin T.s} (hgh : g ≤ h) (l : Fin T.u) :
 
 /-! ## First-order symbols in Tahara's frame -/
 
-theorem nfc_ℓ1_zero {y : G} (hy : y ∈ lowerCentralSeries G 1) (i : Fin T.s) :
+theorem nfc_ℓ1_zero {y : G} (hy : y ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (i : Fin T.s) :
     (Tframe h4 hT hy4).nfc y (ℓ1 i) = 0 := by
   by_contra h0
   have := (Tframe h4 hT hy4).nf_weight (k := 2) (by simpa using hy)
     ((Tframe h4 hT hy4).nfc_lt y) ((Tframe h4 hT hy4).nprod_nfc y) h0
   simp at this
 
-theorem nfc_ℓ2_zero {y : G} (hy : y ∈ lowerCentralSeries G 2) (k : Fin T.t) :
+theorem nfc_ℓ2_zero {y : G} (hy : y ∈ (⊤ : Subgroup G).lowerCentralSeries 2) (k : Fin T.t) :
     (Tframe h4 hT hy4).nfc y (ℓ2 k) = 0 := by
   by_contra h0
   have := (Tframe h4 hT hy4).nf_weight (k := 3) (by simpa using hy)
@@ -182,7 +186,7 @@ theorem nfc_ℓ2_zero {y : G} (hy : y ∈ lowerCentralSeries G 2) (k : Fin T.t) 
   simp at this
 
 /-- `P(x_{1j} - 1)(y - 1)` to first order, for `y ∈ γ₂`. -/
-theorem nsum_ℓ1 {y : G} (hy : y ∈ lowerCentralSeries G 1) (j : Fin T.s) :
+theorem nsum_ℓ1 {y : G} (hy : y ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (j : Fin T.s) :
     (Tframe h4 hT hy4).nsum y (cnt [ℓ1 j]) =
       ∑ k, ((Tframe h4 hT hy4).nfc y (ℓ2 k) : ℤ) • (Tframe h4 hT hy4).E12 (ℓ1 j) (ℓ2 k) +
         ∑ l, ((Tframe h4 hT hy4).nfc y (ℓ3 l) : ℤ) • (Tframe h4 hT hy4).T13 (ℓ1 j) (ℓ3 l) := by
@@ -201,7 +205,7 @@ theorem nsum_ℓ1 {y : G} (hy : y ∈ lowerCentralSeries G 1) (j : Fin T.s) :
   simp only [e1, e2, e3, e4, smul_zero, Finset.sum_const_zero, add_zero, zero_add]
 
 /-- `P(x_{1j} - 1)(x_{1j'} - 1)(y - 1)` to first order, for `y ∈ γ₂`, `j ≤ j'`. -/
-theorem nsum_ℓ11 {y : G} (hy : y ∈ lowerCentralSeries G 1) {j j' : Fin T.s} (hjj : j ≤ j') :
+theorem nsum_ℓ11 {y : G} (hy : y ∈ (⊤ : Subgroup G).lowerCentralSeries 1) {j j' : Fin T.s} (hjj : j ≤ j') :
     (Tframe h4 hT hy4).nsum y (cnt [ℓ1 j, ℓ1 j']) =
       ∑ k, ((Tframe h4 hT hy4).nfc y (ℓ2 k) : ℤ) •
         (Tframe h4 hT hy4).S22 (ℓ1 j) (ℓ1 j') (ℓ2 k) := by
@@ -222,14 +226,14 @@ theorem nsum_ℓ11 {y : G} (hy : y ∈ lowerCentralSeries G 1) {j j' : Fin T.s} 
   simp only [e1, e2, e3, e4, smul_zero, Finset.sum_const_zero, add_zero, zero_add]
 
 /-- `P(x_{1j} - 1)(y - 1)` to first order, for `y ∈ γ₃`. -/
-theorem nsum_ℓ1_of_mem2 {y : G} (hy : y ∈ lowerCentralSeries G 2) (j : Fin T.s) :
+theorem nsum_ℓ1_of_mem2 {y : G} (hy : y ∈ (⊤ : Subgroup G).lowerCentralSeries 2) (j : Fin T.s) :
     (Tframe h4 hT hy4).nsum y (cnt [ℓ1 j]) =
       ∑ l, ((Tframe h4 hT hy4).nfc y (ℓ3 l) : ℤ) • (Tframe h4 hT hy4).T13 (ℓ1 j) (ℓ3 l) := by
   rw [nsum_ℓ1 h4 hT hy4 (lcs_mem_of_le (by norm_num) hy)]
   simp [nfc_ℓ2_zero h4 hT hy4 hy]
 
 /-- `P(x_{2k} - 1)(y - 1)` to first order, for `y ∈ γ₂`. -/
-theorem nsum_ℓ2 {y : G} (hy : y ∈ lowerCentralSeries G 1) (k : Fin T.t) :
+theorem nsum_ℓ2 {y : G} (hy : y ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (k : Fin T.t) :
     (Tframe h4 hT hy4).nsum y (cnt [ℓ2 k]) =
       ∑ m, ((Tframe h4 hT hy4).nfc y (ℓ2 m) : ℤ) •
         (if k ≤ m then (Tframe h4 hT hy4).S2' (ℓ2 k) (ℓ2 m)

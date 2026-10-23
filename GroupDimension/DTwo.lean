@@ -1,4 +1,8 @@
-import GroupDimension.LowerCentral
+module
+
+public import GroupDimension.LowerCentral
+
+@[expose] public section
 
 /-!
 # `D₂(G) = γ₂(G)`
@@ -49,8 +53,12 @@ noncomputable def toSqZero : G →* TrivSqZeroExt ℤ (Gab G) where
     · simp
   map_mul' a b := by
     apply TrivSqZeroExt.ext
-    · simp
-    · simp [TrivSqZeroExt.snd_mul, add_comm]
+    · show (1 : ℤ) = 1 * 1
+      rfl
+    · show Additive.ofMul (Abelianization.of (a * b)) =
+        (1 : ℤ) • Additive.ofMul (Abelianization.of b) +
+          MulOpposite.op (1 : ℤ) • Additive.ofMul (Abelianization.of a)
+      simp [add_comm]
 
 /-- The ring map `Φ : ℤ[G] → ℤ ⊕ G_ab`. -/
 noncomputable def sqZeroRep : MonoidAlgebra ℤ G →+* TrivSqZeroExt ℤ (Gab G) :=
@@ -64,6 +72,7 @@ theorem fst_sqZeroRep (x : MonoidAlgebra ℤ G) :
       simp [sqZeroRep, augmentation]
     · intro g
       simp [sqZeroRep, augmentation, toSqZero]
+      all_goals rfl
   exact congrArg (fun φ => φ x) this
 
 theorem sqZeroRep_of (g : G) :
@@ -87,16 +96,17 @@ theorem D_two_le_commutator : D 2 G ≤ commutator G := by
   have h1 := congrArg TrivSqZeroExt.snd h0
   simp only [toSqZero, MonoidHom.coe_mk, OneHom.coe_mk, TrivSqZeroExt.snd_one] at h1
   have h2 : Abelianization.of g = 1 := by
-    simpa using h1
+    have h1' : Additive.ofMul (Abelianization.of g) = 0 := h1
+    simpa using h1'
   rw [← Abelianization.ker_of]
   exact h2
 
 variable (G) in
 /-- **`D₂(G) = γ₂(G)`**: `G ∩ (1 + Δ(G)²) = [G, G]`. In Mathlib's indexing
-`γ₂(G) = lowerCentralSeries G 1 = commutator G`. -/
-theorem D_two : D 2 G = lowerCentralSeries G 1 := by
+`γ₂(G) = (⊤ : Subgroup G).lowerCentralSeries 1 = commutator G`. -/
+theorem D_two : D 2 G = (⊤ : Subgroup G).lowerCentralSeries 1 := by
   apply le_antisymm
-  · rw [lowerCentralSeries_one]
+  · rw [Subgroup.top_lowerCentralSeries_one]
     exact D_two_le_commutator
   · exact lowerCentralSeries_le_D G 1
 

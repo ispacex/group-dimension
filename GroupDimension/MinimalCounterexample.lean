@@ -1,6 +1,10 @@
-import GroupDimension.Jennings.Theorem
-import GroupDimension.Reduction
-import GroupDimension.Statements
+module
+
+public import GroupDimension.Jennings.Theorem
+public import GroupDimension.Reduction
+public import GroupDimension.Statements
+
+@[expose] public section
 
 /-!
 # A minimal counterexample is a candidate (Lemma 5.2)
@@ -119,7 +123,7 @@ theorem normal_of_le_center {G : Type*} [Group G] {N : Subgroup G} (h : N ≤ ce
 /-- **Lemma 5.2 of the paper**, parts (a)–(c): a minimal counterexample is a candidate, and
 `D₅(Q) = ⟨n⟩`. -/
 theorem isCandidate_of_minimal (hD3 : DThreeEqGammaThree) {Q : Type} [Group Q] [Finite Q]
-    (hQ : IsPGroup 2 Q) (h4 : lowerCentralSeries Q 3 = ⊥) (h3 : lowerCentralSeries Q 2 ≠ ⊥)
+    (hQ : IsPGroup 2 Q) (h4 : (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥) (h3 : (⊤ : Subgroup Q).lowerCentralSeries 2 ≠ ⊥)
     (hmin : ∀ N : Subgroup Q, ∀ _ : N.Normal, N ≤ center Q → Nat.card N = 2 → D 5 (Q ⧸ N) = ⊥)
     (hD : D 5 Q ≠ ⊥) : ∃ n, IsCandidate Q n ∧ D 5 Q = zpowers n := by
   -- `D₅` lies in every central subgroup of order `2`
@@ -169,7 +173,7 @@ theorem isCandidate_of_minimal (hD3 : DThreeEqGammaThree) {Q : Type} [Group Q] [
         (by rw [Subgroup.orderOf_coe, hw])]
   -- (b) `n ∈ γ₃ ∩ M₅`
   have hnD : n ∈ D 5 Q := hDn ▸ mem_zpowers n
-  have hnγ3 : n ∈ lowerCentralSeries Q 2 := by
+  have hnγ3 : n ∈ (⊤ : Subgroup Q).lowerCentralSeries 2 := by
     rw [← hD3 Q]; exact D_antitone (by norm_num : 3 ≤ 5) hnD
   have hnM5 : n ∈ jennings 2 Q 5 :=
     mem_jennings_of_sub_one_mem hQ h4 (sub_one_mem_augIdealP_pow_of_mem_D hnD)
@@ -236,12 +240,12 @@ class `≤ 2` as well, which is immediate from `D₃ = γ₃`, so given `hD3` it
 Neither `hD3` nor `h1024` is proved here. -/
 theorem D_five_eq_bot_of_rank (hD3 : DThreeEqGammaThree)
     (h1024 : ∀ (R : Type) [Group R] [Finite R], Nat.card R = 2 ^ 10 →
-      lowerCentralSeries R 3 = ⊥ → D 5 R = ⊥)
+      (⊤ : Subgroup R).lowerCentralSeries 3 = ⊥ → D 5 R = ⊥)
     {Q : Type} [Group Q] [Finite Q] (hcard : Nat.card Q = 2 ^ 11)
-    (h4 : lowerCentralSeries Q 3 = ⊥) (hrank : 8 ≤ Group.rank Q) : D 5 Q = ⊥ := by
+    (h4 : (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥) (hrank : 8 ≤ Group.rank Q) : D 5 Q = ⊥ := by
   have hQ : IsPGroup 2 Q := IsPGroup.of_card hcard
   by_contra hD
-  have h3 : lowerCentralSeries Q 2 ≠ ⊥ := fun h => hD (by
+  have h3 : (⊤ : Subgroup Q).lowerCentralSeries 2 ≠ ⊥ := fun h => hD (by
     rw [eq_bot_iff, ← h, ← hD3 Q]; exact D_antitone (by norm_num : 3 ≤ 5))
   have hmin : ∀ N : Subgroup Q, ∀ _ : N.Normal, N ≤ center Q → Nat.card N = 2 →
       D 5 (Q ⧸ N) = ⊥ := by

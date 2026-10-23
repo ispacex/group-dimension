@@ -1,7 +1,7 @@
 name = "group-dimension"
 version = "0.1.0"
 keywords = ["mathematics", "group-theory", "dimension-subgroups"]
-defaultTargets = ["GroupDimension"]
+defaultTargets = ["GroupDimension", "Challenge", "Solution"]
 
 [leanOptions]
 autoImplicit = false
@@ -11,14 +11,14 @@ relaxedAutoImplicit = false
 [[require]]
 name = "mathlib"
 scope = "leanprover-community"
-rev = "v4.29.0"
+rev = "v4.35.0"
 
 [[lean_lib]]
 name = "GroupDimension"
 
-# The authors' formalization of the Lie-ring case (IMP26), pinned to the audited commit
-# (the same one as the submodule `upstream/lie-algebras`); used only by `LieComparison`.
-[[require]]
-name = "lie-rings"
-git = "https://github.com/TimmPeterson/lie-algebras"
-rev = "ed3d9fb660024ec849884b542cfc779462aea8f5"
+# Palomar submission (palomar/README.md): the Mathlib-only statements and their proofs.
+[[lean_lib]]
+name = "Challenge"
+
+[[lean_lib]]
+name = "Solution"
