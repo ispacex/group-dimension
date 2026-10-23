@@ -1426,3 +1426,16 @@ open GroupDimension
 #print axioms GroupDimension.D_four_le_of_isPGroup_three
 #print axioms GroupDimension.minimal_three_of_quotients
 #print axioms GroupDimension.minimal_three
+#print axioms GroupDimension.nonterminal_necessary
+#print axioms GroupDimension.Nonterminal.pc_pc_symm
+#print axioms GroupDimension.Nonterminal.pc_jacobi
+#print axioms GroupDimension.Nonterminal.conj_pow_formula
+#print axioms GroupDimension.Nonterminal.mul_pow_formula
+#print axioms GroupDimension.Nonterminal.indep
+#print axioms GroupDimension.Nonterminal.Setup.pow_p_lcs2
+#print axioms GroupDimension.Nonterminal.Setup.psi_phi_symm
+#print axioms GroupDimension.Nonterminal.Setup.exists_psi_ne
+#print axioms GroupDimension.Nonterminal.Setup.N1
+#print axioms GroupDimension.Nonterminal.Setup.N2_exp
+#print axioms GroupDimension.Nonterminal.Setup.N3
+#print axioms GroupDimension.Nonterminal.Setup.N4
