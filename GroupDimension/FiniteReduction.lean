@@ -28,6 +28,8 @@ hypothesis; for class exactly `3`, as in the paper, also `D₃ = γ₃`
 (`D_five_le_of_bounded_class_three`).
 
 The three hypotheses are the `def … : Prop` of `Statements.lean`; nothing is assumed globally.
+`DThreeEqGammaThree` is proved in `DThree.lean` (which imports this file);
+`DThreeCorollaries.lean` restates the theorems here without it.
 -/
 
 namespace GroupDimension

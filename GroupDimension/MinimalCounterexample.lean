@@ -16,7 +16,8 @@ such that `D₅(Q/N) = 1` for every central subgroup `N` of order `2`. If `D₅(
 and `P_c = ⟨n⟩`. Part (d) of the lemma (the immediate descendant) is in `Descendants.lean`
 (`isDescendant_of_minimal`).
 
-`D₅ ≤ D₃ = γ₃` uses `DThreeEqGammaThree` as a hypothesis (as in `FiniteReduction.lean`).
+`D₅ ≤ D₃ = γ₃` uses `DThreeEqGammaThree` as a hypothesis (as in `FiniteReduction.lean`); it is
+proved in `DThree.lean`, and `DThreeCorollaries.lean` has the versions without it.
 `n ∈ M₅` uses Jennings' theorem (`mem_jennings_of_sub_one_mem`): `D₅` maps into
 `G ∩ (1 + Δ_{𝔽₂}^5)` under `ℤ[Q] → 𝔽₂[Q]` (`modP`).
 -/
@@ -238,7 +239,8 @@ theorem isCandidate_of_minimal (hD3 : DThreeEqGammaThree) {Q : Type} [Group Q] [
 `2`-group `Q` of order `2¹¹`, class `≤ 3` and rank `d(Q) ≥ 8`. By Lemma 5.2 a counterexample would
 be a candidate, and there is none (`not_isCandidate_of_rank`). The hypothesis `h1024` allows
 class `≤ 2` as well, which is immediate from `D₃ = γ₃`, so given `hD3` it is Proposition 5.3.
-Neither `hD3` nor `h1024` is proved here. -/
+`h1024` is not proved here; `hD3` is proved in `DThree.lean` (`D_five_eq_bot_of_rank'` is the
+version without it). -/
 theorem D_five_eq_bot_of_rank (hD3 : DThreeEqGammaThree)
     (h1024 : ∀ (R : Type) [Group R] [Finite R], Nat.card R = 2 ^ 10 →
       (⊤ : Subgroup R).lowerCentralSeries 3 = ⊥ → D 5 R = ⊥)

@@ -15,5 +15,7 @@ The soundness theorems themselves are in `AxiomAudit.lean` and use no extra axio
 #print axioms GroupDimension.Cert1024.D_five_cand
 #print axioms GroupDimension.Cert1024.prop_1024
 #print axioms GroupDimension.Cert1024.D_five_eq_bot_of_rank_of_complete
+#print axioms GroupDimension.Cert1024.prop_1024'
+#print axioms GroupDimension.Cert1024.D_five_eq_bot_of_rank_of_complete'
 #print axioms GroupDimension.Cert1024.D_four_cand
 #print axioms GroupDimension.Cert1024.card_cand

@@ -15,6 +15,8 @@ public import GroupDimension.ClassFour
 public import GroupDimension.ClassFourOrder
 public import GroupDimension.PCover
 public import GroupDimension.Descendants
+public import GroupDimension.DThree
+public import GroupDimension.DThreeCorollaries
 public import GroupDimension.Tahara
 public import GroupDimension.ExpThree
 public import GroupDimension.ExpThreePlus
