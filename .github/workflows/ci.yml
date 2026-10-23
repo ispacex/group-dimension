@@ -60,7 +60,8 @@ jobs:
           axioms=$(grep -o 'depends on axioms: \[[^]]*\]' audit-cert.flat \
                 | sed 's/.*\[\(.*\)\]/\1/' | tr ',' '\n' | tr -d ' ' | sort -u)
           # allowed: the three standard axioms, and the axiom `native_decide` adds for a data chunk
-          native='^_private\.GroupDimension\.Cert1024\.Data\.C[0-9][0-9]\.0\.GroupDimension\.Cert1024\.Data\.c[0-9][0-9]_ok\._native\.native_decide\.ax_[0-9_]+$'
+          # (chunk CNN, NN < 34, and its own theorem cNN_ok)
+          native='^_private\.GroupDimension\.Cert1024\.Data\.C([0-2][0-9]|3[0-3])\.0\.GroupDimension\.Cert1024\.Data\.c\1_ok\._native\.native_decide\.ax_[0-9_]+$'
           bad=$(echo "$axioms" | grep -v -x -e propext -e Classical.choice -e Quot.sound | grep -v -E "$native" || true)
           if [ -n "$bad" ]; then echo "::error::unexpected axioms: $bad"; exit 1; fi
           # guard against a vacuous audit: `prop_1024` must see all 34 chunks and the standard axioms

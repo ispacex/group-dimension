@@ -120,6 +120,24 @@ def lineDepths (s : String) : Option (List Nat) :=
 `nilSpan` is not vacuous at depth `3`. -/
 theorem real_depths : lineDepths real = some [4, 5] := by native_decide
 
+/-- The certificate of `447001` with `C_0` replaced by the `3`-cycle `e_0 ↦ e_1 ↦ e_2 ↦ e_0` (well
+defined: `a_0 = a_1 = a_2`; of order `3`, so `C_0 - 1` is not nilpotent). Only `nilOK` and
+`genOK` can fail; `nilOK` (and `nilFull`) must. -/
+def real3cycle : Bool × Bool :=
+  let s := real
+  let av := modsOf s
+  let Cs := matsOf s
+  let r := rankOf s
+  let a : Fin r → Nat := fun i => av[i]
+  let P : Mat r := Vector.ofFn fun i => Vector.ofFn fun j =>
+    if i.val < 3 ∧ j.val < 3 then (if i.val = (j.val + 1) % 3 then 1 else 0)
+    else if i = j then 1 else 0
+  let C : Fin M → Mat r := fun k => if k.val = 0 then P else Cs[k]
+  (nilOK M a C, nilFull M a C 4)
+
+theorem real3cycle_nil : (modsOf real).toList.take 3 = [2, 2, 2] ∧ real3cycle = (false, false) := by
+  native_decide
+
 /-- The Jordan block `J_n` (`1` on the diagonal and above it), `n × n`. -/
 def jordan (n : Nat) : Mat n := Vector.ofFn fun i => Vector.ofFn fun j =>
   if i.val = j.val ∨ i.val + 1 = j.val then 1 else 0
@@ -163,7 +181,7 @@ def randDepths : List (Option (List Nat)) :=
 /-- On 40 pseudo-random certificates `nilSpan` and `nilFull` agree at every depth `≤ 6`, and
 the first passing depth takes at least three different values. -/
 theorem rand_depths : randDepths.all Option.isSome = true ∧
-    ((randDepths.filterMap id).map (·.headD 7)).eraseDups.length ≥ 3 := by
+    ((randDepths.filterMap id).filterMap List.head?).eraseDups.length ≥ 3 := by
   native_decide
 
 end GroupDimension.Cert1024.Test
