@@ -25,7 +25,7 @@ side is therefore only quoted below; the group-side formulations are unchanged.
 | `γ_n ⊆ D_n` | `LieRings.lowerCentralSeries_le_dimensionSubring` | `GroupDimension.lowerCentralSeries_le_D` |
 | functoriality | `LieRings.map_dimensionSubring_le` | `GroupDimension.map_D_le` |
 | `D₂ = γ₂` | `LieRings.dimensionSubring_two_eq_lowerCentralSeries_one` | `GroupDimension.D_two` |
-| `D₃ = γ₃` | `LieRings.dimensionSubring_three_eq_lowerCentralSeries_two` | `DThreeEqGammaThree` (stated only) |
+| `D₃ = γ₃` | `LieRings.dimensionSubring_three_eq_lowerCentralSeries_two` | `dThreeEqGammaThree` (proved, `DThree.lean`) |
 | `D₅ ⊆ γ₄` | `LieRings.Publication.corollaryD` (second half) | `DimensionQuestion5` — **open** |
 
 ## The authors' statement
