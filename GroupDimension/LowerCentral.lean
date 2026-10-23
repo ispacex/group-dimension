@@ -1,4 +1,8 @@
-import GroupDimension.Basic
+module
+
+public import GroupDimension.Basic
+
+@[expose] public section
 
 /-!
 # `γₙ(G) ⊆ Dₙ(G)` and functoriality
@@ -68,20 +72,20 @@ theorem commutator_D_le (i j : ℕ) : ⁅D i G, D j G⁆ ≤ D (i + j) G :=
 
 variable (G) in
 /-- **`γ_{n+1}(G) ⊆ D_{n+1}(G)`** in Mathlib's zero-based indexing of the lower central
-series: `lowerCentralSeries G n = γ_{n+1}(G)`. -/
-theorem lowerCentralSeries_le_D (n : ℕ) : lowerCentralSeries G n ≤ D (n + 1) G := by
+series: `(⊤ : Subgroup G).lowerCentralSeries n = γ_{n+1}(G)`. -/
+theorem lowerCentralSeries_le_D (n : ℕ) : (⊤ : Subgroup G).lowerCentralSeries n ≤ D (n + 1) G := by
   induction n with
   | zero => simp
   | succ n ih =>
-    change ⁅lowerCentralSeries G n, ⊤⁆ ≤ D (n + 1 + 1) G
-    calc ⁅lowerCentralSeries G n, ⊤⁆ ≤ ⁅D (n + 1) G, D 1 G⁆ :=
+    change ⁅(⊤ : Subgroup G).lowerCentralSeries n, ⊤⁆ ≤ D (n + 1 + 1) G
+    calc ⁅(⊤ : Subgroup G).lowerCentralSeries n, ⊤⁆ ≤ ⁅D (n + 1) G, D 1 G⁆ :=
           Subgroup.commutator_mono ih (by simp)
       _ ≤ D (n + 1 + 1) G := commutator_D_le _ _
 
 variable (G) in
 /-- **`γ_n(G) ⊆ D_n(G)` for every `n ≥ 1`**, in the literature's indexing:
-`γ_n(G) = lowerCentralSeries G (n - 1)`. -/
-theorem gamma_le_D (n : ℕ) (hn : 1 ≤ n) : lowerCentralSeries G (n - 1) ≤ D n G := by
+`γ_n(G) = (⊤ : Subgroup G).lowerCentralSeries (n - 1)`. -/
+theorem gamma_le_D (n : ℕ) (hn : 1 ≤ n) : (⊤ : Subgroup G).lowerCentralSeries (n - 1) ≤ D n G := by
   obtain ⟨k, rfl⟩ := Nat.exists_eq_add_of_le' hn
   simpa using lowerCentralSeries_le_D G k
 

@@ -1,4 +1,8 @@
-import GroupDimension.CentralD8
+module
+
+public import GroupDimension.CentralD8
+
+@[expose] public section
 
 /-!
 # Adjoining a central square root (the core of Proposition 5.8(2) of the D5 paper)

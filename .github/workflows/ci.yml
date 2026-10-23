@@ -34,4 +34,8 @@ jobs:
                 | grep -v -x -e propext -e Classical.choice -e Quot.sound | sort -u || true)
           if [ -n "$bad" ]; then echo "::error::unexpected axioms: $bad"; exit 1; fi
           if grep -q ': error' audit.log; then echo "::error::errors in the audit"; exit 1; fi
+          # guard against a vacuous audit (proof bodies invisible to `#print axioms`)
+          grep -q "GroupDimension.Palomar.D_five_eq_gamma_five_of_exp_three' depends on axioms: \[propext, Classical.choice, Quot.sound\]" \
+            <(tr '\n' ' ' < audit.log | sed 's/  */ /g') \
+            || { echo "::error::audit does not see proof bodies"; exit 1; }
           echo "audit: $got declarations, only propext / Classical.choice / Quot.sound"

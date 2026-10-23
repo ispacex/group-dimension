@@ -1,4 +1,8 @@
-import Mathlib
+module
+
+public import Mathlib
+
+@[expose] public section
 
 /-!
 # Integral dimension subgroups
@@ -12,10 +16,10 @@ The `n`-th dimension subgroup is
 Indexing follows the literature: `D 1 G = G`, `D 2 G = [G, G]`, … (and `D 0 G = G`
 because `Δ^0 = ℤ[G]`).
 
-Mathlib's `lowerCentralSeries G k` is numbered from zero:
-`lowerCentralSeries G 0 = ⊤` and `lowerCentralSeries G (k + 1) = ⁅lowerCentralSeries G k, ⊤⁆`
-(see `Mathlib/GroupTheory/Nilpotent.lean`), so **`lowerCentralSeries G k = γ_{k+1}(G)`**.
-For example `γ₄(G)` is `lowerCentralSeries G 3`.
+Mathlib's `(⊤ : Subgroup G).lowerCentralSeries k` is numbered from zero:
+`(⊤ : Subgroup G).lowerCentralSeries 0 = ⊤` and `(⊤ : Subgroup G).lowerCentralSeries (k + 1) = ⁅(⊤ : Subgroup G).lowerCentralSeries k, ⊤⁆`
+(see `Mathlib/GroupTheory/Nilpotent.lean`), so **`(⊤ : Subgroup G).lowerCentralSeries k = γ_{k+1}(G)`**.
+For example `γ₄(G)` is `(⊤ : Subgroup G).lowerCentralSeries 3`.
 
 `Δ(G)` is a left ideal in Mathlib's sense (`Ideal = Submodule ℤ[G] ℤ[G]`) and carries the
 instance `IsTwoSided`, being the kernel of a ring homomorphism; its powers are two-sided too.

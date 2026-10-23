@@ -1,5 +1,9 @@
-import GroupDimension.TaharaProof.Induction
-import GroupDimension.DTwo
+module
+
+public import GroupDimension.TaharaProof.Induction
+public import GroupDimension.DTwo
+
+@[expose] public section
 
 /-!
 # `Δ^n ⊆ Λ_n` and `D₃ = γ₃` for finite groups ([Tah81, Theorem 4.1])
@@ -125,12 +129,12 @@ theorem Φ1w_long {l : List ι} (h : 3 ≤ l.length) : F.Φ1w l = 0 := by
   | [_, _], h => simp at h
   | _ :: _ :: _ :: _, _ => rfl
 
-theorem c2_mul {g h : G} (hg : g ∈ lowerCentralSeries G 1) (hh : h ∈ lowerCentralSeries G 1) :
+theorem c2_mul {g h : G} (hg : g ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (hh : h ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
     F.c2 (g * h) = F.c2 g + F.c2 h := by
   simp [c2, cl_mul hg hh]
 
-theorem c2_of_mem {g : G} (hg : g ∈ lowerCentralSeries G 2) : F.c2 g = 0 := by
-  by_cases h1 : g ∈ lowerCentralSeries G 1
+theorem c2_of_mem {g : G} (hg : g ∈ (⊤ : Subgroup G).lowerCentralSeries 2) : F.c2 g = 0 := by
+  by_cases h1 : g ∈ (⊤ : Subgroup G).lowerCentralSeries 1
   · simp [c2, (cl_eq_zero_iff h1).mpr hg]
   · exact absurd (lcs_mem_of_le (by norm_num) hg) h1
 
@@ -300,20 +304,20 @@ theorem sum_rel {b : ι → ℕ} (h : ∀ j, b j ≠ 0 → (F.P (Pi.single j 1),
 /-- The class of a product of letters of weight `≥ 2`. -/
 theorem c2_nprod {b : ι → ℕ} (hb : ∀ j, b j ≠ 0 → 2 ≤ F.w j) :
     F.c2 (F.nprod b) = ∑ j, (b j : ℤ) • F.c2 (F.x j) := by
-  have hmem : ∀ j, b j ≠ 0 → F.x j ∈ lowerCentralSeries G 1 := fun j hj =>
+  have hmem : ∀ j, b j ≠ 0 → F.x j ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := fun j hj =>
     lcs_mem_of_le (by have := hb j hj; omega) (F.mem j)
-  have key : ∀ l : List ι, (∀ j ∈ l, b j ≠ 0 → F.x j ∈ lowerCentralSeries G 1) →
+  have key : ∀ l : List ι, (∀ j ∈ l, b j ≠ 0 → F.x j ∈ (⊤ : Subgroup G).lowerCentralSeries 1) →
       F.c2 (l.map fun j => F.x j ^ b j).prod = (l.map fun j => (b j : ℤ) • F.c2 (F.x j)).sum := by
     intro l
     induction l with
     | nil => simp [c2, cl_one]
     | cons j l ih =>
       intro hl
-      have hj : F.x j ^ b j ∈ lowerCentralSeries G 1 := by
+      have hj : F.x j ^ b j ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := by
         by_cases h : b j = 0
         · simp [h, one_mem]
         · exact _root_.pow_mem (hl j List.mem_cons_self h) _
-      have hrest : (l.map fun j => F.x j ^ b j).prod ∈ lowerCentralSeries G 1 := by
+      have hrest : (l.map fun j => F.x j ^ b j).prod ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := by
         refine list_prod_mem fun z hz => ?_
         obtain ⟨i, hi, rfl⟩ := List.mem_map.mp hz
         by_cases h : b i = 0
@@ -367,7 +371,7 @@ theorem U1 (a : ι → ℕ) : (F.P a, F.Φ1 a) ∈ F.rel1 := by
       have := congrFun hlh j; simp only [Pi.add_apply, Pi.zero_apply] at this ⊢; omega
     rw [hlo, hhi, P_zero, one_mul, mul_one]
     obtain ⟨b, hbo, hbe⟩ := F.nf (F.x x ^ F.o x)
-    have hyw : F.x x ^ F.o x ∈ lowerCentralSeries G (F.w x + 1 - 1) := by
+    have hyw : F.x x ^ F.o x ∈ (⊤ : Subgroup G).lowerCentralSeries (F.w x + 1 - 1) := by
       simpa using F.pow_mem x
     have hbw : ∀ j, b j ≠ 0 → F.w x + 1 ≤ F.w j := fun j hj =>
       F.nf_weight hyw hbo hbe hj
@@ -468,7 +472,7 @@ theorem U1 (a : ι → ℕ) : (F.P a, F.Φ1 a) ∈ F.rel1 := by
     · have hw2 : 2 ≤ F.w x := by omega
       rw [F.Φ1_nsmul_single, if_neg (by norm_num), if_neg (by omega),
         F.Φ1_single_of_two_le hw2, smul_zero, add_zero]
-      have hx1 : F.x x ∈ lowerCentralSeries G 1 := lcs_mem_of_le (by omega) (F.mem x)
+      have hx1 : F.x x ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := lcs_mem_of_le (by omega) (F.mem x)
       have : F.c2 (F.x x ^ F.o x) = (F.o x : ℤ) • F.c2 (F.x x) := by
         simp [c2, ← zpow_natCast, cl_zpow hx1]
       rw [this, sub_self]; exact zero_mem _
@@ -538,12 +542,15 @@ theorem ψ1_mem_R1_of_mem_Sp3 {z : MonoidAlgebra ℤ G} (hz : z ∈ F.Sp 3 Set.u
   rwa [mem_rel1, F.Φ1_eq_zero_of_W ha, sub_zero] at this
 
 /-- `ψ₁(g - 1)` is the class of `g ∈ γ₂` in `γ₂/γ₃`. -/
-theorem ψ1_of_sub_one {g : G} (hg : g ∈ lowerCentralSeries G 1) :
+theorem ψ1_of_sub_one {g : G} (hg : g ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
     F.ψ1 (of ℤ G g - 1) = F.c2 g := by
   classical
   obtain ⟨b, hb, rfl⟩ := F.nf g
   have hbw : ∀ j, b j ≠ 0 → 2 ≤ F.w j := fun j hj =>
-    F.nf_weight (k := 2) (by simpa using hg) hb rfl hj
+    F.nf_weight (k := 2) (by
+      have h' := hg
+      simp only [Subgroup.lowerCentralSeries_succ, Subgroup.lowerCentralSeries_zero] at h' ⊢
+      exact h') hb rfl hj
   obtain ⟨-, h2⟩ := F.of_nprod_sub_one b
   have hjunk : F.ψ1 (of ℤ G (F.nprod b) - 1 - ∑ j, (b j : ℤ) • F.X j) = 0 := by
     generalize of ℤ G (F.nprod b) - 1 - ∑ j, (b j : ℤ) • F.X j = z0 at h2 ⊢
@@ -606,9 +613,9 @@ theorem eq_zero_of_mem_R1 {v : Additive (Layer G 1)} (h : ((0 : ι → ℤ), (0 
 
 include F in
 /-- **`D₃(G) ⊆ γ₃(G)`** for a finite group with a frame ([Tah81, Theorem 4.1]; Passi). -/
-theorem D_three_le : D 3 G ≤ lowerCentralSeries G 2 := by
+theorem D_three_le : D 3 G ≤ (⊤ : Subgroup G).lowerCentralSeries 2 := by
   intro g hg
-  have hg2 : g ∈ lowerCentralSeries G 1 := by
+  have hg2 : g ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := by
     rw [← D_two]; exact D_antitone (by norm_num) hg
   have h1 := F.ψ1_mem_R1_of_mem_Sp3 (F.augIdeal_pow_le_Sp 3 (mem_D.mp hg))
   rw [F.ψ1_of_sub_one hg2] at h1

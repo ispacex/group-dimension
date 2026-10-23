@@ -1,5 +1,9 @@
-import GroupDimension.Jennings.Lazard
-import GroupDimension.ClassFour
+module
+
+public import GroupDimension.Jennings.Lazard
+public import GroupDimension.ClassFour
+
+@[expose] public section
 
 /-!
 # `S₅ ≤ Q⁸ γ₂⁴ γ₃²` for groups of class `≤ 3` (`p = 2`)
@@ -143,38 +147,38 @@ theorem commutator_mul_central {g x e : G} (he : e ∈ center G) : ⁅g, x * e�
 
 section ClassThree
 
-variable (h4 : lowerCentralSeries G 3 = ⊥)
+variable (h4 : (⊤ : Subgroup G).lowerCentralSeries 3 = ⊥)
 include h4
 
 omit h4 in
-theorem lcs_two_eq : lowerCentralSeries G 2 = ⁅lowerCentralSeries G 1, ⊤⁆ := lowerCentralSeries_succ 1
+theorem lcs_two_eq : (⊤ : Subgroup G).lowerCentralSeries 2 = ⁅(⊤ : Subgroup G).lowerCentralSeries 1, ⊤⁆ := Subgroup.lowerCentralSeries_succ ⊤ 1
 
 omit h4 in
-theorem comm_mem_lcs_one (g h : G) : ⁅g, h⁆ ∈ lowerCentralSeries G 1 := by
-  rw [lowerCentralSeries_one, _root_.commutator_def]
+theorem comm_mem_lcs_one (g h : G) : ⁅g, h⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := by
+  rw [Subgroup.top_lowerCentralSeries_one, _root_.commutator_def]
   exact commutator_mem_commutator (mem_top g) (mem_top h)
 
 omit h4 in
-theorem comm_mem_lcs_two {c : G} (hc : c ∈ lowerCentralSeries G 1) (g : G) :
-    ⁅c, g⁆ ∈ lowerCentralSeries G 2 := by
-  rw [lowerCentralSeries_succ 1]; exact commutator_mem_commutator hc (mem_top g)
+theorem comm_mem_lcs_two {c : G} (hc : c ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (g : G) :
+    ⁅c, g⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := by
+  rw [Subgroup.lowerCentralSeries_succ ⊤ 1]; exact commutator_mem_commutator hc (mem_top g)
 
 omit h4 in
-theorem comm_mem_lcs_two' {c : G} (hc : c ∈ lowerCentralSeries G 1) (g : G) :
-    ⁅g, c⁆ ∈ lowerCentralSeries G 2 := by
+theorem comm_mem_lcs_two' {c : G} (hc : c ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (g : G) :
+    ⁅g, c⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := by
   rw [← commutatorElement_inv]; exact inv_mem (comm_mem_lcs_two hc g)
 
-theorem mem_center_of_lcs_two {w : G} (hw : w ∈ lowerCentralSeries G 2) : w ∈ center G := by
+theorem mem_center_of_lcs_two {w : G} (hw : w ∈ (⊤ : Subgroup G).lowerCentralSeries 2) : w ∈ center G := by
   rw [mem_center_iff]
   intro g
-  have e3 : lowerCentralSeries G 3 = ⁅lowerCentralSeries G 2, ⊤⁆ := lowerCentralSeries_succ 2
-  have : ⁅w, g⁆ ∈ lowerCentralSeries G 3 := by
+  have e3 : (⊤ : Subgroup G).lowerCentralSeries 3 = ⁅(⊤ : Subgroup G).lowerCentralSeries 2, ⊤⁆ := Subgroup.lowerCentralSeries_succ ⊤ 2
+  have : ⁅w, g⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by
     rw [e3]; exact commutator_mem_commutator hw (mem_top g)
   rw [h4, mem_bot, commutatorElement_eq_one_iff_mul_comm] at this
   exact this.symm
 
-theorem comm_lcs_one_eq_one {c c' : G} (hc : c ∈ lowerCentralSeries G 1)
-    (hc' : c' ∈ lowerCentralSeries G 1) : ⁅c, c'⁆ = 1 := by
+theorem comm_lcs_one_eq_one {c c' : G} (hc : c ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
+    (hc' : c' ∈ (⊤ : Subgroup G).lowerCentralSeries 1) : ⁅c, c'⁆ = 1 := by
   have := commutator_lcs_le (G := G) 1 1 (commutator_mem_commutator hc hc')
   rwa [show 1 + 1 + 1 = 3 from rfl, h4, mem_bot] at this
 
@@ -184,21 +188,21 @@ theorem comm_pow_left (g h : G) (n : ℕ) :
   commutator_pow_left (mem_center_of_lcs_two h4 (comm_mem_lcs_two' (comm_mem_lcs_one g h) g)) n
 
 /-- `[c^n, g] = [c, g]^n` for `c ∈ γ₂`. -/
-theorem comm_pow_left_of_lcs_one {c : G} (hc : c ∈ lowerCentralSeries G 1) (g : G) (n : ℕ) :
+theorem comm_pow_left_of_lcs_one {c : G} (hc : c ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (g : G) (n : ℕ) :
     ⁅c ^ n, g⁆ = ⁅c, g⁆ ^ n := by
   have hz := mem_center_of_lcs_two h4 (comm_mem_lcs_two hc g)
   rw [commutator_pow_left (by rw [commutator_central_right hz]; exact one_mem _) n,
     commutator_central_right hz, one_pow, mul_one]
 
 /-- `[g^n, c] = [g, c]^n` for `c ∈ γ₂`. -/
-theorem comm_pow_left_lcs_one {c : G} (hc : c ∈ lowerCentralSeries G 1) (g : G) (n : ℕ) :
+theorem comm_pow_left_lcs_one {c : G} (hc : c ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (g : G) (n : ℕ) :
     ⁅g ^ n, c⁆ = ⁅g, c⁆ ^ n := by
   have hz := mem_center_of_lcs_two h4 (comm_mem_lcs_two' hc g)
   rw [commutator_pow_left (by rw [commutator_central_right hz]; exact one_mem _) n,
     commutator_central_right hz, one_pow, mul_one]
 
 /-- `[g, c^n] = [g, c]^n` for `c ∈ γ₂`. -/
-theorem comm_pow_right_of_lcs_one {c : G} (hc : c ∈ lowerCentralSeries G 1) (g : G) (n : ℕ) :
+theorem comm_pow_right_of_lcs_one {c : G} (hc : c ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (g : G) (n : ℕ) :
     ⁅g, c ^ n⁆ = ⁅g, c⁆ ^ n := by
   rw [← commutatorElement_inv, comm_pow_left_of_lcs_one h4 hc g n, ← inv_pow,
     commutatorElement_inv]
@@ -216,27 +220,28 @@ theorem pow_mul_mem {H : Subgroup G} {x : G} (hx : x ∈ H) (a m : ℕ) :
 
 variable (G) in
 /-- `F₂ = γ₂ G²`. -/
-def F2 : Subgroup G := lowerCentralSeries G 1 ⊔ powSubgroup ⊤ 2
+def F2 : Subgroup G := (⊤ : Subgroup G).lowerCentralSeries 1 ⊔ powSubgroup ⊤ 2
 
 variable (G) in
 /-- `F₃ = G⁴ γ₂² γ₃`. -/
 def F3 : Subgroup G :=
-  powSubgroup ⊤ 4 ⊔ powSubgroup (lowerCentralSeries G 1) 2 ⊔ lowerCentralSeries G 2
+  powSubgroup ⊤ 4 ⊔ powSubgroup ((⊤ : Subgroup G).lowerCentralSeries 1) 2 ⊔ (⊤ : Subgroup G).lowerCentralSeries 2
 
 variable (G) in
 /-- `F₄ = G⁴ γ₂² γ₃²`. -/
 def F4 : Subgroup G :=
-  powSubgroup ⊤ 4 ⊔ powSubgroup (lowerCentralSeries G 1) 2 ⊔
-    powSubgroup (lowerCentralSeries G 2) 2
+  powSubgroup ⊤ 4 ⊔ powSubgroup ((⊤ : Subgroup G).lowerCentralSeries 1) 2 ⊔
+    powSubgroup ((⊤ : Subgroup G).lowerCentralSeries 2) 2
 
 variable (G) in
 /-- `F₅ = G⁸ γ₂⁴ γ₃²`. -/
 def F5 : Subgroup G :=
-  powSubgroup ⊤ 8 ⊔ powSubgroup (lowerCentralSeries G 1) 4 ⊔
-    powSubgroup (lowerCentralSeries G 2) 2
+  powSubgroup ⊤ 8 ⊔ powSubgroup ((⊤ : Subgroup G).lowerCentralSeries 1) 4 ⊔
+    powSubgroup ((⊤ : Subgroup G).lowerCentralSeries 2) 2
 
 instance (m : ℕ) : (powSubgroup (⊤ : Subgroup G) m).Normal := powSubgroup_normal _ _
-instance (k m : ℕ) : (powSubgroup (lowerCentralSeries G k) m).Normal := powSubgroup_normal _ _
+instance instNormalPowSubgroupLowerCentralSeries (k m : ℕ) :
+    (powSubgroup ((⊤ : Subgroup G).lowerCentralSeries k) m).Normal := powSubgroup_normal _ _
 instance : (F2 G).Normal := by unfold F2; infer_instance
 instance : (F3 G).Normal := by unfold F3; infer_instance
 instance : (F4 G).Normal := by unfold F4; infer_instance
@@ -244,21 +249,21 @@ instance : (F5 G).Normal := by unfold F5; infer_instance
 
 theorem F3_le_F2 : F3 G ≤ F2 G := by
   refine sup_le (sup_le ((closure_le _).mpr ?_) ((closure_le _).mpr ?_)) fun z hz =>
-    mem_sup_left (lowerCentralSeries_antitone (by norm_num) hz)
+    mem_sup_left ((Subgroup.lowerCentralSeries_antitone ⊤) (by norm_num) hz)
   · rintro _ ⟨g, -, rfl⟩; exact mem_sup_right (pow_mul_mem (mem_top g) 2 2)
   · rintro _ ⟨c, hc, rfl⟩; exact mem_sup_left (pow_mem hc 2)
 
 theorem F5_le_jennings : F5 G ≤ jennings 2 G 5 := by
   have t : ∀ i j, 5 ≤ (i + 1) * 2 ^ j →
-      powSubgroup (lowerCentralSeries G i) (2 ^ j) ≤ jennings 2 G 5 :=
+      powSubgroup ((⊤ : Subgroup G).lowerCentralSeries i) (2 ^ j) ≤ jennings 2 G 5 :=
     fun i j h => le_iSup_of_le i (le_iSup_of_le j (le_iSup_of_le h le_rfl))
   refine sup_le (sup_le ?_ (t 1 2 (by norm_num))) (t 2 1 (by norm_num))
   have := t 0 3 (by norm_num)
-  rwa [lowerCentralSeries_zero] at this
+  rwa [Subgroup.lowerCentralSeries_zero] at this
 
 section Inclusions
 
-variable (h4 : lowerCentralSeries G 3 = ⊥)
+variable (h4 : (⊤ : Subgroup G).lowerCentralSeries 3 = ⊥)
 include h4
 
 /-- `[F₂, G] ≤ F₃`. -/
@@ -321,13 +326,13 @@ theorem comm_F2_F2 : ⁅F2 G, F2 G⁆ ≤ F4 G := by
         (pow_mem_powSubgroup (comm_mem_lcs_one h (g ^ 2)) 2))) ?_
       -- `[h, [h, g²]] = [h, [g, h]²]⁻¹`
       set c := ⁅g, h⁆ with hcdef
-      have hc : c ∈ lowerCentralSeries G 1 := comm_mem_lcs_one g h
+      have hc : c ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := comm_mem_lcs_one g h
       have he : ⁅g, c⁆ ∈ center G := mem_center_of_lcs_two h4 (comm_mem_lcs_two' hc g)
       have hu : ⁅h, g ^ 2⁆ = (c ^ 2 * ⁅g, c⁆)⁻¹ := by
         rw [← commutatorElement_inv, comm_pow_left h4 g h 2, show Nat.choose 2 2 = 1 from rfl,
           pow_one]
-      have hx : c ^ 2 * ⁅g, c⁆ ∈ lowerCentralSeries G 1 :=
-        mul_mem (pow_mem hc 2) (lowerCentralSeries_antitone (by norm_num)
+      have hx : c ^ 2 * ⁅g, c⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+        mul_mem (pow_mem hc 2) ((Subgroup.lowerCentralSeries_antitone ⊤) (by norm_num)
           (comm_mem_lcs_two' hc g))
       rw [hu, commutator_inv_right (mem_center_of_lcs_two h4 (comm_mem_lcs_two' hx h)),
         commutator_mul_central he, comm_pow_right_of_lcs_one h4 hc h 2]
@@ -409,7 +414,7 @@ theorem lazard_two_le : lazard 2 G 2 ≤ F2 G := by
   refine lazard_le le_rfl (fun a b ha hb han hbn _ => ?_) (fun a ha han _ => ?_)
   · obtain rfl : a = 1 := by omega
     obtain rfl : b = 1 := by omega
-    rw [lazard_one, ← _root_.commutator_def, ← lowerCentralSeries_one]
+    rw [lazard_one, ← _root_.commutator_def, ← Subgroup.top_lowerCentralSeries_one]
     exact le_sup_left
   · obtain rfl : a = 1 := by omega
     rw [lazard_one]

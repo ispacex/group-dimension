@@ -1,4 +1,8 @@
-import GroupDimension.TaharaProof.Basis
+module
+
+public import GroupDimension.TaharaProof.Basis
+
+@[expose] public section
 
 /-!
 # Frames from uniqueness bases of the layers
@@ -98,11 +102,11 @@ end Transport
 
 /-- The normal-form part of Tahara's uniqueness basis of the layer `γ_{k+1}/γ_{k+2}`. -/
 structure LayerNF (k : ℕ) {n : ℕ} (y : Fin n → G) (o : Fin n → ℕ) : Prop where
-  mem : ∀ i, y i ∈ lowerCentralSeries G k
+  mem : ∀ i, y i ∈ (⊤ : Subgroup G).lowerCentralSeries k
   pos : ∀ i, 0 < o i
-  indep : ∀ a : Fin n → ℤ, oprod y a ∈ lowerCentralSeries G (k + 1) ↔ ∀ i, (o i : ℤ) ∣ a i
-  span : ∀ g ∈ lowerCentralSeries G k, ∃ a : Fin n → ℤ,
-    (oprod y a)⁻¹ * g ∈ lowerCentralSeries G (k + 1)
+  indep : ∀ a : Fin n → ℤ, oprod y a ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1) ↔ ∀ i, (o i : ℤ) ∣ a i
+  span : ∀ g ∈ (⊤ : Subgroup G).lowerCentralSeries k, ∃ a : Fin n → ℤ,
+    (oprod y a)⁻¹ * g ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1)
 
 theorem IsLayerBasis.layerNF {k n : ℕ} {y : Fin n → G} {o : Fin n → ℕ}
     (h : IsLayerBasis k y o) : LayerNF k y o :=
@@ -113,7 +117,7 @@ namespace LayerNF
 variable {k n : ℕ} {y : Fin n → G} {o : Fin n → ℕ} (h : LayerNF k y o)
 include h
 
-theorem lprod_mem (c : Fin n → ℕ) : lprod (ordL (Fin n)) y c ∈ lowerCentralSeries G k := by
+theorem lprod_mem (c : Fin n → ℕ) : lprod (ordL (Fin n)) y c ∈ (⊤ : Subgroup G).lowerCentralSeries k := by
   rw [lprod_fin_eq_oprod]; exact ExpThree.oprod_mem h.mem _
 
 theorem cl_lprod (c : Fin n → ℕ) :
@@ -130,20 +134,20 @@ theorem o_smul_cl (i : Fin n) : (o i : ℤ) • cl G k (y i) = 0 := by
   rw [Finset.sum_eq_single i (fun j _ hj => by simp [Pi.single_eq_of_ne hj]) (by simp)] at h1
   simpa using h1
 
-theorem pow_mem (i : Fin n) : y i ^ o i ∈ lowerCentralSeries G (k + 1) := by
+theorem pow_mem (i : Fin n) : y i ^ o i ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1) := by
   rw [← cl_eq_zero_iff (_root_.pow_mem (h.mem i) _), ← zpow_natCast, cl_zpow (h.mem i)]
   exact h.o_smul_cl i
 
 /-- Membership in `γ_{k+2}` of a product, by its coefficients. -/
 theorem lprod_mem_succ_iff (c : Fin n → ℕ) :
-    lprod (ordL (Fin n)) y c ∈ lowerCentralSeries G (k + 1) ↔ ∀ i, o i ∣ c i := by
+    lprod (ordL (Fin n)) y c ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1) ↔ ∀ i, o i ∣ c i := by
   rw [lprod_fin_eq_oprod, h.indep]
   simp only [Int.natCast_dvd_natCast]
 
 /-- Existence of the normal form in the layer. -/
-theorem exists_nf {g : G} (hg : g ∈ lowerCentralSeries G k) :
+theorem exists_nf {g : G} (hg : g ∈ (⊤ : Subgroup G).lowerCentralSeries k) :
     ∃ c : Fin n → ℕ, (∀ i, c i < o i) ∧
-      (lprod (ordL (Fin n)) y c)⁻¹ * g ∈ lowerCentralSeries G (k + 1) := by
+      (lprod (ordL (Fin n)) y c)⁻¹ * g ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1) := by
   obtain ⟨a, ha⟩ := h.span g hg
   refine ⟨fun i => (a i % (o i : ℤ)).toNat, fun i => ?_, ?_⟩
   · show (a i % (o i : ℤ)).toNat < o i
@@ -167,13 +171,13 @@ theorem exists_nf {g : G} (hg : g ∈ lowerCentralSeries G k) :
 /-- Uniqueness of the normal form in the layer. -/
 theorem nf_unique {c c' : Fin n → ℕ} (hc : ∀ i, c i < o i) (hc' : ∀ i, c' i < o i)
     (hcc : (lprod (ordL (Fin n)) y c)⁻¹ * lprod (ordL (Fin n)) y c' ∈
-      lowerCentralSeries G (k + 1)) : c = c' := by
+      (⊤ : Subgroup G).lowerCentralSeries (k + 1)) : c = c' := by
   have hm := h.lprod_mem c
   have hm' := h.lprod_mem c'
   rw [← cl_eq_zero_iff (mul_mem (inv_mem hm) hm'), cl_mul (inv_mem hm) hm', cl_inv hm,
     h.cl_lprod, h.cl_lprod, neg_add_eq_sub, ← Finset.sum_sub_distrib] at hcc
   simp_rw [← sub_smul] at hcc
-  have key : oprod y (fun i => (c' i : ℤ) - c i) ∈ lowerCentralSeries G (k + 1) := by
+  have key : oprod y (fun i => (c' i : ℤ) - c i) ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1) := by
     rw [← cl_eq_zero_iff (ExpThree.oprod_mem h.mem _), cl_oprod h.mem]; exact hcc
   have hd := (h.indep _).mp key
   funext i
@@ -201,20 +205,20 @@ structure TailFrame (G : Type*) [Group G] (k : ℕ) (ι : Type*) [LinearOrder ι
   o : ι → ℕ
   w_ge : ∀ j, k + 1 ≤ w j
   w_mono : Monotone w
-  mem : ∀ j, x j ∈ lowerCentralSeries G (w j - 1)
-  pow_mem : ∀ j, x j ^ o j ∈ lowerCentralSeries G (w j)
-  nf : ∀ g ∈ lowerCentralSeries G k, ∃ b : ι → ℕ, (∀ j, b j < o j) ∧ lprod (ordL ι) x b = g
+  mem : ∀ j, x j ∈ (⊤ : Subgroup G).lowerCentralSeries (w j - 1)
+  pow_mem : ∀ j, x j ^ o j ∈ (⊤ : Subgroup G).lowerCentralSeries (w j)
+  nf : ∀ g ∈ (⊤ : Subgroup G).lowerCentralSeries k, ∃ b : ι → ℕ, (∀ j, b j < o j) ∧ lprod (ordL ι) x b = g
   nf_unique : ∀ b c : ι → ℕ, (∀ j, b j < o j) → (∀ j, c j < o j) →
     lprod (ordL ι) x b = lprod (ordL ι) x c → b = c
   wt : ∀ b : ι → ℕ, (∀ j, b j < o j) → ∀ k',
-    lprod (ordL ι) x b ∈ lowerCentralSeries G k' ↔ ∀ j, w j ≤ k' → b j = 0
+    lprod (ordL ι) x b ∈ (⊤ : Subgroup G).lowerCentralSeries k' ↔ ∀ j, w j ≤ k' → b j = 0
 
 namespace TailFrame
 
 variable {ι : Type*} [LinearOrder ι] [Fintype ι]
 
 /-- No letters: the top of the series is trivial. -/
-def empty (k : ℕ) (hk : lowerCentralSeries G k = ⊥) : TailFrame G k (Fin 0) where
+def empty (k : ℕ) (hk : (⊤ : Subgroup G).lowerCentralSeries k = ⊥) : TailFrame G k (Fin 0) where
   x := Fin.elim0
   w := Fin.elim0
   o := Fin.elim0
@@ -233,7 +237,7 @@ def empty (k : ℕ) (hk : lowerCentralSeries G k = ⊥) : TailFrame G k (Fin 0) 
 
 variable {k : ℕ} (T : TailFrame G k ι)
 
-theorem lprod_mem (b : ι → ℕ) : lprod (ordL ι) T.x b ∈ lowerCentralSeries G k := by
+theorem lprod_mem (b : ι → ℕ) : lprod (ordL ι) T.x b ∈ (⊤ : Subgroup G).lowerCentralSeries k := by
   refine list_prod_mem fun z hz => ?_
   obtain ⟨j, -, rfl⟩ := List.mem_map.mp hz
   exact _root_.pow_mem (lcs_mem_of_le (i := k) (j := T.w j - 1) (by have := T.w_ge j; omega)
@@ -319,7 +323,8 @@ def TailFrame.glue (hy : LayerNF k y o') (T : TailFrame G (k + 1) ι) :
     · exact T.w_mono (Sum.Lex.inr_le_inr_iff.mp hpq)
   mem p := by
     rcases p with (i | j)
-    · simpa using hy.mem i
+    · show y i ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1 - 1)
+      simpa using hy.mem i
     · exact T.mem j
   pow_mem p := by
     rcases p with (i | j)
@@ -371,7 +376,7 @@ def TailFrame.glue (hy : LayerNF k y o') (T : TailFrame G (k + 1) ι) :
       constructor
       · intro hm
         have hl0 : b ∘ inlₗ = 0 := by
-          have h1 : lprod (ordL (Fin n)) y (b ∘ inlₗ) ∈ lowerCentralSeries G (k + 1) := by
+          have h1 : lprod (ordL (Fin n)) y (b ∘ inlₗ) ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1) := by
             have := lcs_mem_of_le (show k + 1 ≤ k' by omega) hm
             have e : lprod (ordL (Fin n)) y (b ∘ inlₗ) =
                 lprod (ordL (Fin n)) y (b ∘ inlₗ) * lprod (ordL ι) T.x (b ∘ inrₗ) *

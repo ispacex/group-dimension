@@ -1,4 +1,8 @@
-import GroupDimension.TaharaProof.Decode3
+module
+
+public import GroupDimension.TaharaProof.Decode3
+
+@[expose] public section
 
 /-!
 # The relations (I)–(VII) in Tahara's frame, explicitly
@@ -17,7 +21,7 @@ variable {G : Type*} [Group G]
 
 section TFrame
 
-variable [Finite G] [Fintype G] (h4 : lowerCentralSeries G 4 = ⊥) {T : Data G} (hT : T.Valid)
+variable [Finite G] [Fintype G] (h4 : (⊤ : Subgroup G).lowerCentralSeries 4 = ⊥) {T : Data G} (hT : T.Valid)
   {v : ℕ} {y4 : Fin v → G} {o4 : Fin v → ℕ} (hy4 : LayerNF 3 y4 o4) (ho4 : ∀ q, 1 < o4 q)
 
 local notation "TF" => Tframe h4 hT hy4
@@ -53,13 +57,13 @@ theorem Φ3_3 (l : Fin T.u) : (TF).Φ3 (cnt [ℓ3 l]) = (TF).E3' (ℓ3 l) := by
 
 /-! ## Membership facts -/
 
-theorem yy1_mem (i : Fin T.s) : (TF).yy (ℓ1 i) ∈ lowerCentralSeries G 1 :=
+theorem yy1_mem (i : Fin T.s) : (TF).yy (ℓ1 i) ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
   (IsLayerBasis.layerNF hT.basis₁).pow_mem i
 
-theorem yy2_mem (k : Fin T.t) : (TF).yy (ℓ2 k) ∈ lowerCentralSeries G 2 :=
+theorem yy2_mem (k : Fin T.t) : (TF).yy (ℓ2 k) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
   (IsLayerBasis.layerNF hT.basis₂).pow_mem k
 
-theorem cc_mem2 (g h : Fin T.s) : (TF).cc (ℓ1 g) (ℓ1 h) ∈ lowerCentralSeries G 2 :=
+theorem cc_mem2 (g h : Fin T.s) : (TF).cc (ℓ1 g) (ℓ1 h) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
   ExpThree.tc_mem (i := 1) (j := 0) (by norm_num) (yy1_mem h4 hT hy4 g) (hT.basis₁.mem h)
 
 /-! ## The generators -/
@@ -119,7 +123,7 @@ theorem commsum_T (i : Fin T.s) (k : Fin T.t) :
   rw [TIdx_sum]
   have e1 : ∀ i', ((TF).nfc ((TF).yy (ℓ1 i)) (ℓ1 i') : ℤ) = 0 := fun i' => by
     rw [nfc_ℓ1_zero h4 hT hy4 (yy1_mem h4 hT hy4 i)]; rfl
-  have hc4 : ∀ (z : G), z ∈ lowerCentralSeries G 4 → (TF).nsum z 0 = 0 := fun z hz => by
+  have hc4 : ∀ (z : G), z ∈ (⊤ : Subgroup G).lowerCentralSeries 4 → (TF).nsum z 0 = 0 := fun z hz => by
     rw [h4, Subgroup.mem_bot] at hz; rw [hz]; exact Frame.nsum_one 0
   have e3 : ∀ l, (TF).nsum (tc ((TF).x (ℓ3 l)) ((TF).x (ℓ2 k))) 0 = 0 := fun l =>
     hc4 _ (ExpThree.tc_mem (i := 2) (j := 1) (by norm_num) (hT.basis₃.mem l) (hT.basis₂.mem k))

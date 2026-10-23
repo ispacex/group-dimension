@@ -1,4 +1,8 @@
-import GroupDimension.CentralSqrt
+module
+
+public import GroupDimension.CentralSqrt
+
+@[expose] public section
 
 /-!
 # Central products `H ∘ E` with `E/Z(E) ≅ (ℤ/2)²` (Proposition 5.8 of the D5 paper)
@@ -302,6 +306,7 @@ theorem sqrt_hc (g : S.H)
   rw [_root_.map_sub, _root_.map_one, mapDomainRingHom_of] at this
   rw [sqrt_c]
   convert this using 3
+  all_goals exact (map_pow S.φ.toMonoidHom _ _).symm
 
 /-- `Q → G`, `q ↦ π(q, 0)`; injective by `mem_of_π_eq`. -/
 def ιQ : Q →* S.G := S.π.comp (MonoidHom.inl Q _)
@@ -370,7 +375,7 @@ end CentralProductData
 
 theorem augIdeal_of_commutator {H : Type*} [Group H] {t : H} (htc : t ∈ commutator H) :
     of ℤ H t - 1 ∈ augIdeal H ^ 2 := by
-  have : t ∈ D 2 H := by rw [D_two, lowerCentralSeries_one]; exact htc
+  have : t ∈ D 2 H := by rw [D_two, Subgroup.top_lowerCentralSeries_one]; exact htc
   exact mem_D.mp this
 
 /-- **Proposition 5.8, general form.** `H ≤ Q`, `α, β ∈ Q` commuting with `H`,
@@ -442,7 +447,7 @@ theorem D_n_eq_of_modular_sq {Q : Type*} [Group Q] (H : Subgroup Q) (α β : Q) 
 theorem D_n_eq_of_modular_comm {Q : Type*} [Group Q] (H : Subgroup Q) (α β : Q) (s t : H)
     (comm_α : ∀ h ∈ H, α * h = h * α) (comm_β : ∀ h ∈ H, β * h = h * β)
     (hα : α * α = s) (hβ : β * β = 1) (ht : (t : Q) = α * β * α⁻¹ * β⁻¹)
-    (htc : t ∈ commutator H) (hs : s ∈ commutator H) (hs2 : s * s ∈ lowerCentralSeries H 2)
+    (htc : t ∈ commutator H) (hs : s ∈ commutator H) (hs2 : s * s ∈ (⊤ : Subgroup H).lowerCentralSeries 2)
     (hs4 : s ^ 4 = 1)
     (gen : ∀ q : Q, ∃ h ∈ H, q = h ∨ q = h * α ∨ q = h * β ∨ q = h * (α * β))
     (α_nmem : α ∉ H) (β_nmem : β ∉ H) (αβ_nmem : α * β ∉ H) :
@@ -461,14 +466,14 @@ theorem D_n_eq_of_modular_comm {Q : Type*} [Group Q] (H : Subgroup Q) (α β : Q
     exact zero_mem _
 
 /-- **Proposition 5.8(2), "for instance"**: `c = g⁻² s` with `c^(2^j) ∈ γ_{j+2}(H)` for all `j`
-(`lowerCentralSeries H (j + 1) = γ_{j+2}(H)`). -/
+(`(⊤ : Subgroup H).lowerCentralSeries (j + 1) = γ_{j+2}(H)`). -/
 theorem D_n_eq_of_central_product_of_gamma {Q : Type*} [Group Q] (H : Subgroup Q) (α β : Q)
     (s t g : H) (e : ℤ) (comm_α : ∀ h ∈ H, α * h = h * α) (comm_β : ∀ h ∈ H, β * h = h * β)
     (hα : α * α = s) (hβ : β * β = (s : Q) ^ e) (ht : (t : Q) = α * β * α⁻¹ * β⁻¹)
     (htc : t ∈ commutator H)
     (gen : ∀ q : Q, ∃ h ∈ H, q = h ∨ q = h * α ∨ q = h * β ∨ q = h * (α * β))
     (α_nmem : α ∉ H) (β_nmem : β ∉ H) (αβ_nmem : α * β ∉ H)
-    (hγ : ∀ j : ℕ, (g⁻¹ * g⁻¹ * s) ^ 2 ^ j ∈ lowerCentralSeries H (j + 1)) :
+    (hγ : ∀ j : ℕ, (g⁻¹ * g⁻¹ * s) ^ 2 ^ j ∈ (⊤ : Subgroup H).lowerCentralSeries (j + 1)) :
     (∀ (n : ℕ) (x : MonoidAlgebra ℤ H),
         mapDomainRingHom ℤ H.subtype x ∈ augIdeal Q ^ n ↔ x ∈ augIdeal H ^ n) ∧
       ∀ n, 2 ≤ n → D n Q = (D n H).map H.subtype :=

@@ -1,0 +1,208 @@
+# yaml-language-server: $schema=https://raw.githubusercontent.com/mathlib-initiative/formalization.yaml/main/schema/formalization.schema.json
+version: "v0.4"
+
+project:
+  name: "Fifth dimension subgroups: D₅ = γ₅ when G/γ₂ is finite of exponent 3, candidates for a counterexample, and a reduction of Kourovka 20.84"
+  description: >-
+    Lean 4 / Mathlib formalization accompanying S. Vorobev, "On the inclusion
+    D_5(G) ⊆ γ_4(G): reductions, the Lie-ring proof, and evidence" (preprint, 2026;
+    submitted to arXiv math.GR on 2026-10-22). The integral dimension subgroups
+    D_n(G) = {g ∈ G : g − 1 ∈ Δ(G)^n} are defined from the augmentation ideal of Mathlib's
+    integral group ring. Kourovka Problem 20.84 asks whether D_5(G) ⊆ γ_4(G) for every group;
+    it is open and is not claimed here. Unconditional results: D_5(G) = γ_5(G) whenever
+    G/γ_2(G) is finite of exponent 3, and more generally whenever G/γ_2(G) is a finite
+    3-group whose cubes form a cyclic group (paper, Theorems 6.6 and 6.8; the inclusion part
+    of Tahara's 1981 description of D_5 is formalized for this); D_5(G) lies in the Jennings
+    product M_5(G) for finite 2-groups of class at most 3; and, for "candidates" (the
+    paper's minimal-counterexample shape among finite 2-groups of class 3), there is no
+    candidate of order 2^11 with Q/P_3 ≅ Z/4 × (Z/2)^7 and none of order 2^11 and rank at
+    least 8 (paper, Lemma 5.6 and Proposition 5.7). Conditional results, with every
+    assumption an explicit hypothesis: the reduction of Problem 20.84 to finite 2-groups of
+    class exactly 3 assuming D_3 = γ_3, Passi's D_4^2 ⊆ γ_4 and Gruenberg's residual theorem
+    (Proposition 2.1); a minimal counterexample is a candidate assuming D_3 = γ_3 (Lemma 5.2);
+    and D_5 = 1 for groups of order 2^11, class at most 3 and rank at least 8, assuming
+    D_3 = γ_3 and the paper's computer result for order 2^10 (Proposition 5.7, D_5 form).
+  authors:
+    - "Stanislav Vorobev"
+  license: "MIT"
+  responsible_maintainers:
+    - "Stanislav Vorobev"
+
+classification:
+  arxiv: ["math.GR"]
+  msc2020: ["20F14", "20D15", "20C05", "16S34"]
+
+sources:
+  - title: "On the inclusion D_5(G) ⊆ γ_4(G): reductions, the Lie-ring proof, and evidence"
+    authors: ["Stanislav Vorobev"]
+    type: paper
+    id: "https://ispacex.github.io/d5/paper/d5.pdf"
+    location: "Theorems 6.6 and 6.8; Lemmas 5.2 (a)-(c) and 5.6; Proposition 5.7 (candidate form and D_5 form); Proposition 2.1 (1) ⇔ (3)"
+    relationship: formalizes
+    note: >-
+      The paper and this formalization were developed together; the paper marks each
+      statement [paper], [Lean] or [computer]. The version cited is the one of 2026-10-22,
+      submitted to arXiv (math.GR) that day; its arXiv identifier was not yet assigned when
+      this commit was made. The paper's formalization section describes this repository at
+      commit e58aa2b (tag lean-v4.29, Lean 4.29); since then the Lie-ring comparison theorem
+      lieDimensionQuestion5 has been removed (see related_formalizations) and the code was
+      ported to Lean 4.35; the paper's [Lean] markers otherwise apply unchanged. Departures
+      from the paper are listed under fidelity.
+    author_endorsement: participated
+  - title: "S. A. Jennings, The structure of the group ring of a p-group over a modular field, Trans. Amer. Math. Soc. 50 (1941) 175-185"
+    authors: ["S. A. Jennings"]
+    type: paper
+    relationship: adapts
+    note: >-
+      D_five_le_jennings formalizes the case needed by the paper (p = 2, n = 5, class at most 3)
+      of the inclusion G ∩ (1 + Δ_{F_p}(G)^n) ⊆ ∏_{i p^j ≥ n} γ_i(G)^{p^j} of Jennings'
+      theorem, applied to D_5(G). The general theorem is not formalized.
+  - title: "K.-I. Tahara, The augmentation quotients of group rings and the fifth dimension subgroups, J. Algebra 71 (1981) 141-173"
+    authors: ["Ken-Ichi Tahara"]
+    type: paper
+    location: "Theorem 6.1 (the inclusion part)"
+    relationship: other
+    note: >-
+      The inclusion part of Tahara's Theorem 6.1 is formalized in the development
+      (taharaFiveOne) and is the main ingredient of the proofs of Theorems 6.6 and 6.8. It is
+      not itself a compared statement.
+  - title: "Kourovka notebook, Problem 20.84 (E. I. Khukhro, V. D. Mazurov, eds., Unsolved problems in group theory, arXiv:1401.0300)"
+    type: other
+    relationship: background
+    note: "The open question D_5(G) ⊆ γ_4(G); stated as DimensionQuestion5 and used only as one side of an equivalence."
+  - title: "I. B. S. Passi, Dimension subgroups, J. Algebra 9 (1968) 152-182; Group rings and their augmentation ideals, LNM 715 (1979)"
+    authors: ["I. B. S. Passi"]
+    type: paper
+    relationship: background
+    note: "Source of the hypotheses D_3 = γ_3 and D_4^2 ⊆ γ_4, which are assumed (explicit hypotheses), not proved."
+  - title: "K. W. Gruenberg, Residual properties of infinite soluble groups, Proc. London Math. Soc. (3) 7 (1957) 29-62"
+    authors: ["K. W. Gruenberg"]
+    type: paper
+    relationship: background
+    note: "Source of the hypothesis GruenbergResidualTwo, assumed (explicit hypothesis), not proved."
+
+related_formalizations:
+  - id: "https://github.com/TimmPeterson/lie-algebras"
+    relationship: other
+    note: >-
+      Lean formalization by V. Ionin, R. Mikhailov and T. Petrov of the Lie-ring analogue
+      (D_5(L) ⊆ γ_4(L) for Lie rings, arXiv:2610.02042). Earlier versions of this repository
+      (up to commit e58aa2b, Lean 4.29) imported it for a side-by-side comparison; it has no
+      licence file and is on Lean 4.29, so it is not a dependency of this commit, and nothing
+      here uses it.
+
+status:
+  scope: >-
+    The compared theorems are proved without sorry and use only propext, Classical.choice and
+    Quot.sound. Not formalized: the general Jennings theorem (only the inclusion needed for
+    D_5 is); the paper's computer results (Propositions 5.1, 5.3, 5.10, Theorems 5.4, 6.14),
+    of which Proposition 5.3 enters D_five_eq_bot_of_rank as an explicit hypothesis; the
+    classical results D_3 = γ_3, Passi's D_4^2 ⊆ γ_4 and Gruenberg's theorem, which enter as
+    explicit hypotheses; the paper's Remark 2.2 (restriction to metabelian groups in
+    Proposition 2.1) and Lemma 5.2 (d); the paper-only results (Lemmas 6.1, 6.2, 6.9,
+    Theorems 6.10, 6.12). Formalized in the development but not compared here: Proposition 5.8,
+    Lemma 5.9, Lemma 6.3, Proposition 6.5 and the inclusion part of Tahara's Theorem 6.1.
+  sorry_count: 0
+  sorry_in_definitions: 0
+  axioms: ["propext", "Classical.choice", "Quot.sound"]
+
+automation:
+  methods:
+    - method: agent
+      models: ["claude-opus-5-5"]
+      framework: "Claude Code"
+      tool_setup: >-
+        Claude Code agents wrote all Lean code (definitions, statements and proofs) and the
+        Challenge/Solution pair, under the direction of Stanislav Vorobev, who chose the
+        results and tracked the work in an issue tracker. Lean builds ran on a separate
+        build machine through a job runner. The port from Lean 4.29 to Lean 4.35 with the
+        module system was also done by an agent.
+      cost:
+        wall_time: "about one week (2026-10-16 to 2026-10-23)"
+        spend_usd: "subscription-based usage; not itemized"
+        hardware: "API-only for the agents; a 10-core build server for Lean"
+      prompting_notes: >-
+        Agents were given tasks of the form "formalize Lemma X of the paper", with the
+        paper source and the existing development, and were required to keep an axiom
+        audit (#print axioms for every declaration) free of anything beyond the three
+        standard axioms.
+  spend_usd: "subscription-based usage; not itemized"
+  notes: >-
+    The Lean code is AI-written. The human author directed the work and is responsible for
+    it, but did not write or line-by-line review the Lean proofs. Correctness rests on the
+    Lean kernel; faithfulness of the statements rests on the agent reviews described under
+    review.
+
+fidelity:
+  divergences: >-
+    (1) D_n is stated in the Challenge as a set; the development defines it as a normal
+    subgroup, and Solution.lean proves they agree. (2) M_n in a candidate is defined by
+    Jennings' product formula, not as G ∩ (1 + Δ_{F_2}(G)^n); the inclusion
+    G ∩ (1 + Δ_{F_2}(G)^5) ⊆ M_5 (class ≤ 3) is proved, the reverse is not. Hence the
+    non-existence results for candidates (Lemma 5.6, Proposition 5.7) are at least as strong
+    as the paper's, while Lemma 5.2 (b) gives n ∈ M_5 only in the product sense. (3) Proposition 2.1 is proved with
+    D_3 = γ_3, Passi's theorem and Gruenberg's theorem as explicit hypotheses, and with
+    "metabelian" omitted, which is automatic for class ≤ 3 (Remark 2.2, not formalized). (4) Lemma 5.2 is formalized in
+    parts (a)-(c) only, assuming D_3 = γ_3. (5) The D_5 form of Proposition 5.7 assumes
+    D_3 = γ_3 and the order-2^10 statement of Proposition 5.3 for class ≤ 3 (class exactly 3
+    is the paper's Proposition 5.3, [computer + paper]; class ≤ 2 follows from D_3 = γ_3). (6) In Lemma 5.6 the isomorphism Q/P_3(Q) ≅ Z/4 × (Z/2)^7 is given as a
+    surjective homomorphism with kernel P_3(Q). (7) In Theorem 6.8 "the cubes of G/γ_2 form
+    a cyclic group" is stated as: for some t, every x^3 is congruent modulo γ_2 to a power
+    of t^3.
+
+review:
+  status: "agent-reviewed"
+  reviewers: ["independent Claude Code reviewer agents (one per change), not human experts"]
+  notes: >-
+    Every change to the development was reviewed before merging by a separate agent, given the
+    diff, the paper and the sources but not the author agent's notes, checking the statements
+    against the paper and the cited sources (for
+    example Tahara's condition (C_2) against Tahara 1981, p. 160). An axiom audit
+    (AxiomAudit.lean, run in CI) prints the axioms of every declaration of the development;
+    all depend only on propext, Classical.choice and Quot.sound. No human expert has
+    reviewed the Lean code.
+
+alignment:
+  namespace: "GroupDimension.Palomar"
+  statements:
+    - source: "Theorem 6.6"
+      lean: "GroupDimension.Palomar.D_five_eq_gamma_five_of_exp_three"
+      module: "Challenge"
+      status: "proved"
+    - source: "Theorem 6.8"
+      lean: "GroupDimension.Palomar.D_five_eq_gamma_five_of_cubes_cyclic"
+      module: "Challenge"
+      status: "proved"
+    - source: "Jennings' inclusion D_5 ⊆ M_5 (finite 2-groups of class ≤ 3)"
+      lean: "GroupDimension.Palomar.D_five_le_jennings"
+      module: "Challenge"
+      status: "proved"
+    - source: "Lemma 5.6"
+      lean: "GroupDimension.Palomar.not_isCandidate_of_quotient_z4"
+      module: "Challenge"
+      status: "proved"
+    - source: "Proposition 5.7 (|P_2| ≥ 16 for every candidate)"
+      lean: "GroupDimension.Palomar.false_of_card_expCentral_two_le"
+      module: "Challenge"
+      status: "proved"
+    - source: "Proposition 5.7 (candidate form)"
+      lean: "GroupDimension.Palomar.not_isCandidate_of_rank"
+      module: "Challenge"
+      status: "proved"
+    - source: "Proposition 2.1, (1) ⇔ (3)"
+      lean: "GroupDimension.Palomar.dimensionQuestion5_iff_class_three"
+      module: "Challenge"
+      status: "proved, conditional"
+      note: "Hypotheses: D_3 = γ_3, Passi, Gruenberg; without 'metabelian'."
+    - source: "Lemma 5.2 (a)-(c)"
+      lean: "GroupDimension.Palomar.isCandidate_of_minimal"
+      module: "Challenge"
+      status: "proved, conditional"
+      note: "Hypothesis: D_3 = γ_3."
+    - source: "Proposition 5.7 (D_5 form)"
+      lean: "GroupDimension.Palomar.D_five_eq_bot_of_rank"
+      module: "Challenge"
+      status: "proved, conditional"
+      note: "Hypotheses: D_3 = γ_3 and Proposition 5.3 for order 2^10 (a computer result in the paper)."
+
+acknowledgements: "Mathlib."

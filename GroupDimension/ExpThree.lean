@@ -1,5 +1,9 @@
-import GroupDimension.Tahara
-import GroupDimension.ClassFour
+module
+
+public import GroupDimension.Tahara
+public import GroupDimension.ClassFour
+
+@[expose] public section
 
 /-!
 # `D₅ = γ₅` when `G/γ₂(G)` has exponent `3` (Theorem 6.6), given Tahara's Theorem 6.1
@@ -22,7 +26,7 @@ import GroupDimension.ClassFour
   `𝔽₃`-valued maps additive on a layer (`exists_F_mod`, `mem_of_forall_F`), so the
   bookkeeping becomes arithmetic in `ZMod 3`.
 
-Indexing: Mathlib's `lowerCentralSeries G k` is `γ_{k+1}(G)`; Tahara's `H_i` is `γ_i`.
+Indexing: Mathlib's `(⊤ : Subgroup G).lowerCentralSeries k` is `γ_{k+1}(G)`; Tahara's `H_i` is `γ_i`.
 -/
 
 namespace GroupDimension
@@ -39,8 +43,8 @@ variable {G : Type*} [Group G]
 theorem tc_eq (y x : G) : tc y x = ⁅y⁻¹, x⁻¹⁆ := by
   simp only [tc, commutatorElement_def, inv_inv]
 
-theorem tc_mem {i j n : ℕ} (h : i + j + 1 = n) {y x : G} (hy : y ∈ lowerCentralSeries G i)
-    (hx : x ∈ lowerCentralSeries G j) : tc y x ∈ lowerCentralSeries G n := by
+theorem tc_mem {i j n : ℕ} (h : i + j + 1 = n) {y x : G} (hy : y ∈ (⊤ : Subgroup G).lowerCentralSeries i)
+    (hx : x ∈ (⊤ : Subgroup G).lowerCentralSeries j) : tc y x ∈ (⊤ : Subgroup G).lowerCentralSeries n := by
   rw [tc_eq]; exact commutator_mem_lcs h (inv_mem hy) (inv_mem hx)
 
 theorem tc_inv (y x : G) : (tc y x)⁻¹ = tc x y := by simp only [tc]; group
@@ -175,10 +179,10 @@ theorem pow_mul_mod {N : Subgroup G} [N.Normal] {a b : G} (h : ⁅a, b⁆ ∈ N)
   simpa [QuotientGroup.mk'_apply] using this.symm
 
 /-- `⁅cⁿ, g⁆ ≡ ⁅c, g⁆ⁿ` modulo `γ_{k+2}`, for `c ∈ γ_{k+1}` (Mathlib index `k`). -/
-theorem comm_pow_left_mod {k : ℕ} {c : G} (hc : c ∈ lowerCentralSeries G k) (g : G) (n : ℕ) :
-    (⁅c, g⁆ ^ n)⁻¹ * ⁅c ^ n, g⁆ ∈ lowerCentralSeries G (k + 2) := by
+theorem comm_pow_left_mod {k : ℕ} {c : G} (hc : c ∈ (⊤ : Subgroup G).lowerCentralSeries k) (g : G) (n : ℕ) :
+    (⁅c, g⁆ ^ n)⁻¹ * ⁅c ^ n, g⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 2) := by
   rw [← QuotientGroup.eq]
-  let π := QuotientGroup.mk' (lowerCentralSeries G (k + 2))
+  let π := QuotientGroup.mk' ((⊤ : Subgroup G).lowerCentralSeries (k + 2))
   have hz : ∀ y : G, Commute (π y) (π ⁅c, g⁆) := fun y =>
     mk_commute (commutator_mem_lcs (i := 0) (j := k + 1) (by omega) (mem_lcs_zero y)
       (commutator_mem_lcs (i := k) (j := 0) (by omega) hc (mem_lcs_zero g)))
@@ -192,65 +196,65 @@ theorem comm_pow_left_mod {k : ℕ} {c : G} (hc : c ∈ lowerCentralSeries G k) 
 
 /-- If `γ_{k+1}/γ_{k+2}` has exponent dividing `n`, so has `γ_{k+2}/γ_{k+3}` (Mathlib index). -/
 theorem pow_succ_mem {k n : ℕ}
-    (hk : ∀ a ∈ lowerCentralSeries G k, a ^ n ∈ lowerCentralSeries G (k + 1)) :
-    ∀ a ∈ lowerCentralSeries G (k + 1), a ^ n ∈ lowerCentralSeries G (k + 2) := by
+    (hk : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries k, a ^ n ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1)) :
+    ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1), a ^ n ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 2) := by
   let S : Subgroup G :=
-    { carrier := {a | a ∈ lowerCentralSeries G (k + 1) ∧ a ^ n ∈ lowerCentralSeries G (k + 2)}
+    { carrier := {a | a ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1) ∧ a ^ n ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 2)}
       one_mem' := ⟨one_mem _, by rw [one_pow]; exact one_mem _⟩
       mul_mem' := by
         rintro a b ⟨ha, ha3⟩ ⟨hb, hb3⟩
         refine ⟨mul_mem ha hb, ?_⟩
-        have h := pow_mul_mod (N := lowerCentralSeries G (k + 2))
+        have h := pow_mul_mod (N := (⊤ : Subgroup G).lowerCentralSeries (k + 2))
           (commutator_mem_lcs (i := k + 1) (j := 0) (by omega) ha (mem_lcs_zero b)) n
         have := mul_mem (mul_mem ha3 hb3) h
         rwa [mul_inv_cancel_left] at this
       inv_mem' := by
         rintro a ⟨ha, ha3⟩
         exact ⟨inv_mem ha, by rw [inv_pow]; exact inv_mem ha3⟩ }
-  have hle : lowerCentralSeries G (k + 1) ≤ S := by
-    show ⁅lowerCentralSeries G k, ⊤⁆ ≤ S
+  have hle : (⊤ : Subgroup G).lowerCentralSeries (k + 1) ≤ S := by
+    show ⁅(⊤ : Subgroup G).lowerCentralSeries k, ⊤⁆ ≤ S
     rw [commutator_le]
     intro c hc g _
     refine ⟨commutator_mem_lcs (by omega) hc (mem_lcs_zero g), ?_⟩
     have h := comm_pow_left_mod hc g n
-    have h3 : ⁅c ^ n, g⁆ ∈ lowerCentralSeries G (k + 2) :=
+    have h3 : ⁅c ^ n, g⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 2) :=
       commutator_mem_lcs (by omega) (hk c hc) (mem_lcs_zero g)
     have := mul_mem h3 (inv_mem h)
     rwa [mul_inv_rev, inv_inv, mul_inv_cancel_left] at this
   exact fun a ha => (hle ha).2
 
 theorem cube_succ {k : ℕ}
-    (hk : ∀ a ∈ lowerCentralSeries G k, a ^ 3 ∈ lowerCentralSeries G (k + 1)) :
-    ∀ a ∈ lowerCentralSeries G (k + 1), a ^ 3 ∈ lowerCentralSeries G (k + 2) :=
+    (hk : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries k, a ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1)) :
+    ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1), a ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 2) :=
   pow_succ_mem hk
 
 /-! ## Groups of class `≤ 4` whose layers have exponent `3` -/
 
 section Cubes
 
-variable (h5 : lowerCentralSeries G 4 = ⊥)
-  (h2 : ∀ a ∈ lowerCentralSeries G 1, a ^ 3 ∈ lowerCentralSeries G 2)
+variable (h5 : (⊤ : Subgroup G).lowerCentralSeries 4 = ⊥)
+  (h2 : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, a ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 2)
 
 include h2 in
-theorem cube_L2 : ∀ c ∈ lowerCentralSeries G 2, c ^ 3 ∈ lowerCentralSeries G 3 := cube_succ h2
+theorem cube_L2 : ∀ c ∈ (⊤ : Subgroup G).lowerCentralSeries 2, c ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := cube_succ h2
 
 include h5 h2 in
-theorem cube_L3 : ∀ z ∈ lowerCentralSeries G 3, z ^ 3 = 1 := fun z hz => by
+theorem cube_L3 : ∀ z ∈ (⊤ : Subgroup G).lowerCentralSeries 3, z ^ 3 = 1 := fun z hz => by
   have := cube_succ (cube_L2 h2) z hz
   rwa [h5, mem_bot] at this
 
 include h5 in
-theorem central_L3 {z : G} (hz : z ∈ lowerCentralSeries G 3) (g : G) : g * z = z * g :=
+theorem central_L3 {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 3) (g : G) : g * z = z * g :=
   central3 h5 hz g
 
 include h5 h2 in
 /-- `[Y, x³] = [Y, x]³` for `Y ∈ γ₂` (Tahara's commutator). -/
-theorem tc_pow_three_right {Y : G} (hY : Y ∈ lowerCentralSeries G 1) (x : G) :
+theorem tc_pow_three_right {Y : G} (hY : Y ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (x : G) :
     tc Y (x ^ 3) = tc Y x ^ 3 := by
   obtain ⟨c, hc⟩ : ∃ c, c = tc Y x := ⟨_, rfl⟩
   obtain ⟨e, he⟩ : ∃ e, e = tc c x := ⟨_, rfl⟩
-  have hc2 : c ∈ lowerCentralSeries G 2 := hc ▸ tc_mem (by omega) hY (mem_lcs_zero x)
-  have he3 : e ∈ lowerCentralSeries G 3 := he ▸ tc_mem (by omega) hc2 (mem_lcs_zero x)
+  have hc2 : c ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := hc ▸ tc_mem (by omega) hY (mem_lcs_zero x)
+  have he3 : e ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := he ▸ tc_mem (by omega) hc2 (mem_lcs_zero x)
   have hez : ∀ g : G, g * e = e * g := fun g => central_L3 h5 he3 g
   have hY' : x⁻¹ * Y * x = Y * c := by rw [hc, tc]; group
   have hc' : x⁻¹ * c * x = c * e := by rw [he, tc]; group
@@ -270,10 +274,10 @@ theorem tc_pow_three_right {Y : G} (hY : Y ∈ lowerCentralSeries G 1) (x : G) :
 
 include h5 in
 /-- `[a³, x] = [a, x]³` for `a ∈ γ₂` (Tahara's commutator). -/
-theorem tc_pow_three_left {a : G} (ha : a ∈ lowerCentralSeries G 1) (x : G) :
+theorem tc_pow_three_left {a : G} (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (x : G) :
     tc (a ^ 3) x = tc a x ^ 3 := by
   obtain ⟨c, hc⟩ : ∃ c, c = tc a x := ⟨_, rfl⟩
-  have hc2 : c ∈ lowerCentralSeries G 2 := hc ▸ tc_mem (by omega) ha (mem_lcs_zero x)
+  have hc2 : c ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := hc ▸ tc_mem (by omega) ha (mem_lcs_zero x)
   have hac : Commute a c := by
     have := comm_eq_one h5 (by norm_num) ha hc2
     exact commutatorElement_eq_one_iff_mul_comm.mp this
@@ -286,8 +290,8 @@ theorem tc_pow_three_left {a : G} (ha : a ∈ lowerCentralSeries G 1) (x : G) :
 
 include h5 h2 in
 /-- If `a ∈ γ₂` and `a³ ∈ γ₄`, then `[x³, a] = 1`. -/
-theorem tc_cube_eq_one {a : G} (ha : a ∈ lowerCentralSeries G 1)
-    (ha3 : a ^ 3 ∈ lowerCentralSeries G 3) (x : G) : tc (x ^ 3) a = 1 := by
+theorem tc_cube_eq_one {a : G} (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
+    (ha3 : a ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 3) (x : G) : tc (x ^ 3) a = 1 := by
   rw [← tc_inv, tc_pow_three_right h5 h2 ha, ← tc_pow_three_left h5 ha,
     tc_of_central (fun g => central_L3 h5 ha3 g), inv_one]
 
@@ -394,8 +398,8 @@ theorem row_zero {n t : ℕ} (b : Fin n → Fin t → ℤ) {k0 : Fin t} (hb : �
 `3`, and the basis is adapted to the cube map. `σ i = some k` says that `x_{1i}` is *active*,
 with `x_{1i}³ = x_{2k}`; inactive `x_{1i}` have `x_{1i}³ ∈ γ₃`. -/
 structure Setup (T : Data G) (σ : Fin T.s → Option (Fin T.t)) : Prop where
-  h5 : lowerCentralSeries G 4 = ⊥
-  h2 : ∀ a ∈ lowerCentralSeries G 1, a ^ 3 ∈ lowerCentralSeries G 2
+  h5 : (⊤ : Subgroup G).lowerCentralSeries 4 = ⊥
+  h2 : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, a ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 2
   valid : T.Valid
   hd : ∀ i, T.d i = 3
   he : ∀ k, T.e k = 3
@@ -405,7 +409,7 @@ structure Setup (T : Data G) (σ : Fin T.s → Option (Fin T.t)) : Prop where
   down : ∀ i ki k, σ i = some ki → k < ki → ∃ j, σ j = some k
   hb : ∀ i k, T.b i k = if σ i = some k then 1 else 0
   hY : ∀ i k, σ i = some k → T.x₂ k = T.x₁ i ^ 3
-  hK : ∀ i, σ i = none → T.x₁ i ^ 3 ∈ lowerCentralSeries G 2
+  hK : ∀ i, σ i = none → T.x₁ i ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 2
 
 namespace Setup
 
@@ -420,14 +424,14 @@ theorem ch2 (i : Fin T.s) : T.ch i 2 = 3 := by
 theorem ch3 (i : Fin T.s) : T.ch i 3 = 1 := by
   rw [Data.ch, S.hd]; rfl
 
-theorem x2mem (k : Fin T.t) : T.x₂ k ∈ lowerCentralSeries G 1 := S.valid.basis₂.mem k
+theorem x2mem (k : Fin T.t) : T.x₂ k ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := S.valid.basis₂.mem k
 
-theorem x3mem (l : Fin T.u) : T.x₃ l ∈ lowerCentralSeries G 2 := S.valid.basis₃.mem l
+theorem x3mem (l : Fin T.u) : T.x₃ l ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := S.valid.basis₃.mem l
 
-theorem Y1 (i : Fin T.s) : T.x₁ i ^ 3 ∈ lowerCentralSeries G 1 := by
+theorem Y1 (i : Fin T.s) : T.x₁ i ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := by
   have h := S.valid.hb i
   rw [S.hd] at h
-  have hP : oprod T.x₂ (T.b i) * oprod T.x₃ (T.c i) ∈ lowerCentralSeries G 1 :=
+  have hP : oprod T.x₂ (T.b i) * oprod T.x₃ (T.c i) ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
     mul_mem (oprod_mem S.x2mem _) (oprod_mem (fun l => lcs_mem_of_le (by norm_num) (S.x3mem l)) _)
   rw [← mul_inv_cancel_left (oprod T.x₂ (T.b i) * oprod T.x₃ (T.c i)) (T.x₁ i ^ 3)]
   exact mul_mem hP (lcs_mem_of_le (by norm_num) h)
@@ -490,9 +494,9 @@ theorem α3 {g : Fin T.s} (hg : σ g = none) {h : Fin T.s} (hgh : g ≤ h) (l : 
     (3 : ℤ) ∣ T.α g h l := by
   have hm := S.valid.hα g h hgh
   rw [S.hd] at hm
-  have ht : tc (T.x₁ g ^ 3) (T.x₁ h) ∈ lowerCentralSeries G 3 :=
+  have ht : tc (T.x₁ g ^ 3) (T.x₁ h) ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
     tc_mem (by omega) (S.hK g hg) (mem_lcs_zero _)
-  have hP : oprod T.x₃ (T.α g h) ∈ lowerCentralSeries G 3 := by
+  have hP : oprod T.x₃ (T.α g h) ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by
     have := mul_mem ht (inv_mem hm)
     rwa [mul_inv_rev, inv_inv, mul_inv_cancel_left] at this
   have := (S.valid.basis₃.indep _).mp hP l
@@ -527,24 +531,23 @@ theorem E3 (i : Fin T.s) (l : Fin T.u) : (3 : ℤ) ∣ ∑ k, τ.v' i k * T.dd k
     · exact (S.w'3 hτ hσ hh.1 hh.2).mul_right _
   omega
 
-theorem a3 (i : Fin T.s) : oprod T.x₂ (τ.v' i) ^ 3 ∈ lowerCentralSeries G 3 := by
-  apply mem_of_forall_F (p := 3) (lowerCentralSeries G 2) (lowerCentralSeries G 3)
-    (lowerCentralSeries_antitone (by norm_num))
+theorem a3 (i : Fin T.s) : oprod T.x₂ (τ.v' i) ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by
+  apply mem_of_forall_F (p := 3) ((⊤ : Subgroup G).lowerCentralSeries 2) ((⊤ : Subgroup G).lowerCentralSeries 3)
+    ((Subgroup.lowerCentralSeries_antitone ⊤) (by norm_num))
     (fun a ha b _ => commutator_mem_lcs (i := 2) (j := 0) (by omega) ha (mem_lcs_zero b))
     (cube_L2 S.h2) (S.h2 _ (oprod_mem S.x2mem _))
   intro F hF hF0
-  have hle : lowerCentralSeries G 3 ≤ lowerCentralSeries G 2 :=
-    lowerCentralSeries_antitone (by norm_num)
-  have hC : ∀ a ∈ lowerCentralSeries G 1, ∀ b ∈ lowerCentralSeries G 1,
+  have hle : (⊤ : Subgroup G).lowerCentralSeries 3 ≤ (⊤ : Subgroup G).lowerCentralSeries 2 :=
+    (Subgroup.lowerCentralSeries_antitone ⊤) (by norm_num)
+  have hC : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 1,
       F ((a * b) ^ 3) = F (a ^ 3) + F (b ^ 3) := by
     intro a ha b hb
-    have hn := pow_mul_mod (N := lowerCentralSeries G 3)
+    have hn := pow_mul_mod (N := (⊤ : Subgroup G).lowerCentralSeries 3)
       (commutator_mem_lcs (i := 1) (j := 1) (by omega) ha hb) 3
     rw [← mul_inv_cancel_left (a ^ 3 * b ^ 3) ((a * b) ^ 3),
       addMap_mul_mem hle hF hF0 (mul_mem (S.h2 a ha) (S.h2 b hb)) hn,
       hF _ (S.h2 a ha) _ (S.h2 b hb)]
   have hsum := addMap_oprod (A := fun y => F (y ^ 3)) hC S.x2mem (τ.v' i)
-  simp only at hsum
   have hxk : ∀ k, F (T.x₂ k ^ 3) = ∑ l, (T.dd k l : ZMod 3) * F (T.x₃ l) := by
     intro k
     have h := S.valid.hdd k
@@ -638,12 +641,12 @@ theorem genC_eq : T.genC τ = 1 := by
   split_ifs with hijk
   · rw [S.hd]
     rcases hσ : σ i with _ | ki
-    · have : tc (tc (T.x₁ i ^ 3) (T.x₁ j)) (T.x₁ k) ∈ lowerCentralSeries G 4 :=
+    · have : tc (tc (T.x₁ i ^ 3) (T.x₁ j)) (T.x₁ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 4 :=
         tc_mem (i := 3) (j := 0) (by omega)
           (tc_mem (i := 2) (j := 0) (by omega) (S.hK i hσ) (mem_lcs_zero _)) (mem_lcs_zero _)
       rw [S.h5, mem_bot] at this
       rw [this, one_zpow]
-    · have hz : tc (tc (T.x₁ i ^ 3) (T.x₁ j)) (T.x₁ k) ∈ lowerCentralSeries G 3 :=
+    · have hz : tc (tc (T.x₁ i ^ 3) (T.x₁ j)) (T.x₁ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
         tc_mem (i := 2) (j := 0) (by omega)
           (tc_mem (i := 1) (j := 0) (by omega) (S.Y1 i) (mem_lcs_zero _)) (mem_lcs_zero _)
       obtain ⟨w0, hw0⟩ := S.w3 hτ hσ hijk.1 hijk.2
@@ -653,13 +656,13 @@ theorem genC_eq : T.genC τ = 1 := by
 omit hτ in
 /-- `y ↦ F [Y, y]` is additive on `γ₂`, for `Y ∈ γ₂` and `F` additive on `γ₄`. -/
 theorem addMap_tc_right {F : G → ZMod 3}
-    (hF : ∀ a ∈ lowerCentralSeries G 3, ∀ b ∈ lowerCentralSeries G 3, F (a * b) = F a + F b)
-    {Y : G} (hY : Y ∈ lowerCentralSeries G 1) :
-    ∀ a ∈ lowerCentralSeries G 1, ∀ b ∈ lowerCentralSeries G 1,
+    (hF : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 3, ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 3, F (a * b) = F a + F b)
+    {Y : G} (hY : Y ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
+    ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 1,
       F (tc Y (a * b)) = F (tc Y a) + F (tc Y b) := by
   intro a ha b hb
-  have hta : tc Y a ∈ lowerCentralSeries G 3 := tc_mem (by omega) hY ha
-  have htb : tc Y b ∈ lowerCentralSeries G 3 := tc_mem (by omega) hY hb
+  have hta : tc Y a ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := tc_mem (by omega) hY ha
+  have htb : tc Y b ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := tc_mem (by omega) hY hb
   rw [tc_mul_right, show b⁻¹ * tc Y a * b = tc Y a by
     rw [central_L3 S.h5 hta b⁻¹]; group, hF _ htb _ hta, add_comm]
 
@@ -674,7 +677,7 @@ theorem factorA (i j : Fin T.s) (hu : i < j → (3 : ℤ) ∣ τ.u i j) :
     by_cases ha : σ i ≠ none ∧ σ j ≠ none
     · rw [if_pos ⟨hij, ha⟩]
     · rw [if_neg (fun h => ha h.2)]
-      have h4 : tc (T.x₁ i ^ 3) (T.x₁ j ^ 3) ∈ lowerCentralSeries G 4 := by
+      have h4 : tc (T.x₁ i ^ 3) (T.x₁ j ^ 3) ∈ (⊤ : Subgroup G).lowerCentralSeries 4 := by
         by_cases hi : σ i = none
         · exact tc_mem (i := 2) (j := 1) (by omega) (S.hK i hi) (S.Y1 j)
         · have hj : σ j = none := by
@@ -687,8 +690,8 @@ theorem factorA (i j : Fin T.s) (hu : i < j → (3 : ℤ) ∣ τ.u i j) :
 /-- **Every generator of Tahara's Theorem 6.1 is trivial** in the situation `Setup`. -/
 theorem gen_eq_one : T.gen τ = 1 := by
   classical
-  have hle34 : lowerCentralSeries G 4 ≤ lowerCentralSeries G 3 :=
-    lowerCentralSeries_antitone (by norm_num)
+  have hle34 : (⊤ : Subgroup G).lowerCentralSeries 4 ≤ (⊤ : Subgroup G).lowerCentralSeries 3 :=
+    (Subgroup.lowerCentralSeries_antitone ⊤) (by norm_num)
   -- the `u`-part, rewritten
   have hA : T.genA τ = (List.ofFn fun i => (List.ofFn fun j =>
       if i < j ∧ σ i ≠ none ∧ σ j ≠ none then tc (T.x₁ i ^ 3) (T.x₁ j ^ 3) ^ (τ.u i j / 3)
@@ -696,34 +699,34 @@ theorem gen_eq_one : T.gen τ = 1 := by
     unfold Data.genA
     simp only [S.factorA (τ := τ) _ _ (S.u3 hτ _ _)]
   have memA : ∀ i j, (if i < j ∧ σ i ≠ none ∧ σ j ≠ none then
-      tc (T.x₁ i ^ 3) (T.x₁ j ^ 3) ^ (τ.u i j / 3) else 1) ∈ lowerCentralSeries G 3 := by
+      tc (T.x₁ i ^ 3) (T.x₁ j ^ 3) ^ (τ.u i j / 3) else 1) ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by
     intro i j
     split_ifs
     · exact zpow_mem (tc_mem (by omega) (S.Y1 i) (S.Y1 j)) _
     · exact one_mem _
   have memB : ∀ i k, (List.ofFn fun l => if k < l then tc (T.x₂ l) (T.x₂ k) ^ T.b i l
-      else 1).prod ^ τ.v i k ∈ lowerCentralSeries G 3 := by
+      else 1).prod ^ τ.v i k ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by
     intro i k
     refine zpow_mem (list_prod_mem fun y hy => ?_) _
     obtain ⟨l, rfl⟩ := List.mem_ofFn.mp hy
     split_ifs
     · exact zpow_mem (tc_mem (by omega) (S.x2mem l) (S.x2mem k)) _
     · exact one_mem _
-  have memGA : T.genA τ ∈ lowerCentralSeries G 3 := by
+  have memGA : T.genA τ ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by
     rw [hA]
     exact list_prod_mem fun y hy => by
       obtain ⟨i, rfl⟩ := List.mem_ofFn.mp hy
       exact list_prod_mem fun y hy => by obtain ⟨j, rfl⟩ := List.mem_ofFn.mp hy; exact memA i j
-  have memGB : T.genB τ ∈ lowerCentralSeries G 3 := by
+  have memGB : T.genB τ ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by
     unfold Data.genB
     exact list_prod_mem fun y hy => by
       obtain ⟨i, rfl⟩ := List.mem_ofFn.mp hy
       exact list_prod_mem fun y hy => by obtain ⟨k, rfl⟩ := List.mem_ofFn.mp hy; exact memB i k
   have hgen : T.gen τ = T.genA τ * T.genB τ := by
     rw [Data.gen, S.genC_eq hτ, mul_one]
-  have key : T.gen τ ∈ lowerCentralSeries G 4 := by
+  have key : T.gen τ ∈ (⊤ : Subgroup G).lowerCentralSeries 4 := by
     rw [hgen]
-    refine mem_of_forall_F (p := 3) (lowerCentralSeries G 3) (lowerCentralSeries G 4) hle34
+    refine mem_of_forall_F (p := 3) ((⊤ : Subgroup G).lowerCentralSeries 3) ((⊤ : Subgroup G).lowerCentralSeries 4) hle34
       (fun a ha b _ => commutator_mem_lcs (i := 3) (j := 0) (by omega) ha (mem_lcs_zero b))
       (fun z hz => by rw [cube_L3 S.h5 S.h2 z hz]; exact one_mem _) (mul_mem memGA memGB) ?_
     intro F hF hF0
@@ -740,7 +743,7 @@ theorem gen_eq_one : T.gen τ = 1 := by
       intro i j kj hj; simp only [γ, β, S.hY j kj hj]
     have hβskew : ∀ i j, β i j + β j i = 0 := by
       intro i j
-      have ht : tc (T.x₁ i ^ 3) (T.x₁ j ^ 3) ∈ lowerCentralSeries G 3 :=
+      have ht : tc (T.x₁ i ^ 3) (T.x₁ j ^ 3) ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
         tc_mem (by omega) (S.Y1 i) (S.Y1 j)
       simp only [β]
       rw [show tc (T.x₁ j ^ 3) (T.x₁ i ^ 3) = (tc (T.x₁ i ^ 3) (T.x₁ j ^ 3))⁻¹ from
@@ -846,13 +849,12 @@ theorem gen_eq_one : T.gen τ = 1 := by
     have pairing : ∀ i li, σ i = some li →
         ∑ j, (if σ j ≠ none then M i j * β i j else 0) = 0 := by
       intro i li hσi
-      have ha1 : oprod T.x₂ (τ.v' i) ∈ lowerCentralSeries G 1 := oprod_mem S.x2mem _
+      have ha1 : oprod T.x₂ (τ.v' i) ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := oprod_mem S.x2mem _
       have h0 := tc_cube_eq_one S.h5 S.h2 (inv_mem ha1)
         (by rw [inv_pow]; exact inv_mem (S.a3 hτ i)) (T.x₁ i)
       have hadd := S.addMap_tc_right hF (S.Y1 i)
       have hinv := addMap_inv (A := fun y => F (tc (T.x₁ i ^ 3) y)) hadd ha1
       have hsum := addMap_oprod (A := fun y => F (tc (T.x₁ i ^ 3) y)) hadd S.x2mem (τ.v' i)
-      simp only at hinv hsum
       rw [h0, addMap_one hF, hsum] at hinv
       -- `v' = -v - W`
       have hW : ∀ k, (∑ h, if i < h then τ.u i h / 3 * T.b h k else 0)
@@ -969,9 +971,8 @@ theorem exists_adapted_bases {K : Type*} [Field K] {V W : Type*} [AddCommGroup V
     constructor
     · intro c c' h
       have h' : P (c - c' : V) = 0 := by
-        have := congrArg Subtype.val h
-        simp only [φ, LinearMap.codRestrict_apply, LinearMap.domRestrict_apply] at this
-        rw [map_sub, this, sub_self]
+        have h2 : P c = P c' := congrArg Subtype.val h
+        rw [map_sub, h2, sub_self]
       have hk : ((c - c' : C) : V) ∈ LinearMap.ker P := by simpa using h'
       have hc : ((c - c' : C) : V) ∈ C := (c - c').2
       have := hC.disjoint.le_bot ⟨hk, hc⟩
@@ -981,8 +982,8 @@ theorem exists_adapted_bases {K : Type*} [Field K] {V W : Type*} [AddCommGroup V
       have hv : v ∈ LinearMap.ker P ⊔ C := by rw [hC.sup_eq_top]; trivial
       obtain ⟨k, hk, c, hc, rfl⟩ := Submodule.mem_sup.mp hv
       refine ⟨⟨c, hc⟩, Subtype.ext ?_⟩
-      simp only [φ, LinearMap.codRestrict_apply, LinearMap.domRestrict_apply, map_add,
-        LinearMap.mem_ker.mp hk, zero_add]
+      show P c = P (k + c)
+      rw [map_add, LinearMap.mem_ker.mp hk, zero_add]
   let bR := bC.map (LinearEquiv.ofBijective φ hφ)
   let e := ((bC.prod bK).map (Submodule.prodEquivOfIsCompl C (LinearMap.ker P) hC.symm)).reindex
     finSumFinEquiv
@@ -991,6 +992,7 @@ theorem exists_adapted_bases {K : Type*} [Field K] {V W : Type*} [AddCommGroup V
   refine ⟨_, _, _, e, f, ?_, ?_⟩
   · intro i
     simp [e, f, bR, φ]
+    all_goals rfl
   · intro j
     simp [e]
 
@@ -1015,7 +1017,7 @@ theorem mul_pow_three_of_central {H : Type*} [Group H] {a b z : H} (hba : b * a 
 variable (G) in
 /-- The layer `γ_{k+1}/γ_{k+2}` (Mathlib index `k`). -/
 abbrev Layer (k : ℕ) : Type _ :=
-  ↥(lowerCentralSeries G k) ⧸ (lowerCentralSeries G (k + 1)).subgroupOf (lowerCentralSeries G k)
+  ↥((⊤ : Subgroup G).lowerCentralSeries k) ⧸ ((⊤ : Subgroup G).lowerCentralSeries (k + 1)).subgroupOf ((⊤ : Subgroup G).lowerCentralSeries k)
 
 instance (k : ℕ) : CommGroup (Layer G k) :=
   { (inferInstance : Group (Layer G k)) with
@@ -1023,10 +1025,10 @@ instance (k : ℕ) : CommGroup (Layer G k) :=
       induction x using QuotientGroup.induction_on with | H a =>
       induction y using QuotientGroup.induction_on with | H b =>
       rw [← QuotientGroup.mk_mul, ← QuotientGroup.mk_mul, QuotientGroup.eq, Subgroup.mem_subgroupOf]
-      have h : ⁅(b : G)⁻¹, (a : G)⁻¹⁆ ∈ lowerCentralSeries G (k + 1) :=
+      have h : ⁅(b : G)⁻¹, (a : G)⁻¹⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1) :=
         lcs_mem_of_le (by omega) (commutator_lcs_le k k
           (commutator_mem_commutator (inv_mem b.2) (inv_mem a.2)))
-      have e : (((a * b)⁻¹ * (b * a) : ↥(lowerCentralSeries G k)) : G) =
+      have e : (((a * b)⁻¹ * (b * a) : ↥((⊤ : Subgroup G).lowerCentralSeries k)) : G) =
           ⁅(b : G)⁻¹, (a : G)⁻¹⁆ := by
         simp only [commutatorElement_def, inv_inv, Subgroup.coe_mul, Subgroup.coe_inv]; group
       rw [e]; exact h }
@@ -1035,37 +1037,37 @@ variable (G) in
 /-- The class of `g ∈ γ_{k+1}` in the layer, written additively (`0` off `γ_{k+1}`). -/
 noncomputable def cl (k : ℕ) (g : G) : Additive (Layer G k) :=
   open Classical in
-  if h : g ∈ lowerCentralSeries G k then Additive.ofMul (QuotientGroup.mk ⟨g, h⟩) else 0
+  if h : g ∈ (⊤ : Subgroup G).lowerCentralSeries k then Additive.ofMul (QuotientGroup.mk ⟨g, h⟩) else 0
 
-theorem cl_of_mem {k : ℕ} {g : G} (h : g ∈ lowerCentralSeries G k) :
+theorem cl_of_mem {k : ℕ} {g : G} (h : g ∈ (⊤ : Subgroup G).lowerCentralSeries k) :
     cl G k g = Additive.ofMul (QuotientGroup.mk ⟨g, h⟩) := by
-  simp [cl, h]
+  rw [cl, dif_pos h]
 
-theorem cl_mul {k : ℕ} {a b : G} (ha : a ∈ lowerCentralSeries G k)
-    (hb : b ∈ lowerCentralSeries G k) : cl G k (a * b) = cl G k a + cl G k b := by
+theorem cl_mul {k : ℕ} {a b : G} (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries k)
+    (hb : b ∈ (⊤ : Subgroup G).lowerCentralSeries k) : cl G k (a * b) = cl G k a + cl G k b := by
   rw [cl_of_mem ha, cl_of_mem hb, cl_of_mem (mul_mem ha hb), ← ofMul_mul]
   rfl
 
-theorem cl_eq_zero_iff {k : ℕ} {a : G} (ha : a ∈ lowerCentralSeries G k) :
-    cl G k a = 0 ↔ a ∈ lowerCentralSeries G (k + 1) := by
+theorem cl_eq_zero_iff {k : ℕ} {a : G} (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries k) :
+    cl G k a = 0 ↔ a ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1) := by
   rw [cl_of_mem ha, ← ofMul_one, Additive.ofMul.apply_eq_iff_eq, QuotientGroup.eq_one_iff,
     Subgroup.mem_subgroupOf]
 
 theorem cl_surj (k : ℕ) (v : Additive (Layer G k)) :
-    ∃ g ∈ lowerCentralSeries G k, cl G k g = v := by
+    ∃ g ∈ (⊤ : Subgroup G).lowerCentralSeries k, cl G k g = v := by
   induction v using Additive.rec with | ofMul x =>
   induction x using QuotientGroup.induction_on with | H a =>
   exact ⟨a, a.2, by rw [cl_of_mem a.2]⟩
 
 theorem cl_one (k : ℕ) : cl G k (1 : G) = 0 := (cl_eq_zero_iff (one_mem _)).mpr (one_mem _)
 
-theorem cl_inv {k : ℕ} {a : G} (ha : a ∈ lowerCentralSeries G k) :
+theorem cl_inv {k : ℕ} {a : G} (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries k) :
     cl G k a⁻¹ = -cl G k a := by
   have := cl_mul ha (inv_mem ha)
   rw [mul_inv_cancel, cl_one] at this
   exact (neg_eq_of_add_eq_zero_right this.symm).symm
 
-theorem cl_zpow {k : ℕ} {a : G} (ha : a ∈ lowerCentralSeries G k) (n : ℤ) :
+theorem cl_zpow {k : ℕ} {a : G} (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries k) (n : ℤ) :
     cl G k (a ^ n) = n • cl G k a := by
   induction n using Int.induction_on with
   | zero => simp [cl_one]
@@ -1074,10 +1076,10 @@ theorem cl_zpow {k : ℕ} {a : G} (ha : a ∈ lowerCentralSeries G k) (n : ℤ) 
     rw [zpow_sub_one, cl_mul (zpow_mem ha _) (inv_mem ha), ih, cl_inv ha, sub_smul, one_smul,
       sub_eq_add_neg]
 
-theorem cl_oprod {k n : ℕ} {y : Fin n → G} (hy : ∀ i, y i ∈ lowerCentralSeries G k)
+theorem cl_oprod {k n : ℕ} {y : Fin n → G} (hy : ∀ i, y i ∈ (⊤ : Subgroup G).lowerCentralSeries k)
     (a : Fin n → ℤ) : cl G k (oprod y a) = ∑ i, a i • cl G k (y i) := by
   unfold oprod
-  have : ∀ l : List G, (∀ x ∈ l, x ∈ lowerCentralSeries G k) →
+  have : ∀ l : List G, (∀ x ∈ l, x ∈ (⊤ : Subgroup G).lowerCentralSeries k) →
       cl G k l.prod = (l.map (cl G k)).sum := by
     intro l
     induction l with
@@ -1092,7 +1094,7 @@ theorem cl_oprod {k n : ℕ} {y : Fin n → G} (hy : ∀ i, y i ∈ lowerCentral
   exact Finset.sum_congr rfl fun i _ => cl_zpow (hy i) _
 
 theorem three_smul_cl {k : ℕ}
-    (h3 : ∀ a ∈ lowerCentralSeries G k, a ^ 3 ∈ lowerCentralSeries G (k + 1))
+    (h3 : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries k, a ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1))
     (v : Additive (Layer G k)) : (3 : ℕ) • v = 0 := by
   obtain ⟨g, hg, rfl⟩ := cl_surj k v
   rw [← natCast_zsmul, ← cl_zpow hg, cl_eq_zero_iff (zpow_mem hg _)]
@@ -1102,22 +1104,22 @@ theorem three_smul_cl {k : ℕ}
 basis of the layer with all orders `3`; normal forms have exponents in `[0, 3)`. -/
 theorem isLayerBasis_of_basis {k n : ℕ}
     [Module (ZMod 3) (Additive (Layer G k))] {y : Fin n → G}
-    (hy : ∀ i, y i ∈ lowerCentralSeries G k) (b : Module.Basis (Fin n) (ZMod 3) (Additive (Layer G k)))
+    (hy : ∀ i, y i ∈ (⊤ : Subgroup G).lowerCentralSeries k) (b : Module.Basis (Fin n) (ZMod 3) (Additive (Layer G k)))
     (hb : ∀ i, b i = cl G k (y i)) :
-    IsLayerBasis k y (fun _ => 3) ∧ ∀ g ∈ lowerCentralSeries G k, ∃ a : Fin n → ℤ,
-      (∀ i, 0 ≤ a i ∧ a i < 3) ∧ (oprod y a)⁻¹ * g ∈ lowerCentralSeries G (k + 1) := by
+    IsLayerBasis k y (fun _ => 3) ∧ ∀ g ∈ (⊤ : Subgroup G).lowerCentralSeries k, ∃ a : Fin n → ℤ,
+      (∀ i, 0 ≤ a i ∧ a i < 3) ∧ (oprod y a)⁻¹ * g ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1) := by
   have hcl : ∀ a : Fin n → ℤ, cl G k (oprod y a) = ∑ i, (a i : ZMod 3) • b i := by
     intro a
     rw [cl_oprod hy]
     exact Finset.sum_congr rfl fun i _ => by rw [hb, Int.cast_smul_eq_zsmul]
-  have hnf : ∀ g ∈ lowerCentralSeries G k, ∃ a : Fin n → ℤ,
-      (∀ i, 0 ≤ a i ∧ a i < 3) ∧ (oprod y a)⁻¹ * g ∈ lowerCentralSeries G (k + 1) := by
+  have hnf : ∀ g ∈ (⊤ : Subgroup G).lowerCentralSeries k, ∃ a : Fin n → ℤ,
+      (∀ i, 0 ≤ a i ∧ a i < 3) ∧ (oprod y a)⁻¹ * g ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1) := by
     intro g hg
     refine ⟨fun i => ((b.repr (cl G k g) i).val : ℤ), fun i => ⟨by positivity, ?_⟩, ?_⟩
     · have := (b.repr (cl G k g) i).val_lt
       show (((b.repr (cl G k g) i).val : ℕ) : ℤ) < 3
       omega
-    · have hm : oprod y (fun i => ((b.repr (cl G k g) i).val : ℤ)) ∈ lowerCentralSeries G k :=
+    · have hm : oprod y (fun i => ((b.repr (cl G k g) i).val : ℤ)) ∈ (⊤ : Subgroup G).lowerCentralSeries k :=
         oprod_mem hy _
       rw [← cl_eq_zero_iff (mul_mem (inv_mem hm) hg), cl_mul (inv_mem hm) hg, cl_inv hm, hcl]
       simp only [Int.cast_natCast, ZMod.natCast_zmod_val]
@@ -1164,18 +1166,18 @@ theorem oprod_single {n : ℕ} (x : Fin n → G) (i : Fin n) :
   simp
 
 /-- `(xy)³ ≡ x³y³` modulo `γ₃` when `γ₂/γ₃` has exponent `3`. -/
-theorem cube_mul_mod (h2 : ∀ a ∈ lowerCentralSeries G 1, a ^ 3 ∈ lowerCentralSeries G 2)
-    (x y : G) : (x ^ 3 * y ^ 3)⁻¹ * (x * y) ^ 3 ∈ lowerCentralSeries G 2 := by
+theorem cube_mul_mod (h2 : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, a ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 2)
+    (x y : G) : (x ^ 3 * y ^ 3)⁻¹ * (x * y) ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := by
   rw [← QuotientGroup.eq]
-  let π := QuotientGroup.mk' (lowerCentralSeries G 2)
-  have hc : tc y x ∈ lowerCentralSeries G 1 := tc_mem (by omega) (mem_lcs_zero y) (mem_lcs_zero x)
+  let π := QuotientGroup.mk' ((⊤ : Subgroup G).lowerCentralSeries 2)
+  have hc : tc y x ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := tc_mem (by omega) (mem_lcs_zero y) (mem_lcs_zero x)
   have hba : π y * π x = π x * π y * π (tc y x) := by
     rw [← map_mul, ← map_mul, ← map_mul]; congr 1; simp only [tc]; group
   have hz : ∀ g, π (tc y x) * π g = π g * π (tc y x) := fun g =>
     (mk_commute (commutator_mem_lcs (i := 1) (j := 0) (by omega) hc (mem_lcs_zero g))).eq
-  have hπ : ∀ g, π g = (g : G ⧸ lowerCentralSeries G 2) := fun _ => rfl
+  have hπ : ∀ g, π g = (g : G ⧸ (⊤ : Subgroup G).lowerCentralSeries 2) := fun _ => rfl
   have key := mul_pow_three_of_central hba (fun g => by
-    obtain ⟨g, rfl⟩ := QuotientGroup.mk'_surjective (lowerCentralSeries G 2) g; exact hz g)
+    obtain ⟨g, rfl⟩ := QuotientGroup.mk'_surjective ((⊤ : Subgroup G).lowerCentralSeries 2) g; exact hz g)
   have h3 : π (tc y x) ^ 3 = 1 := by
     rw [← map_pow, QuotientGroup.mk'_apply, QuotientGroup.eq_one_iff]; exact h2 _ hc
   rw [h3, mul_one] at key
@@ -1184,8 +1186,8 @@ theorem cube_mul_mod (h2 : ∀ a ∈ lowerCentralSeries G 1, a ^ 3 ∈ lowerCent
 
 variable (G) in
 /-- The cube map `γ₁/γ₂ → γ₂/γ₃`, `x ↦ x³`, for `G/γ₂` of exponent `3`. -/
-noncomputable def cubeMap (h1 : ∀ x : G, x ^ 3 ∈ lowerCentralSeries G 1)
-    (h2 : ∀ a ∈ lowerCentralSeries G 1, a ^ 3 ∈ lowerCentralSeries G 2) :
+noncomputable def cubeMap (h1 : ∀ x : G, x ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
+    (h2 : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, a ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 2) :
     Additive (Layer G 0) →+ Additive (Layer G 1) :=
   MonoidHom.toAdditive <| QuotientGroup.lift _
     { toFun := fun x => QuotientGroup.mk ⟨(x : G) ^ 3, h1 x⟩
@@ -1203,8 +1205,8 @@ noncomputable def cubeMap (h1 : ∀ x : G, x ^ 3 ∈ lowerCentralSeries G 1)
       rw [QuotientGroup.eq_one_iff, Subgroup.mem_subgroupOf]
       exact h2 _ hx)
 
-theorem cubeMap_cl (h1 : ∀ x : G, x ^ 3 ∈ lowerCentralSeries G 1)
-    (h2 : ∀ a ∈ lowerCentralSeries G 1, a ^ 3 ∈ lowerCentralSeries G 2) (x : G) :
+theorem cubeMap_cl (h1 : ∀ x : G, x ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
+    (h2 : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, a ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 2) (x : G) :
     cubeMap G h1 h2 (cl G 0 x) = cl G 1 (x ^ 3) := by
   rw [cl_of_mem (mem_lcs_zero x), cl_of_mem (h1 x)]
   rfl
@@ -1214,13 +1216,13 @@ theorem cubeMap_cl (h1 : ∀ x : G, x ^ 3 ∈ lowerCentralSeries G 1)
 /-- **Theorem 6.6, finite case, modulo Tahara.** If `Q` is finite of class `≤ 4` and
 `Q/γ₂(Q)` has exponent dividing `3`, then `D₅(Q) = 1`. -/
 theorem D_five_eq_bot_of_class_four (hT : TaharaFiveOne) {Q : Type} [Group Q] [Finite Q]
-    (h5 : lowerCentralSeries Q 4 = ⊥) (h1 : ∀ x : Q, x ^ 3 ∈ lowerCentralSeries Q 1) :
+    (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥) (h1 : ∀ x : Q, x ^ 3 ∈ (⊤ : Subgroup Q).lowerCentralSeries 1) :
     D 5 Q = ⊥ := by
   classical
-  have h1' : ∀ a ∈ lowerCentralSeries Q 0, a ^ 3 ∈ lowerCentralSeries Q (0 + 1) :=
+  have h1' : ∀ a ∈ (⊤ : Subgroup Q).lowerCentralSeries 0, a ^ 3 ∈ (⊤ : Subgroup Q).lowerCentralSeries (0 + 1) :=
     fun a _ => h1 a
-  have h2 : ∀ a ∈ lowerCentralSeries Q 1, a ^ 3 ∈ lowerCentralSeries Q 2 := cube_succ h1'
-  have h3 : ∀ a ∈ lowerCentralSeries Q 2, a ^ 3 ∈ lowerCentralSeries Q 3 := cube_succ h2
+  have h2 : ∀ a ∈ (⊤ : Subgroup Q).lowerCentralSeries 1, a ^ 3 ∈ (⊤ : Subgroup Q).lowerCentralSeries 2 := cube_succ h1'
+  have h3 : ∀ a ∈ (⊤ : Subgroup Q).lowerCentralSeries 2, a ^ 3 ∈ (⊤ : Subgroup Q).lowerCentralSeries 3 := cube_succ h2
   letI : Module (ZMod 3) (Additive (Layer Q 0)) := AddCommGroup.zmodModule (three_smul_cl h1')
   letI : Module (ZMod 3) (Additive (Layer Q 1)) := AddCommGroup.zmodModule (three_smul_cl h2)
   letI : Module (ZMod 3) (Additive (Layer Q 2)) := AddCommGroup.zmodModule (three_smul_cl h3)
@@ -1239,7 +1241,7 @@ theorem D_five_eq_bot_of_class_four (hT : TaharaFiveOne) {Q : Type} [Group Q] [F
   let x3 : Fin (Module.finrank (ZMod 3) (Additive (Layer Q 2))) → Q := fun l => L2 (e3 l)
   have hx1 : ∀ i, cl Q 0 (x1 i) = e i := fun i => (hL0 (e i)).2
   have hcube : ∀ i, cl Q 1 (x1 i ^ 3) = P (e i) := fun i => by rw [← hx1, hP]
-  have hx2mem : ∀ k, x2 k ∈ lowerCentralSeries Q 1 := by
+  have hx2mem : ∀ k, x2 k ∈ (⊤ : Subgroup Q).lowerCentralSeries 1 := by
     intro k
     by_cases h : (k : ℕ) < m
     · simp only [x2, dif_pos h]; exact h1 _
@@ -1270,7 +1272,7 @@ theorem D_five_eq_bot_of_class_four (hT : TaharaFiveOne) {Q : Type} [Group Q] [F
       · rintro rfl; rfl
       · intro hk; exact Fin.ext hk.symm
     · simp [h]
-  have hK : ∀ i, σ i = none → x1 i ^ 3 ∈ lowerCentralSeries Q 2 := by
+  have hK : ∀ i, σ i = none → x1 i ^ 3 ∈ (⊤ : Subgroup Q).lowerCentralSeries 2 := by
     intro i hi
     have hm : ¬ (i : ℕ) < m := by
       intro h; simp [σ, h] at hi
@@ -1363,27 +1365,27 @@ theorem D_five_eq_bot_of_class_four (hT : TaharaFiveOne) {Q : Type} [Group Q] [F
 
 /-! ## `G/γ₂` finite ⇒ `G/γ_k` finite -/
 
-theorem cl_eq_cl {k : ℕ} {a b : G} (ha : a ∈ lowerCentralSeries G k)
-    (hb : b ∈ lowerCentralSeries G k) :
-    cl G k a = cl G k b ↔ a⁻¹ * b ∈ lowerCentralSeries G (k + 1) := by
+theorem cl_eq_cl {k : ℕ} {a b : G} (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries k)
+    (hb : b ∈ (⊤ : Subgroup G).lowerCentralSeries k) :
+    cl G k a = cl G k b ↔ a⁻¹ * b ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1) := by
   rw [← cl_eq_zero_iff (mul_mem (inv_mem ha) hb), cl_mul (inv_mem ha) hb, cl_inv ha,
     neg_add_eq_zero]
 
 /-- The class of `⁅c, g⁆` in `γ_{k+2}/γ_{k+3}` depends only on `c` modulo `γ_{k+2}` and on `g`
 modulo `γ₂`. -/
-theorem cl_comm_congr {k : ℕ} {c c' g g' : G} (hc : c ∈ lowerCentralSeries G k)
-    (hcc : c⁻¹ * c' ∈ lowerCentralSeries G (k + 1))
-    (hgg : g⁻¹ * g' ∈ lowerCentralSeries G 1) :
+theorem cl_comm_congr {k : ℕ} {c c' g g' : G} (hc : c ∈ (⊤ : Subgroup G).lowerCentralSeries k)
+    (hcc : c⁻¹ * c' ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1))
+    (hgg : g⁻¹ * g' ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
     cl G (k + 1) ⁅c, g⁆ = cl G (k + 1) ⁅c', g'⁆ := by
-  have hc' : c' ∈ lowerCentralSeries G k := by
+  have hc' : c' ∈ (⊤ : Subgroup G).lowerCentralSeries k := by
     rw [← mul_inv_cancel_left c c']; exact mul_mem hc (lcs_mem_of_le (by omega) hcc)
   rw [cl_eq_cl (commutator_mem_lcs (by omega) hc (mem_lcs_zero g))
     (commutator_mem_lcs (by omega) hc' (mem_lcs_zero g')), ← QuotientGroup.eq]
-  let π := QuotientGroup.mk' (lowerCentralSeries G (k + 2))
+  let π := QuotientGroup.mk' ((⊤ : Subgroup G).lowerCentralSeries (k + 2))
   show π ⁅c, g⁆ = π ⁅c', g'⁆
-  obtain ⟨n, hn, rfl⟩ : ∃ n ∈ lowerCentralSeries G (k + 1), c' = c * n :=
+  obtain ⟨n, hn, rfl⟩ : ∃ n ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1), c' = c * n :=
     ⟨c⁻¹ * c', hcc, by group⟩
-  obtain ⟨m, hm, rfl⟩ : ∃ m ∈ lowerCentralSeries G 1, g' = g * m :=
+  obtain ⟨m, hm, rfl⟩ : ∃ m ∈ (⊤ : Subgroup G).lowerCentralSeries 1, g' = g * m :=
     ⟨g⁻¹ * g', hgg, by group⟩
   have h1 : π ⁅n, g * m⁆ = 1 := by
     rw [QuotientGroup.mk'_apply, QuotientGroup.eq_one_iff]
@@ -1398,16 +1400,16 @@ theorem cl_comm_congr {k : ℕ} {c c' g g' : G} (hc : c ∈ lowerCentralSeries G
   rw [e1, e2]
 
 /-- If `G/γ₂(G)` is finite, so is every `G/γ_{k+1}(G)`. -/
-theorem finite_quotient_lcs (hfin : Finite (G ⧸ lowerCentralSeries G 1)) :
-    ∀ k, Finite (G ⧸ lowerCentralSeries G (k + 1)) := by
+theorem finite_quotient_lcs (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1)) :
+    ∀ k, Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries (k + 1)) := by
   classical
-  set n := Nat.card (G ⧸ lowerCentralSeries G 1)
+  set n := Nat.card (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1)
   have hn : 0 < n := Nat.card_pos
-  have hpow0 : ∀ a ∈ lowerCentralSeries G 0, a ^ n ∈ lowerCentralSeries G (0 + 1) := by
+  have hpow0 : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 0, a ^ n ∈ (⊤ : Subgroup G).lowerCentralSeries (0 + 1) := by
     intro a _
     rw [← QuotientGroup.eq_one_iff, QuotientGroup.mk_pow]
     exact pow_card_eq_one'
-  have hpow : ∀ k, ∀ a ∈ lowerCentralSeries G k, a ^ n ∈ lowerCentralSeries G (k + 1) := by
+  have hpow : ∀ k, ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries k, a ^ n ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1) := by
     intro k
     induction k with
     | zero => exact hpow0
@@ -1417,7 +1419,7 @@ theorem finite_quotient_lcs (hfin : Finite (G ⧸ lowerCentralSeries G 1)) :
     intro k
     induction k with
     | zero =>
-      let f : G ⧸ lowerCentralSeries G 1 → Layer G 0 :=
+      let f : G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1 → Layer G 0 :=
         Quotient.lift (fun g => QuotientGroup.mk ⟨g, mem_lcs_zero g⟩) (fun a b hab => by
           rw [QuotientGroup.eq, Subgroup.mem_subgroupOf]
           exact QuotientGroup.leftRel_apply.mp hab)
@@ -1430,17 +1432,17 @@ theorem finite_quotient_lcs (hfin : Finite (G ⧸ lowerCentralSeries G 1)) :
         induction x using QuotientGroup.induction_on with | H a =>
         refine (isOfFinOrder_iff_pow_eq_one).mpr ⟨n, hn, ?_⟩
         rw [← QuotientGroup.mk_pow, QuotientGroup.eq_one_iff, Subgroup.mem_subgroupOf]
-        simpa using hpow (k + 1) a a.2
+        exact hpow (k + 1) a a.2
       -- a finite generating set
       choose rk hrk using fun v : Additive (Layer G k) => cl_surj (G := G) k v
-      choose r0 hr0 using fun q : G ⧸ lowerCentralSeries G 1 => QuotientGroup.mk_surjective q
+      choose r0 hr0 using fun q : G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1 => QuotientGroup.mk_surjective q
       let T : Set (Layer G (k + 1)) := Set.range fun p : Additive (Layer G k) ×
-          (G ⧸ lowerCentralSeries G 1) => Additive.toMul (cl G (k + 1) ⁅rk p.1, r0 p.2⁆)
+          (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1) => Additive.toMul (cl G (k + 1) ⁅rk p.1, r0 p.2⁆)
       have hTfin : T.Finite := Set.finite_range _
-      have hcl : ∀ c ∈ lowerCentralSeries G k, ∀ g : G,
+      have hcl : ∀ c ∈ (⊤ : Subgroup G).lowerCentralSeries k, ∀ g : G,
           Additive.toMul (cl G (k + 1) ⁅c, g⁆) ∈ T := by
         intro c hc g
-        exact ⟨(cl G k c, (g : G ⧸ lowerCentralSeries G 1)), congrArg Additive.toMul
+        exact ⟨(cl G k c, (g : G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1)), congrArg Additive.toMul
           (cl_comm_congr (hrk _).1 ((cl_eq_cl (hrk _).1 hc).mp (hrk _).2)
             (QuotientGroup.eq.mp (hr0 _)))⟩
       have htop : Subgroup.closure T = ⊤ := by
@@ -1448,14 +1450,14 @@ theorem finite_quotient_lcs (hfin : Finite (G ⧸ lowerCentralSeries G 1)) :
         intro x _
         induction x using QuotientGroup.induction_on with | H a =>
         obtain ⟨a, ha⟩ := a
-        let ι := QuotientGroup.mk' ((lowerCentralSeries G (k + 2)).subgroupOf
-          (lowerCentralSeries G (k + 1)))
-        let H' : Subgroup G := ((Subgroup.closure T).comap ι).map (lowerCentralSeries G (k + 1)).subtype
-        have hle : lowerCentralSeries G (k + 1) ≤ H' := by
-          show ⁅lowerCentralSeries G k, ⊤⁆ ≤ H'
+        let ι := QuotientGroup.mk' (((⊤ : Subgroup G).lowerCentralSeries (k + 2)).subgroupOf
+          ((⊤ : Subgroup G).lowerCentralSeries (k + 1)))
+        let H' : Subgroup G := ((Subgroup.closure T).comap ι).map ((⊤ : Subgroup G).lowerCentralSeries (k + 1)).subtype
+        have hle : (⊤ : Subgroup G).lowerCentralSeries (k + 1) ≤ H' := by
+          show ⁅(⊤ : Subgroup G).lowerCentralSeries k, ⊤⁆ ≤ H'
           rw [commutator_le]
           intro c hc g _
-          have hm : ⁅c, g⁆ ∈ lowerCentralSeries G (k + 1) :=
+          have hm : ⁅c, g⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1) :=
             commutator_mem_lcs (by omega) hc (mem_lcs_zero g)
           refine ⟨⟨⁅c, g⁆, hm⟩, Subgroup.subset_closure ?_, rfl⟩
           have := hcl c hc g
@@ -1464,33 +1466,33 @@ theorem finite_quotient_lcs (hfin : Finite (G ⧸ lowerCentralSeries G 1)) :
         simp only [Subgroup.coe_subtype] at hba
         subst hba
         exact hbT
-      haveI : Group.FG (Layer G (k + 1)) := ⟨⟨hTfin.toFinset, by simpa using htop⟩⟩
+      haveI : Group.FG (Layer G (k + 1)) := Group.fg_iff.mpr ⟨T, htop, hTfin⟩
       exact CommGroup.finite_of_fg_torsion _ htor
   intro k
   induction k with
   | zero => exact hfin
   | succ k ih =>
-    have hidx := Subgroup.relIndex_mul_index (H := lowerCentralSeries G (k + 2))
-      (K := lowerCentralSeries G (k + 1)) (lowerCentralSeries_antitone (by omega))
-    have h1 : (lowerCentralSeries G (k + 1)).index ≠ 0 :=
+    have hidx := Subgroup.relIndex_mul_index (H := (⊤ : Subgroup G).lowerCentralSeries (k + 2))
+      (K := (⊤ : Subgroup G).lowerCentralSeries (k + 1)) ((Subgroup.lowerCentralSeries_antitone ⊤) (by omega))
+    have h1 : ((⊤ : Subgroup G).lowerCentralSeries (k + 1)).index ≠ 0 :=
       Subgroup.index_ne_zero_of_finite
-    have h2 : (lowerCentralSeries G (k + 2)).relIndex (lowerCentralSeries G (k + 1)) ≠ 0 := by
+    have h2 : ((⊤ : Subgroup G).lowerCentralSeries (k + 2)).relIndex ((⊤ : Subgroup G).lowerCentralSeries (k + 1)) ≠ 0 := by
       haveI := hlay (k + 1)
       exact Subgroup.index_ne_zero_of_finite
-    have h3 : (lowerCentralSeries G (k + 2)).index ≠ 0 := by
+    have h3 : ((⊤ : Subgroup G).lowerCentralSeries (k + 2)).index ≠ 0 := by
       rw [← hidx]; exact mul_ne_zero h2 h1
-    haveI : (lowerCentralSeries G (k + 2)).FiniteIndex := ⟨h3⟩
+    haveI : ((⊤ : Subgroup G).lowerCentralSeries (k + 2)).FiniteIndex := ⟨h3⟩
     exact Subgroup.finite_quotient_of_finiteIndex
 
 /-- **Theorem 6.6, modulo Tahara's Theorem 6.1.** If `G/γ₂(G)` is finite of exponent dividing
 `3`, then `D₅(G) = γ₅(G)`. -/
 theorem D_five_eq_gamma_five (hT : TaharaFiveOne) (G : Type) [Group G]
-    (hfin : Finite (G ⧸ lowerCentralSeries G 1)) (h1 : ∀ x : G, x ^ 3 ∈ lowerCentralSeries G 1) :
-    D 5 G = lowerCentralSeries G 4 := by
+    (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1)) (h1 : ∀ x : G, x ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
+    D 5 G = (⊤ : Subgroup G).lowerCentralSeries 4 := by
   refine le_antisymm (D_le_of_D_quotient_eq_bot _ 5 ?_) (gamma_le_D G 5 (by norm_num))
-  haveI : Finite (G ⧸ lowerCentralSeries G 4) := finite_quotient_lcs hfin 3
+  haveI : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 4) := finite_quotient_lcs hfin 3
   refine D_five_eq_bot_of_class_four hT (lowerCentralSeries_quotient_eq_bot 4) fun x => ?_
-  obtain ⟨x, rfl⟩ := QuotientGroup.mk'_surjective (lowerCentralSeries G 4) x
+  obtain ⟨x, rfl⟩ := QuotientGroup.mk'_surjective ((⊤ : Subgroup G).lowerCentralSeries 4) x
   rw [← map_pow, ← lcs_map_mk]
   exact Subgroup.mem_map_of_mem _ (h1 x)
 

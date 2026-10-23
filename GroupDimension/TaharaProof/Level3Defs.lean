@@ -1,4 +1,8 @@
-import GroupDimension.TaharaProof.Level1
+module
+
+public import GroupDimension.TaharaProof.Level1
+
+@[expose] public section
 
 /-!
 # Level 3: the target `W₃* ⊕ W₄`, symbols, and `R₅*` ([Tah81, §5])
@@ -37,7 +41,9 @@ theorem word_cnt {l : List ι} (hl : l.Pairwise (· ≤ ·)) : Frame.word (cnt l
 theorem cnt_append (l l' : List ι) : cnt (l ++ l') = cnt l + cnt l' := by
   funext j; simp [cnt, List.count_append]
 
-theorem cnt_single (i : ι) : cnt [i] = Pi.single i 1 := by
+/-- Stated for any `DecidableEq` instance on `ι`, since `Pi.single` on the index types used below
+(`Lex` sums) is elaborated with Mathlib's `Lex` instance rather than the one from `LinearOrder`. -/
+theorem cnt_single [DecidableEq ι] (i : ι) : cnt [i] = Pi.single i 1 := by
   funext j; by_cases h : j = i
   · subst h; simp [cnt]
   · simp [cnt, Pi.single_eq_of_ne h, List.count_singleton, Ne.symm h]
@@ -63,7 +69,7 @@ theorem W_cnt (l : List ι) : F.W (cnt l) = (l.map F.w).sum := by
 
 /-- A frame of a group of class `≤ 4` with Tahara's divisibility chains in the first two layers. -/
 structure Class4 : Prop where
-  top : lowerCentralSeries G 4 = ⊥
+  top : (⊤ : Subgroup G).lowerCentralSeries 4 = ⊥
   w_le : ∀ j, F.w j ≤ 4
   one_lt : ∀ j, 1 < F.o j
   dvd : ∀ i j, F.w i = F.w j → F.w i ≤ 2 → i ≤ j → F.o i ∣ F.o j

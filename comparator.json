@@ -1,0 +1,18 @@
+{
+  "challenge_module": "Challenge",
+  "solution_module": "Solution",
+  "theorem_names": [
+    "GroupDimension.Palomar.D_five_eq_gamma_five_of_exp_three",
+    "GroupDimension.Palomar.D_five_eq_gamma_five_of_cubes_cyclic",
+    "GroupDimension.Palomar.D_five_le_jennings",
+    "GroupDimension.Palomar.not_isCandidate_of_quotient_z4",
+    "GroupDimension.Palomar.false_of_card_expCentral_two_le",
+    "GroupDimension.Palomar.not_isCandidate_of_rank",
+    "GroupDimension.Palomar.dimensionQuestion5_iff_class_three",
+    "GroupDimension.Palomar.isCandidate_of_minimal",
+    "GroupDimension.Palomar.D_five_eq_bot_of_rank"
+  ],
+  "definition_names": [],
+  "permitted_axioms": ["propext", "Quot.sound", "Classical.choice"],
+  "enable_nanoda": true
+}

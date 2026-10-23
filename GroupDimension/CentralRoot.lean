@@ -1,4 +1,8 @@
-import GroupDimension.DTwo
+module
+
+public import GroupDimension.DTwo
+
+@[expose] public section
 
 /-!
 # Adjoining a central root (Lemma 5.9 of the D5 paper)
@@ -118,12 +122,12 @@ theorem q_of (k : K) : S.q (of ℤ K k) = of ℤ S.H (S.retr k) := by
 theorem induction_of {G : Type*} [Group G] {p : MonoidAlgebra ℤ G → Prop}
     (x : MonoidAlgebra ℤ G) (h0 : p 0) (hof : ∀ g, p (of ℤ G g))
     (hneg : ∀ y, p y → p (-y)) (hadd : ∀ y z, p y → p z → p (y + z)) : p x := by
-  induction x using Finsupp.induction_linear with
+  induction x using MonoidAlgebra.induction_linear with
   | zero => exact h0
   | add y z hy hz => exact hadd y z hy hz
   | single g n =>
-    have e : (Finsupp.single g n : MonoidAlgebra ℤ G) = n • of ℤ G g := by
-      simp only [MonoidAlgebra.of_apply]; exact (Finsupp.smul_single_one _ _).symm
+    have e : (MonoidAlgebra.single g n : MonoidAlgebra ℤ G) = n • of ℤ G g := by
+      rw [MonoidAlgebra.of_apply, MonoidAlgebra.smul_single', mul_one]
     rw [e]; clear e
     induction n using Int.induction_on with
     | zero => simpa using h0
@@ -371,7 +375,7 @@ theorem D_eq (n : ℕ) (hn : 2 ≤ n) : D n K = (D n S.H).map S.H.subtype := by
   intro k hk
   have hk2 : k ∈ S.H := by
     have : k ∈ D 2 K := D_antitone hn hk
-    rw [D_two, lowerCentralSeries_one] at this
+    rw [D_two, Subgroup.top_lowerCentralSeries_one] at this
     exact S.commutator_le this
   refine ⟨⟨k, hk2⟩, ?_, rfl⟩
   show (⟨k, hk2⟩ : S.H) ∈ D n S.H

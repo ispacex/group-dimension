@@ -1,4 +1,8 @@
-import GroupDimension.Jennings.Series
+module
+
+public import GroupDimension.Jennings.Series
+
+@[expose] public section
 
 /-!
 # Frames of a restricted N-series and the weight filtration of `𝔽_p[G]`
@@ -194,7 +198,7 @@ theorem of_nprod_sub_one (b : ι → ℕ) :
     have hX : F.X y ∈ F.low b 1 := by
       rw [← F.P_single]
       refine Submodule.subset_span ⟨(Pi.single y 1 : ι → ℕ), ?_, by simp, rfl⟩
-      rw [hbb]; exact le_add_of_nonneg_left (zero_le _)
+      rw [hbb]; exact le_add_of_nonneg_left zero_le
     have h1 := F.low_mul_X hb'l ih1
     rw [← hbb] at h1
     constructor
@@ -259,7 +263,7 @@ theorem Bsp_zero : F.Bsp 0 = ⊤ := by
   refine add_mem (Submodule.span_le.mpr ?_ h1) (F.P_mem_Bsp ?_ (Nat.zero_le _))
   · rintro _ ⟨β, hβ, -, rfl⟩
     exact F.P_mem_Bsp (fun j => lt_of_le_of_lt (hβ j) (hb j)) (Nat.zero_le _)
-  · intro j; exact lt_of_le_of_lt (zero_le _) (hb j)
+  · intro j; exact lt_of_le_of_lt zero_le (hb j)
 
 theorem Sp_zero_eq_top : F.Sp 0 Set.univ = ⊤ :=
   eq_top_iff.mpr (F.Bsp_zero ▸ F.Bsp_le_Sp 0)

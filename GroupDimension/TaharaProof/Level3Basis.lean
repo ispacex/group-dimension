@@ -1,4 +1,8 @@
-import GroupDimension.TaharaProof.Level3Defs
+module
+
+public import GroupDimension.TaharaProof.Level3Defs
+
+@[expose] public section
 
 /-!
 # A `ℤ`-basis of `Λ₃` and the map `ψ₃` ([Tah81, Lemma 3.3, §5])
