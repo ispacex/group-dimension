@@ -10,7 +10,8 @@ public import GroupDimension.Basic
 Every declaration in this file is a `def … : Prop`. None of them is an `axiom` and none is
 proved here. A theorem that uses one takes it as an explicit hypothesis (`FiniteReduction.lean`
 takes `PassiDFourSquare`, `GruenbergResidualTwo`, `DThreeEqGammaThree`; `MetabelianOdd.lean`
-takes `GuptaTaharaMetabelian`); nothing is assumed globally. Tahara's description of `D₅`
+takes `GuptaTaharaMetabelian`; `MinimalThree.lean` takes `PassiDFourSquare` and
+`GuptaTaharaMetabelian`); nothing is assumed globally. Tahara's description of `D₅`
 ([Tah81, Thm. 6.1]) is stated as `TaharaFiveOne` in `Tahara.lean`; unlike the statements here
 it is proved (`TaharaTheorem.lean`), and so is `DThreeEqGammaThree` (`dThreeEqGammaThree`,
 `DThree.lean`). They record, in Lean, *what* is known or asked, so that later work can be

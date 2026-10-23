@@ -25,6 +25,7 @@ public import GroupDimension.Candidate
 public import GroupDimension.Jennings.Theorem
 public import GroupDimension.MinimalCounterexample
 public import GroupDimension.MetabelianOdd
+public import GroupDimension.MinimalThree
 public import GroupDimension.Cert1024.Nilpotent
 public import GroupDimension.Cert1024.PcBound
 public import GroupDimension.Cert1024.Check
