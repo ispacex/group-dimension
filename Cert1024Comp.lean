@@ -172,7 +172,17 @@ def modsOf (s : String) : Vector Nat (rankOf s) := modsOfArr (rankOf s) (tailOf 
 /-- The matrices `C_k` of a line. -/
 def matsOf (s : String) : Vector (Mat (rankOf s)) M := matsOfArr (rankOf s) (tailOf s)
 
+/-- The line is well formed: every token is a natural number, `m = 10`, and there are exactly
+`2 + M + M(M-1)/2 + 1 + r + M r²` numbers. (Not needed for soundness, which holds for any string;
+it makes Lean read a line exactly as `verify_lines.g` in GAP does.) -/
+def wellFormed (s : String) : Bool :=
+  let r := rankOf s
+  (s.splitOn " ").all (fun t => t.toNat?.isSome) &&
+    (nums s)[1]? == some M &&
+    (nums s).length == 3 + M + M * (M - 1) / 2 + r + M * r * r
+
 /-- The check of one line of the data. -/
-def checkStr (s : String) : Bool := checkVec (presOf s) (modsOf s) (matsOf s)
+def checkStr (s : String) : Bool :=
+  wellFormed s && checkVec (presOf s) (modsOf s) (matsOf s)
 
 end GroupDimension.Cert1024

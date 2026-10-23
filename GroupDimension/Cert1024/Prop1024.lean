@@ -27,12 +27,20 @@ open Data
 /-- The `i`-th candidate group of order `2¹⁰` (its pc presentation). -/
 abbrev cand (i : Fin 3400) : Type := candGroup (cands.get (i.cast cands_length.symm))
 
-/-- **The certificates**: `D₅ = 1` for all `3400` candidates. -/
-theorem D_five_cand (i : Fin 3400) : D 5 (cand i) = ⊥ := by
-  apply D_five_candGroup
+theorem cand_ok (i : Fin 3400) : checkStr (cands.get (i.cast cands_length.symm)) = true := by
   have h := cands_ok
   rw [List.all_eq_true] at h
   exact h _ (List.get_mem _ _)
+
+/-- **The certificates**: `D₅ = 1` for all `3400` candidates. -/
+theorem D_five_cand (i : Fin 3400) : D 5 (cand i) = ⊥ := D_five_candGroup (cand_ok i)
+
+/-- `D₄ = 1` for all `3400` candidates (this is what the certificates prove). -/
+theorem D_four_cand (i : Fin 3400) : D 4 (cand i) = ⊥ := D_four_candGroup (cand_ok i)
+
+/-- Each `cand i` has order `2¹⁰` (so a surjection from it onto a group of order `2¹⁰` is an
+isomorphism; this is how `verify_lines.g` identifies it with the ANUPQ group). -/
+theorem card_cand (i : Fin 3400) : Nat.card (cand i) = 2 ^ 10 := card_candGroup (cand_ok i)
 
 /-- `D_n` is invariant under isomorphism. -/
 theorem D_eq_bot_of_mulEquiv {G H : Type*} [Group G] [Group H] (e : G ≃* H) {n : ℕ}

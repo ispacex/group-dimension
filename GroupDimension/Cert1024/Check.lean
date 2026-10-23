@@ -12,11 +12,11 @@ relative order `2`: for each `k` the relation `g_k² = w_k`, and for `k < l` the
 (`PresentedGroup`); nothing else is assumed about it.
 
 **The certificate.** A finite abelian group `V = ⊕_{i<r} ℤ/2^{a_i}`, realised as `(Fin r → ℤ) ⧸ L`
-with `L = {v | 2^{a_i} ∣ v_i}`, and integer matrices `C_k`, `C_k'` (`k < m`), acting on `V`.
+with `L = {v | 2^{a_i} ∣ v_i}`, and integer matrices `C_k` (`k < m`), acting on `V`.
 
 **The check** (`checkAux`, a `Bool`): the masks are of pc shape (`w_k`, `w_{kl}` only involve
-generators after `g_k`); every matrix is well defined on `V` (`2^{a_i} ∣ C_{ij} 2^{a_j}`); `C_k C_k'
-= C_k' C_k = 1` on `V`; the `C_k` satisfy the relations on `V`; every product of four matrices
+generators after `g_k`); every matrix is well defined on `V` (`2^{a_i} ∣ C_{ij} 2^{a_j}`); `C_k` is
+invertible on `V` with the computed inverse `C_k' = 1 - N + N² - N³`, `N = C_k - 1`; the `C_k` satisfy the relations on `V`; every product of four matrices
 `C_k - 1` is `0` on `V`; and the `2^m` normal words in the `C_k` are pairwise distinct on `V`.
 All matrices are kept reduced (row `i` modulo `2^{a_i}`), so "equal on `V`" is equality.
 
@@ -303,8 +303,12 @@ theorem eq_of_op_eq {x y : Mat r} (hx : WD a (toM x)) (hy : WD a (toM y))
   rw [hX, hY, red_red, red_red] at this
   exact toM_injective (by rw [hX, hY, this])
 
-/-- **Soundness of the check**: the group of the presentation has `D₄ = 1`. -/
-theorem D_four_eq_bot_of_checkAux (h : checkAux m P a C = true) : D 4 (PcGroup m P) = ⊥ := by
+/-- What a passing check gives: a representation `f` of the group of the presentation that kills
+`D₄`, distinct normal words have distinct images, and every element is a normal word. -/
+theorem rep_of_checkAux (h : checkAux m P a C = true) :
+    ∃ f : PcGroup m P →* AddMonoid.End (Mod a), (∀ g ∈ D 4 (PcGroup m P), f g = 1) ∧
+      (∀ e e', f (nwFrom PresentedGroup.of e 0) = f (nwFrom PresentedGroup.of e' 0) → e = e') ∧
+      ∀ x : PcGroup m P, ∃ e, x = nwFrom PresentedGroup.of e 0 := by
   simp only [checkAux, Bool.and_eq_true, List.all_eq_true, List.mem_finRange, forall_const] at h
   obtain ⟨hfmt0, hgen0, hnil0, hnodup0⟩ := h
   have hfmt := formatOK_spec hfmt0
@@ -396,20 +400,35 @@ theorem D_four_eq_bot_of_checkAux (h : checkAux m P a C = true) : D 4 (PcGroup m
     rw [map_nwFrom]
     simp only [hf]
     exact (nwMat_spec hC e 0).2.1.symm
+  refine ⟨f, hD, fun e e' hee => ?_, hpc⟩
+  rw [hnw, hnw] at hee
+  have heq : nwMat a C e 0 = nwMat a C e' 0 :=
+    eq_of_op_eq (nwMat_spec hC e 0).1 (nwMat_spec hC _ 0).1 (nwMat_spec hC e 0).2.2
+      (nwMat_spec hC _ 0).2.2 hee
+  exact List.inj_on_of_nodup_map hnodup (mem_allFns e) (mem_allFns _) heq
+
+theorem nwFrom_false {G : Type*} [Monoid G] (g : Fin m → G) : nwFrom g (fun _ => false) 0 = 1 :=
+  (nwFrom_skip _ _ (Nat.zero_le m) (fun _ _ => rfl)).trans (nwFrom_of_le _ _ le_rfl)
+
+/-- **Soundness of the check**: the group of the presentation has `D₄ = 1`. -/
+theorem D_four_eq_bot_of_checkAux (h : checkAux m P a C = true) : D 4 (PcGroup m P) = ⊥ := by
+  obtain ⟨f, hD, hinj, hpc⟩ := rep_of_checkAux h
   rw [eq_bot_iff]
   intro g hg
   obtain ⟨e, rfl⟩ := hpc g
   have h1 := hD _ hg
-  rw [hnw] at h1
-  have e0 := hnw (fun _ => false)
-  rw [show nwFrom (PresentedGroup.of (rels := pcRels m P)) (fun _ => false) 0 = 1 from
-    (nwFrom_skip _ _ (Nat.zero_le m) (fun _ _ => rfl)).trans (nwFrom_of_le _ _ le_rfl), map_one] at e0
-  have heq : nwMat a C e 0 = nwMat a C (fun _ => false) 0 :=
-    eq_of_op_eq (nwMat_spec hC e 0).1 (nwMat_spec hC _ 0).1 (nwMat_spec hC e 0).2.2
-      (nwMat_spec hC _ 0).2.2 (h1.trans e0)
-  have := List.inj_on_of_nodup_map hnodup (mem_allFns e) (mem_allFns _) heq
-  rw [this, Subgroup.mem_bot]
-  exact (nwFrom_skip _ _ (Nat.zero_le m) (fun _ _ => rfl)).trans (nwFrom_of_le _ _ le_rfl)
+  have h0 : f (nwFrom PresentedGroup.of (fun _ => false) 0) = 1 := by rw [nwFrom_false, map_one]
+  rw [hinj e _ (h1.trans h0.symm), Subgroup.mem_bot, nwFrom_false]
+
+/-- The group of the presentation has order `2^m`: the normal words are a bijection. -/
+theorem card_eq_of_checkAux (h : checkAux m P a C = true) : Nat.card (PcGroup m P) = 2 ^ m := by
+  obtain ⟨f, -, hinj, hpc⟩ := rep_of_checkAux h
+  have hbij : Function.Bijective
+      (fun e : Fin m → Bool => nwFrom (PresentedGroup.of (rels := pcRels m P)) e 0) :=
+    ⟨fun e e' hee => hinj e e' (by simp only at hee; rw [hee]),
+      fun x => (hpc x).imp fun e he => he.symm⟩
+  rw [← Nat.card_eq_of_bijective _ hbij, Nat.card_eq_fintype_card, Fintype.card_fun,
+    Fintype.card_bool, Fintype.card_fin]
 
 theorem D_five_eq_bot_of_checkAux (h : checkAux m P a C = true) : D 5 (PcGroup m P) = ⊥ :=
   eq_bot_iff.mpr ((D_antitone (by norm_num : 4 ≤ 5)).trans (D_four_eq_bot_of_checkAux h).le)

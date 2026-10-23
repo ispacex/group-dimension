@@ -22,3 +22,4 @@ import GroupDimension.Cert1024.Nilpotent
 import GroupDimension.Cert1024.PcBound
 import GroupDimension.Cert1024.Check
 import GroupDimension.Cert1024.Decode
+import GroupDimension.Cert1024.Test.Tamper
