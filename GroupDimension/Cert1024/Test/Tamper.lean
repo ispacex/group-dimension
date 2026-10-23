@@ -5,10 +5,12 @@ public meta import Cert1024Comp
 
 @[expose] public section
 
-/-! Negative controls for the checker (D5-34; built in CI). Each control is a real line or the
+/-! Negative controls for the checker (D5-34; built in CI as a separate step, not imported by
+`GroupDimension.lean`). Each control is a real line or the
 real line of `447001` changed in one way; the theorems record which of the four parts of the check
 (`formatOK`, `genOK`, `nilOK`, `faithOK`) fail. Also two small groups: `ℤ/4` with a relation that is
-not of pc shape, and `D₃₂` (class `4`, `D₄ ≠ 1`) with its regular representation over `𝔽₂`. -/
+not of pc shape, and `D₃₂` (class `4`, `D₄ ≠ 1`) with its regular representation over `𝔽₂`.
+Finally the pruned nilpotency check `nilSpan` is compared with the unpruned `nilFull`. -/
 
 namespace GroupDimension.Cert1024.Test
 
@@ -85,6 +87,83 @@ def d32C : Fin 5 → Mat 32 := fun k => (#v[#v[#v[0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 
 
 /-- The nilpotency check fails (and so does the check). -/
 theorem d32_nil : nilOK 5 (fun _ => 1) d32C = false ∧ checkAux 5 d32 (fun _ => 1) d32C = false := by
+  native_decide
+
+/-! ### The pruned nilpotency check (`nilSpan`)
+
+`nilSpan` (spanning sets of `Δ^d V`) against `nilFull` (every product of `c` matrices `N_k`,
+one at a time) at several depths `c`, on: the real line of `447001`; Jordan blocks over `𝔽₂`;
+`ℤ/2^e` with `g ↦ 3`; a mixed-valuation module where `Δ³ V ≠ 0 = Δ⁴ V`; and 40 pseudo-random
+upper triangular certificates. In each case both checks must give the same answer, and the answers
+must not all be the same. -/
+
+/-- `nilSpan` and `nilFull` at depths `0, …, D`. -/
+def spanVsFull (D m r : Nat) (a : Fin r → Nat) (C : Fin m → Mat r) : List (Bool × Bool) :=
+  (List.range (D + 1)).map fun c => (nilSpan m a C c, nilFull m a C c)
+
+/-- The depths `≤ D` at which `nilSpan` passes, after checking that it agrees with `nilFull`
+(`none` if they disagree somewhere). -/
+def spanDepths (m r : Nat) (a : Fin r → Nat) (C : Fin m → Mat r) (D : Nat := 6) :
+    Option (List Nat) :=
+  let xs := spanVsFull D m r a C
+  if xs.all (fun p => p.1 == p.2) then
+    some (((List.range (D + 1)).zip xs).filterMap fun (c, p) => if p.1 then some c else none)
+  else none
+
+/-- The certificate of a line. -/
+def lineDepths (s : String) : Option (List Nat) :=
+  let av := modsOf s
+  let Cs := matsOf s
+  spanDepths M (rankOf s) (fun i => av[i]) (fun k => Cs[k]) 5
+
+/-- `447001` (depths `≤ 5`, `10^5` products for `nilFull`): `Δ³ V ≠ 0`, `Δ⁴ V = 0`, so
+`nilSpan` is not vacuous at depth `3`. -/
+theorem real_depths : lineDepths real = some [4, 5] := by native_decide
+
+/-- The Jordan block `J_n` (`1` on the diagonal and above it), `n × n`. -/
+def jordan (n : Nat) : Mat n := Vector.ofFn fun i => Vector.ofFn fun j =>
+  if i.val = j.val ∨ i.val + 1 = j.val then 1 else 0
+
+/-- `J_4`, `J_5` over `𝔽₂`: `N^4 = 0` exactly for `J_4`. -/
+theorem jordan_depths : spanDepths 1 4 (fun _ => 1) (fun _ => jordan 4) = some [4, 5, 6] ∧
+    spanDepths 1 5 (fun _ => 1) (fun _ => jordan 5) = some [5, 6] := by native_decide
+
+/-- `g ↦ 3` on `ℤ/16` and on `ℤ/32` (`N = 2`, `N^c = 2^c`). -/
+theorem three_depths : spanDepths 1 1 (fun _ => 4) (fun _ => #v[#v[3]]) = some [4, 5, 6] ∧
+    spanDepths 1 1 (fun _ => 5) (fun _ => #v[#v[3]]) = some [5, 6] := by native_decide
+
+/-- `V = ℤ/8 ⊕ ℤ/8`, `N_0 : e_1 ↦ e_0, e_0 ↦ 0` and `N_1 = 2`: the nonzero products of length `3`
+are `4 N_0` up to order, so the spanning sets have vectors of positive valuation at the pivot. -/
+def mixC : Fin 2 → Mat 2 := fun k =>
+  if k.val = 0 then #v[#v[1, 1], #v[0, 1]] else #v[#v[3, 0], #v[0, 3]]
+
+theorem mix_depths : spanDepths 2 2 (fun _ => 3) mixC = some [4, 5, 6] := by native_decide
+
+/-- A pseudo-random generator (a linear congruential one). -/
+def lcg (x : Nat) : Nat := (x * 1103515245 + 12345) % 2147483648
+
+/-- Pseudo-random upper triangular `C_0, C_1, C_2` on `V = ⊕_{i<4} ℤ/2^{a_i}` with `a` nondecreasing
+(so every matrix is well defined on `V`), from the seed `s`. -/
+def randCert (s : Nat) : (Fin 4 → Nat) × (Fin 3 → Mat 4) :=
+  let x i := (List.range (i + 1)).foldl (fun y _ => lcg y) (s * 7919 + 1)
+  let a : Fin 4 → Nat := fun i => 1 + x 0 % 2 + (if i.val ≥ 1 then x 1 % 2 else 0) +
+    (if i.val ≥ 3 then x 3 % 2 else 0)
+  let C : Fin 3 → Mat 4 := fun k => Vector.ofFn fun i => Vector.ofFn fun j =>
+    if i = j then (if (x (100 + 16 * k.val + 4 * i.val) / 5) % 4 == 0 then 3 else 1)
+    else if i < j then
+      (let y := x (200 + 16 * k.val + 4 * i.val + j.val) / 7
+       if y % 3 == 0 then ((y / 3) % 4 : Nat) else 0)
+    else 0
+  (a, C)
+
+/-- The passing depths of the 40 pseudo-random certificates. -/
+def randDepths : List (Option (List Nat)) :=
+  (List.range 40).map fun s => spanDepths 3 4 (randCert s).1 (randCert s).2
+
+/-- On 40 pseudo-random certificates `nilSpan` and `nilFull` agree at every depth `≤ 6`, and
+the first passing depth takes at least three different values. -/
+theorem rand_depths : randDepths.all Option.isSome = true ∧
+    ((randDepths.filterMap id).map (·.headD 7)).eraseDups.length ≥ 3 := by
   native_decide
 
 end GroupDimension.Cert1024.Test

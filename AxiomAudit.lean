@@ -1368,3 +1368,4 @@ open GroupDimension
 #print axioms GroupDimension.Cert1024.D_four_candGroup
 #print axioms GroupDimension.Cert1024.card_candGroup
 #print axioms GroupDimension.Cert1024.card_eq_of_checkAux
+#print axioms GroupDimension.Cert1024.nilSpan_sound
