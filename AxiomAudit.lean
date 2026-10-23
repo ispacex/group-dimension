@@ -1421,3 +1421,8 @@ open GroupDimension
 #print axioms GroupDimension.D_le_derivedSeries_two
 #print axioms GroupDimension.mem_of_mem_D_add_two
 #print axioms GroupDimension.rank_ge_three_of_D_five_ne_bot
+#print axioms GroupDimension.isCyclic_of_unique_subgroup_prime
+#print axioms GroupDimension.eq_zpowers_of_le_central_prime
+#print axioms GroupDimension.D_four_le_of_isPGroup_three
+#print axioms GroupDimension.minimal_three_of_quotients
+#print axioms GroupDimension.minimal_three
