@@ -1,4 +1,9 @@
-import Cert1024Comp
+module
+
+public import Cert1024Comp
+public meta import Cert1024Comp
+
+@[expose] public section
 
 /-! Negative controls for the checker (D5-34; built in CI). Each control is a real line or the
 real line of `447001` changed in one way; the theorems record which of the four parts of the check

@@ -1,4 +1,9 @@
-import GroupDimension
+module
+
+public import GroupDimension
+public import Solution
+
+@[expose] public section
 
 /-! Axiom audit: `lake env lean AxiomAudit.lean`. Every proved theorem of the project must
 depend only on `propext`, `Classical.choice`, `Quot.sound`. -/
@@ -26,7 +31,6 @@ open GroupDimension
 #print axioms GroupDimension.D_le_of_D_quotient_eq_bot
 #print axioms GroupDimension.forall_D_le_iff
 #print axioms GroupDimension.dimensionQuestion5_iff
-#print axioms GroupDimension.LieComparison.lieDimensionQuestion5
 #print axioms GroupDimension.LieComparison.groupQuestion_def
 #print axioms GroupDimension.center_comm
 #print axioms GroupDimension.comm_central
@@ -1344,6 +1348,18 @@ open GroupDimension
 #print axioms GroupDimension.normal_of_le_center
 #print axioms GroupDimension.isCandidate_of_minimal
 #print axioms GroupDimension.D_five_eq_bot_of_rank
+
+-- The statements compared for Palomar (`Solution.lean`).
+#print axioms GroupDimension.Palomar.D_five_eq_gamma_five_of_exp_three
+#print axioms GroupDimension.Palomar.D_five_eq_gamma_five_of_cubes_cyclic
+#print axioms GroupDimension.Palomar.D_five_le_jennings
+#print axioms GroupDimension.Palomar.not_isCandidate_of_quotient_z4
+#print axioms GroupDimension.Palomar.false_of_card_expCentral_two_le
+#print axioms GroupDimension.Palomar.not_isCandidate_of_rank
+#print axioms GroupDimension.Palomar.dimensionQuestion5_iff_class_three
+#print axioms GroupDimension.Palomar.isCandidate_of_minimal
+#print axioms GroupDimension.Palomar.D_five_eq_bot_of_rank
+
 #print axioms GroupDimension.Cert1024.map_eq_one_of_mem_D
 #print axioms GroupDimension.Cert1024.exists_nwFrom_zero
 #print axioms GroupDimension.Cert1024.D_four_eq_bot_of_checkAux

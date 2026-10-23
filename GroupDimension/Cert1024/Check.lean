@@ -1,6 +1,10 @@
-import GroupDimension.Cert1024.Nilpotent
-import GroupDimension.Cert1024.PcBound
-import Cert1024Comp
+module
+
+public import GroupDimension.Cert1024.Nilpotent
+public import GroupDimension.Cert1024.PcBound
+public import Cert1024Comp
+
+@[expose] public section
 
 /-!
 # Certificates for `D₄(Q) = 1`, `Q` given by a pc presentation
@@ -93,25 +97,27 @@ theorem WD.one : WD a (1 : Matrix (Fin r) (Fin r) ℤ) := by
   · simp [one_apply_ne h]
 
 theorem WD.sub {A B : Matrix (Fin r) (Fin r) ℤ} (hA : WD a A) (hB : WD a B) : WD a (A - B) :=
-  fun i j => by rw [sub_apply, sub_mul]; exact dvd_sub (hA i j) (hB i j)
+  fun i j => by rw [Matrix.sub_apply, sub_mul]; exact dvd_sub (hA i j) (hB i j)
 
 theorem WD.zero : WD a (0 : Matrix (Fin r) (Fin r) ℤ) := fun i j => by simp
 
 variable (a)
 
+/-- The operator of a well-defined `A` on `V`. -/
+noncomputable def opWD (A : Matrix (Fin r) (Fin r) ℤ) (h : WD a A) : AddMonoid.End (Mod a) :=
+  QuotientAddGroup.map (latt a) (latt a) (mulVecLin A).toAddMonoidHom
+    (fun _ hv => WD.mulVec_mem h hv)
+
 /-- The operator of `A` on `V` (`0` if `A` is not well defined). -/
 noncomputable def op (A : Matrix (Fin r) (Fin r) ℤ) : AddMonoid.End (Mod a) := by
   classical
-  exact if h : WD a A then
-    QuotientAddGroup.map (latt a) (latt a) (mulVecLin A).toAddMonoidHom
-      (fun _ hv => WD.mulVec_mem h hv)
-  else 0
+  exact if h : WD a A then opWD a A h else 0
 
 variable {a}
 
 theorem op_mk {A : Matrix (Fin r) (Fin r) ℤ} (hA : WD a A) (v : Fin r → ℤ) :
     op a A (QuotientAddGroup.mk v) = QuotientAddGroup.mk (A *ᵥ v) := by
-  rw [op, dif_pos hA]; rfl
+  rw [op, dif_pos hA, opWD]; rfl
 
 theorem op_ext {f g : AddMonoid.End (Mod a)}
     (h : ∀ v : Fin r → ℤ, f (QuotientAddGroup.mk v) = g (QuotientAddGroup.mk v)) : f = g :=
@@ -142,7 +148,7 @@ theorem op_eq_of_dvd {A B : Matrix (Fin r) (Fin r) ℤ} (hA : WD a A) (hB : WD a
     intro i
     rw [← sub_mulVec]
     simp only [mulVec, dotProduct]
-    exact Finset.dvd_sum fun j _ => Dvd.dvd.mul_right (by rw [sub_apply]; exact h i j) _
+    exact Finset.dvd_sum fun j _ => Dvd.dvd.mul_right (by rw [Matrix.sub_apply]; exact h i j) _
 
 /-- Conversely, matrices that act equally are congruent row by row. -/
 theorem dvd_of_op_eq {A B : Matrix (Fin r) (Fin r) ℤ} (hA : WD a A) (hB : WD a B)

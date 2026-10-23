@@ -1,37 +1,41 @@
-import GroupDimension.Cert1024.Data.C00
-import GroupDimension.Cert1024.Data.C01
-import GroupDimension.Cert1024.Data.C02
-import GroupDimension.Cert1024.Data.C03
-import GroupDimension.Cert1024.Data.C04
-import GroupDimension.Cert1024.Data.C05
-import GroupDimension.Cert1024.Data.C06
-import GroupDimension.Cert1024.Data.C07
-import GroupDimension.Cert1024.Data.C08
-import GroupDimension.Cert1024.Data.C09
-import GroupDimension.Cert1024.Data.C10
-import GroupDimension.Cert1024.Data.C11
-import GroupDimension.Cert1024.Data.C12
-import GroupDimension.Cert1024.Data.C13
-import GroupDimension.Cert1024.Data.C14
-import GroupDimension.Cert1024.Data.C15
-import GroupDimension.Cert1024.Data.C16
-import GroupDimension.Cert1024.Data.C17
-import GroupDimension.Cert1024.Data.C18
-import GroupDimension.Cert1024.Data.C19
-import GroupDimension.Cert1024.Data.C20
-import GroupDimension.Cert1024.Data.C21
-import GroupDimension.Cert1024.Data.C22
-import GroupDimension.Cert1024.Data.C23
-import GroupDimension.Cert1024.Data.C24
-import GroupDimension.Cert1024.Data.C25
-import GroupDimension.Cert1024.Data.C26
-import GroupDimension.Cert1024.Data.C27
-import GroupDimension.Cert1024.Data.C28
-import GroupDimension.Cert1024.Data.C29
-import GroupDimension.Cert1024.Data.C30
-import GroupDimension.Cert1024.Data.C31
-import GroupDimension.Cert1024.Data.C32
-import GroupDimension.Cert1024.Data.C33
+module
+
+public import GroupDimension.Cert1024.Data.C00
+public import GroupDimension.Cert1024.Data.C01
+public import GroupDimension.Cert1024.Data.C02
+public import GroupDimension.Cert1024.Data.C03
+public import GroupDimension.Cert1024.Data.C04
+public import GroupDimension.Cert1024.Data.C05
+public import GroupDimension.Cert1024.Data.C06
+public import GroupDimension.Cert1024.Data.C07
+public import GroupDimension.Cert1024.Data.C08
+public import GroupDimension.Cert1024.Data.C09
+public import GroupDimension.Cert1024.Data.C10
+public import GroupDimension.Cert1024.Data.C11
+public import GroupDimension.Cert1024.Data.C12
+public import GroupDimension.Cert1024.Data.C13
+public import GroupDimension.Cert1024.Data.C14
+public import GroupDimension.Cert1024.Data.C15
+public import GroupDimension.Cert1024.Data.C16
+public import GroupDimension.Cert1024.Data.C17
+public import GroupDimension.Cert1024.Data.C18
+public import GroupDimension.Cert1024.Data.C19
+public import GroupDimension.Cert1024.Data.C20
+public import GroupDimension.Cert1024.Data.C21
+public import GroupDimension.Cert1024.Data.C22
+public import GroupDimension.Cert1024.Data.C23
+public import GroupDimension.Cert1024.Data.C24
+public import GroupDimension.Cert1024.Data.C25
+public import GroupDimension.Cert1024.Data.C26
+public import GroupDimension.Cert1024.Data.C27
+public import GroupDimension.Cert1024.Data.C28
+public import GroupDimension.Cert1024.Data.C29
+public import GroupDimension.Cert1024.Data.C30
+public import GroupDimension.Cert1024.Data.C31
+public import GroupDimension.Cert1024.Data.C32
+public import GroupDimension.Cert1024.Data.C33
+
+@[expose] public section
 
 /-! All 3400 certificates of Prop. 5.3. -/
 

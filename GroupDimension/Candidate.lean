@@ -1,4 +1,8 @@
-import GroupDimension.ClassFourOrder
+module
+
+public import GroupDimension.ClassFourOrder
+
+@[expose] public section
 
 /-!
 # Candidates of order `2¹¹`: Lemma 5.6 and Proposition 5.7
@@ -10,7 +14,7 @@ Notation of §5 of the paper.
   `P₁ = G`, `P_{i+1} = [P_i, G] P_i^p` (and `P₀ = G`, as for `D`). For `p = 2` the `2`-class of
   `G` is the least `c` with `P_{c+1} = 1`.
 * `jennings p G n` is `M_n(G) = ∏_{i p^j ≥ n} γ_i^{p^j}` (`i ≥ 1`, `j ≥ 0`), with `γ_i` Mathlib's
-  `lowerCentralSeries G (i - 1)`. The paper defines `M_n(Q) = Q ∩ (1 + Δ_{𝔽₂}(Q)^n)` and quotes
+  `(⊤ : Subgroup G).lowerCentralSeries (i - 1)`. The paper defines `M_n(Q) = Q ∩ (1 + Δ_{𝔽₂}(Q)^n)` and quotes
   this product formula as a theorem (Jennings [Jen41], Lazard [Laz54]); here the formula is the
   definition. For `p = 2` and class `≤ 3`, `D₅(Q) ≤ M₅ ≤ jennings 2 Q 5` is
   `D_five_le_jennings` (`Jennings/Theorem.lean`): reduction `ℤ[Q] → 𝔽₂[Q]` and the hard inclusion
@@ -74,12 +78,12 @@ def expCentral (p : ℕ) (G : Type*) [Group G] (n : ℕ) : Subgroup G :=
   expCentralAux p G (n - 1)
 
 /-- The Jennings subgroups `M_n(G) = ∏_{i p^j ≥ n} γ_i(G)^{p^j}` over `i ≥ 1`, `j ≥ 0`; the
-index `i` below is Mathlib's, `lowerCentralSeries G i = γ_{i+1}(G)`. The paper's definition is
+index `i` below is Mathlib's, `(⊤ : Subgroup G).lowerCentralSeries i = γ_{i+1}(G)`. The paper's definition is
 `G ∩ (1 + Δ_{𝔽_p}(G)^n)`; the two agree by Jennings' theorem. The inclusion of the paper's `M₅`
 into this product, for `p = 2` and class `≤ 3`, is `mem_jennings_of_sub_one_mem`
 (`Jennings/Theorem.lean`); the general equality is not formalized. -/
 def jennings (p : ℕ) (G : Type*) [Group G] (n : ℕ) : Subgroup G :=
-  ⨆ (i : ℕ) (j : ℕ) (_ : n ≤ (i + 1) * p ^ j), powSubgroup (lowerCentralSeries G i) (p ^ j)
+  ⨆ (i : ℕ) (j : ℕ) (_ : n ≤ (i + 1) * p ^ j), powSubgroup ((⊤ : Subgroup G).lowerCentralSeries i) (p ^ j)
 
 variable {p : ℕ}
 
@@ -130,10 +134,10 @@ theorem commutator_mem_expCentral_succ {m : ℕ} (hm : 1 ≤ m) {x : G}
   exact mem_sup_left (commutator_mem_commutator hx (mem_top g))
 
 /-- `γ_{k+1} ≤ P_{k+1}`. -/
-theorem lowerCentralSeries_le_expCentral : ∀ k, lowerCentralSeries G k ≤ expCentral p G (k + 1)
-  | 0 => by rw [lowerCentralSeries_zero]; exact (expCentral_one).ge
+theorem lowerCentralSeries_le_expCentral : ∀ k, (⊤ : Subgroup G).lowerCentralSeries k ≤ expCentral p G (k + 1)
+  | 0 => by rw [Subgroup.lowerCentralSeries_zero]; exact (expCentral_one).ge
   | k + 1 => by
-    rw [lowerCentralSeries_succ, expCentral_succ (n := k + 1) (by omega)]
+    rw [Subgroup.lowerCentralSeries_succ, expCentral_succ (n := k + 1) (by omega)]
     exact le_sup_of_le_left (commutator_mono (lowerCentralSeries_le_expCentral k) le_rfl)
 
 /-- Until it reaches `1`, the series `P_k` decreases strictly. -/
@@ -191,7 +195,7 @@ theorem pow_mem_of_isCoatom (hG : IsPGroup p G) {K : Subgroup G} [K.Normal] (hK 
 /-- In a finite `p`-group, `P₂ = [G, G] G^p` lies in every maximal subgroup. -/
 theorem expCentral_two_le_of_isCoatom (hG : IsPGroup p G) {K : Subgroup G} (hK : IsCoatom K) :
     expCentral p G 2 ≤ K := by
-  have h02 := (isNilpotent_of_finite_tfae (G := G)).out 0 2
+  have h02 := (Group.isNilpotent_of_finite_tfae (G := G)).out 1 3
   haveI : K.Normal := h02.mp hG.isNilpotent K hK
   show expCentral p G (1 + 1) ≤ K
   rw [expCentral_succ le_rfl, expCentral_one]
@@ -238,12 +242,12 @@ end Rank
 structure IsCandidate (G : Type*) [Group G] (n : G) : Prop where
   finite : Finite G
   isPGroup : IsPGroup 2 G
-  gamma_four_eq_bot : lowerCentralSeries G 3 = ⊥
-  gamma_three_ne_bot : lowerCentralSeries G 2 ≠ ⊥
+  gamma_four_eq_bot : (⊤ : Subgroup G).lowerCentralSeries 3 = ⊥
+  gamma_three_ne_bot : (⊤ : Subgroup G).lowerCentralSeries 2 ≠ ⊥
   isCyclic_center : IsCyclic (center G)
   mem_center : n ∈ center G
   orderOf_eq_two : orderOf n = 2
-  mem_gamma_three : n ∈ lowerCentralSeries G 2
+  mem_gamma_three : n ∈ (⊤ : Subgroup G).lowerCentralSeries 2
   mem_jennings : n ∈ jennings 2 G 5
   twoClass : ∃ c ≥ 4, expCentral 2 G (c + 1) = ⊥ ∧ expCentral 2 G c = zpowers n
 
@@ -287,12 +291,12 @@ private theorem commutator_pow_of_commute {x g : G} (hcx : Commute ⁅x, g⁆ x)
     ⁅x ^ m, g⁆ = ⁅x, g⁆ ^ m := by
   rw [commutatorElement_def, conj_pow_eq_of_commute hcx m, mul_inv_cancel_right]
 
-private theorem mem_center_of_mem_gamma_three (h4 : lowerCentralSeries G 3 = ⊥) {w : G}
-    (hw : w ∈ lowerCentralSeries G 2) : w ∈ center G := by
+private theorem mem_center_of_mem_gamma_three (h4 : (⊤ : Subgroup G).lowerCentralSeries 3 = ⊥) {w : G}
+    (hw : w ∈ (⊤ : Subgroup G).lowerCentralSeries 2) : w ∈ center G := by
   rw [mem_center_iff]
   intro g
-  have e3 : lowerCentralSeries G 3 = ⁅lowerCentralSeries G 2, ⊤⁆ := lowerCentralSeries_succ 2
-  have : ⁅w, g⁆ ∈ lowerCentralSeries G 3 := by
+  have e3 : (⊤ : Subgroup G).lowerCentralSeries 3 = ⁅(⊤ : Subgroup G).lowerCentralSeries 2, ⊤⁆ := Subgroup.lowerCentralSeries_succ ⊤ 2
+  have : ⁅w, g⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by
     rw [e3]
     exact commutator_mem_commutator hw (mem_top g)
   rw [h4, mem_bot, commutatorElement_eq_one_iff_mul_comm] at this
@@ -325,7 +329,7 @@ theorem card_Z4Z2pow7 : Nat.card Z4Z2pow7 = 2 ^ 9 := by
 `γ₂(Q) ≤ P₃(Q)`. -/
 theorem false_of_gamma_two_le {Q : Type*} [Group Q] {n : Q} (hQ : IsCandidate Q n)
     (hP3 : Nat.card (expCentral 2 Q 3) = 4) (hP4 : expCentral 2 Q 4 = zpowers n)
-    (hγ2le : lowerCentralSeries Q 1 ≤ expCentral 2 Q 3) : False := by
+    (hγ2le : (⊤ : Subgroup Q).lowerCentralSeries 1 ≤ expCentral 2 Q 3) : False := by
   haveI := hQ.finite
   have hn1 : n ≠ 1 := by
     intro h
@@ -335,37 +339,37 @@ theorem false_of_gamma_two_le {Q : Type*} [Group Q] {n : Q} (hQ : IsCandidate Q 
   have hx4 : ∀ x : Q, x ^ 4 ∈ expCentral 2 Q 3 := fun x =>
     pow_pow_mem_expCentral (m := 1) le_rfl (by rw [expCentral_one]; exact mem_top x) 2
   -- (2): `γ₂ = P₃` of order `4`, `|γ₃| = 2`
-  have e2 : lowerCentralSeries Q 2 = ⁅lowerCentralSeries Q 1, ⊤⁆ := lowerCentralSeries_succ 1
-  have e3 : lowerCentralSeries Q 3 = ⁅lowerCentralSeries Q 2, ⊤⁆ := lowerCentralSeries_succ 2
-  have hγ32 : lowerCentralSeries Q 2 ≤ lowerCentralSeries Q 1 :=
-    lowerCentralSeries_antitone (by norm_num)
-  have hγ3ne : lowerCentralSeries Q 2 ≠ lowerCentralSeries Q 1 := by
+  have e2 : (⊤ : Subgroup Q).lowerCentralSeries 2 = ⁅(⊤ : Subgroup Q).lowerCentralSeries 1, ⊤⁆ := Subgroup.lowerCentralSeries_succ ⊤ 1
+  have e3 : (⊤ : Subgroup Q).lowerCentralSeries 3 = ⁅(⊤ : Subgroup Q).lowerCentralSeries 2, ⊤⁆ := Subgroup.lowerCentralSeries_succ ⊤ 2
+  have hγ32 : (⊤ : Subgroup Q).lowerCentralSeries 2 ≤ (⊤ : Subgroup Q).lowerCentralSeries 1 :=
+    (Subgroup.lowerCentralSeries_antitone ⊤) (by norm_num)
+  have hγ3ne : (⊤ : Subgroup Q).lowerCentralSeries 2 ≠ (⊤ : Subgroup Q).lowerCentralSeries 1 := by
     intro h
     apply hQ.gamma_three_ne_bot
-    calc lowerCentralSeries Q 2 = ⁅lowerCentralSeries Q 1, ⊤⁆ := e2
-      _ = ⁅lowerCentralSeries Q 2, ⊤⁆ := by rw [h]
-      _ = lowerCentralSeries Q 3 := e3.symm
+    calc (⊤ : Subgroup Q).lowerCentralSeries 2 = ⁅(⊤ : Subgroup Q).lowerCentralSeries 1, ⊤⁆ := e2
+      _ = ⁅(⊤ : Subgroup Q).lowerCentralSeries 2, ⊤⁆ := by rw [h]
+      _ = (⊤ : Subgroup Q).lowerCentralSeries 3 := e3.symm
       _ = ⊥ := hQ.gamma_four_eq_bot
-  have hγ3card1 : Nat.card (lowerCentralSeries Q 2) ≠ 1 := fun h =>
+  have hγ3card1 : Nat.card ((⊤ : Subgroup Q).lowerCentralSeries 2) ≠ 1 := fun h =>
     hQ.gamma_three_ne_bot (card_eq_one.mp h)
-  have hγ3ne' : Nat.card (lowerCentralSeries Q 2) ≠ Nat.card (lowerCentralSeries Q 1) := fun h =>
+  have hγ3ne' : Nat.card ((⊤ : Subgroup Q).lowerCentralSeries 2) ≠ Nat.card ((⊤ : Subgroup Q).lowerCentralSeries 1) := fun h =>
     hγ3ne (eq_of_le_of_card_ge hγ32 h.ge)
-  have hγ2card : Nat.card (lowerCentralSeries Q 1) = 4 ∧ Nat.card (lowerCentralSeries Q 2) = 2 := by
+  have hγ2card : Nat.card ((⊤ : Subgroup Q).lowerCentralSeries 1) = 4 ∧ Nat.card ((⊤ : Subgroup Q).lowerCentralSeries 2) = 2 := by
     have h1 := card_dvd_of_le hγ2le
     rw [hP3] at h1
     have h2 := card_dvd_of_le hγ32
-    have hpos : 0 < Nat.card (lowerCentralSeries Q 2) := Nat.card_pos
+    have hpos : 0 < Nat.card ((⊤ : Subgroup Q).lowerCentralSeries 2) := Nat.card_pos
     have h3 := hγ3card1
     have h4 := hγ3ne'
-    obtain ⟨m, hm⟩ : ∃ m, Nat.card (lowerCentralSeries Q 1) = m := ⟨_, rfl⟩
-    obtain ⟨k, hk⟩ : ∃ k, Nat.card (lowerCentralSeries Q 2) = k := ⟨_, rfl⟩
+    obtain ⟨m, hm⟩ : ∃ m, Nat.card ((⊤ : Subgroup Q).lowerCentralSeries 1) = m := ⟨_, rfl⟩
+    obtain ⟨k, hk⟩ : ∃ k, Nat.card ((⊤ : Subgroup Q).lowerCentralSeries 2) = k := ⟨_, rfl⟩
     rw [hm] at h1 h2 h4 ⊢
     rw [hk] at h2 h3 h4 hpos ⊢
     have hm4 : m ≤ 4 := Nat.le_of_dvd (by norm_num) h1
     have hkm : k ≤ m := Nat.le_of_dvd (Nat.pos_of_dvd_of_pos h1 (by norm_num)) h2
     clear hm hk
     interval_cases m <;> interval_cases k <;> omega
-  have hγ2 : lowerCentralSeries Q 1 = expCentral 2 Q 3 :=
+  have hγ2 : (⊤ : Subgroup Q).lowerCentralSeries 1 = expCentral 2 Q 3 :=
     eq_of_le_of_card_ge hγ2le (by rw [hP3, hγ2card.1])
   -- (3): `M₅ ≤ Q⁸`
   have hM5 : jennings 2 Q 5 ≤ powSubgroup ⊤ 8 := by
@@ -400,7 +404,7 @@ theorem false_of_gamma_two_le {Q : Type*} [Group Q] {n : Q} (hQ : IsCandidate Q 
       have := pow_card_eq_one_of_mem hh
       rwa [hγ2card.2] at this
     · have h1 : h = 1 := by
-        have := lowerCentralSeries_antitone (G := Q) (by omega : 3 ≤ i + 1 + 1 + 1) hh
+        have := (⊤ : Subgroup Q).lowerCentralSeries_antitone (by omega : 3 ≤ i + 1 + 1 + 1) hh
         rwa [hQ.gamma_four_eq_bot, mem_bot] at this
       refine hpow (a := 1) (by rw [h1, one_pow]) (one_dvd _)
   -- (4)–(5): `x⁸ = n` for some `x`
@@ -429,15 +433,15 @@ theorem false_of_gamma_two_le {Q : Type*} [Group Q] {n : Q} (hQ : IsCandidate Q 
       exact hx ▸ hn1
     · rw [← pow_mul, show 4 * 2 ^ (1 + 1) = 8 * 2 by norm_num, pow_mul, hx,
         ← hQ.orderOf_eq_two, pow_orderOf_eq_one]
-  have hx4γ : x ^ 4 ∈ lowerCentralSeries Q 1 := hγ2 ▸ hx4 x
-  have hγ2z : zpowers (x ^ 4) = lowerCentralSeries Q 1 :=
+  have hx4γ : x ^ 4 ∈ (⊤ : Subgroup Q).lowerCentralSeries 1 := hγ2 ▸ hx4 x
+  have hγ2z : zpowers (x ^ 4) = (⊤ : Subgroup Q).lowerCentralSeries 1 :=
     eq_of_le_of_card_ge (zpowers_le.mpr hx4γ) (by rw [Nat.card_zpowers, hord, hγ2card.1])
   -- (6): `x⁴` is central
   have hcent : x ^ 4 ∈ center Q := by
     rw [mem_center_iff]
     intro g
-    have hc : ⁅x, g⁆ ∈ lowerCentralSeries Q 1 := by
-      rw [lowerCentralSeries_one]
+    have hc : ⁅x, g⁆ ∈ (⊤ : Subgroup Q).lowerCentralSeries 1 := by
+      rw [Subgroup.top_lowerCentralSeries_one]
       exact commutator_mem_commutator (mem_top x) (mem_top g)
     have hcx : Commute ⁅x, g⁆ x := by
       rw [← hγ2z] at hc
@@ -522,8 +526,8 @@ theorem not_isCandidate_of_quotient_z4 {Q : Type*} [Group Q] (hcard : Nat.card Q
       interval_cases m <;> omega
     exact (eq_of_le_of_card_ge (zpowers_le.mpr hn4) (by rw [h2, hcardn])).symm
   -- (1): `γ₂ ≤ P₃`
-  have hγ2le : lowerCentralSeries Q 1 ≤ expCentral 2 Q 3 := by
-    rw [lowerCentralSeries_one, _root_.commutator_def]
+  have hγ2le : (⊤ : Subgroup Q).lowerCentralSeries 1 ≤ expCentral 2 Q 3 := by
+    rw [Subgroup.top_lowerCentralSeries_one, _root_.commutator_def]
     refine commutator_le.mpr fun a _ b _ => hmk _ ?_
     rw [map_commutatorElement, map_commutatorElement, commutatorElement_eq_one_iff_mul_comm,
       mul_comm]
@@ -577,11 +581,11 @@ theorem false_of_card_expCentral_two_le {Q : Type*} [Group Q] [Finite Q] {n : Q}
   have hP4 : expCentral 2 Q 4 = zpowers n :=
     (eq_of_le_of_card_ge (zpowers_le.mpr hn4) (by rw [hP4c, hcardn])).symm
   -- facts on `γ₂`, `γ₃`
-  have e2 : lowerCentralSeries Q 2 = ⁅lowerCentralSeries Q 1, ⊤⁆ := lowerCentralSeries_succ 1
-  have e3 : lowerCentralSeries Q 3 = ⁅lowerCentralSeries Q 2, ⊤⁆ := lowerCentralSeries_succ 2
-  have hγ2P : lowerCentralSeries Q 1 ≤ expCentral 2 Q 2 := lowerCentralSeries_le_expCentral 1
-  have hγ3P : lowerCentralSeries Q 2 ≤ expCentral 2 Q 3 := lowerCentralSeries_le_expCentral 2
-  have hcent : ∀ w ∈ lowerCentralSeries Q 2, w ∈ center Q := fun w hw =>
+  have e2 : (⊤ : Subgroup Q).lowerCentralSeries 2 = ⁅(⊤ : Subgroup Q).lowerCentralSeries 1, ⊤⁆ := Subgroup.lowerCentralSeries_succ ⊤ 1
+  have e3 : (⊤ : Subgroup Q).lowerCentralSeries 3 = ⁅(⊤ : Subgroup Q).lowerCentralSeries 2, ⊤⁆ := Subgroup.lowerCentralSeries_succ ⊤ 2
+  have hγ2P : (⊤ : Subgroup Q).lowerCentralSeries 1 ≤ expCentral 2 Q 2 := lowerCentralSeries_le_expCentral 1
+  have hγ3P : (⊤ : Subgroup Q).lowerCentralSeries 2 ≤ expCentral 2 Q 3 := lowerCentralSeries_le_expCentral 2
+  have hcent : ∀ w ∈ (⊤ : Subgroup Q).lowerCentralSeries 2, w ∈ center Q := fun w hw =>
     mem_center_of_mem_gamma_three hQ.gamma_four_eq_bot hw
   have hsq1 : ∀ w ∈ zpowers n, w ^ 2 = 1 := fun w hw => by
     rcases eq_one_or_eq_of_mem_zpowers horder hw with rfl | rfl
@@ -589,25 +593,25 @@ theorem false_of_card_expCentral_two_le {Q : Type*} [Group Q] [Finite Q] {n : Q}
     · rw [← horder]; exact pow_orderOf_eq_one w
   have hx2 : ∀ x : Q, x ^ 2 ∈ expCentral 2 Q 2 := fun x =>
     pow_mem_expCentral_succ (n := 1) le_rfl (by rw [expCentral_one]; exact mem_top x)
-  have hγ32 : lowerCentralSeries Q 2 < lowerCentralSeries Q 1 := by
-    refine lt_of_le_of_ne (lowerCentralSeries_antitone (by norm_num)) fun h => ?_
+  have hγ32 : (⊤ : Subgroup Q).lowerCentralSeries 2 < (⊤ : Subgroup Q).lowerCentralSeries 1 := by
+    refine lt_of_le_of_ne ((Subgroup.lowerCentralSeries_antitone ⊤) (by norm_num)) fun h => ?_
     apply hQ.gamma_three_ne_bot
-    calc lowerCentralSeries Q 2 = ⁅lowerCentralSeries Q 1, ⊤⁆ := e2
-      _ = ⁅lowerCentralSeries Q 2, ⊤⁆ := by rw [h]
-      _ = lowerCentralSeries Q 3 := e3.symm
+    calc (⊤ : Subgroup Q).lowerCentralSeries 2 = ⁅(⊤ : Subgroup Q).lowerCentralSeries 1, ⊤⁆ := e2
+      _ = ⁅(⊤ : Subgroup Q).lowerCentralSeries 2, ⊤⁆ := by rw [h]
+      _ = (⊤ : Subgroup Q).lowerCentralSeries 3 := e3.symm
       _ = ⊥ := hQ.gamma_four_eq_bot
-  have hγ2c4 : 4 ≤ Nat.card (lowerCentralSeries Q 1) := by
-    have h1 : Nat.card (lowerCentralSeries Q 2) ≠ 1 := fun h =>
+  have hγ2c4 : 4 ≤ Nat.card ((⊤ : Subgroup Q).lowerCentralSeries 1) := by
+    have h1 : Nat.card ((⊤ : Subgroup Q).lowerCentralSeries 2) ≠ 1 := fun h =>
       hQ.gamma_three_ne_bot (card_eq_one.mp h)
-    have hpos : 0 < Nat.card (lowerCentralSeries Q 2) := Nat.card_pos
+    have hpos : 0 < Nat.card ((⊤ : Subgroup Q).lowerCentralSeries 2) := Nat.card_pos
     have := two_mul_card_le_of_lt hγ32
     omega
-  have hγ2dvd : Nat.card (lowerCentralSeries Q 1) ∣ 8 := by
+  have hγ2dvd : Nat.card ((⊤ : Subgroup Q).lowerCentralSeries 1) ∣ 8 := by
     have := card_dvd_of_le hγ2P
     rwa [hP2] at this
   -- `n ∈ M₅ = Q⁸ γ₂⁴ γ₃² ≤ P₄ = ⟨n⟩`: three cases
-  have hsplit : (∃ x : Q, x ^ 8 = n) ∨ (∃ y ∈ lowerCentralSeries Q 1, y ^ 4 = n) ∨
-      (∃ z ∈ lowerCentralSeries Q 2, z ^ 2 = n) := by
+  have hsplit : (∃ x : Q, x ^ 8 = n) ∨ (∃ y ∈ (⊤ : Subgroup Q).lowerCentralSeries 1, y ^ 4 = n) ∨
+      (∃ z ∈ (⊤ : Subgroup Q).lowerCentralSeries 2, z ^ 2 = n) := by
     by_contra hno
     simp only [not_or, not_exists, not_and] at hno
     obtain ⟨ha, hb, hc⟩ := hno
@@ -637,7 +641,7 @@ theorem false_of_card_expCentral_two_le {Q : Type*} [Group Q] [Finite Q] {n : Q}
           norm_num at this hij
           omega
         rw [hsplit_pow h hj]
-        have hw : h ^ 2 ^ (j - 2) ∈ lowerCentralSeries Q 1 := pow_mem hh _
+        have hw : h ^ 2 ^ (j - 2) ∈ (⊤ : Subgroup Q).lowerCentralSeries 1 := pow_mem hh _
         refine hP4one _ (pow_pow_mem_expCentral (m := 2) (by norm_num) (hγ2P hw) 2) fun he => ?_
         rw [show (2 : ℕ) ^ 2 = 4 by norm_num] at he
         exact hb _ hw he
@@ -647,17 +651,17 @@ theorem false_of_card_expCentral_two_le {Q : Type*} [Group Q] [Finite Q] {n : Q}
           subst this
           norm_num at hij
         rw [hsplit_pow h hj]
-        have hw : h ^ 2 ^ (j - 1) ∈ lowerCentralSeries Q 2 := pow_mem hh _
+        have hw : h ^ 2 ^ (j - 1) ∈ (⊤ : Subgroup Q).lowerCentralSeries 2 := pow_mem hh _
         refine hP4one _ (pow_pow_mem_expCentral (m := 3) (by norm_num) (hγ3P hw) 1) fun he => ?_
         rw [pow_one] at he
         exact hc _ hw he
       · have h1 : h = 1 := by
-          have := lowerCentralSeries_antitone (G := Q) (by omega : 3 ≤ i + 1 + 1 + 1) hh
+          have := (⊤ : Subgroup Q).lowerCentralSeries_antitone (by omega : 3 ≤ i + 1 + 1 + 1) hh
           rwa [hQ.gamma_four_eq_bot, mem_bot] at this
         rw [h1, one_pow]
     exact hn1 (mem_bot.mp (hle hQ.mem_jennings))
   -- case `z ∈ γ₃`, `z² = n`
-  have hcase_c : ∀ z ∈ lowerCentralSeries Q 2, z ^ 2 = n → False := by
+  have hcase_c : ∀ z ∈ (⊤ : Subgroup Q).lowerCentralSeries 2, z ^ 2 = n → False := by
     intro z hz hz2
     have hzord : orderOf z = 4 := by
       have h := orderOf_eq_prime_pow (p := 2) (n := 1) (x := z) ?_ ?_
@@ -667,15 +671,15 @@ theorem false_of_card_expCentral_two_le {Q : Type*} [Group Q] [Finite Q] {n : Q}
           pow_orderOf_eq_one]
     have hzP3 : zpowers z = expCentral 2 Q 3 :=
       eq_of_le_of_card_ge (zpowers_le.mpr (hγ3P hz)) (by rw [Nat.card_zpowers, hzord, hP3])
-    have hP3γ3 : expCentral 2 Q 3 ≤ lowerCentralSeries Q 2 := by
+    have hP3γ3 : expCentral 2 Q 3 ≤ (⊤ : Subgroup Q).lowerCentralSeries 2 := by
       rw [← hzP3]; exact zpowers_le.mpr hz
-    have hγ3n : lowerCentralSeries Q 2 ≤ zpowers n := by
+    have hγ3n : (⊤ : Subgroup Q).lowerCentralSeries 2 ≤ zpowers n := by
       rw [e2, commutator_le]
       intro u hu g _
-      have hcγ : ⁅u, g⁆ ∈ lowerCentralSeries Q 2 := by
+      have hcγ : ⁅u, g⁆ ∈ (⊤ : Subgroup Q).lowerCentralSeries 2 := by
         rw [e2]; exact commutator_mem_commutator hu (mem_top g)
       have hcomm : Commute ⁅u, g⁆ u := ((mem_center_iff.mp (hcent _ hcγ)) u).symm
-      have hu2 : u ^ 2 ∈ lowerCentralSeries Q 2 :=
+      have hu2 : u ^ 2 ∈ (⊤ : Subgroup Q).lowerCentralSeries 2 :=
         hP3γ3 (pow_mem_expCentral_succ (n := 2) (by norm_num) (hγ2P hu))
       have hsq : ⁅u, g⁆ ^ 2 = 1 := by
         rw [← commutator_pow_of_commute hcomm 2]
@@ -687,7 +691,7 @@ theorem false_of_card_expCentral_two_le {Q : Type*} [Group Q] [Finite Q] {n : Q}
     rw [hz2] at this
     exact hn1 this
   -- case `y ∈ γ₂`, `y⁴ = n`
-  have hcase_b : ∀ y ∈ lowerCentralSeries Q 1, y ^ 4 = n → False := by
+  have hcase_b : ∀ y ∈ (⊤ : Subgroup Q).lowerCentralSeries 1, y ^ 4 = n → False := by
     intro y hy hy4
     have hyord : orderOf y = 8 := by
       have h := orderOf_eq_prime_pow (p := 2) (n := 2) (x := y) ?_ ?_
@@ -697,7 +701,7 @@ theorem false_of_card_expCentral_two_le {Q : Type*} [Group Q] [Finite Q] {n : Q}
           pow_orderOf_eq_one]
     have hyP2 : zpowers y = expCentral 2 Q 2 :=
       eq_of_le_of_card_ge (zpowers_le.mpr (hγ2P hy)) (by rw [Nat.card_zpowers, hyord, hP2])
-    have hγ2eq : lowerCentralSeries Q 1 = expCentral 2 Q 2 :=
+    have hγ2eq : (⊤ : Subgroup Q).lowerCentralSeries 1 = expCentral 2 Q 2 :=
       le_antisymm hγ2P (by rw [← hyP2]; exact zpowers_le.mpr hy)
     have hy2P3 : y ^ 2 ∈ expCentral 2 Q 3 := pow_mem_expCentral_succ (n := 2) (by norm_num) (hγ2P hy)
     have hy2ord : orderOf (y ^ 2) = 4 := by
@@ -706,7 +710,7 @@ theorem false_of_card_expCentral_two_le {Q : Type*} [Group Q] [Finite Q] {n : Q}
     have hP3y : zpowers (y ^ 2) = expCentral 2 Q 3 :=
       eq_of_le_of_card_ge (zpowers_le.mpr hy2P3) (by rw [Nat.card_zpowers, hy2ord, hP3])
     have hy4' : (y ^ 2) ^ 2 = n := by rw [← pow_mul]; exact hy4
-    have hcγ : ∀ g : Q, ⁅y, g⁆ ∈ lowerCentralSeries Q 2 := fun g => by
+    have hcγ : ∀ g : Q, ⁅y, g⁆ ∈ (⊤ : Subgroup Q).lowerCentralSeries 2 := fun g => by
       rw [e2]; exact commutator_mem_commutator hy (mem_top g)
     -- `[y, g] ∈ ⟨n⟩`
     have hcg : ∀ g : Q, ⁅y, g⁆ ∈ zpowers n := by
@@ -729,7 +733,7 @@ theorem false_of_card_expCentral_two_le {Q : Type*} [Group Q] [Finite Q] {n : Q}
           have hzP3 : zpowers ⁅y, g⁆ = expCentral 2 Q 3 :=
             eq_of_le_of_card_ge (zpowers_le.mpr (hγ3P (hcγ g)))
               (by rw [Nat.card_zpowers, hco, hP3])
-          have hy2γ3 : y ^ 2 ∈ lowerCentralSeries Q 2 := by
+          have hy2γ3 : y ^ 2 ∈ (⊤ : Subgroup Q).lowerCentralSeries 2 := by
             have : y ^ 2 ∈ zpowers ⁅y, g⁆ := by rw [hzP3]; exact hy2P3
             exact zpowers_le.mpr (hcγ g) this
           have : ⁅y ^ 2, g⁆ = 1 := commutatorElement_eq_one_iff_mul_comm.mpr
@@ -741,7 +745,7 @@ theorem false_of_card_expCentral_two_le {Q : Type*} [Group Q] [Finite Q] {n : Q}
         hmemP3 hsq
       rwa [hy4'] at this
     -- `γ₃ ≤ ⟨n⟩`
-    have hγ3n : lowerCentralSeries Q 2 ≤ zpowers n := by
+    have hγ3n : (⊤ : Subgroup Q).lowerCentralSeries 2 ≤ zpowers n := by
       rw [e2, commutator_le]
       intro u hu g _
       have hu' : u ∈ zpowers y := by rw [hyP2, ← hγ2eq]; exact hu
@@ -751,15 +755,15 @@ theorem false_of_card_expCentral_two_le {Q : Type*} [Group Q] [Finite Q] {n : Q}
       rw [commutator_pow_of_commute hcomm m]
       exact pow_mem (hcg g) m
     -- `γ₂ ≤ ⟨y²⟩`
-    have hγ2y : lowerCentralSeries Q 1 ≤ zpowers (y ^ 2) := by
-      rw [lowerCentralSeries_one, _root_.commutator_def, commutator_le]
+    have hγ2y : (⊤ : Subgroup Q).lowerCentralSeries 1 ≤ zpowers (y ^ 2) := by
+      rw [Subgroup.top_lowerCentralSeries_one, _root_.commutator_def, commutator_le]
       intro g _ h _
-      have hcγ2 : ⁅g, h⁆ ∈ lowerCentralSeries Q 1 := by
-        rw [lowerCentralSeries_one]; exact commutator_mem_commutator (mem_top g) (mem_top h)
-      have hgc : ⁅g, ⁅g, h⁆⁆ ∈ lowerCentralSeries Q 2 := by
+      have hcγ2 : ⁅g, h⁆ ∈ (⊤ : Subgroup Q).lowerCentralSeries 1 := by
+        rw [Subgroup.top_lowerCentralSeries_one]; exact commutator_mem_commutator (mem_top g) (mem_top h)
+      have hgc : ⁅g, ⁅g, h⁆⁆ ∈ (⊤ : Subgroup Q).lowerCentralSeries 2 := by
         rw [← commutatorElement_inv]
         exact inv_mem (by rw [e2]; exact commutator_mem_commutator hcγ2 (mem_top g))
-      have hg2 : ⁅g ^ 2, h⁆ ∈ lowerCentralSeries Q 2 := by
+      have hg2 : ⁅g ^ 2, h⁆ ∈ (⊤ : Subgroup Q).lowerCentralSeries 2 := by
         rw [e2]; exact commutator_mem_commutator (by rw [hγ2eq]; exact hx2 g) (mem_top h)
       have hid : ⁅g, h⁆ ^ 2 = ⁅g, ⁅g, h⁆⁆⁻¹ * ⁅g ^ 2, h⁆ := by
         simp only [sq, commutatorElement_def]
@@ -785,10 +789,10 @@ theorem false_of_card_expCentral_two_le {Q : Type*} [Group Q] [Finite Q] {n : Q}
           pow_orderOf_eq_one]
     have hxP2 : zpowers (x ^ 2) = expCentral 2 Q 2 :=
       eq_of_le_of_card_ge (zpowers_le.mpr (hx2 x)) (by rw [Nat.card_zpowers, hx2ord, hP2])
-    have hcases : Nat.card (lowerCentralSeries Q 1) = 4 ∨
-        Nat.card (lowerCentralSeries Q 1) = 8 := by
+    have hcases : Nat.card ((⊤ : Subgroup Q).lowerCentralSeries 1) = 4 ∨
+        Nat.card ((⊤ : Subgroup Q).lowerCentralSeries 1) = 8 := by
       have hle := Nat.le_of_dvd (by norm_num) hγ2dvd
-      obtain ⟨m, hm⟩ : ∃ m, Nat.card (lowerCentralSeries Q 1) = m := ⟨_, rfl⟩
+      obtain ⟨m, hm⟩ : ∃ m, Nat.card ((⊤ : Subgroup Q).lowerCentralSeries 1) = m := ⟨_, rfl⟩
       rw [hm] at hle hγ2dvd hγ2c4 ⊢
       interval_cases m <;> omega
     rcases hcases with h4 | h8
@@ -800,7 +804,7 @@ theorem false_of_card_expCentral_two_le {Q : Type*} [Group Q] [Finite Q] {n : Q}
       have := mem_zpowers_pow_of_pow_eq_one (a := 4) (b := 2) (by norm_num) (by rw [hx2ord])
         huP2 hu4
       exact zpowers_le.mpr (pow_mem_expCentral_succ (n := 2) (by norm_num) (hx2 x)) this
-    · have hγ2eq : lowerCentralSeries Q 1 = expCentral 2 Q 2 :=
+    · have hγ2eq : (⊤ : Subgroup Q).lowerCentralSeries 1 = expCentral 2 Q 2 :=
         eq_of_le_of_card_ge hγ2P (by rw [h8, hP2])
       exact hcase_b (x ^ 2) (by rw [hγ2eq]; exact hx2 x) (by rw [← pow_mul]; exact hx)
   · exact hcase_b y hy hy4

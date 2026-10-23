@@ -1,5 +1,9 @@
-import GroupDimension.Reduction
-import GroupDimension.CentralRoot
+module
+
+public import GroupDimension.Reduction
+public import GroupDimension.CentralRoot
+
+@[expose] public section
 
 /-!
 # From class `≤ 3` to finite `2`-groups of class `3` (Proposition 2.1, Remark 2.3)
@@ -114,7 +118,7 @@ theorem exists_closure_finset_mem_D {n : ℕ} {x : G} (hx : x ∈ D n G) :
   rw [mem_D]
   have hinj : Function.Injective
       (mapDomainRingHom ℤ (Subgroup.closure ((insert x s : Finset G) : Set G)).subtype) :=
-    Finsupp.mapDomain_injective Subtype.val_injective
+    MonoidAlgebra.mapDomain_injective Subtype.val_injective
   have e : of ℤ _ (⟨x, hxs⟩ : Subgroup.closure ((insert x s : Finset G) : Set G)) - 1 = z' := by
     apply hinj
     rw [hz'x, hzx, _root_.map_sub, _root_.map_one, mapDomainRingHom_of]; rfl
@@ -128,14 +132,14 @@ variable {G H : Type*} [Group G] [Group H]
 
 /-- An injective homomorphism into a group with `γ_{k+1} = 1`: the source has `γ_{k+1} = 1`. -/
 theorem lowerCentralSeries_eq_bot_of_injective (f : G →* H) (hf : Function.Injective f) {k : ℕ}
-    (h : lowerCentralSeries H k = ⊥) : lowerCentralSeries G k = ⊥ :=
-  (Subgroup.map_eq_bot_iff_of_injective _ hf).mp (le_bot_iff.mp (h ▸ lowerCentralSeries.map f k))
+    (h : (⊤ : Subgroup H).lowerCentralSeries k = ⊥) : (⊤ : Subgroup G).lowerCentralSeries k = ⊥ :=
+  (Subgroup.map_eq_bot_iff_of_injective _ hf).mp (le_bot_iff.mp (h ▸ ((Subgroup.map_lowerCentralSeries ⊤ f k).le.trans (Subgroup.lowerCentralSeries_mono k le_top))))
 
 /-- In a finite nilpotent group an element `x ≠ 1` with `x² = 1` survives in the projection to
 the Sylow `2`-subgroup. -/
 theorem exists_sylow_two_proj [Finite G] (hG : Group.IsNilpotent G) {x : G} (hx2 : x ^ 2 = 1)
     (hx : x ≠ 1) : ∃ P : Sylow 2 G, ∃ π : G →* (P : Subgroup G), π x ≠ 1 := by
-  have hn := ((isNilpotent_of_finite_tfae (G := G)).out 0 3).mp hG
+  have hn := ((Group.isNilpotent_of_finite_tfae (G := G)).out 1 4).mp hG
   let e := Sylow.directProductOfNormal (G := G) (fun {p} _ P => hn p inferInstance P)
   have h2 : 2 ∈ (Nat.card G).primeFactors := by
     rw [Nat.mem_primeFactors]
@@ -180,9 +184,9 @@ end Sylow
 /-- The core of `(3) ⇒ (2)`: a finitely generated group `H` of class `≤ 3` has `D₅(H) = 1`
 if all finite `2`-groups of class `≤ 3` do. -/
 theorem D_five_eq_bot_of_fg (hP : PassiDFourSquare) (hG : GruenbergResidualTwo)
-    (h : ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → lowerCentralSeries Q 3 = ⊥ →
+    (h : ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥ →
       D 5 Q = ⊥)
-    (H : Type) [Group H] (hfg : Group.FG H) (hH : lowerCentralSeries H 3 = ⊥) :
+    (H : Type) [Group H] (hfg : Group.FG H) (hH : (⊤ : Subgroup H).lowerCentralSeries 3 = ⊥) :
     D 5 H = ⊥ := by
   rw [eq_bot_iff]
   intro y hy
@@ -191,15 +195,15 @@ theorem D_five_eq_bot_of_fg (hP : PassiDFourSquare) (hG : GruenbergResidualTwo)
   have hy2 : y ^ 2 = 1 := by
     have := hP H y (D_antitone (by norm_num : 4 ≤ 5) hy)
     rwa [hH, Subgroup.mem_bot] at this
-  obtain ⟨N, _, _, h2, hyN⟩ := hG H hfg (nilpotent_iff_lowerCentralSeries.mpr ⟨3, hH⟩) y
+  obtain ⟨N, _, _, h2, hyN⟩ := hG H hfg (Subgroup.nilpotent_iff_lowerCentralSeries.mpr ⟨3, hH⟩) y
     (fun m hm => by
       obtain ⟨k, rfl⟩ := hm
       rw [pow_succ, pow_mul, hy2, one_pow, one_mul]
       exact hy1)
-  have hQ : lowerCentralSeries (H ⧸ N) 3 = ⊥ := by
+  have hQ : (⊤ : Subgroup (H ⧸ N)).lowerCentralSeries 3 = ⊥ := by
     apply le_bot_iff.mp
-    calc lowerCentralSeries (H ⧸ N) 3
-        ≤ (lowerCentralSeries H 3).map (QuotientGroup.mk' N) :=
+    calc (⊤ : Subgroup (H ⧸ N)).lowerCentralSeries 3
+        ≤ ((⊤ : Subgroup H).lowerCentralSeries 3).map (QuotientGroup.mk' N) :=
           lowerCentralSeries_le_map_of_surjective _ (QuotientGroup.mk'_surjective N) 3
       _ = ⊥ := by rw [hH, Subgroup.map_bot]
   have hmem := map_mem_D (QuotientGroup.mk' N) hy
@@ -209,14 +213,14 @@ theorem D_five_eq_bot_of_fg (hP : PassiDFourSquare) (hG : GruenbergResidualTwo)
 
 /-- `(3) ⇒ (2)` of Proposition 2.1, for one group of class `≤ 3`. -/
 theorem D_five_eq_bot_of_two_groups (hP : PassiDFourSquare) (hG : GruenbergResidualTwo)
-    (h : ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → lowerCentralSeries Q 3 = ⊥ →
+    (h : ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥ →
       D 5 Q = ⊥)
-    (M : Type) [Group M] (hM : lowerCentralSeries M 3 = ⊥) : D 5 M = ⊥ := by
+    (M : Type) [Group M] (hM : (⊤ : Subgroup M).lowerCentralSeries 3 = ⊥) : D 5 M = ⊥ := by
   rw [eq_bot_iff]
   intro x hx
   obtain ⟨s, hs, hxH⟩ := exists_closure_finset_mem_D hx
   have hH := D_five_eq_bot_of_fg hP hG h (Subgroup.closure (s : Set M))
-    ((Group.fg_iff_subgroup_fg _).mpr ⟨s, rfl⟩)
+    ((Group.fg_iff_subgroup_fg _).mpr ((Subgroup.fg_iff _).mpr ⟨_, rfl, s.finite_toSet⟩))
     (lowerCentralSeries_eq_bot_of_injective (Subgroup.closure (s : Set M)).subtype
       (Subgroup.subtype_injective _) hM)
   rw [hH, Subgroup.mem_bot] at hxH
@@ -228,14 +232,14 @@ theorem D_five_eq_bot_of_two_groups (hP : PassiDFourSquare) (hG : GruenbergResid
 theorem dimensionQuestion5_iff_finite_two_groups (hP : PassiDFourSquare)
     (hG : GruenbergResidualTwo) :
     DimensionQuestion5 ↔
-      ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → lowerCentralSeries Q 3 = ⊥ →
+      ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥ →
         D 5 Q = ⊥ := by
   rw [dimensionQuestion5_iff]
   exact ⟨fun h Q _ _ _ hQ => h Q hQ, fun h M _ hM => D_five_eq_bot_of_two_groups hP hG h M hM⟩
 
 /-- Class `≤ 2` has `D₅ = 1`, given `D₃ = γ₃`. -/
 theorem D_five_eq_bot_of_class_two (hD3 : DThreeEqGammaThree) (Q : Type) [Group Q]
-    (h3 : lowerCentralSeries Q 2 = ⊥) : D 5 Q = ⊥ := by
+    (h3 : (⊤ : Subgroup Q).lowerCentralSeries 2 = ⊥) : D 5 Q = ⊥ := by
   rw [eq_bot_iff]
   intro g hg
   have hg3 : g ∈ D 3 Q := D_antitone (by norm_num : 3 ≤ 5) hg
@@ -247,11 +251,11 @@ is not formalized. -/
 theorem dimensionQuestion5_iff_class_three (hD3 : DThreeEqGammaThree) (hP : PassiDFourSquare)
     (hG : GruenbergResidualTwo) :
     DimensionQuestion5 ↔
-      ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → lowerCentralSeries Q 3 = ⊥ →
-        lowerCentralSeries Q 2 ≠ ⊥ → D 5 Q = ⊥ := by
+      ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥ →
+        (⊤ : Subgroup Q).lowerCentralSeries 2 ≠ ⊥ → D 5 Q = ⊥ := by
   rw [dimensionQuestion5_iff_finite_two_groups hP hG]
   refine ⟨fun h Q _ _ h2 hQ _ => h Q h2 hQ, fun h Q _ _ h2 hQ => ?_⟩
-  by_cases h3 : lowerCentralSeries Q 2 = ⊥
+  by_cases h3 : (⊤ : Subgroup Q).lowerCentralSeries 2 = ⊥
   · exact D_five_eq_bot_of_class_two hD3 Q h3
   · exact h Q h2 hQ h3
 
@@ -261,12 +265,12 @@ theorem dimensionQuestion5_iff_class_three (hD3 : DThreeEqGammaThree) (hP : Pass
 `D₅(G) ⊆ γ₄(G)` for every finite `G` whose Sylow `2`-subgroups have order `≤ 2^k`. Only Passi's
 theorem is assumed: the finite `2`-quotient is the Sylow `2`-subgroup of `G/γ₄(G)`. -/
 theorem D_five_le_of_bounded (hP : PassiDFourSquare) (k : ℕ)
-    (h : ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → lowerCentralSeries Q 3 = ⊥ →
+    (h : ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥ →
       Nat.card Q ≤ 2 ^ k → D 5 Q = ⊥)
     (G : Type) [Group G] [Finite G] (hG : ∀ P : Sylow 2 G, Nat.card P ≤ 2 ^ k) :
-    D 5 G ≤ lowerCentralSeries G 3 := by
+    D 5 G ≤ (⊤ : Subgroup G).lowerCentralSeries 3 := by
   apply D_le_of_D_quotient_eq_bot
-  have hM : lowerCentralSeries (G ⧸ lowerCentralSeries G 3) 3 = ⊥ :=
+  have hM : (⊤ : Subgroup (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 3)).lowerCentralSeries 3 = ⊥ :=
     lowerCentralSeries_quotient_eq_bot 3
   rw [eq_bot_iff]
   intro x hx
@@ -276,12 +280,12 @@ theorem D_five_le_of_bounded (hP : PassiDFourSquare) (k : ℕ)
     have := hP _ x (D_antitone (by norm_num : 4 ≤ 5) hx)
     rwa [hM, Subgroup.mem_bot] at this
   obtain ⟨P, π, hπ⟩ :=
-    exists_sylow_two_proj (nilpotent_iff_lowerCentralSeries.mpr ⟨3, hM⟩) hx2 hx1
+    exists_sylow_two_proj (Subgroup.nilpotent_iff_lowerCentralSeries.mpr ⟨3, hM⟩) hx2 hx1
   haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
-  have hPγ : lowerCentralSeries (P : Subgroup (G ⧸ lowerCentralSeries G 3)) 3 = ⊥ :=
-    lowerCentralSeries_eq_bot_of_injective (P : Subgroup (G ⧸ lowerCentralSeries G 3)).subtype
+  have hPγ : (⊤ : Subgroup (P : Subgroup (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 3))).lowerCentralSeries 3 = ⊥ :=
+    lowerCentralSeries_eq_bot_of_injective (P : Subgroup (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 3)).subtype
       (Subgroup.subtype_injective _) hM
-  have hcard : Nat.card (P : Subgroup (G ⧸ lowerCentralSeries G 3)) ≤ 2 ^ k := by
+  have hcard : Nat.card (P : Subgroup (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 3)) ≤ 2 ^ k := by
     obtain ⟨PG⟩ := (inferInstance : Nonempty (Sylow 2 G))
     refine le_trans ?_ (hG PG)
     rw [Sylow.card_eq_multiplicity, Sylow.card_eq_multiplicity]
@@ -296,12 +300,12 @@ theorem D_five_le_of_bounded (hP : PassiDFourSquare) (k : ℕ)
 `D₃ = γ₃`. -/
 theorem D_five_le_of_bounded_class_three (hD3 : DThreeEqGammaThree) (hP : PassiDFourSquare)
     (k : ℕ)
-    (h : ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → lowerCentralSeries Q 3 = ⊥ →
-      lowerCentralSeries Q 2 ≠ ⊥ → Nat.card Q ≤ 2 ^ k → D 5 Q = ⊥)
+    (h : ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥ →
+      (⊤ : Subgroup Q).lowerCentralSeries 2 ≠ ⊥ → Nat.card Q ≤ 2 ^ k → D 5 Q = ⊥)
     (G : Type) [Group G] [Finite G] (hG : ∀ P : Sylow 2 G, Nat.card P ≤ 2 ^ k) :
-    D 5 G ≤ lowerCentralSeries G 3 := by
+    D 5 G ≤ (⊤ : Subgroup G).lowerCentralSeries 3 := by
   refine D_five_le_of_bounded hP k (fun Q _ _ h2 hQ hc => ?_) G hG
-  by_cases h3 : lowerCentralSeries Q 2 = ⊥
+  by_cases h3 : (⊤ : Subgroup Q).lowerCentralSeries 2 = ⊥
   · exact D_five_eq_bot_of_class_two hD3 Q h3
   · exact h Q h2 hQ h3 hc
 

@@ -1,4 +1,8 @@
-import GroupDimension.TaharaProof.Decode5
+module
+
+public import GroupDimension.TaharaProof.Decode5
+
+@[expose] public section
 
 /-!
 # The symbol modulo (I): coordinates, the projection to `A₃ ⊕ A₄`, products
@@ -65,20 +69,20 @@ variable [Fintype G] (hF : F.Class4)
 include hF
 
 /-- `S` as a map to `W₃* ⊕ W₄` modulo (I). -/
-theorem mkQ_S_mul {z z' : G} (hz : z ∈ lowerCentralSeries G 2)
-    (hz' : z' ∈ lowerCentralSeries G 2) :
+theorem mkQ_S_mul {z z' : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 2)
+    (hz' : z' ∈ (⊤ : Subgroup G).lowerCentralSeries 2) :
     F.RI.mkQ (F.S (z * z')) = F.RI.mkQ (F.S z) + F.RI.mkQ (F.S z') := by
   rw [← map_add, ← sub_eq_zero, ← _root_.map_sub, Submodule.mkQ_apply,
     Submodule.Quotient.mk_eq_zero]
   exact S_mul hF hz hz'
 
-theorem mkQ_S_zpow {z : G} (hz : z ∈ lowerCentralSeries G 2) (k : ℤ) :
+theorem mkQ_S_zpow {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 2) (k : ℤ) :
     F.RI.mkQ (F.S (z ^ k)) = k • F.RI.mkQ (F.S z) := by
   rw [← map_zsmul, ← sub_eq_zero, ← _root_.map_sub, Submodule.mkQ_apply,
     Submodule.Quotient.mk_eq_zero]
   exact S_zpow hF hz k
 
-theorem mkQ_S_list_prod (L : List G) (hL : ∀ z ∈ L, z ∈ lowerCentralSeries G 2) :
+theorem mkQ_S_list_prod (L : List G) (hL : ∀ z ∈ L, z ∈ (⊤ : Subgroup G).lowerCentralSeries 2) :
     F.RI.mkQ (F.S L.prod) = (L.map fun z => F.RI.mkQ (F.S z)).sum := by
   induction L with
   | nil => simp [S_one]
@@ -88,14 +92,14 @@ theorem mkQ_S_list_prod (L : List G) (hL : ∀ z ∈ L, z ∈ lowerCentralSeries
         (Subgroup.list_prod_mem _ (fun z hz => hL z (List.mem_cons_of_mem a hz))),
       ih fun z hz => hL z (List.mem_cons_of_mem a hz)]
 
-theorem mkQ_S_ofFn {n : ℕ} (f : Fin n → G) (hf : ∀ i, f i ∈ lowerCentralSeries G 2) :
+theorem mkQ_S_ofFn {n : ℕ} (f : Fin n → G) (hf : ∀ i, f i ∈ (⊤ : Subgroup G).lowerCentralSeries 2) :
     F.RI.mkQ (F.S (List.ofFn f).prod) = ∑ i, F.RI.mkQ (F.S (f i)) := by
   rw [mkQ_S_list_prod hF _ (fun z hz => by
     obtain ⟨i, rfl⟩ := (List.mem_ofFn' f z).mp hz; exact hf i), List.map_ofFn, List.sum_ofFn]
   rfl
 
-theorem ofFn_mem {n : ℕ} (f : Fin n → G) (hf : ∀ i, f i ∈ lowerCentralSeries G 2) :
-    (List.ofFn f).prod ∈ lowerCentralSeries G 2 :=
+theorem ofFn_mem {n : ℕ} (f : Fin n → G) (hf : ∀ i, f i ∈ (⊤ : Subgroup G).lowerCentralSeries 2) :
+    (List.ofFn f).prod ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
   Subgroup.list_prod_mem _ (fun z hz => by
     obtain ⟨i, rfl⟩ := (List.mem_ofFn' f z).mp hz; exact hf i)
 
@@ -105,7 +109,7 @@ theorem S_ite (P : Prop) [Decidable P] (z : G) :
   split_ifs <;> simp [S_one]
 
 /-- On `γ₄`, the symbol is the class in `A₄`. -/
-theorem S_of_mem4 {z : G} (hz : z ∈ lowerCentralSeries G 3) : F.S z = F.A4 z :=
+theorem S_of_mem4 {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 3) : F.S z = F.A4 z :=
   nsum_zero_of_mem4 hF hz
 
 end Frame

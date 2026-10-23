@@ -1,4 +1,8 @@
-import Mathlib
+module
+
+public import Mathlib
+
+@[expose] public section
 
 /-!
 # Normal words of a polycyclic presentation with relative orders `2`
@@ -110,7 +114,7 @@ theorem exists_nwFrom (g : Fin m → G)
     have : tail g i = ⊥ := by
       rw [tail, Subgroup.closure_eq_bot_iff]
       rintro _ ⟨k, hk, rfl⟩
-      exact absurd (k.isLt) (by simp only [Set.mem_setOf_eq] at hk; omega)
+      exact absurd (k.isLt) (by simp only [Set.mem_ofPred_eq] at hk; omega)
     rw [this, Subgroup.mem_bot] at hx
     exact ⟨fun _ => false, by rw [hx, nwFrom_of_le _ _ hi]⟩
   | hstep i hi ih =>
@@ -123,7 +127,7 @@ theorem exists_nwFrom (g : Fin m → G)
       induction hy using Subgroup.closure_induction with
       | mem y hy =>
         obtain ⟨l, hl, rfl⟩ := hy
-        exact hconj ⟨i, hi⟩ l (by simp only [Set.mem_setOf_eq] at hl; exact Fin.mk_lt_of_lt_val (by omega))
+        exact hconj ⟨i, hi⟩ l (by simp only [Set.mem_ofPred_eq] at hl; exact Fin.mk_lt_of_lt_val (by omega))
       | one => simp
       | mul x y _ _ hx hy =>
         have : a⁻¹ * (x * y) * a = (a⁻¹ * x * a) * (a⁻¹ * y * a) := by group
@@ -155,7 +159,7 @@ theorem exists_nwFrom (g : Fin m → G)
     have hle : tail g i ≤ S := by
       rw [tail, Subgroup.closure_le]
       rintro _ ⟨k, hk, rfl⟩
-      simp only [Set.mem_setOf_eq] at hk
+      simp only [Set.mem_ofPred_eq] at hk
       rcases Nat.eq_or_lt_of_le hk with h | h
       · have : k = ⟨i, hi⟩ := Fin.ext h.symm
         subst this

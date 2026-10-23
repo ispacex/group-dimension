@@ -1,4 +1,8 @@
-import GroupDimension.Candidate
+module
+
+public import GroupDimension.Candidate
+
+@[expose] public section
 
 /-!
 # The smallest restricted N-series (Lazard)
@@ -231,13 +235,13 @@ theorem eq_bot_of_eq_commutator_sup_pow [hp : Fact p.Prime] [Finite G] (hG : IsP
     have : π x ∈ M := mem_map_of_mem π hx
     rw [hMbot, mem_bot] at this
     exact (QuotientGroup.eq_one_iff x).mp this
-  have hlcs : ∀ j, N ≤ lowerCentralSeries G j := by
+  have hlcs : ∀ j, N ≤ (⊤ : Subgroup G).lowerCentralSeries j := by
     intro j
     induction j with
-    | zero => exact le_top.trans (lowerCentralSeries_zero).ge
+    | zero => exact le_top.trans (Subgroup.lowerCentralSeries_zero ⊤).ge
     | succ j ih =>
-      exact hNK.trans (by rw [lowerCentralSeries_succ]; exact commutator_mono ih le_rfl)
-  obtain ⟨j, hj⟩ := nilpotent_iff_lowerCentralSeries.mp hG.isNilpotent
+      exact hNK.trans (by rw [Subgroup.lowerCentralSeries_succ]; exact commutator_mono ih le_rfl)
+  obtain ⟨j, hj⟩ := Subgroup.nilpotent_iff_lowerCentralSeries.mp hG.isNilpotent
   exact eq_bot_iff.mpr ((hlcs j).trans hj.le)
 
 /-- In a finite `p`-group the lower exponent-`p` central series reaches `1`. -/

@@ -1,5 +1,9 @@
-import GroupDimension.TaharaProof.Words
-import GroupDimension.CentralRoot
+module
+
+public import GroupDimension.TaharaProof.Words
+public import GroupDimension.CentralRoot
+
+@[expose] public section
 
 /-!
 # The basic products form a `ℤ`-basis of `ℤ[G]` ([Tah81, Lemma 3.1], after Losey)
@@ -64,7 +68,7 @@ theorem P_span : Submodule.span ℤ (Set.range fun b : F.Basic => F.P b.val) = �
     refine add_mem (Submodule.span_le.mpr ?_ h1) (Submodule.subset_span ⟨F.toBasic 0 ?_, rfl⟩)
     · rintro _ ⟨β, hβ, -, rfl⟩
       exact Submodule.subset_span ⟨F.toBasic β fun j => lt_of_le_of_lt (hβ j) (hb j), rfl⟩
-    · intro j; exact lt_of_le_of_lt (zero_le _) (hb j)
+    · intro j; exact lt_of_le_of_lt zero_le (hb j)
   | hneg y hy => exact neg_mem hy
   | hadd y z hy hz => exact add_mem hy hz
 
@@ -79,7 +83,8 @@ theorem P_linearIndependent : LinearIndependent ℤ fun b : F.Basic => F.P b.val
     rw [← LinearMap.range_eq_top, hf, Fintype.range_linearCombination, F.P_span]
   -- `e : ℤ[G] ≃ ℤ^Basic`
   let e : MonoidAlgebra ℤ G ≃ₗ[ℤ] (F.Basic → ℤ) :=
-    (Finsupp.linearEquivFunOnFinite ℤ ℤ G).trans (LinearEquiv.funCongrLeft ℤ ℤ (F.nfEquiv))
+    (MonoidAlgebra.coeffLinearEquiv ℤ).trans
+      ((Finsupp.linearEquivFunOnFinite ℤ ℤ G).trans (LinearEquiv.funCongrLeft ℤ ℤ (F.nfEquiv)))
   have hinj : Function.Injective (e.toLinearMap.comp f) :=
     IsNoetherian.injective_of_surjective_endomorphism _ (e.surjective.comp hsurj)
   have hfi : Function.Injective f := fun u v huv => hinj (by simp [huv])

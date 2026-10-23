@@ -1,4 +1,8 @@
-import GroupDimension.CentralRoot
+module
+
+public import GroupDimension.CentralRoot
+
+@[expose] public section
 
 /-!
 # Central products with `D₈` (Proposition 5.8(1) of the D5 paper)
@@ -38,7 +42,7 @@ theorem D_eq_of_mem_pow {Q : Type*} [Group Q] (H : Subgroup Q) (hcomm : commutat
   intro k hk
   have hk2 : k ∈ H := by
     have : k ∈ D 2 Q := D_antitone hn hk
-    rw [D_two, lowerCentralSeries_one] at this
+    rw [D_two, Subgroup.top_lowerCentralSeries_one] at this
     exact hcomm this
   refine ⟨⟨k, hk2⟩, ?_, rfl⟩
   show (⟨k, hk2⟩ : H) ∈ D n H
@@ -461,7 +465,7 @@ theorem X_iota (x : MonoidAlgebra ℤ S.H) : S.X (mapDomainRingHom ℤ S.H.subty
 variable {S}
 
 theorem tau_mem (htc : S.t ∈ commutator S.H) : S.τ ∈ augIdeal S.H ^ 2 := by
-  have : S.t ∈ D 2 S.H := by rw [D_two, lowerCentralSeries_one]; exact htc
+  have : S.t ∈ D 2 S.H := by rw [D_two, Subgroup.top_lowerCentralSeries_one]; exact htc
   exact mem_D.mp this
 
 theorem two_pow_smul_tau (htc : S.t ∈ commutator S.H) (k : ℕ) :

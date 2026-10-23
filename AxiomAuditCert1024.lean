@@ -1,4 +1,8 @@
-import GroupDimension.Cert1024.Prop1024
+module
+
+public import GroupDimension.Cert1024.Prop1024
+
+@[expose] public section
 
 /-! Axiom audit of the order-`2¹⁰` certificates (D5-34): `lake build GroupDimension.Cert1024.Prop1024`
 then `lake env lean AxiomAuditCert1024.lean`. Besides `propext`, `Classical.choice`, `Quot.sound`

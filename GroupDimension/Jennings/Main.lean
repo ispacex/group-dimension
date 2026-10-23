@@ -1,4 +1,8 @@
-import GroupDimension.Jennings.Layers
+module
+
+public import GroupDimension.Jennings.Layers
+
+@[expose] public section
 
 /-!
 # Jennings' theorem: `G ∩ (1 + Δ_{𝔽_p}^n) ≤ S n`

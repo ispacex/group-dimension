@@ -1,4 +1,8 @@
-import GroupDimension.TaharaProof.Decode11
+module
+
+public import GroupDimension.TaharaProof.Decode11
+
+@[expose] public section
 
 /-!
 # `g = gen τ`
@@ -17,7 +21,7 @@ variable {G : Type*} [Group G]
 
 section TFrame
 
-variable [Fintype G] (h4 : lowerCentralSeries G 4 = ⊥) {T : Data G} (hT : T.Valid)
+variable [Fintype G] (h4 : (⊤ : Subgroup G).lowerCentralSeries 4 = ⊥) {T : Data G} (hT : T.Valid)
   {v : ℕ} {y4 : Fin v → G} {o4 : Fin v → ℕ} (hy4 : LayerNF 3 y4 o4) (ho4 : ∀ q, 1 < o4 q)
 
 local notation "TF" => Tframe h4 hT hy4
@@ -83,22 +87,22 @@ theorem mkQ_ite {M : Type*} [AddCommGroup M] [Module ℤ M] (N : Submodule ℤ M
 
 include hT in
 theorem tc11_mem (i j : Fin T.s) :
-    tc (T.x₁ i ^ T.d i) (T.x₁ j) ∈ lowerCentralSeries G 2 :=
+    tc (T.x₁ i ^ T.d i) (T.x₁ j) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
   ExpThree.tc_mem (i := 1) (j := 0) (by norm_num) ((IsLayerBasis.layerNF hT.basis₁).pow_mem i)
     (hT.basis₁.mem j)
 
 include hT in
-theorem tc22_mem (l k : Fin T.t) : tc (T.x₂ l) (T.x₂ k) ∈ lowerCentralSeries G 3 :=
+theorem tc22_mem (l k : Fin T.t) : tc (T.x₂ l) (T.x₂ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
   ExpThree.tc_mem (i := 1) (j := 1) (by norm_num) (hT.basis₂.mem l) (hT.basis₂.mem k)
 
 include hT in
 theorem tc111_mem (i j k : Fin T.s) :
-    tc (tc (T.x₁ i ^ T.d i) (T.x₁ j)) (T.x₁ k) ∈ lowerCentralSeries G 3 :=
+    tc (tc (T.x₁ i ^ T.d i) (T.x₁ j)) (T.x₁ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
   ExpThree.tc_mem (i := 2) (j := 0) (by norm_num) (tc11_mem hT i j) (hT.basis₁.mem k)
 
 include ho4
 
-theorem mkQ_S_ite_zpow (P : Prop) [Decidable P] {z : G} (hz : z ∈ lowerCentralSeries G 2)
+theorem mkQ_S_ite_zpow (P : Prop) [Decidable P] {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 2)
     (n : ℤ) : (TF).RI.mkQ ((TF).S (if P then z ^ n else 1)) =
       if P then n • (TF).RI.mkQ ((TF).S z) else 0 := by
   split_ifs
@@ -106,14 +110,14 @@ theorem mkQ_S_ite_zpow (P : Prop) [Decidable P] {z : G} (hz : z ∈ lowerCentral
   · simp [Frame.S_one]
 
 include h4 hT hy4 in
-theorem genA_mem (τ : Coeffs T.s T.t) : T.genA τ ∈ lowerCentralSeries G 2 :=
+theorem genA_mem (τ : Coeffs T.s T.t) : T.genA τ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
   Frame.ofFn_mem TC _ fun i => Frame.ofFn_mem TC _ fun j => by
     split_ifs
     · exact zpow_mem (tc11_mem hT i j) _
     · exact one_mem _
 
 include h4 hT hy4 in
-theorem genB_mem (τ : Coeffs T.s T.t) : T.genB τ ∈ lowerCentralSeries G 2 :=
+theorem genB_mem (τ : Coeffs T.s T.t) : T.genB τ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
   Frame.ofFn_mem TC _ fun i => Frame.ofFn_mem TC _ fun k =>
     zpow_mem (Frame.ofFn_mem TC _ fun l => by
       split_ifs
@@ -121,14 +125,14 @@ theorem genB_mem (τ : Coeffs T.s T.t) : T.genB τ ∈ lowerCentralSeries G 2 :=
       · exact one_mem _) _
 
 include h4 hT hy4 in
-theorem genC_mem (τ : Coeffs T.s T.t) : T.genC τ ∈ lowerCentralSeries G 2 :=
+theorem genC_mem (τ : Coeffs T.s T.t) : T.genC τ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
   Frame.ofFn_mem TC _ fun i => Frame.ofFn_mem TC _ fun j => Frame.ofFn_mem TC _ fun k => by
     split_ifs
     · exact zpow_mem (lcs_mem_of_le (by norm_num) (tc111_mem hT i j k)) _
     · exact one_mem _
 
 include h4 hT hy4 in
-theorem gen_mem (τ : Coeffs T.s T.t) : T.gen τ ∈ lowerCentralSeries G 2 :=
+theorem gen_mem (τ : Coeffs T.s T.t) : T.gen τ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
   mul_mem (mul_mem (genA_mem h4 hT hy4 ho4 τ) (genB_mem h4 hT hy4 ho4 τ))
     (genC_mem h4 hT hy4 ho4 τ)
 
@@ -151,10 +155,10 @@ theorem mkQ_S_genA (τ : Coeffs T.s T.t) : (TF).RI.mkQ ((TF).S (T.genA τ)) =
 theorem mkQ_S_genB (τ : Coeffs T.s T.t) : (TF).RI.mkQ ((TF).S (T.genB τ)) =
     ∑ i, ∑ k, τ.v i k • ∑ l, if k < l then T.b i l •
       (TF).RI.mkQ ((TF).A4 (tc (T.x₂ l) (T.x₂ k))) else 0 := by
-  have h3 : ∀ l k : Fin T.t, tc (T.x₂ l) (T.x₂ k) ∈ lowerCentralSeries G 2 := fun l k =>
+  have h3 : ∀ l k : Fin T.t, tc (T.x₂ l) (T.x₂ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := fun l k =>
     lcs_mem_of_le (by norm_num) (tc22_mem hT l k)
   have hin : ∀ i k, (List.ofFn fun l => if k < l then tc (T.x₂ l) (T.x₂ k) ^ T.b i l
-      else 1).prod ∈ lowerCentralSeries G 2 := fun i k => Frame.ofFn_mem TC _ fun l => by
+      else 1).prod ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := fun i k => Frame.ofFn_mem TC _ fun l => by
     split_ifs
     · exact zpow_mem (h3 l k) _
     · exact one_mem _
@@ -175,7 +179,7 @@ theorem mkQ_S_genC (τ : Coeffs T.s T.t) : (TF).RI.mkQ ((TF).S (T.genC τ)) =
     ∑ i, ∑ j, ∑ k, if i ≤ j ∧ j ≤ k then τ.w i j k •
       (TF).RI.mkQ ((TF).A4 (tc (tc (T.x₁ i ^ T.d i) (T.x₁ j)) (T.x₁ k))) else 0 := by
   have h3 : ∀ i j k : Fin T.s, tc (tc (T.x₁ i ^ T.d i) (T.x₁ j)) (T.x₁ k) ∈
-      lowerCentralSeries G 2 := fun i j k =>
+      (⊤ : Subgroup G).lowerCentralSeries 2 := fun i j k =>
     lcs_mem_of_le (by norm_num) (tc111_mem hT i j k)
   unfold Data.genC
   rw [Frame.mkQ_S_ofFn TC _ fun i => Frame.ofFn_mem TC _ fun j => Frame.ofFn_mem TC _ fun k => by
@@ -201,7 +205,7 @@ variable {p : Fin T.u → ℤ} {U : Fin T.s × Fin T.s → ℤ} {V V' : Fin T.s 
   {W5 W6 W7 : Fin T.s × Fin T.s × Fin T.s → ℤ} {g : G}
 
 set_option maxHeartbeats 1000000 in
-theorem eq_gen (hg : g ∈ lowerCentralSeries G 2)
+theorem eq_gen (hg : g ∈ (⊤ : Subgroup G).lowerCentralSeries 2)
     (hS : (TF).S g = combx h4 hT hy4 p U V V' W5 W6 W7) :
     g = T.gen (tau U V V' W5 W6 W7) := by
   -- the symbol of `g`, modulo (I)

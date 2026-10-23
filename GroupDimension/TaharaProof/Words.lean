@@ -1,4 +1,8 @@
-import GroupDimension.ExpThree
+module
+
+public import GroupDimension.ExpThree
+
+@[expose] public section
 
 /-!
 # Proper products and the weight filtration of `ℤ[G]` ([Tah81, §§2–3])
@@ -199,13 +203,13 @@ structure Frame (G : Type*) [Group G] (ι : Type*) [LinearOrder ι] [Fintype ι]
   o : ι → ℕ
   w_pos : ∀ j, 1 ≤ w j
   w_mono : Monotone w
-  mem : ∀ j, x j ∈ lowerCentralSeries G (w j - 1)
-  pow_mem : ∀ j, x j ^ o j ∈ lowerCentralSeries G (w j)
+  mem : ∀ j, x j ∈ (⊤ : Subgroup G).lowerCentralSeries (w j - 1)
+  pow_mem : ∀ j, x j ^ o j ∈ (⊤ : Subgroup G).lowerCentralSeries (w j)
   nf : ∀ g : G, ∃ b : ι → ℕ, (∀ j, b j < o j) ∧ lprod (ordL ι) x b = g
   nf_unique : ∀ b c : ι → ℕ, (∀ j, b j < o j) → (∀ j, c j < o j) →
     lprod (ordL ι) x b = lprod (ordL ι) x c → b = c
   wt : ∀ b : ι → ℕ, (∀ j, b j < o j) → ∀ k,
-    lprod (ordL ι) x b ∈ lowerCentralSeries G k ↔ ∀ j, w j ≤ k → b j = 0
+    lprod (ordL ι) x b ∈ (⊤ : Subgroup G).lowerCentralSeries k ↔ ∀ j, w j ≤ k → b j = 0
 
 variable {G : Type*} [Group G] {ι : Type*} [LinearOrder ι] [Fintype ι]
 
@@ -328,7 +332,7 @@ theorem of_nprod_sub_one (b : ι → ℕ) :
         rw [← zero_add (Pi.single y 1 : ι → ℕ), ← F.P_mul_X (by simp), P_zero, one_mul]
       rw [this]
       refine Submodule.subset_span ⟨(Pi.single y 1 : ι → ℕ), ?_, by simp, rfl⟩
-      rw [hbb]; exact le_add_of_nonneg_left (zero_le _)
+      rw [hbb]; exact le_add_of_nonneg_left zero_le
     have h1 := F.low_mul_X hb'l ih1
     rw [← hbb] at h1
     constructor
@@ -353,16 +357,16 @@ theorem of_nprod_sub_one (b : ι → ℕ) :
       exact add_mem (F.low_mono hle le_rfl ih2) h1
 
 /-- The normal form of an element of `γ_k` has no letters of weight `< k`. -/
-theorem nf_weight {g : G} {k : ℕ} (hg : g ∈ lowerCentralSeries G (k - 1)) {b : ι → ℕ}
+theorem nf_weight {g : G} {k : ℕ} (hg : g ∈ (⊤ : Subgroup G).lowerCentralSeries (k - 1)) {b : ι → ℕ}
     (hb : ∀ j, b j < F.o j) (hbg : F.nprod b = g) {j : ι} (hj : b j ≠ 0) : k ≤ F.w j := by
   by_contra h
-  have hm : lprod (ordL ι) F.x b ∈ lowerCentralSeries G (k - 1) := by
+  have hm : lprod (ordL ι) F.x b ∈ (⊤ : Subgroup G).lowerCentralSeries (k - 1) := by
     rw [show lprod (ordL ι) F.x b = g from hbg]; exact hg
   exact hj ((F.wt b hb (k - 1)).mp hm j (by omega))
 
 /-- For `g ∈ γ_k`, `g - 1` is a combination of proper products of weight `≥ k` whose letters have
 weight `≥ k`. -/
-theorem of_sub_one_mem {g : G} {k : ℕ} (hg : g ∈ lowerCentralSeries G (k - 1)) (U : Set ι)
+theorem of_sub_one_mem {g : G} {k : ℕ} (hg : g ∈ (⊤ : Subgroup G).lowerCentralSeries (k - 1)) (U : Set ι)
     (hU : ∀ j, k ≤ F.w j → j ∈ U) :
     of ℤ G g - 1 ∈ F.Sp k U := by
   obtain ⟨b, hb, rfl⟩ := F.nf g
@@ -375,7 +379,7 @@ theorem of_sub_one_mem {g : G} {k : ℕ} (hg : g ∈ lowerCentralSeries G (k - 1
     by_contra h; push Not at h; simp [h] at hβn
   calc k ≤ F.w j0 := hl j0 hj0
     _ ≤ β j0 * F.w j0 := Nat.le_mul_of_pos_left _ (Nat.pos_of_ne_zero hj0)
-    _ ≤ F.W β := Finset.single_le_sum (f := fun j => β j * F.w j) (fun _ _ => zero_le _)
+    _ ≤ F.W β := Finset.single_le_sum (f := fun j => β j * F.w j) (fun _ _ => zero_le)
           (Finset.mem_univ j0)
 
 /-! ## Sorting -/
@@ -461,7 +465,7 @@ theorem Sp_mul_X {U : Set ι} (hU : IsUpperSet U) :
   | _ j IH =>
   intro hjU
   -- multiplying by `c - 1` for `c` of weight `> w j`
-  have hc : ∀ (c : G) (r : ℕ), F.w j < r → c ∈ lowerCentralSeries G (r - 1) →
+  have hc : ∀ (c : G) (r : ℕ), F.w j < r → c ∈ (⊤ : Subgroup G).lowerCentralSeries (r - 1) →
       ∀ k, ∀ z ∈ F.Sp k U, z * (of ℤ G c - 1) ∈ F.Sp (k + r) U := by
     intro c r hr hcr k z hz
     have hcm : of ℤ G c - 1 ∈ F.Sp r {i | j < i} :=
@@ -501,7 +505,7 @@ theorem Sp_mul_X {U : Set ι} (hU : IsUpperSet U) :
     have hyU : y ∈ U := haU y hy
     have hWa : F.W a = F.W a' + F.w y := by rw [haa, W_add, W_single]
     set c := tc (F.x y) (F.x j)
-    have hcm : c ∈ lowerCentralSeries G (F.w y + F.w j - 1) := by
+    have hcm : c ∈ (⊤ : Subgroup G).lowerCentralSeries (F.w y + F.w j - 1) := by
       refine ExpThree.tc_mem ?_ (F.mem y) (F.mem j)
       have := F.w_pos y; have := F.w_pos j; omega
     have hwj := F.w_pos y

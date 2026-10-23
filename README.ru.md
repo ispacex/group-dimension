@@ -26,9 +26,19 @@ rev = "main"
 лиевским случаем, который доказан и формализован в [IMP26] (arXiv:2610.02042, репозиторий
 <https://github.com/TimmPeterson/lie-algebras>).
 
-Lean `v4.29.0`, Mathlib `v4.29.0` (rev `8a17838`), та же версия, что у авторов. Пакет авторов
-`lie-rings` подключён через `require` на проверенном коммите `ed3d9fb` (тот же, что в подмодуле
-`upstream/lie-algebras` репозитория [dimension-subrings](https://github.com/ispacex/dimension-subrings)); нужен только файлу `LieComparison.lean`.
+Lean `v4.35.0`, Mathlib `v4.35.0` (rev `56a0058`); все файлы используют систему модулей Lean
+(`module`, `public import`, `@[expose] public section`). Единственная зависимость — Mathlib.
+
+**Lean 4.29 → 4.35 и зависимость `lie-rings`.** До коммита `e58aa2b` (тег `lean-v4.29`) пакет был
+на Lean/Mathlib `v4.29.0` и подключал пакет авторов `lie-rings` (TimmPeterson/lie-algebras на
+`ed3d9fb`, тоже 4.29); он был нужен только файлу `LieComparison.lean` для лиевской теоремы
+`lieDimensionQuestion5`. При переносе на 4.35 (нужен для подачи в
+[Palomar](#подача-в-реестр-palomar)) эта зависимость **убрана**, а не скопирована к нам: в
+репозитории нет файла лицензии, так что копировать его код нельзя; он на 4.29, около 2,3 МБ
+Lean, а отправить перенос в исходный репозиторий мы не можем. `LieComparison.lean` сохраняет
+групповые формулировки и цитирует лиевскую; `lieDimensionQuestion5` проверяется на `e58aa2b`.
+Формулировки теорем в остальном не изменились; единственная систематическая правка — переименование
+в Mathlib `lowerCentralSeries G k` в `(⊤ : Subgroup G).lowerCentralSeries k` (та же подгруппа).
 
 ## Определения (`GroupDimension/Basic.lean`)
 
@@ -38,16 +48,18 @@ Lean `v4.29.0`, Mathlib `v4.29.0` (rev `8a17838`), та же версия, чт�
 | $\varepsilon\colon \mathbb Z[G]\to\mathbb Z$, $g\mapsto 1$ | `augmentation G := (MonoidAlgebra.lift ℤ ℤ G 1).toRingHom` |
 | $\Delta(G)=\ker\varepsilon$ | `augIdeal G := RingHom.ker (augmentation G)` — `Ideal`, с экземпляром `IsTwoSided` |
 | $D_n(G)=\{g \mid g-1\in\Delta^n\}$ | `D n G : Subgroup G`, `mem_D` — по определению (`Iff.rfl`) |
-| $\gamma_n(G)$, $\gamma_1=G$ | Mathlib `lowerCentralSeries G (n-1)` |
+| $\gamma_n(G)$, $\gamma_1=G$ | Mathlib `(⊤ : Subgroup G).lowerCentralSeries (n-1)` |
 | $H^m$, подгруппа, порождённая $m$-ми степенями | `powSubgroup H m` |
 | $P_n(G)$, нижний экспоненциально-$p$-центральный ряд: $P_1=G$, $P_{i+1}=[P_i,G]P_i^p$ | `expCentral p G n` (и $P_0=G$) |
 | $M_n(G)=\prod_{ip^j\ge n}\gamma_i^{p^j}$ | `jennings p G n` — **формула Дженнингса–Лазара взята за определение**; её совпадение с $G\cap(1+\Delta_{\mathbb F_p}(G)^n)$ (определение статьи) — теорема Дженнингса. Её трудное включение доказано в нужном статье случае $p=2$, $n=5$, ступень $\le3$: $G\cap(1+\Delta_{\mathbb F_2}^5)\le$ `jennings 2 G 5` (`mem_jennings_of_sub_one_mem`, `Jennings/`); в общем виде оно доказано с рядом Лазара вместо произведения, а их совпадение (Лазар) не формализовано |
 | кандидат (§5, перед леммой 5.6) | `IsCandidate Q n` (`Candidate.lean`) |
 
 **Нумерация нижнего центрального ряда.** В Mathlib (`Mathlib/GroupTheory/Nilpotent.lean`)
-`lowerCentralSeries G 0 = ⊤`, `lowerCentralSeries G (k+1) = ⁅lowerCentralSeries G k, ⊤⁆`,
-поэтому **`lowerCentralSeries G k` = $\gamma_{k+1}(G)$**: $\gamma_2$ = `lowerCentralSeries G 1`
-(= `commutator G`, `lowerCentralSeries_one`), $\gamma_4$ = `lowerCentralSeries G 3`. Нумерация
+`S.lowerCentralSeries 0 = S`, `S.lowerCentralSeries (k+1) = ⁅S.lowerCentralSeries k, S⁆`, и при
+`S = ⊤` **`(⊤ : Subgroup G).lowerCentralSeries k` = $\gamma_{k+1}(G)$**: $\gamma_2$ =
+`(⊤ : Subgroup G).lowerCentralSeries 1` (= `commutator G`, `Subgroup.top_lowerCentralSeries_one`),
+$\gamma_4$ = `(⊤ : Subgroup G).lowerCentralSeries 3`. (До Mathlib 2026-05 это было
+`lowerCentralSeries G k`.) Нумерация
 `D n G` — как в литературе, без сдвига ($D_0 = D_1 = G$).
 
 **Коммутатор.** В Mathlib `⁅a, b⁆ = a b a⁻¹ b⁻¹`. Тождество в $\mathbb Z[G]$:
@@ -92,7 +104,6 @@ $[a,b]=a^{-1}b^{-1}ab$ — $[a,b]-1 = a^{-1}b^{-1}\bigl((a-1)(b-1)-(b-1)(a-1)\bi
 | **предложение 5.7 статьи** (в форме MATH-320): нет кандидата $Q$ порядка $2^{11}$ ранга $d(Q)\ge8$; доказательство элементарное, без классификации групп порядка $2^9$ ранга $8$ и без компьютера. Попутно: $P_2$ лежит в каждой максимальной подгруппе конечной $p$-группы, поэтому $d(G)\le n$ при $\vert G/P_2\vert\le p^n$; $\gamma_k\le P_k$; $P_k$ строго убывает до $1$ | `not_isCandidate_of_rank`; `false_of_card_expCentral_two_le` (у всякого кандидата $\vert P_2\vert\ge16$, т.е. $\vert\Phi(Q)\vert\ge16$); `false_of_gamma_two_le` (ядро леммы 5.6: $\gamma_2\le P_3$ невозможно для кандидата с $\vert P_3\vert=4$, $P_4=\langle n\rangle$); `rank_le_of_index_expCentral_two`, `expCentral_two_le_of_isCoatom`, `pow_mem_of_isCoatom`, `lowerCentralSeries_le_expCentral`, `expCentral_lt` | `Candidate.lean` |
 | **теорема Дженнингса**, трудное включение (D5-32): для конечной $p$-группы и всякого ограниченного N-ряда $S$ ($[S_a,S_b]\le S_{a+b}$, $S_a^p\le S_{pa}$) $G\cap(1+\Delta_{\mathbb F_p}(G)^n)\le S_n$, через базис Дженнингса $\prod(x_i-1)^{a_i}$ алгебры $\mathbb F_p[G]$; ряд Лазара (наименьший такой) доходит до $1$; при $p=2$ и ступени $\le3$ $S_5\le G^8\gamma_2^4\gamma_3^2$ | `Jennings.RestrictedSeries.mem_of_sub_one_mem`, `mem_lazard_of_sub_one_mem`, `lazard_le_of_restrictedSeries`, `lazard_eventually_bot`, `ClassThree.lazard_five_le_jennings`, `mem_jennings_of_sub_one_mem`; через $\mathbb Z[G]\to\mathbb F_p[G]$: $D_5(G)\le G^8\gamma_2^4\gamma_3^2$ (`D_five_le_jennings`) | `Jennings/` |
 | **лемма 5.2 статьи** (a)–(c), D5-33: при $D_3=\gamma_3$ (гипотеза `DThreeEqGammaThree`, здесь не доказывается) конечная $2$-группа ступени $3$ с $D_5(Q/N)=1$ для всякой центральной $N$ порядка $2$ и $D_5(Q)\ne1$ — кандидат, причём $D_5(Q)=\langle n\rangle$; попутно: конечная абелева $2$-группа не более чем с одной инволюцией циклична. **Предложение 5.7 в форме $D_5$**: при явных гипотезах $D_3=\gamma_3$ и предложения 5.3 ($D_5=1$ на порядке $2^{10}$, ступень $\le3$), которые в Lean не доказаны (5.3 — результат вычисления, в статье [computer + paper]), $D_5(Q)=1$ при $\vert Q\vert=2^{11}$, ступени $\le3$, $d(Q)\ge8$ | `isCandidate_of_minimal`, `isCyclic_of_unique_involution`, `D_five_eq_bot_of_rank` | `MinimalCounterexample.lean` |
-| лиевский $D_5(L)\subseteq\gamma_4(L)$ (из `corollaryD` авторов) | `LieComparison.lieDimensionQuestion5` | `LieComparison.lean` |
 
 $D_2 = \gamma_2$ доказано через тривиальное квадратично-нулевое расширение
 $T=\mathbb Z\oplus G_{ab}$ (`TrivSqZeroExt`): $g\mapsto(1,\bar g)$ продолжается до кольцевого
@@ -100,8 +111,10 @@ $\Phi\colon\mathbb Z[G]\to T$ с первой координатой $\varepsilo
 $\Phi(g-1)=(0,\bar g)$. Это та же идея, что у авторов в `DegreeTwo.lean` (квадратично-нулевое
 представление).
 
-`#print axioms` для всех 1337 доказанных объявлений (`AxiomAudit.lean`) — только `propext`,
-`Classical.choice`, `Quot.sound`. Ни `sorry`, ни `axiom` в исходниках нет.
+`#print axioms` для всех 1345 доказанных объявлений (`AxiomAudit.lean`: 1336 из разработки и
+9 сравниваемых теорем Palomar из `Solution.lean`) — только `propext`,
+`Classical.choice`, `Quot.sound`. Ни `sorry`, ни `axiom` нет ни в разработке, ни в `Solution.lean`;
+`Challenge.lean` формулирует подаваемые результаты с `sorry` намеренно.
 
 ## Сертификаты для предложения 5.3 (порядок $2^{10}$; `GroupDimension/Cert1024/`, D5-34)
 
@@ -165,8 +178,9 @@ $D_5 = 1$ — проверяется в Lean по сертификатам, не
 
 ## Сравнение с кольцами Ли (`LieComparison.lean`)
 
-Файл импортирует `LieRings.Publication.Results`, ставит рядом лиевскую и групповую
-постановки (`LieDimensionQuestion5` — доказано из `corollaryD`; `DimensionQuestion5` — открыто)
+Файл ставит рядом лиевскую постановку (цитата из [IMP26]; до `e58aa2b` она импортировалась из
+`LieRings.Publication.Results`, и `lieDimensionQuestion5` доказывалась из `corollaryD`) и
+групповую `DimensionQuestion5` (открыто)
 и в комментарии разбирает, какие шаги §§5–6 статьи переносятся. Кратко:
 
 * **переносятся**: переход к фактору (Corollary 6.14; для групп доказано здесь —
@@ -184,12 +198,23 @@ $D_5 = 1$ — проверяется в Lean по сертификатам, не
 
 ```bash
 lake exe cache get          # Mathlib из кэша
-lake build                  # GroupDimension + нужная часть lie-rings
+lake build                  # GroupDimension, Challenge, Solution
 lake env lean AxiomAudit.lean
 ```
 
-С нуля, кроме Mathlib из кэша, собирается пакет авторов — около 4 мин на 16 ядрах
-(см. аудит, [`notes/formalization-audit.ru.md`](https://github.com/ispacex/dimension-subrings/blob/main/notes/formalization-audit.ru.md) в dimension-subrings).
+С Mathlib из кэша сборка занимает несколько минут (см. также аудит,
+[`notes/formalization-audit.ru.md`](https://github.com/ispacex/dimension-subrings/blob/main/notes/formalization-audit.ru.md) в dimension-subrings, написанный для версии 4.29).
+
+## Подача в реестр Palomar
+
+Файлы `Challenge.lean`, `Solution.lean`, `comparator.json` и `formalization.yaml` — подача в
+[реестр Palomar](https://palomar-registry.org) машинно проверенных результатов. `Challenge.lean`
+формулирует девять результатов только средствами Mathlib (с `sorry`); `Solution.lean` (порождается
+из него скриптом `palomar/make_solution.py`) дословно повторяет определения и доказывает каждое
+утверждение из разработки; Comparator проверяет, что они совпадают и что используются только
+`propext`, `Classical.choice`, `Quot.sound`. Workflow `.github/workflows/palomar-preflight.yml`
+запускает собственную проверку Palomar на каждом существенном push. Что подано, с гипотезами
+условных результатов, описано в [`palomar/README.md`](palomar/README.md).
 
 ## Литература
 

@@ -1,5 +1,9 @@
-import GroupDimension.Cert1024.Data.All
-import GroupDimension.MinimalCounterexample
+module
+
+public import GroupDimension.Cert1024.Data.All
+public import GroupDimension.MinimalCounterexample
+
+@[expose] public section
 
 /-!
 # Proposition 5.3 of the paper from the certificates
@@ -56,14 +60,14 @@ theorem D_eq_bot_of_mulEquiv {G H : Type*} [Group G] [Group H] (e : G ≃* H) {n
 the candidate list: `D₅(R) = 1` for every group of order `2¹⁰` with `γ₄(R) = 1`. -/
 theorem prop_1024 (hD3 : DThreeEqGammaThree)
     (h512 : ∀ (R : Type) [Group R] [Finite R], Nat.card R = 2 ^ 9 →
-      lowerCentralSeries R 3 = ⊥ → D 5 R = ⊥)
+      (⊤ : Subgroup R).lowerCentralSeries 3 = ⊥ → D 5 R = ⊥)
     (hcomplete : ∀ (Q : Type) [Group Q] [Finite Q] (n : Q), Nat.card Q = 2 ^ 10 →
       IsCandidate Q n → ∃ i : Fin 3400, Nonempty (Q ≃* cand i))
     (R : Type) [Group R] [Finite R] (hcard : Nat.card R = 2 ^ 10)
-    (h4 : lowerCentralSeries R 3 = ⊥) : D 5 R = ⊥ := by
+    (h4 : (⊤ : Subgroup R).lowerCentralSeries 3 = ⊥) : D 5 R = ⊥ := by
   have hR : IsPGroup 2 R := IsPGroup.of_card hcard
   by_contra hD
-  have h3 : lowerCentralSeries R 2 ≠ ⊥ := fun h => hD (by
+  have h3 : (⊤ : Subgroup R).lowerCentralSeries 2 ≠ ⊥ := fun h => hD (by
     rw [eq_bot_iff, ← h, ← hD3 R]; exact D_antitone (by norm_num : 3 ≤ 5))
   have hmin : ∀ N : Subgroup R, ∀ _ : N.Normal, N ≤ Subgroup.center R → Nat.card N = 2 →
       D 5 (R ⧸ N) = ⊥ := by
@@ -84,11 +88,11 @@ theorem prop_1024 (hD3 : DThreeEqGammaThree)
 of the order-`2¹⁰` candidate list. -/
 theorem D_five_eq_bot_of_rank_of_complete (hD3 : DThreeEqGammaThree)
     (h512 : ∀ (R : Type) [Group R] [Finite R], Nat.card R = 2 ^ 9 →
-      lowerCentralSeries R 3 = ⊥ → D 5 R = ⊥)
+      (⊤ : Subgroup R).lowerCentralSeries 3 = ⊥ → D 5 R = ⊥)
     (hcomplete : ∀ (Q : Type) [Group Q] [Finite Q] (n : Q), Nat.card Q = 2 ^ 10 →
       IsCandidate Q n → ∃ i : Fin 3400, Nonempty (Q ≃* cand i))
     {Q : Type} [Group Q] [Finite Q] (hcard : Nat.card Q = 2 ^ 11)
-    (h4 : lowerCentralSeries Q 3 = ⊥) (hrank : 8 ≤ Group.rank Q) : D 5 Q = ⊥ :=
+    (h4 : (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥) (hrank : 8 ≤ Group.rank Q) : D 5 Q = ⊥ :=
   D_five_eq_bot_of_rank hD3 (fun R _ _ => prop_1024 hD3 h512 hcomplete R) hcard h4 hrank
 
 end GroupDimension.Cert1024

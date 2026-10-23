@@ -1,4 +1,8 @@
-import GroupDimension.TaharaProof.Decode1
+module
+
+public import GroupDimension.TaharaProof.Decode1
+
+@[expose] public section
 
 /-!
 # Coordinates of `W₃* ⊕ W₄`, and `D₅ ⊆ ker S mod R₅*` ([Tah81, §6])
@@ -283,12 +287,12 @@ include hF
 omit hF in
 theorem S_one : F.S (1 : G) = 0 := nsum_one 0
 
-theorem S_inv {z : G} (hz : z ∈ lowerCentralSeries G 2) : F.S z⁻¹ + F.S z ∈ F.RI := by
+theorem S_inv {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 2) : F.S z⁻¹ + F.S z ∈ F.RI := by
   have := S_mul hF (inv_mem hz) hz
   rw [inv_mul_cancel, S_one, zero_sub] at this
   have := neg_mem this; rwa [neg_neg] at this
 
-theorem S_zpow {z : G} (hz : z ∈ lowerCentralSeries G 2) (k : ℤ) :
+theorem S_zpow {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 2) (k : ℤ) :
     F.S (z ^ k) - k • F.S z ∈ F.RI := by
   induction k using Int.induction_on with
   | zero => simp [S_one]
@@ -306,7 +310,7 @@ theorem S_zpow {z : G} (hz : z ∈ lowerCentralSeries G 2) (k : ℤ) :
     rw [sub_smul, neg_smul, one_smul]; abel
 
 /-- **Injectivity**: an element of `γ₃` whose symbol lies in the span of (I) is trivial. -/
-theorem eq_one_of_S_mem {z : G} (hz : z ∈ lowerCentralSeries G 2) (hS : F.S z ∈ F.RI) :
+theorem eq_one_of_S_mem {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 2) (hS : F.S z ∈ F.RI) :
     z = 1 := by
   classical
   obtain ⟨n3, n4, h3b, h3w, -, -, hzeq, hh0, hSeq⟩ := nf_split hF hz
@@ -358,7 +362,7 @@ theorem eq_one_of_S_mem {z : G} (hz : z ∈ lowerCentralSeries G 2) (hS : F.S z 
   simp [nprod, lprod]
 
 /-- `ψ₃(z - 1) = S z` for `z ∈ γ₃`. -/
-theorem rel3_S {z : G} (hz : z ∈ lowerCentralSeries G 2) :
+theorem rel3_S {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 2) :
     (of ℤ G z - 1, F.S z) ∈ rel3 hF := by
   classical
   obtain ⟨-, h2⟩ := F.of_nprod_sub_one (F.nfc z)
@@ -408,7 +412,7 @@ theorem rel3_S {z : G} (hz : z ∈ lowerCentralSeries G 2) :
   rwa [add_sub_cancel, add_zero] at this
 
 /-- **`D₅ ∩ γ₃` has symbols in `R₅*`** ([Tah81, §6]). -/
-theorem S_mem_R5 {z : G} (hz5 : z ∈ D 5 G) (hz : z ∈ lowerCentralSeries G 2) :
+theorem S_mem_R5 {z : G} (hz5 : z ∈ D 5 G) (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 2) :
     F.S z ∈ F.R5 := by
   have r1 := rel3_S hF hz
   have r2 := rel3_of_mem_Sp5 hF (F.augIdeal_pow_le_Sp 5 (mem_D.mp hz5))

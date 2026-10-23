@@ -1,4 +1,8 @@
-import GroupDimension.TaharaProof.TFrame
+module
+
+public import GroupDimension.TaharaProof.TFrame
+
+@[expose] public section
 
 /-!
 # The symbol of an element of `γ₃` ([Tah81, §6])
@@ -25,22 +29,22 @@ variable [Fintype G] {F : Frame G ι} (hF : F.Class4)
 include hF
 
 /-- `γ₃` is abelian (class `≤ 4`). -/
-theorem lcs2_comm {g h : G} (hg : g ∈ lowerCentralSeries G 2) (hh : h ∈ lowerCentralSeries G 2) :
+theorem lcs2_comm {g h : G} (hg : g ∈ (⊤ : Subgroup G).lowerCentralSeries 2) (hh : h ∈ (⊤ : Subgroup G).lowerCentralSeries 2) :
     g * h = h * g := by
-  have hc : ⁅g, h⁆ ∈ lowerCentralSeries G 5 :=
+  have hc : ⁅g, h⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 5 :=
     lcs_mem_of_le (by norm_num) (commutator_lcs_le 2 2 (Subgroup.commutator_mem_commutator hg hh))
-  have h5 : lowerCentralSeries G 5 = ⊥ := by
-    rw [eq_bot_iff, ← hF.top]; exact lowerCentralSeries_antitone (by norm_num)
+  have h5 : (⊤ : Subgroup G).lowerCentralSeries 5 = ⊥ := by
+    rw [eq_bot_iff, ← hF.top]; exact (Subgroup.lowerCentralSeries_antitone ⊤) (by norm_num)
   rw [h5, Subgroup.mem_bot, commutatorElement_eq_one_iff_mul_comm] at hc
   exact hc
 
 omit [Fintype G] hF in
-theorem A4_mul {g h : G} (hg : g ∈ lowerCentralSeries G 3) (hh : h ∈ lowerCentralSeries G 3) :
+theorem A4_mul {g h : G} (hg : g ∈ (⊤ : Subgroup G).lowerCentralSeries 3) (hh : h ∈ (⊤ : Subgroup G).lowerCentralSeries 3) :
     F.A4 (g * h) = F.A4 g + F.A4 h := by
   simp [A4, cl_mul hg hh]
 
 omit [Fintype G] hF in
-theorem A4_zpow {g : G} (hg : g ∈ lowerCentralSeries G 3) (n : ℤ) : F.A4 (g ^ n) = n • F.A4 g := by
+theorem A4_zpow {g : G} (hg : g ∈ (⊤ : Subgroup G).lowerCentralSeries 3) (n : ℤ) : F.A4 (g ^ n) = n • F.A4 g := by
   simp [A4, cl_zpow hg]
 
 omit [Fintype G] hF in
@@ -53,15 +57,15 @@ theorem Φ3_single (m : ι) : F.Φ3 (Pi.single m 1) =
   rw [← cnt_single, F.Φ3_cnt (List.pairwise_singleton _ _)]; rfl
 
 /-- On `γ₄`, `nsum z 0` is the class of `z`. -/
-theorem nsum_zero_of_mem4 {z : G} (hz : z ∈ lowerCentralSeries G 3) : F.nsum z 0 = F.A4 z := by
+theorem nsum_zero_of_mem4 {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 3) : F.nsum z 0 = F.A4 z := by
   have hn : ∀ m, F.nfc z m ≠ 0 → F.w m = 4 := fun m hm => by
     have := F.nf_weight (k := 4) (by simpa using hz) (F.nfc_lt z) (F.nprod_nfc z) hm
     have := hF.w_le m; omega
-  have hmem : ∀ m, F.nfc z m ≠ 0 → F.x m ∈ lowerCentralSeries G 3 := fun m hm => by
+  have hmem : ∀ m, F.nfc z m ≠ 0 → F.x m ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := fun m hm => by
     simpa [hn m hm] using F.mem m
   conv_rhs => rw [← F.nprod_nfc z]
   -- the class of an ordered product of letters of weight 4
-  have key : ∀ l : List ι, (∀ m ∈ l, F.nfc z m ≠ 0 → F.x m ∈ lowerCentralSeries G 3) →
+  have key : ∀ l : List ι, (∀ m ∈ l, F.nfc z m ≠ 0 → F.x m ∈ (⊤ : Subgroup G).lowerCentralSeries 3) →
       F.A4 (l.map fun m => F.x m ^ F.nfc z m).prod =
         (l.map fun m => (F.nfc z m : ℤ) • F.A4 (F.x m)).sum := by
     intro l
@@ -69,11 +73,11 @@ theorem nsum_zero_of_mem4 {z : G} (hz : z ∈ lowerCentralSeries G 3) : F.nsum z
     | nil => simp [A4_one]
     | cons m l ih =>
       intro hl
-      have h1 : F.x m ^ F.nfc z m ∈ lowerCentralSeries G 3 := by
+      have h1 : F.x m ^ F.nfc z m ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by
         by_cases h : F.nfc z m = 0
         · simp [h, one_mem]
         · exact _root_.pow_mem (hl m List.mem_cons_self h) _
-      have h2 : (l.map fun m => F.x m ^ F.nfc z m).prod ∈ lowerCentralSeries G 3 := by
+      have h2 : (l.map fun m => F.x m ^ F.nfc z m).prod ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by
         refine list_prod_mem fun y hy => ?_
         obtain ⟨i, hi, rfl⟩ := List.mem_map.mp hy
         by_cases h : F.nfc z i = 0
@@ -103,7 +107,7 @@ theorem zprod_natCast (b : ι → ℕ) : F.zprod (fun j => (b j : ℤ)) = F.npro
 
 omit [Fintype G] hF in
 theorem zprod_mem {a : ι → ℤ} (ha : ∀ j, a j ≠ 0 → 3 ≤ F.w j) :
-    F.zprod a ∈ lowerCentralSeries G 2 := by
+    F.zprod a ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := by
   refine list_prod_mem fun y hy => ?_
   obtain ⟨j, -, rfl⟩ := List.mem_map.mp hy
   by_cases h : a j = 0
@@ -111,12 +115,12 @@ theorem zprod_mem {a : ι → ℤ} (ha : ∀ j, a j ≠ 0 → 3 ≤ F.w j) :
   · exact zpow_mem (lcs_mem_of_le (by have := ha j h; omega) (F.mem j)) _
 
 theorem list_prod_mul_of_mem (L : List ι) (u v : ι → G)
-    (hu : ∀ j ∈ L, u j ∈ lowerCentralSeries G 2) (hv : ∀ j ∈ L, v j ∈ lowerCentralSeries G 2) :
+    (hu : ∀ j ∈ L, u j ∈ (⊤ : Subgroup G).lowerCentralSeries 2) (hv : ∀ j ∈ L, v j ∈ (⊤ : Subgroup G).lowerCentralSeries 2) :
     (L.map fun j => u j * v j).prod = (L.map u).prod * (L.map v).prod := by
   induction L with
   | nil => simp
   | cons j L ih =>
-    have hPu : (L.map u).prod ∈ lowerCentralSeries G 2 := by
+    have hPu : (L.map u).prod ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := by
       refine list_prod_mem fun y hy => ?_
       obtain ⟨i, hi, rfl⟩ := List.mem_map.mp hy
       exact hu i (List.mem_cons_of_mem _ hi)
@@ -128,7 +132,7 @@ theorem list_prod_mul_of_mem (L : List ι) (u v : ι → G)
 /-- In `γ₃` the ordered products are multiplicative in the exponents. -/
 theorem zprod_add {a a' : ι → ℤ} (ha : ∀ j, a j ≠ 0 → 3 ≤ F.w j)
     (ha' : ∀ j, a' j ≠ 0 → 3 ≤ F.w j) : F.zprod (a + a') = F.zprod a * F.zprod a' := by
-  have hm : ∀ (b : ι → ℤ), (∀ j, b j ≠ 0 → 3 ≤ F.w j) → ∀ j, F.x j ^ b j ∈ lowerCentralSeries G 2 :=
+  have hm : ∀ (b : ι → ℤ), (∀ j, b j ≠ 0 → 3 ≤ F.w j) → ∀ j, F.x j ^ b j ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
     fun b hb j => by
       by_cases h : b j = 0
       · simp [h, one_mem]
@@ -138,7 +142,7 @@ theorem zprod_add {a a' : ι → ℤ} (ha : ∀ j, a j ≠ 0 → 3 ≤ F.w j)
   simp only [Pi.add_apply, zpow_add]
 
 omit [Fintype G] hF in
-theorem A4_list_prod (L : List G) (hL : ∀ g ∈ L, g ∈ lowerCentralSeries G 3) :
+theorem A4_list_prod (L : List G) (hL : ∀ g ∈ L, g ∈ (⊤ : Subgroup G).lowerCentralSeries 3) :
     F.A4 L.prod = (L.map F.A4).sum := by
   induction L with
   | nil => simp [A4_one]
@@ -148,30 +152,30 @@ theorem A4_list_prod (L : List G) (hL : ∀ g ∈ L, g ∈ lowerCentralSeries G 
       ih fun y hy => hL y (List.mem_cons_of_mem _ hy), List.map_cons, List.sum_cons]
 
 omit [Fintype G] hF in
-theorem pow_o_mem3 {j : ι} (hj : F.w j = 3) : F.x j ^ F.o j ∈ lowerCentralSeries G 3 := by
+theorem pow_o_mem3 {j : ι} (hj : F.w j = 3) : F.x j ^ F.o j ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by
   simpa [hj] using F.pow_mem j
 
 /-- Exponents of a product in `γ₄` of letters of weight 3 are divisible by the orders. -/
 theorem zprod_dvd {t : ι → ℤ} (ht : ∀ j, t j ≠ 0 → F.w j = 3)
-    (hm : F.zprod t ∈ lowerCentralSeries G 3) : ∀ j, (F.o j : ℤ) ∣ t j := by
+    (hm : F.zprod t ∈ (⊤ : Subgroup G).lowerCentralSeries 3) : ∀ j, (F.o j : ℤ) ∣ t j := by
   have ho : ∀ j, (0 : ℤ) < F.o j := fun j => Int.natCast_pos.mpr (F.o_pos j)
   set r : ι → ℤ := fun j => t j % F.o j
   set q : ι → ℤ := fun j => (F.o j : ℤ) * (t j / F.o j)
-  have hrq : t = r + q := funext fun j => by simp [r, q, Int.emod_add_ediv]
+  have hrq : t = r + q := funext fun j => by simp [r, q, Int.emod_add_mul_ediv]
   have hr0 : ∀ j, r j ≠ 0 → 3 ≤ F.w j := fun j hj => by
     have : t j ≠ 0 := fun h => hj (by simp [r, h])
     rw [ht j this]
   have hq0 : ∀ j, q j ≠ 0 → 3 ≤ F.w j := fun j hj => by
     have : t j ≠ 0 := fun h => hj (by simp [q, h])
     rw [ht j this]
-  have hqm : F.zprod q ∈ lowerCentralSeries G 3 := by
+  have hqm : F.zprod q ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by
     refine list_prod_mem fun y hy => ?_
     obtain ⟨j, -, rfl⟩ := List.mem_map.mp hy
     by_cases h : t j = 0
     · simp [q, h, one_mem]
     · simp only [q, zpow_mul]
       exact zpow_mem (by rw [zpow_natCast]; exact pow_o_mem3 (ht j h)) _
-  have hrm : F.zprod r ∈ lowerCentralSeries G 3 := by
+  have hrm : F.zprod r ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by
     have e := zprod_add hF hr0 hq0
     rw [← hrq] at e
     have : F.zprod r = F.zprod t * (F.zprod q)⁻¹ := by rw [e]; group
@@ -225,10 +229,10 @@ theorem gI_eq {l : ι} (hl : F.w l = 3) :
     nsum_zero_of_mem4 hF (pow_o_mem3 hl)]
 
 /-- The normal form of `z ∈ γ₃`, split into its layers 3 and 4. -/
-theorem nf_split {z : G} (hz : z ∈ lowerCentralSeries G 2) :
+theorem nf_split {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 2) :
     ∃ (n3 n4 : ι → ℕ), (∀ j, n3 j < F.o j) ∧ (∀ j, n3 j ≠ 0 → F.w j = 3) ∧
       (∀ j, n4 j < F.o j) ∧ (∀ j, n4 j ≠ 0 → 4 ≤ F.w j) ∧
-      z = F.nprod n3 * F.nprod n4 ∧ F.nprod n4 ∈ lowerCentralSeries G 3 ∧
+      z = F.nprod n3 * F.nprod n4 ∧ F.nprod n4 ∈ (⊤ : Subgroup G).lowerCentralSeries 3 ∧
       F.S z = ∑ j, (n3 j : ℤ) • F.Φ3 (Pi.single j 1) + F.A4 (F.nprod n4) := by
   classical
   set n := F.nfc z
@@ -258,7 +262,7 @@ theorem nf_split {z : G} (hz : z ∈ lowerCentralSeries G 2) :
     rw [hsplit]
     exact (lprod_mul_lprod F.x _ n4 rfl fun i j hi hj =>
       F.lt_of_w_lt (by have := h3w i hi; have := h4w j hj; omega)).symm
-  have hh0 : F.nprod n4 ∈ lowerCentralSeries G 3 := by
+  have hh0 : F.nprod n4 ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by
     refine list_prod_mem fun y hy => ?_
     obtain ⟨j, -, rfl⟩ := List.mem_map.mp hy
     by_cases h : n4 j = 0
@@ -274,10 +278,10 @@ theorem nf_split {z : G} (hz : z ∈ lowerCentralSeries G 2) :
 /-- **The symbol of a product**: for `z = ∏ x_j^{a_j} · h` (letters of weight 3, `h ∈ γ₄`, any
 integer exponents), `S z ≡ ∑ a_j x̄_j + h̄` modulo (I). -/
 theorem S_eq_of {a : ι → ℤ} (ha : ∀ j, a j ≠ 0 → F.w j = 3) {h : G}
-    (hh : h ∈ lowerCentralSeries G 3) :
+    (hh : h ∈ (⊤ : Subgroup G).lowerCentralSeries 3) :
     F.S (F.zprod a * h) - (∑ j, a j • F.Φ3 (Pi.single j 1) + F.A4 h) ∈ F.RI := by
   have ha3 : ∀ j, a j ≠ 0 → 3 ≤ F.w j := fun j hj => by rw [ha j hj]
-  have hz : F.zprod a * h ∈ lowerCentralSeries G 2 :=
+  have hz : F.zprod a * h ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
     mul_mem (F.zprod_mem ha3) (lcs_mem_of_le (by norm_num) hh)
   obtain ⟨n3, n4, h3b, h3w, -, -, hzeq, hh0, hS⟩ := nf_split hF hz
   set n3' : ι → ℤ := fun j => (n3 j : ℤ)
@@ -295,14 +299,14 @@ theorem S_eq_of {a : ι → ℤ} (ha : ∀ j, a j ≠ 0 → F.w j = 3) {h : G}
   have hzn : F.zprod n3' = F.nprod n3 := zprod_natCast n3
   rw [hsplit, hzn, mul_assoc] at hzeq
   have hth : F.zprod t * h = F.nprod n4 := mul_left_cancel hzeq
-  have htm : F.zprod t ∈ lowerCentralSeries G 3 := by
+  have htm : F.zprod t ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by
     have : F.zprod t = F.nprod n4 * h⁻¹ := by rw [← hth]; group
     rw [this]; exact mul_mem hh0 (inv_mem hh)
   have hdv := zprod_dvd hF ht htm
   -- the class of `∏ x_j^{t_j}`
   have hfac : ∀ j, F.x j ^ t j = (F.x j ^ F.o j) ^ (t j / F.o j) := fun j => by
     rw [← zpow_natCast, ← zpow_mul, Int.mul_ediv_cancel' (hdv j)]
-  have hfm : ∀ j, F.x j ^ t j ∈ lowerCentralSeries G 3 := fun j => by
+  have hfm : ∀ j, F.x j ^ t j ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := fun j => by
     by_cases h0 : t j = 0
     · simp [h0, one_mem]
     · rw [hfac]; exact zpow_mem (pow_o_mem3 (ht j h0)) _
@@ -332,7 +336,7 @@ theorem S_eq_of {a : ι → ℤ} (ha : ∀ j, a j ≠ 0 → F.w j = 3) {h : G}
     exact Submodule.smul_mem _ _ (gI_mem_RI (ht j h0))
 
 /-- Additivity of the symbol modulo (I). -/
-theorem S_mul {z z' : G} (hz : z ∈ lowerCentralSeries G 2) (hz' : z' ∈ lowerCentralSeries G 2) :
+theorem S_mul {z z' : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 2) (hz' : z' ∈ (⊤ : Subgroup G).lowerCentralSeries 2) :
     F.S (z * z') - (F.S z + F.S z') ∈ F.RI := by
   obtain ⟨n3, n4, -, h3w, -, -, hzeq, hh0, hS⟩ := nf_split hF hz
   obtain ⟨m3, m4, -, h3w', -, -, hzeq', hh0', hS'⟩ := nf_split hF hz'

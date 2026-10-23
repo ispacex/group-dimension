@@ -1,25 +1,29 @@
-import GroupDimension.Basic
-import GroupDimension.LowerCentral
-import GroupDimension.DTwo
-import GroupDimension.Statements
-import GroupDimension.Reduction
-import GroupDimension.LieComparison
-import GroupDimension.CentralRoot
-import GroupDimension.CentralD8
-import GroupDimension.CentralSqrt
-import GroupDimension.CentralProduct
-import GroupDimension.FiniteReduction
-import GroupDimension.ClassFour
-import GroupDimension.ClassFourOrder
-import GroupDimension.Tahara
-import GroupDimension.ExpThree
-import GroupDimension.ExpThreePlus
-import GroupDimension.TaharaTheorem
-import GroupDimension.Candidate
-import GroupDimension.Jennings.Theorem
-import GroupDimension.MinimalCounterexample
-import GroupDimension.Cert1024.Nilpotent
-import GroupDimension.Cert1024.PcBound
-import GroupDimension.Cert1024.Check
-import GroupDimension.Cert1024.Decode
-import GroupDimension.Cert1024.Test.Tamper
+module
+
+public import GroupDimension.Basic
+public import GroupDimension.LowerCentral
+public import GroupDimension.DTwo
+public import GroupDimension.Statements
+public import GroupDimension.Reduction
+public import GroupDimension.LieComparison
+public import GroupDimension.CentralRoot
+public import GroupDimension.CentralD8
+public import GroupDimension.CentralSqrt
+public import GroupDimension.CentralProduct
+public import GroupDimension.FiniteReduction
+public import GroupDimension.ClassFour
+public import GroupDimension.ClassFourOrder
+public import GroupDimension.Tahara
+public import GroupDimension.ExpThree
+public import GroupDimension.ExpThreePlus
+public import GroupDimension.TaharaTheorem
+public import GroupDimension.Candidate
+public import GroupDimension.Jennings.Theorem
+public import GroupDimension.MinimalCounterexample
+public import GroupDimension.Cert1024.Nilpotent
+public import GroupDimension.Cert1024.PcBound
+public import GroupDimension.Cert1024.Check
+public import GroupDimension.Cert1024.Decode
+public import GroupDimension.Cert1024.Test.Tamper
+
+@[expose] public section

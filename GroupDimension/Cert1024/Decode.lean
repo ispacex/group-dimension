@@ -1,4 +1,8 @@
-import GroupDimension.Cert1024.Check
+module
+
+public import GroupDimension.Cert1024.Check
+
+@[expose] public section
 
 /-!
 # The candidate group of a data line

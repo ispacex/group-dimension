@@ -1,3 +1,7 @@
+module
+
+@[expose] public section
+
 /-!
 # The certificate checker for Prop. 5.3 — the computational part
 

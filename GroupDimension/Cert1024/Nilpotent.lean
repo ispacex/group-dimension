@@ -1,4 +1,8 @@
-import GroupDimension.Basic
+module
+
+public import GroupDimension.Basic
+
+@[expose] public section
 
 /-!
 # A representation that kills `Δ^k`
@@ -82,13 +86,13 @@ theorem sub_one_mem_prodSpan (f : G →* A) (s : ι → G) (hs : Subgroup.closur
       one_mem' := by simp
       mul_mem' := by
         intro a b ha hb
-        simp only [Set.mem_setOf_eq, map_mul] at *
+        simp only [Set.mem_ofPred_eq, map_mul] at *
         have e : f a * f b - 1 = (f a - 1) * (f b - 1) + (f a - 1) + (f b - 1) := by noncomm_ring
         rw [e]
         exact add_mem (add_mem (prodSpan_anti N (by norm_num) (mul_mem_prodSpan N ha hb)) ha) hb
       inv_mem' := by
         intro a ha
-        simp only [Set.mem_setOf_eq] at *
+        simp only [Set.mem_ofPred_eq] at *
         set t := f a - 1 with ht
         obtain ⟨n0, hn0⟩ := hnil (neg_mem ha)
         have hn : (-t) ^ (n0 + 1) = 0 := by rw [pow_succ, hn0, zero_mul]
@@ -143,13 +147,13 @@ theorem map_eq_one_of_mem_D (f : G →* A) (s : ι → G) (hs : Subgroup.closure
   have hleft : ∀ (y : MonoidAlgebra ℤ G) {j} {z : A}, z ∈ prodSpan N j → φ y * z ∈ prodSpan N j := by
     intro y j z hz
     induction y using MonoidAlgebra.induction_on with
-    | hM x =>
+    | of x =>
       rw [hφof]
       have e : f x * z = (f x - 1) * z + z := by noncomm_ring
       rw [e]
       exact add_mem (prodSpan_anti N (by omega) (mul_mem_prodSpan N (h1 x) hz)) hz
-    | hadd a b ha hb => rw [map_add, add_mul]; exact add_mem ha hb
-    | hsmul c a ha =>
+    | add a b ha hb => rw [map_add, add_mul]; exact add_mem ha hb
+    | smul c a ha =>
       have key : ∀ (c : ℤ) (a : MonoidAlgebra ℤ G), φ a * z ∈ prodSpan N j →
           φ (c • a) * z ∈ prodSpan N j := by
         intro c a ha
@@ -159,11 +163,11 @@ theorem map_eq_one_of_mem_D (f : G →* A) (s : ι → G) (hs : Subgroup.closure
   -- the left ideals `P_j = φ⁻¹(𝔐_j)`
   let P : ℕ → Ideal (MonoidAlgebra ℤ G) := fun j =>
     { carrier := {x | φ x ∈ prodSpan N j}
-      add_mem' := by intro a b ha hb; simp only [Set.mem_setOf_eq, map_add] at *; exact add_mem ha hb
+      add_mem' := by intro a b ha hb; simp only [Set.mem_ofPred_eq, map_add] at *; exact add_mem ha hb
       zero_mem' := by simp
       smul_mem' := by
         intro c x hx
-        simp only [Set.mem_setOf_eq, smul_eq_mul, map_mul] at *
+        simp only [Set.mem_ofPred_eq, smul_eq_mul, map_mul] at *
         exact hleft c hx }
   -- `Δ ≤ P_1`
   have hΔ : augIdeal G ≤ P 1 := by
@@ -171,13 +175,13 @@ theorem map_eq_one_of_mem_D (f : G →* A) (s : ι → G) (hs : Subgroup.closure
     have key : ∀ y : MonoidAlgebra ℤ G, φ y - (augmentation G y : A) ∈ prodSpan N 1 := by
       intro y
       induction y using MonoidAlgebra.induction_on with
-      | hM x => rw [hφof, augmentation_of, Int.cast_one]; exact h1 x
-      | hadd a b ha hb =>
+      | of x => rw [hφof, augmentation_of, Int.cast_one]; exact h1 x
+      | add a b ha hb =>
         rw [map_add, map_add, Int.cast_add]
         have e : φ a + φ b - ((augmentation G a : A) + augmentation G b) =
           (φ a - augmentation G a) + (φ b - augmentation G b) := by abel
         rw [e]; exact add_mem ha hb
-      | hsmul c a ha =>
+      | smul c a ha =>
         have key : ∀ (c : ℤ) (a : MonoidAlgebra ℤ G),
             φ a - ((augmentation G a : ℤ) : A) ∈ prodSpan N 1 →
             φ (c • a) - ((augmentation G (c • a) : ℤ) : A) ∈ prodSpan N 1 := by

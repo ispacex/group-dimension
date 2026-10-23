@@ -1,4 +1,8 @@
-import GroupDimension.TaharaProof.Level3
+module
+
+public import GroupDimension.TaharaProof.Level3
+
+@[expose] public section
 
 /-!
 # `ψ₃(Λ₅) ⊆ R₅*`: the case analysis ([Tah81, Lemmas 3.5, 5.3–5.6])
@@ -137,7 +141,7 @@ theorem tc_one_left (g : G) : tc (1 : G) g = 1 := by simp [tc]
 
 omit IH hx in
 /-- `nsum g β = 0` when everything has weight `≥ 5`. -/
-theorem nsum_eq_zero {g : G} {k : ℕ} (hg : g ∈ lowerCentralSeries G (k - 1)) {β : ι → ℕ}
+theorem nsum_eq_zero {g : G} {k : ℕ} (hg : g ∈ (⊤ : Subgroup G).lowerCentralSeries (k - 1)) {β : ι → ℕ}
     (h5 : 5 ≤ F.W β + k) : F.nsum g β = 0 := by
   refine Finset.sum_eq_zero fun m _ => ?_
   by_cases hm : F.nfc g m = 0
@@ -214,7 +218,7 @@ theorem torsion (hF : F.Class4) {c : ι → ℕ} {z : ι} (hz : c z ≠ 0) (hW :
     rw [Φ3w_single4 hWw.symm]
     have h1 : F.x z ^ F.o z = 1 := by
       have := F.pow_mem z; rw [← hWw, hF.top] at this; simpa using this
-    have hm : F.x z ∈ lowerCentralSeries G 3 := by simpa [← hWw] using F.mem z
+    have hm : F.x z ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by simpa [← hWw] using F.mem z
     simp only [A4, Prod.smul_mk, smul_zero]
     rw [← cl_zpow hm, zpow_natCast, h1, cl_one]; rfl
   | [i, j], hzl, hWw, hs =>

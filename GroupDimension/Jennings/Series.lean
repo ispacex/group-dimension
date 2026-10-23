@@ -1,4 +1,8 @@
-import GroupDimension.TaharaProof.Induction
+module
+
+public import GroupDimension.TaharaProof.Induction
+
+@[expose] public section
 
 /-!
 # Restricted N-series and the augmentation ideal over `𝔽_p`
@@ -93,19 +97,19 @@ theorem of_sub_one_mem_augIdealP (g : G) : of (ZMod p) G g - 1 ∈ augIdealP p G
 /-- Induction over `𝔽_p[G]`: a submodule containing every `g` is everything. -/
 theorem mem_of_forall_of {M : Submodule (ZMod p) (MonoidAlgebra (ZMod p) G)}
     (h : ∀ g, of (ZMod p) G g ∈ M) (z : MonoidAlgebra (ZMod p) G) : z ∈ M := by
-  induction z using Finsupp.induction_linear with
+  induction z using MonoidAlgebra.induction_linear with
   | zero => exact zero_mem _
   | add y z hy hz => exact add_mem hy hz
   | single g c =>
-    have e : (Finsupp.single g c : MonoidAlgebra (ZMod p) G) = c • of (ZMod p) G g := by
-      simp only [MonoidAlgebra.of_apply]; exact (Finsupp.smul_single_one _ _).symm
+    have e : (MonoidAlgebra.single g c : MonoidAlgebra (ZMod p) G) = c • of (ZMod p) G g := by
+      rw [MonoidAlgebra.of_apply, MonoidAlgebra.smul_single', mul_one]
     rw [e]; exact Submodule.smul_mem _ _ (h g)
 
 /-- `𝔽_p[G]` has characteristic `p`. -/
 theorem charP [Fact p.Prime] : CharP (MonoidAlgebra (ZMod p) G) p := by
   refine charP_of_injective_algebraMap (R := ZMod p) ?_ p
   intro a b h
-  have := congrArg (fun z : MonoidAlgebra (ZMod p) G => z 1) h
+  have := congrArg (fun z : MonoidAlgebra (ZMod p) G => z.coeff 1) h
   simpa [MonoidAlgebra.coe_algebraMap] using this
 
 end Jennings
