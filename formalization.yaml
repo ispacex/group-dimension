@@ -100,8 +100,10 @@ status:
     classical results D_3 = γ_3, Passi's D_4^2 ⊆ γ_4 and Gruenberg's theorem, which enter as
     explicit hypotheses; the paper's Remark 2.2 (restriction to metabelian groups in
     Proposition 2.1) and Lemma 5.2 (d); the paper-only results (Lemmas 6.1, 6.2, 6.9,
-    Theorems 6.10, 6.12). Formalized in the development but not compared here: Proposition 5.8,
-    Lemma 5.9, Lemma 6.3, Proposition 6.5 and the inclusion part of Tahara's Theorem 6.1.
+    Theorem 6.12). Formalized in the development but not compared here: Proposition 5.8,
+    Lemma 5.9, Lemma 6.3, Proposition 6.5, Theorem 6.10 (for central extensions by a subgroup of
+    exponent p, since Mathlib has no p-covering group) and the inclusion part of Tahara's
+    Theorem 6.1.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: ["propext", "Classical.choice", "Quot.sound"]

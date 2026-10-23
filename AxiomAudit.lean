@@ -269,6 +269,13 @@ open GroupDimension
 #print axioms GroupDimension.metabelian_of_card_le
 #print axioms GroupDimension.rank_of_card_nine
 #print axioms GroupDimension.type_of_card_nine
+#print axioms GroupDimension.lcs_map_of_surjective
+#print axioms GroupDimension.exists_two_gen_of_relIndex
+#print axioms GroupDimension.derivedSeries_two_le_lcs_three
+#print axioms GroupDimension.metabelian_of_central_ext
+#print axioms GroupDimension.metabelian_of_central_ext_card
+#print axioms GroupDimension.metabelian_of_central_quotient
+#print axioms GroupDimension.metabelian_of_central_elementary
 #print axioms GroupDimension.ExpThree.tc_eq
 #print axioms GroupDimension.ExpThree.tc_mem
 #print axioms GroupDimension.ExpThree.tc_inv
