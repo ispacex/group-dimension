@@ -107,9 +107,10 @@ status:
     (with Gupta–Tahara, and for 6.2 also Passi's D_4^2 ⊆ γ_4, as explicit hypotheses), Lemma
     6.3, Proposition 6.5, Lemma 6.9 (for quotients E/U of any group E), Theorem 6.10 (for
     central extensions by a subgroup of exponent p, since Mathlib has no p-covering group),
-    Theorem 6.12 in both directions (nonterminal taken as in Lemma C.1: a central extension by a
-    subgroup of order p with γ_4 ≠ 1; for the sufficiency P is in Type) and the inclusion part of
-    Tahara's Theorem 6.1.
+    Theorem 6.12 in both directions for a given normal form u, v, w, x_i and exponents (N1 and N3
+    enter through it, N2 as a hypothesis of the sufficiency; nonterminal taken as in Lemma C.1: a
+    central extension by a subgroup of order p with γ_4 ≠ 1; for the sufficiency and the
+    equivalence P is in Type) and the inclusion part of Tahara's Theorem 6.1.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: ["propext", "Classical.choice", "Quot.sound"]
