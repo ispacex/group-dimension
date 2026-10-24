@@ -205,18 +205,19 @@ variable {p : Fin T.u → ℤ} {U : Fin T.s × Fin T.s → ℤ} {V V' : Fin T.s 
   {W5 W6 W7 : Fin T.s × Fin T.s × Fin T.s → ℤ} {g : G}
 
 set_option maxHeartbeats 1000000 in
-theorem eq_gen (hg : g ∈ (⊤ : Subgroup G).lowerCentralSeries 2)
-    (hS : (TF).S g = combx h4 hT hy4 p U V V' W5 W6 W7) :
+/-- `g = gen τ` from the `A₃ ⊕ A₄` part of the symbol alone: it suffices that `S g` and the
+combination have the same projection `proj`. -/
+theorem eq_gen_of_proj (hg : g ∈ (⊤ : Subgroup G).lowerCentralSeries 2)
+    (hS : (TF).proj ((TF).S g) = (TF).proj (combx h4 hT hy4 p U V V' W5 W6 W7)) :
     g = T.gen (tau U V V' W5 W6 W7) := by
   -- the symbol of `g`, modulo (I)
-  have hR : (TF).S g = sI h4 hT hy4 p + (sII h4 hT hy4 U + sIII h4 hT hy4 V + sIV h4 hT hy4 V' +
-      sV h4 hT hy4 W5 + sVI h4 hT hy4 W6 + sVII h4 hT hy4 W7) := by
-    rw [hS, combx_eq]; abel
   have hP : (TF).S g = sI h4 hT hy4 p + (TF).proj (sII h4 hT hy4 U + sIII h4 hT hy4 V +
       sIV h4 hT hy4 V' + sV h4 hT hy4 W5 + sVI h4 hT hy4 W6 + sVII h4 hT hy4 W7) := by
-    have := congrArg (TF).proj hR
-    rw [Frame.proj_S, map_add, proj_sI] at this
-    rw [this]
+    have hR : combx h4 hT hy4 p U V V' W5 W6 W7 = sI h4 hT hy4 p + (sII h4 hT hy4 U +
+        sIII h4 hT hy4 V + sIV h4 hT hy4 V' + sV h4 hT hy4 W5 + sVI h4 hT hy4 W6 +
+        sVII h4 hT hy4 W7) := by
+      rw [combx_eq]; abel
+    rw [← Frame.proj_S, hS, hR, map_add, proj_sI]
   have hg1 : (TF).RI.mkQ ((TF).S g) =
       (∑ x, U x • (if x.1 < x.2 then
         -(T.q x.1 x.2 • (TF).RI.mkQ ((TF).S (tc (T.x₁ x.1 ^ T.d x.1) (T.x₁ x.2)))) else 0)) +
@@ -267,6 +268,11 @@ theorem eq_gen (hg : g ∈ (⊤ : Subgroup G).lowerCentralSeries 2)
     rw [← Submodule.Quotient.mk_eq_zero, ← Submodule.mkQ_apply, map_add] at hinv
     rw [eq_neg_of_add_eq_zero_left hinv, ← hg2, add_neg_cancel]
   exact mul_inv_eq_one.mp (Frame.eq_one_of_S_mem TC (mul_mem hg (inv_mem hgen)) h0)
+
+theorem eq_gen (hg : g ∈ (⊤ : Subgroup G).lowerCentralSeries 2)
+    (hS : (TF).S g = combx h4 hT hy4 p U V V' W5 W6 W7) :
+    g = T.gen (tau U V V' W5 W6 W7) :=
+  eq_gen_of_proj h4 hT hy4 ho4 hg (congrArg _ hS)
 
 end TFrame
 

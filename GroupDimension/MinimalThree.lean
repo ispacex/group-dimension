@@ -17,7 +17,9 @@ size `1` of `Q/⟨z⟩` (`P_c(Q/⟨z⟩) = 1 ≠ P_{c-1}(Q/⟨z⟩)`).
 
 Two classical results enter as explicit hypotheses: Passi's `D₄² ⊆ γ₄` (`PassiDFourSquare`),
 which for a `3`-group gives `D₄ = γ₄` (`D_four_le_of_isPGroup_three`), and Gupta–Tahara
-(`GuptaTaharaMetabelian`), through Lemma 6.1 (`MetabelianOdd.lean`). Here `M₅(Q)` is
+(`GuptaTaharaMetabelian`), through Lemma 6.1 (`MetabelianOdd.lean`). Passi's theorem is proved
+(`passiDFourSquare`, `Passi.lean`); `minimal_three'` (`DThreeCorollaries.lean`) has Gupta–Tahara
+as the only hypothesis. Here `M₅(Q)` is
 `Q ∩ (1 + Δ_{𝔽₃}(Q)^5)`.
 
 The form with hypotheses on quotients by central subgroups of order `3`, as in Lemma 5.2, is
