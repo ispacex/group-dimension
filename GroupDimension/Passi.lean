@@ -9,7 +9,7 @@ public import GroupDimension.Gruenberg
 # Passi's theorem `D₄(G)² ⊆ γ₄(G)` [Pas68]
 
 `passiDFourSquare : PassiDFourSquare` proves the statement that `Statements.lean` records, and
-which was an explicit hypothesis of Proposition 2.1, Remark 2.3 and Lemma 6.9.
+which was an explicit hypothesis of Proposition 2.1, Remark 2.3 and Lemma 6.2.
 
 **Finite groups of class `≤ 3` with Tahara's data.** By `exists_gen_of_D_four` (`DFour.lean`) an
 element `g ∈ D₄` is `gen τ` for a family `τ` satisfying Tahara's conditions (A₂), (A₃), (B). With
@@ -22,7 +22,16 @@ element `g ∈ D₄` is `gen τ` for a family `τ` satisfying Tahara's condition
 * `κ_{hi} = ∑_k b_{hk} [x_{2k}, x_i]`, and `[x_{2k}, x_i]` is killed by `d(i)` and by `e(k)`; so
   (B), multiplied by `[x_{2k}, x_i]` and summed, says `∑_{i<j} u_{ij} κ_{ji} =
   ∑_{i<j} u_{ij} q_{ij} κ_{ij}`.
-Together, `g = -g` in `γ₃`, so `g² = 1` (`sq_eq_one_of_D_four`).
+Together, `g = -g` in `γ₃`, so `g² = 1` (`genA_sq`, `sq_eq_one_of_pGroup`).
+
+**Tahara's data exist** for every finite `p`-group (`exists_valid_data`): uniqueness bases of the
+layers with `p`-power orders, sorted so that they form divisibility chains
+(`exists_isLayerBasis`), and normal forms with reduced exponents (`IsLayerBasis.exists_nf`).
+
+**All groups.** A finite nilpotent group reduces to its Sylow subgroups (`exists_sylow_proj`,
+`sq_eq_one_of_finite`); a group of class `≤ 3` to a finitely generated subgroup and then to a
+finite quotient by `Gruenberg.residuallyFinite` (`sq_eq_one_of_class_three`); an arbitrary group
+to `G/γ₄(G)` (`passiDFourSquare`).
 -/
 
 namespace GroupDimension
@@ -40,7 +49,7 @@ section ClassThree
 variable (h3 : (⊤ : Subgroup G).lowerCentralSeries 3 = ⊥)
 include h3
 
-theorem central3 {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 2) (g : G) :
+theorem central_lcs_two {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 2) (g : G) :
     g * z = z * g := by
   have h : tc z g ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
     tc_mem (i := 2) (j := 0) (by norm_num) hz (mem_lcs_zero g)
@@ -48,11 +57,11 @@ theorem central3 {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 2) (g
   calc g * z = z * g * (z⁻¹ * g⁻¹ * z * g)⁻¹ := by group
     _ = z * g := by rw [show z⁻¹ * g⁻¹ * z * g = tc z g from rfl, h, inv_one, mul_one]
 
-theorem tc_eq_one_of_mem3 {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 2) (x : G) :
+theorem tc_eq_one_of_lcs_two {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 2) (x : G) :
     tc z x = 1 :=
-  tc_of_central (central3 h3 hz) x
+  tc_of_central (central_lcs_two h3 hz) x
 
-theorem tc_eq_one_of_mem2 {a b : G} (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
+theorem tc_eq_one_of_lcs_one {a b : G} (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
     (hb : b ∈ (⊤ : Subgroup G).lowerCentralSeries 1) : tc a b = 1 := by
   have h := tc_mem (i := 1) (j := 1) (n := 3) (by norm_num) ha hb
   rwa [h3, mem_bot] at h
@@ -63,12 +72,12 @@ theorem tc_mul_left' (a b x : G) : tc (a * b) x = b⁻¹ * tc a x * b * tc b x :
 
 theorem tc_mul_left2 {a : G} (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (b x : G) :
     tc (a * b) x = tc a x * tc b x := by
-  have hc := central3 h3 (tc_mem (i := 1) (j := 0) (by norm_num) ha (mem_lcs_zero x))
+  have hc := central_lcs_two h3 (tc_mem (i := 1) (j := 0) (by norm_num) ha (mem_lcs_zero x))
   rw [tc_mul_left', mul_assoc b⁻¹, ← hc b, inv_mul_cancel_left]
 
 theorem tc_mul_right2 {a : G} (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (x y : G) :
     tc a (x * y) = tc a x * tc a y := by
-  have hc := central3 h3 (tc_mem (i := 1) (j := 0) (by norm_num) ha (mem_lcs_zero x))
+  have hc := central_lcs_two h3 (tc_mem (i := 1) (j := 0) (by norm_num) ha (mem_lcs_zero x))
   rw [tc_mul_right, mul_assoc y⁻¹, ← hc y, inv_mul_cancel_left, ← hc]
 
 /-- `a ↦ [a, x]` on `γ₂`. -/
@@ -122,7 +131,7 @@ theorem tc_pow_left_gen (x y : G) (n : ℕ) :
     tc_mem (i := 1) (j := 0) (by norm_num) ha (mem_lcs_zero x)
   set A := tc x y with hA
   set t := tc A x with htdef
-  have hz : ∀ g : G, Commute g t := fun g => central3 h3 ht g
+  have hz : ∀ g : G, Commute g t := fun g => central_lcs_two h3 ht g
   have hcomm : ∀ (k : ℕ) (g w : G), t ^ k * (g * w) = g * (t ^ k * w) := fun k g w => by
     rw [← mul_assoc, ← mul_assoc, ← ((hz g).pow_right k).eq]
   have hconj : x⁻¹ * A * x = A * t := by rw [htdef]; simp only [tc]; group
@@ -194,29 +203,29 @@ omit h3 in
 theorem κ_mem (h i : Fin T.s) : κ T h i ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
   tc_mem (i := 1) (j := 0) (by norm_num) (pow_d_mem hT h) (mem_lcs_zero _)
 
-omit h3 hT in
-theorem tc2_mem (T : Data G) (hT : T.Valid) (k : Fin T.t) (x : G) :
+omit h3 in
+theorem tc2_mem (k : Fin T.t) (x : G) :
     tc (T.x₂ k) x ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
   tc_mem (i := 1) (j := 0) (by norm_num) (hT.basis₂.mem k) (mem_lcs_zero x)
 
 theorem cl_κ (h i : Fin T.s) :
     cl G 2 (κ T h i) = ∑ k, T.b h k • cl G 2 (tc (T.x₂ k) (T.x₁ i)) := by
   rw [κ, pow_d_eq h3 hT, tc_mul_left2 h3 (oprod_mem hT.basis₂.mem _),
-    tc_eq_one_of_mem3 h3 (oprod_mem hT.basis₃.mem _), mul_one, tc_oprod_left h3 hT.basis₂.mem,
-    cl_oprod fun k => tc2_mem T hT k _]
+    tc_eq_one_of_lcs_two h3 (oprod_mem hT.basis₃.mem _), mul_one, tc_oprod_left h3 hT.basis₂.mem,
+    cl_oprod fun k => tc2_mem hT k _]
 
 theorem e_smul_cl (k : Fin T.t) (x : G) : (T.e k : ℤ) • cl G 2 (tc (T.x₂ k) x) = 0 := by
   have he : T.x₂ k ^ T.e k ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := by
     have := hT.hdd k
     rw [h3, mem_bot, inv_mul_eq_one] at this
     rw [← this]; exact oprod_mem hT.basis₃.mem _
-  rw [← cl_zpow (tc2_mem T hT k x), ← tc_zpow_left h3 (hT.basis₂.mem k), zpow_natCast,
-    tc_eq_one_of_mem3 h3 he, cl_one]
+  rw [← cl_zpow (tc2_mem hT k x), ← tc_zpow_left h3 (hT.basis₂.mem k), zpow_natCast,
+    tc_eq_one_of_lcs_two h3 he, cl_one]
 
 theorem d_smul_cl (k : Fin T.t) (i : Fin T.s) :
     (T.d i : ℤ) • cl G 2 (tc (T.x₂ k) (T.x₁ i)) = 0 := by
-  rw [← cl_zpow (tc2_mem T hT k _), zpow_natCast, ← tc_pow_right h3 (hT.basis₂.mem k),
-    tc_eq_one_of_mem2 h3 (hT.basis₂.mem k) (pow_d_mem hT i), cl_one]
+  rw [← cl_zpow (tc2_mem hT k _), zpow_natCast, ← tc_pow_right h3 (hT.basis₂.mem k),
+    tc_eq_one_of_lcs_one h3 (hT.basis₂.mem k) (pow_d_mem hT i), cl_one]
 
 /-- `u_{ij} q_{ij} κ_{ij} = -u_{ij} κ_{ji}` under (A₂), (A₃). -/
 theorem swap {τ : Coeffs T.s T.t} (hτ : T.AdmissibleAB τ) {i j : Fin T.s} (hij : i < j) :
@@ -239,9 +248,9 @@ theorem swap {τ : Coeffs T.s T.t} (hτ : T.AdmissibleAB τ) {i j : Fin T.s} (hi
   have hprod : κ T i j ^ (T.d j / T.d i) * κ T j i =
       ti ^ ((T.d i).choose 2 * (T.d j / T.d i)) * (tj ^ (T.d j).choose 2)⁻¹ := by
     have hc : Commute (a ^ T.d i) (ti ^ (T.d i).choose 2) :=
-      ((show Commute (a ^ T.d i) ti from central3 h3 hti _).pow_right _)
+      ((show Commute (a ^ T.d i) ti from central_lcs_two h3 hti _).pow_right _)
     have hc' : Commute (a ^ T.d j) (ti ^ ((T.d i).choose 2 * (T.d j / T.d i))) :=
-      ((show Commute (a ^ T.d j) ti from central3 h3 hti _).pow_right _)
+      ((show Commute (a ^ T.d j) ti from central_lcs_two h3 hti _).pow_right _)
     rw [hκij, hκji, hc.mul_pow, ← pow_mul, ← pow_mul, hq, ← mul_assoc,
       hc'.mul_inv_cancel]
   have hcl : (T.q i j) • cl G 2 (κ T i j) + cl G 2 (κ T j i) =
@@ -254,13 +263,13 @@ theorem swap {τ : Coeffs T.s T.t} (hτ : T.AdmissibleAB τ) {i j : Fin T.s} (hi
     rw [Data.q, e, sub_eq_add_neg]
   have hdi : (T.d i : ℤ) • cl G 2 ti = 0 := by
     rw [← cl_zpow hti, zpow_natCast, ← tc_pow_right h3 ha,
-      tc_eq_one_of_mem2 h3 ha (pow_d_mem hT i), cl_one]
+      tc_eq_one_of_lcs_one h3 ha (pow_d_mem hT i), cl_one]
   have hdj : (T.d i : ℤ) • cl G 2 tj = 0 := by
     have hai : a ^ T.d i ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := by
       have : a ^ T.d i = κ T i j * (ti ^ (T.d i).choose 2)⁻¹ := by
         rw [hκij, mul_inv_cancel_right]
       rw [this]; exact mul_mem (κ_mem hT i j) (inv_mem (pow_mem hti _))
-    rw [← cl_zpow htj, zpow_natCast, ← tc_pow_left h3 ha, tc_eq_one_of_mem3 h3 hai, cl_one]
+    rw [← cl_zpow htj, zpow_natCast, ← tc_pow_left h3 ha, tc_eq_one_of_lcs_two h3 hai, cl_one]
   -- (A₂), (A₃): the coefficients are multiples of `d(i)`
   have hA2 := hτ.A₂ i j hij
   have hA3 := hτ.A₃ i j hij
@@ -312,15 +321,15 @@ theorem cl_genA (τ : Coeffs T.s T.t) :
 theorem gen_eq_genA (τ : Coeffs T.s T.t) : T.gen τ = T.genA τ := by
   have hB : T.genB τ = 1 := by
     have : ∀ l k, tc (T.x₂ l) (T.x₂ k) = 1 := fun l k =>
-      tc_eq_one_of_mem2 h3 (hT.basis₂.mem l) (hT.basis₂.mem k)
+      tc_eq_one_of_lcs_one h3 (hT.basis₂.mem l) (hT.basis₂.mem k)
     simp [Data.genB, this]
   have hC : T.genC τ = 1 := by
     have : ∀ i j k, tc (tc (T.x₁ i ^ T.d i) (T.x₁ j)) (T.x₁ k) = 1 := fun i j k =>
-      tc_eq_one_of_mem3 h3 (κ_mem hT i j) _
+      tc_eq_one_of_lcs_two h3 (κ_mem hT i j) _
     simp [Data.genC, this]
   rw [Data.gen, hB, hC, mul_one, mul_one]
 
-/-- **`gen τ² = 1`** in class `≤ 3`, under (A₂), (A₃), (B). -/
+/-- **`(genA τ)² = 1`** in class `≤ 3`, under (A₂), (A₃), (B); with `gen_eq_genA`, `(gen τ)² = 1`. -/
 theorem genA_sq {τ : Coeffs T.s T.t} (hτ : T.AdmissibleAB τ) : T.genA τ ^ 2 = 1 := by
   set K : Fin T.s → Fin T.s → Additive (Layer G 2) := fun h i => cl G 2 (κ T h i) with hK
   set Tk : Fin T.t → Fin T.s → Additive (Layer G 2) := fun k i => cl G 2 (tc (T.x₂ k) (T.x₁ i))
@@ -373,7 +382,6 @@ end Gen
 
 section Layers
 
-open TaharaProof in
 theorem cl_oprod_eq_zero_iff {k n : ℕ} {y : Fin n → G}
     (hy : ∀ i, y i ∈ (⊤ : Subgroup G).lowerCentralSeries k) (a : Fin n → ℤ) :
     oprod y a ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1) ↔ ∑ i, a i • cl G k (y i) = 0 := by
@@ -449,14 +457,8 @@ theorem _root_.GroupDimension.Tahara.IsLayerBasis.exists_nf {k n : ℕ} {x : Fin
       (oprod x a)⁻¹ * g ∈ (⊤ : Subgroup G).lowerCentralSeries (k + 1) := by
   obtain ⟨a, ha⟩ := h.span g hg
   have hpos : ∀ i, (0 : ℤ) < o i := fun i => by have := h.one_lt i; omega
-  have hord : ∀ i, (o i : ℤ) • cl G k (x i) = 0 := by
-    intro i
-    have := (cl_oprod_eq_zero_iff h.mem (Pi.single i (o i : ℤ))).mp ((h.indep _).mpr fun j => by
-      by_cases hj : j = i
-      · subst hj; simp
-      · simp [Pi.single_eq_of_ne hj])
-    rwa [Finset.sum_eq_single i (fun j _ hj => by simp [Pi.single_eq_of_ne hj]) (by simp),
-      Pi.single_eq_same] at this
+  have hord : ∀ i, (o i : ℤ) • cl G k (x i) = 0 := fun i =>
+    LayerNF.o_smul_cl (IsLayerBasis.layerNF h) i
   refine ⟨fun i => a i % o i,
     fun i => ⟨Int.emod_nonneg _ (hpos i).ne', Int.emod_lt_of_pos _ (hpos i)⟩,
     ?_⟩
@@ -478,9 +480,8 @@ theorem _root_.GroupDimension.Tahara.IsLayerBasis.pow_mem {k n : ℕ} {x : Fin n
     cl_eq_zero_iff (_root_.pow_mem (h.mem i) _)] at this
   exact this
 
-/-- **Tahara's data exist** for a finite `p`-group of class `≤ 3`. -/
+/-- **Tahara's data exist** for a finite `p`-group. -/
 theorem exists_valid_data [Finite G] (hG : IsPGroup p G) : ∃ T : Data G, T.Valid := by
-  classical
   obtain ⟨s, x₁, d, B1⟩ := exists_isLayerBasis hG 0
   obtain ⟨t, x₂, e, B2⟩ := exists_isLayerBasis hG 1
   obtain ⟨u, x₃, f, B3⟩ := exists_isLayerBasis hG 2
@@ -508,7 +509,6 @@ theorem exists_valid_data [Finite G] (hG : IsPGroup p G) : ∃ T : Data G, T.Val
 /-- **Passi's theorem for finite `p`-groups of class `≤ 3`**: `D₄ ⊆ Ω₁`, i.e. `g ∈ D₄ ⇒ g² = 1`. -/
 theorem sq_eq_one_of_pGroup [Finite G] (hG : IsPGroup p G)
     (h3 : (⊤ : Subgroup G).lowerCentralSeries 3 = ⊥) {g : G} (hg : g ∈ D 4 G) : g ^ 2 = 1 := by
-  classical
   let := Fintype.ofFinite G
   obtain ⟨T, hT⟩ := exists_valid_data hG
   obtain ⟨τ, hτ, rfl⟩ := exists_gen_of_D_four hT h3 hg

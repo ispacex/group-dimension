@@ -11,8 +11,9 @@ For `g ∈ D₄ ∩ γ₃` the symbol `S g` need not lie in `R₅*`, but its `W�
 a combination of proper products of weight `≥ 4`, and `ψ₃` of those is their symbol `Φ₃` modulo
 `R₅*`, which has no `W₃*` part (`S_fst_mem_R5`). In Tahara's frame of a group of class `≤ 3`
 the `W₃*` coordinates of the combination of the relations give Tahara's conditions (A₂), (A₃)
-and (B) (`admissibleAB_tau`), and its `A₃` part gives `g = gen τ` (`eq_gen_of_D_four`); `A₄ = γ₄`
-is trivial, so the part `W₄` of the symbol does not enter.
+and (B) (`admissibleAB_tau`). As `A₄ = γ₄` is trivial, its projection to `A₃ ⊕ A₄` is determined
+by the `W₃*` part, and `eq_gen_of_proj` gives `g = gen τ` (`exists_gen_of_D_four`); the part
+`W₄` of the symbol does not enter.
 -/
 
 namespace GroupDimension

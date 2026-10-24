@@ -220,9 +220,9 @@ open GroupDimension
 #print axioms GroupDimension.TaharaProof.admissibleAB_tau
 #print axioms GroupDimension.TaharaProof.proj_eq_of_fst
 #print axioms GroupDimension.TaharaProof.exists_gen_of_D_four
-#print axioms GroupDimension.Passi.central3
-#print axioms GroupDimension.Passi.tc_eq_one_of_mem3
-#print axioms GroupDimension.Passi.tc_eq_one_of_mem2
+#print axioms GroupDimension.Passi.central_lcs_two
+#print axioms GroupDimension.Passi.tc_eq_one_of_lcs_two
+#print axioms GroupDimension.Passi.tc_eq_one_of_lcs_one
 #print axioms GroupDimension.Passi.tc_mul_left'
 #print axioms GroupDimension.Passi.tc_mul_left2
 #print axioms GroupDimension.Passi.tc_mul_right2
