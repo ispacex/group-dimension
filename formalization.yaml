@@ -22,9 +22,9 @@ project:
     (Proposition 2.1); a minimal counterexample is a candidate assuming D_3 = γ_3 (Lemma 5.2);
     and D_5 = 1 for groups of order 2^11, class at most 3 and rank at least 8, assuming
     D_3 = γ_3 and the paper's computer result for order 2^10 (Proposition 5.7, D_5 form).
-    D_3 = γ_3 and Gruenberg's theorem are proved in the development (dThreeEqGammaThree,
-    gruenbergResidualTwo), which also has these results without those hypotheses; the compared
-    statements keep them as hypotheses.
+    D_3 = γ_3, Gruenberg's theorem and Passi's theorem are proved in the development
+    (dThreeEqGammaThree, gruenbergResidualTwo, passiDFourSquare), which also has these results
+    without those hypotheses; the compared statements keep them as hypotheses.
   authors:
     - "Stanislav Vorobev"
   license: "MIT"
@@ -77,7 +77,7 @@ sources:
     authors: ["I. B. S. Passi"]
     type: paper
     relationship: background
-    note: "Source of D_3 = γ_3 (proved in the development as dThreeEqGammaThree, an explicit hypothesis of the compared statements) and of D_4^2 ⊆ γ_4 (an explicit hypothesis, not proved)."
+    note: "Source of D_3 = γ_3 (proved in the development as dThreeEqGammaThree, an explicit hypothesis of the compared statements) and of D_4^2 ⊆ γ_4 (proved in the development as passiDFourSquare, an explicit hypothesis of the compared statements)."
   - title: "K. W. Gruenberg, Residual properties of infinite soluble groups, Proc. London Math. Soc. (3) 7 (1957) 29-62"
     authors: ["K. W. Gruenberg"]
     type: paper
@@ -100,12 +100,12 @@ status:
     Quot.sound. Not formalized: the general Jennings theorem (only the inclusion needed for D_5
     is); the paper's computer results (Propositions 5.1, 5.3, 5.10, Theorems 5.4, 6.14), of
     which Proposition 5.3 enters D_five_eq_bot_of_rank as an explicit hypothesis; the classical
-    results Passi's D_4^2 ⊆ γ_4 and Gupta–Tahara's D_{p+2} = γ_{p+2} for
-    metabelian p-groups, p odd [GT85, Thm. 3.2(c)], which enter as explicit hypotheses (D_3 =
-    γ_3 and Gruenberg's theorem, also hypotheses of the compared statements, are proved in the
-    development: dThreeEqGammaThree, gruenbergResidualTwo); Lemma C.1 (that nonterminal means a nontrivial nucleus). Formalized in
+    result Gupta–Tahara's D_{p+2} = γ_{p+2} for metabelian p-groups, p odd [GT85, Thm.
+    3.2(c)], which enters as an explicit hypothesis (D_3 = γ_3, Gruenberg's theorem and Passi's
+    D_4^2 ⊆ γ_4, also hypotheses of the compared statements, are proved in the development:
+    dThreeEqGammaThree, gruenbergResidualTwo, passiDFourSquare); Lemma C.1 (that nonterminal means a nontrivial nucleus). Formalized in
     the development but not compared here: Remark 2.2, Lemma 5.2 (d), Proposition 5.8, Lemma 5.9, Lemmas 6.1 and 6.2
-    (with Gupta–Tahara, and for 6.2 also Passi's D_4^2 ⊆ γ_4, as explicit hypotheses), Lemma
+    (with Gupta–Tahara as an explicit hypothesis), Lemma
     6.3, Proposition 6.5, Lemma 6.9 (for quotients E/U of any group E), Theorem 6.10 (for
     central extensions by a subgroup of exponent p, since Mathlib has no p-covering group),
     Theorem 6.12 in both directions for a given normal form u, v, w, x_i and exponents (N1 and N3
@@ -205,7 +205,7 @@ alignment:
       lean: "GroupDimension.Palomar.dimensionQuestion5_iff_class_three"
       module: "Challenge"
       status: "proved, conditional"
-      note: "Hypotheses: D_3 = γ_3, Passi, Gruenberg; without 'metabelian'. D_3 = γ_3 and Gruenberg are proved in the development; dimensionQuestion5_iff_class_three' needs only Passi."
+      note: "Hypotheses: D_3 = γ_3, Passi, Gruenberg; without 'metabelian'. D_3 = γ_3, Gruenberg and Passi are proved in the development; dimensionQuestion5_iff_class_three' has no hypotheses."
     - source: "Lemma 5.2 (a)-(c)"
       lean: "GroupDimension.Palomar.isCandidate_of_minimal"
       module: "Challenge"
