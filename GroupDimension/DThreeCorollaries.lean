@@ -10,9 +10,11 @@ public import GroupDimension.Gruenberg
 # The results that assumed `D₃ = γ₃`, without that hypothesis
 
 With `dThreeEqGammaThree` (`DThree.lean`) the hypothesis `hD3 : DThreeEqGammaThree` is discharged:
-Proposition 2.1 with class exactly `3` (with Gruenberg's theorem `gruenbergResidualTwo`,
-`Gruenberg.lean`, now only with Passi's theorem as a hypothesis) and Remark 2.3 (likewise), Lemma 5.2 (all parts), and the `D₅` form of Proposition 5.7 (now only
-with Proposition 5.3 as a hypothesis). The order-`2¹⁰` statement `prop_1024` is in
+Proposition 2.1 with class exactly `3` and Remark 2.3 (now only with Passi's theorem as a
+hypothesis; Gruenberg's theorem is `gruenbergResidualTwo`, `Gruenberg.lean`), Lemma 5.2 (all
+parts), and the `D₅` form of Proposition 5.7 (now only with Proposition 5.3 as a hypothesis).
+Proposition 2.1 itself, which never assumed `D₃ = γ₃`, is restated here without Gruenberg's
+theorem too (`dimensionQuestion5_iff_finite_two_groups'`). The order-`2¹⁰` statement `prop_1024` is in
 `Cert1024/Prop1024.lean` (`prop_1024'`).
 -/
 

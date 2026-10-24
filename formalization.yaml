@@ -22,8 +22,9 @@ project:
     (Proposition 2.1); a minimal counterexample is a candidate assuming D_3 = γ_3 (Lemma 5.2);
     and D_5 = 1 for groups of order 2^11, class at most 3 and rank at least 8, assuming
     D_3 = γ_3 and the paper's computer result for order 2^10 (Proposition 5.7, D_5 form).
-    D_3 = γ_3 itself is proved in the development (dThreeEqGammaThree), which also has these
-    results without that hypothesis; the compared statements keep it as a hypothesis.
+    D_3 = γ_3 and Gruenberg's theorem are proved in the development (dThreeEqGammaThree,
+    gruenbergResidualTwo), which also has these results without those hypotheses; the compared
+    statements keep them as hypotheses.
   authors:
     - "Stanislav Vorobev"
   license: "MIT"
@@ -204,7 +205,7 @@ alignment:
       lean: "GroupDimension.Palomar.dimensionQuestion5_iff_class_three"
       module: "Challenge"
       status: "proved, conditional"
-      note: "Hypotheses: D_3 = γ_3, Passi, Gruenberg; without 'metabelian'."
+      note: "Hypotheses: D_3 = γ_3, Passi, Gruenberg; without 'metabelian'. D_3 = γ_3 and Gruenberg are proved in the development; dimensionQuestion5_iff_class_three' needs only Passi."
     - source: "Lemma 5.2 (a)-(c)"
       lean: "GroupDimension.Palomar.isCandidate_of_minimal"
       module: "Challenge"

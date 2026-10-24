@@ -208,8 +208,8 @@ open GroupDimension
 #print axioms GroupDimension.Gruenberg.residuallyFinite_of_lowerCentralSeries
 #print axioms GroupDimension.Gruenberg.residuallyFinite
 #print axioms GroupDimension.Gruenberg.lowerCentralSeries_eq_bot_of_surjective
-#print axioms GroupDimension.Gruenberg.exists_two_hom_of_central
-#print axioms GroupDimension.Gruenberg.exists_two_hom
+#print axioms GroupDimension.Gruenberg.exists_hom_two_group_of_central
+#print axioms GroupDimension.Gruenberg.exists_hom_two_group
 #print axioms GroupDimension.gruenbergResidualTwo
 #print axioms GroupDimension.dimensionQuestion5_iff_class_three
 #print axioms GroupDimension.D_five_le_of_bounded

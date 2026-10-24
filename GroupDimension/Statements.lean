@@ -14,7 +14,7 @@ takes `GuptaTaharaMetabelian`; `MinimalThree.lean` takes `PassiDFourSquare` and
 `GuptaTaharaMetabelian`); nothing is assumed globally. Tahara's description of `D₅`
 ([Tah81, Thm. 6.1]) is stated as `TaharaFiveOne` in `Tahara.lean`; unlike the statements here
 it is proved (`TaharaTheorem.lean`), and so is `DThreeEqGammaThree` (`dThreeEqGammaThree`,
-`DThree.lean`). They record, in Lean, *what* is known or asked, so that later work can be
+`DThree.lean`) and `GruenbergResidualTwo` (`gruenbergResidualTwo`, `Gruenberg.lean`). They record, in Lean, *what* is known or asked, so that later work can be
 checked against an exact formulation.
 
 Indexing: `D n G` is the literature's `D_n(G)`; Mathlib's `(⊤ : Subgroup G).lowerCentralSeries k` is
@@ -100,7 +100,7 @@ residually a finite `p`-group. Stated in the form used in Proposition 2.1 of the
 after dividing out the finite normal subgroup of elements of odd order): in a finitely generated
 nilpotent group, an element none of whose odd powers is trivial survives in some finite
 `2`-group quotient.
-Formulation only, not proved here. -/
+Formulation only; proved in `Gruenberg.lean` (`gruenbergResidualTwo`). -/
 def GruenbergResidualTwo : Prop :=
   ∀ (G : Type) [Group G], Group.FG G → Group.IsNilpotent G →
     ∀ g : G, (∀ m : ℕ, Odd m → g ^ m ≠ 1) →
