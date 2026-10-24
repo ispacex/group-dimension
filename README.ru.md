@@ -86,8 +86,9 @@ $[a,b]=a^{-1}b^{-1}ab$ — $[a,b]-1 = a^{-1}b^{-1}\bigl((a-1)(b-1)-(b-1)(a-1)\bi
 | **сведение**: вопрос $D_5\subseteq\gamma_4$ ⇔ $D_5(Q)=1$ для всех $Q$ класса $\le 3$ | `forall_D_le_iff`, `dimensionQuestion5_iff` | `Reduction.lean` |
 | конечная порождённость: $x\in D_n(G)$ ⇒ $x\in D_n(H)$, $H$ порождена конечным множеством | `finRep_of_mem`, `exists_closure_finset_mem_D` | `FiniteReduction.lean` |
 | **$D_3(G)=\gamma_3(G)$ для всех групп** (Хигман–Рис–Пасси; утверждение `DThreeEqGammaThree`): для конечных $G$ — через рамку $G/\gamma_3$ и включение $D_3\subseteq\gamma_3$ Тахары; в общем случае — конечная порождённость и конечный фактор конечно порождённой группы ступени $\le2$, в котором данный $c\ne1$ из $\gamma_2$ не исчезает (финитная аппроксимируемость конечно порождённых абелевых групп и центральная подгруппа $m$-х степеней) | `dThreeEqGammaThree`, `D_three_eq_of_finite`, `exists_finite_quotient_ne_one` | `DThree.lean` |
-| результаты, где $D_3=\gamma_3$ было гипотезой, — без неё: предложение 2.1 для ступени ровно $3$ (при теоремах Пасси и Грюнберга), замечание 2.3 (при теореме Пасси), лемма 5.2, $D_5$-форма предложения 5.7 (при предложении 5.3), предложение 5.3 из сертификатов (при предложении 5.1 на $2^9$ и полноте списка) | `dimensionQuestion5_iff_class_three'`, `D_five_le_of_bounded_class_three'`, `isCandidate_of_minimal'`, `isDescendant_of_minimal'`, `D_five_eq_bot_of_rank'`, `prop_1024'`, `D_five_eq_bot_of_rank_of_complete'` | `DThreeCorollaries.lean`, `Cert1024/Prop1024.lean` |
+| результаты, где $D_3=\gamma_3$ было гипотезой, — без неё: предложение 2.1, в том числе для ступени ровно $3$ (при теореме Пасси; теорема Грюнберга доказана, `Gruenberg.lean`), замечание 2.3 (при теореме Пасси), лемма 5.2, $D_5$-форма предложения 5.7 (при предложении 5.3), предложение 5.3 из сертификатов (при предложении 5.1 на $2^9$ и полноте списка) | `dimensionQuestion5_iff_finite_two_groups'`, `dimensionQuestion5_iff_class_three'`, `D_five_le_of_bounded_class_three'`, `isCandidate_of_minimal'`, `isDescendant_of_minimal'`, `D_five_eq_bot_of_rank'`, `prop_1024'`, `D_five_eq_bot_of_rank_of_complete'` | `DThreeCorollaries.lean`, `Cert1024/Prop1024.lean` |
 | **предложение 2.1 статьи**: при теоремах Пасси ($D_4^2\subseteq\gamma_4$) и Грюнберга (гипотезы) вопрос $D_5\subseteq\gamma_4$ ⇔ $D_5(Q)=1$ для всех конечных $2$-групп $Q$ класса $\le3$; при $D_3=\gamma_3$ (гипотеза) — класса ровно $3$ | `dimensionQuestion5_iff_finite_two_groups`, `dimensionQuestion5_iff_class_three` | `FiniteReduction.lean` |
+| **теорема Грюнберга** [Gru57] для $p=2$ (утверждение `GruenbergResidualTwo`): в конечно порождённой нильпотентной группе элемент, никакая нечётная степень которого не равна $1$, выживает в конечной $2$-фактор-группе. По дороге: $\gamma_{k+1}(G)$ конечно порождена, если $G$ конечно порождена и $\gamma_{k+2}(G)=1$ (её порождают $[s,x]$, где $s$ порождают $\gamma_k$ по модулю $\gamma_{k+1}$, а $x$ порождают $G$); конечно порождённые нильпотентные группы финитно аппроксимируемы (`Group.ResiduallyFinite` из Mathlib), индукцией по ступени. Затем нечётная степень $h$ элемента центральна, и в конечной фактор-группе $G/\langle h^2\rangle$ у $h$ порядок $2$, так что $h$ выживает в её силовской $2$-подгруппе | `gruenbergResidualTwo`, `Gruenberg.residuallyFinite`, `Gruenberg.fg_lowerCentralSeries`, `Gruenberg.exists_two_hom` | `Gruenberg.lean` |
 | **замечание 2.2 статьи**: группа класса $\le3$ метабелева ($G''\subseteq\gamma_4$), поэтому в предложении 2.1 слово «метабелева» можно опустить | `metabelian_of_class_three` | `Descendants.lean` |
 | **замечание 2.3** (ограниченный вариант): при теореме Пасси (гипотеза) $D_5(Q)=1$ для $2$-групп класса $\le3$ порядка $\le2^k$ ⇒ $D_5(G)\subseteq\gamma_4(G)$ для конечных $G$ с силовской $2$-подгруппой порядка $\le2^k$; при $D_3=\gamma_3$ (гипотеза) — класса ровно $3$ | `D_five_le_of_bounded`, `D_five_le_of_bounded_class_three`, `exists_sylow_two_proj` | `FiniteReduction.lean` |
 | $[\gamma_i,\gamma_j]\subseteq\gamma_{i+j}$; тождество Холла–Витта | `commutator_lcs_le`, `hall_witt` | `ClassFour.lean` |
@@ -122,7 +123,7 @@ $\Phi\colon\mathbb Z[G]\to T$ с первой координатой $\varepsilo
 $\Phi(g-1)=(0,\bar g)$. Это та же идея, что у авторов в `DegreeTwo.lean` (квадратично-нулевое
 представление).
 
-`#print axioms` для всех 1446 доказанных объявлений (`AxiomAudit.lean`: 1437 из разработки и
+`#print axioms` для всех 1465 доказанных объявлений (`AxiomAudit.lean`: 1456 из разработки и
 9 сравниваемых теорем Palomar из `Solution.lean`) — только `propext`,
 `Classical.choice`, `Quot.sound`. Ни `sorry`, ни `axiom` нет ни в разработке, ни в `Solution.lean`;
 `Challenge.lean` формулирует подаваемые результаты с `sorry` намеренно.
@@ -178,7 +179,7 @@ $D_5 = 1$ — проверяется в Lean по сертификатам, не
 предполагается. Некоторые входят явными гипотезами в теоремы (`FiniteReduction.lean`:
 `PassiDFourSquare`, `GruenbergResidualTwo`, `DThreeEqGammaThree`; `MinimalCounterexample.lean`:
 `DThreeEqGammaThree` и, как явная гипотеза `h1024` теоремы `D_five_eq_bot_of_rank`, предложение 5.3; `MetabelianOdd.lean`: `GuptaTaharaMetabelian`; `MinimalThree.lean`: `PassiDFourSquare`, `GuptaTaharaMetabelian`). `TaharaFiveOne`
-(`Tahara.lean`) стоит здесь как утверждение из литературы, но оно доказано (`TaharaTheorem.lean`); доказано и `DThreeEqGammaThree` (`dThreeEqGammaThree`, `DThree.lean`). Ссылки — в docstring; данные, помеченные †, с оригиналом не сверены.
+(`Tahara.lean`) стоит здесь как утверждение из литературы, но оно доказано (`TaharaTheorem.lean`); доказаны и `DThreeEqGammaThree` (`dThreeEqGammaThree`, `DThree.lean`), и `GruenbergResidualTwo` (`gruenbergResidualTwo`, `Gruenberg.lean`). Ссылки — в docstring; данные, помеченные †, с оригиналом не сверены.
 
 | `Prop` | Содержание | Литература |
 |---|---|---|
@@ -186,7 +187,7 @@ $D_5 = 1$ — проверяется в Lean по сертификатам, не
 | `DThreeEqGammaThree` | $D_3=\gamma_3$ — **доказано** (`dThreeEqGammaThree`) | Higman, Rees (не опубл.), Passi [Pas68]†; [Pas79], [MP09] |
 | `PassiDFourSquare` | $g\in D_4 \Rightarrow g^2\in\gamma_4$ | Passi [Pas68]† |
 | `RipsExample` | $\exists G,\ D_4(G)\ne\gamma_4(G)$ | Rips [Rip72] |
-| `GruenbergResidualTwo` | к.п. нильпотентная $G$, никакая нечётная степень $g$ не равна $1$ $\Rightarrow$ $g\ne1$ в некоторой конечной $2$-фактор-группе | Gruenberg [Gru57] |
+| `GruenbergResidualTwo` | к.п. нильпотентная $G$, никакая нечётная степень $g$ не равна $1$ $\Rightarrow$ $g\ne1$ в некоторой конечной $2$-фактор-группе — **доказано** (`gruenbergResidualTwo`) | Gruenberg [Gru57] |
 | `GuptaTaharaMetabelian` | $p$ нечётно, $G$ — конечная метабелева $p$-группа $\Rightarrow$ $D_{p+2}(G)=\gamma_{p+2}(G)$ | Гупта–Тахара [GT85, теорема 3.2(c)] (там для конечно порождённых $G$) |
 | `TaharaDFiveExponentSix` | $g\in D_5 \Rightarrow g^6\in\gamma_5$ | Тахара [Tah81, сл. 6.11]; [MP09] |
 | `TaharaFiveOne` (`Tahara.lean`) | описание $D_5$ у Тахары для конечных групп класса $\le4$: $D_5$ лежит в подгруппе, порождённой элементами $g(u,v,w)$ по целым наборам с условиями (A)–(F), для любого базиса единственности с его структурными константами (сверено со сканом, с. 143, 150, 159–161; условие (C₂) повторно сверено с с. 160 после исправления опечатки в MATH-226) — **доказано**: `taharaFiveOne` | Тахара [Tah81, т. 6.1] |

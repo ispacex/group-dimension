@@ -81,7 +81,7 @@ sources:
     authors: ["K. W. Gruenberg"]
     type: paper
     relationship: background
-    note: "Source of the hypothesis GruenbergResidualTwo, assumed (explicit hypothesis), not proved."
+    note: "Source of GruenbergResidualTwo, an explicit hypothesis of the compared statement of Proposition 2.1; it is proved in the development (gruenbergResidualTwo, Gruenberg.lean)."
 
 related_formalizations:
   - id: "https://github.com/TimmPeterson/lie-algebras"
@@ -99,10 +99,10 @@ status:
     Quot.sound. Not formalized: the general Jennings theorem (only the inclusion needed for D_5
     is); the paper's computer results (Propositions 5.1, 5.3, 5.10, Theorems 5.4, 6.14), of
     which Proposition 5.3 enters D_five_eq_bot_of_rank as an explicit hypothesis; the classical
-    results Passi's D_4^2 ⊆ γ_4, Gruenberg's theorem and Gupta–Tahara's D_{p+2} = γ_{p+2} for
+    results Passi's D_4^2 ⊆ γ_4 and Gupta–Tahara's D_{p+2} = γ_{p+2} for
     metabelian p-groups, p odd [GT85, Thm. 3.2(c)], which enter as explicit hypotheses (D_3 =
-    γ_3, also a hypothesis of the compared statements, is proved in the development:
-    dThreeEqGammaThree); Lemma C.1 (that nonterminal means a nontrivial nucleus). Formalized in
+    γ_3 and Gruenberg's theorem, also hypotheses of the compared statements, are proved in the
+    development: dThreeEqGammaThree, gruenbergResidualTwo); Lemma C.1 (that nonterminal means a nontrivial nucleus). Formalized in
     the development but not compared here: Remark 2.2, Lemma 5.2 (d), Proposition 5.8, Lemma 5.9, Lemmas 6.1 and 6.2
     (with Gupta–Tahara, and for 6.2 also Passi's D_4^2 ⊆ γ_4, as explicit hypotheses), Lemma
     6.3, Proposition 6.5, Lemma 6.9 (for quotients E/U of any group E), Theorem 6.10 (for

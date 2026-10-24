@@ -2,6 +2,7 @@ module
 
 public import GroupDimension.DThree
 public import GroupDimension.Descendants
+public import GroupDimension.Gruenberg
 
 @[expose] public section
 
@@ -9,8 +10,8 @@ public import GroupDimension.Descendants
 # The results that assumed `D₃ = γ₃`, without that hypothesis
 
 With `dThreeEqGammaThree` (`DThree.lean`) the hypothesis `hD3 : DThreeEqGammaThree` is discharged:
-Proposition 2.1 with class exactly `3` and Remark 2.3 (now only with the theorems of Passi and
-Gruenberg as hypotheses), Lemma 5.2 (all parts), and the `D₅` form of Proposition 5.7 (now only
+Proposition 2.1 with class exactly `3` (with Gruenberg's theorem `gruenbergResidualTwo`,
+`Gruenberg.lean`, now only with Passi's theorem as a hypothesis) and Remark 2.3 (likewise), Lemma 5.2 (all parts), and the `D₅` form of Proposition 5.7 (now only
 with Proposition 5.3 as a hypothesis). The order-`2¹⁰` statement `prop_1024` is in
 `Cert1024/Prop1024.lean` (`prop_1024'`).
 -/
@@ -22,12 +23,20 @@ theorem D_five_eq_bot_of_class_two' (Q : Type) [Group Q]
     (h3 : (⊤ : Subgroup Q).lowerCentralSeries 2 = ⊥) : D 5 Q = ⊥ :=
   D_five_eq_bot_of_class_two dThreeEqGammaThree Q h3
 
-/-- **Proposition 2.1 with class exactly `3`**, given the theorems of Passi and Gruenberg. -/
-theorem dimensionQuestion5_iff_class_three' (hP : PassiDFourSquare) (hG : GruenbergResidualTwo) :
+/-- **Proposition 2.1, `(1) ⇔ (3)`**, given Passi's theorem: `D₅(G) ⊆ γ₄(G)` for all groups iff
+`D₅(Q) = 1` for all finite `2`-groups of class `≤ 3`. -/
+theorem dimensionQuestion5_iff_finite_two_groups' (hP : PassiDFourSquare) :
+    DimensionQuestion5 ↔
+      ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥ →
+        D 5 Q = ⊥ :=
+  dimensionQuestion5_iff_finite_two_groups hP gruenbergResidualTwo
+
+/-- **Proposition 2.1 with class exactly `3`**, given Passi's theorem. -/
+theorem dimensionQuestion5_iff_class_three' (hP : PassiDFourSquare) :
     DimensionQuestion5 ↔
       ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥ →
         (⊤ : Subgroup Q).lowerCentralSeries 2 ≠ ⊥ → D 5 Q = ⊥ :=
-  dimensionQuestion5_iff_class_three dThreeEqGammaThree hP hG
+  dimensionQuestion5_iff_class_three dThreeEqGammaThree hP gruenbergResidualTwo
 
 /-- **Remark 2.3 with class exactly `3`**, given Passi's theorem. -/
 theorem D_five_le_of_bounded_class_three' (hP : PassiDFourSquare) (k : ℕ)
