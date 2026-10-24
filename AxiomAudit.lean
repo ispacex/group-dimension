@@ -1455,3 +1455,9 @@ open GroupDimension
 #print axioms GroupDimension.NonterminalSuff.Hyp.exists_extension
 #print axioms GroupDimension.nonterminal_sufficient
 #print axioms GroupDimension.nonterminal_iff
+#print axioms GroupDimension.LieThreeThree.lcs_eq
+#print axioms GroupDimension.LieThreeThree.finrank_lcs
+#print axioms GroupDimension.LieThreeThree.lieSpan_eq_top
+#print axioms GroupDimension.LieThreeThree.lie_lcs_one_ne_bot
+#print axioms GroupDimension.LieThreeThree.derivedSeries_two_ne_bot
+#print axioms GroupDimension.LieThreeThree.exists_lie_three_three
