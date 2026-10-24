@@ -64,8 +64,9 @@ are proved in the development (`dThreeEqGammaThree`, `passiDFourSquare`,
   of Prop 5.7 took `D₃ = γ₃` (and Prop 2.1 also Passi's and Gruenberg's theorems) as explicit
   hypotheses. These are now proved in the development, and the compared statements no longer
   take them.
-* The paper's computer results (Props 5.1, 5.3, 5.10, Thms 5.4, 6.14) and its paper-only results
-  (Lemmas 6.1, 6.2, Thm 6.12) are not submitted. Remark 2.2, Lemma 5.2 (d), Proposition 5.8,
-  Lemma 5.9, Lemma 6.3, Proposition 6.5, Lemma 6.9, Theorem 6.10 (for central extensions by a
-  subgroup of exponent `p`) and the inclusion part of Tahara's Theorem 6.1 are formalized in the
+* The paper's computer results (Props 5.1, 5.3, 5.10, Thms 5.4, 6.14) are not submitted.
+  Remark 2.2, Lemma 5.2 (d), Proposition 5.8, Lemma 5.9, Lemmas 6.1 and 6.2 (with Gupta–Tahara
+  as an explicit hypothesis), Lemma 6.3, Proposition 6.5, Lemma 6.9, Theorem 6.10 (for central
+  extensions by a subgroup of exponent `p`), Theorem 6.12 (for a given normal form), the Lie
+  algebra of Appendix A and the inclusion part of Tahara's Theorem 6.1 are formalized in the
   development but are not compared statements.

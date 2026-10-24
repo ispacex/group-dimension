@@ -152,7 +152,7 @@ fidelity:
     parts (a)-(c); part (d) is formalized as isDescendant_of_minimal but not
     compared. (5) The D_5 form of Proposition 5.7 assumes
     the order-2^10 statement of Proposition 5.3 for class ≤ 3 (class exactly 3
-    is the paper's Proposition 5.3, [computer + paper]; class ≤ 2 follows from D_3 = γ_3). (6) In Lemma 5.6 the isomorphism Q/P_3(Q) ≅ Z/4 × (Z/2)^7 is given as a
+    is the paper's Proposition 5.3, [computer + paper]; class ≤ 2 follows from D_3 = γ_3, proved in the development). (6) In Lemma 5.6 the isomorphism Q/P_3(Q) ≅ Z/4 × (Z/2)^7 is given as a
     surjective homomorphism with kernel P_3(Q). (7) In Theorem 6.8 "the cubes of G/γ_2 form
     a cyclic group" is stated as: for some t, every x^3 is congruent modulo γ_2 to a power
     of t^3.

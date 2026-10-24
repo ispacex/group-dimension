@@ -165,11 +165,13 @@ theorem not_isCandidate_of_rank {Q : Type*} [Group Q] [Finite Q] (hcard : Nat.ca
     (hrank : 8 ≤ Group.rank Q) (n : Q) : ¬ IsCandidate Q n := by
   sorry
 
-/-! ## The reduction and minimal counterexamples -/
+/-! ## The reduction and minimal counterexamples (the last statement conditional on Prop. 5.3) -/
 
-/-- **Paper, Proposition 2.1, (1) ⇔ (3).** Problem 20.84 has a positive answer if and only if `D₅(Q) = 1` for every finite 2-group `Q` of class exactly 3.
-The paper's (3) also says "metabelian"; a group of class `≤ 3` is automatically metabelian
-(`[γ₂, γ₂] ⊆ γ₄`, the paper's Remark 2.2, not formalized), so the word is omitted here. -/
+/-- **Paper, Proposition 2.1, (1) ⇔ (3).** Problem 20.84 has a positive answer if and only if
+`D₅(Q) = 1` for every finite 2-group `Q` of class exactly 3. The paper's (3) also says
+"metabelian"; a group of class `≤ 3` is automatically metabelian (`[γ₂, γ₂] ⊆ γ₄`, the paper's
+Remark 2.2, formalized in the development as `metabelian_of_class_three` but not compared), so
+the word is omitted here. -/
 theorem dimensionQuestion5_iff_class_three :
     DimensionQuestion5 ↔
       ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥ →
@@ -188,10 +190,10 @@ theorem isCandidate_of_minimal {Q : Type} [Group Q] [Finite Q]
     ∃ n, IsCandidate Q n ∧ DSet 5 Q = (Subgroup.zpowers n : Set Q) := by
   sorry
 
-/-- **Paper, Proposition 5.7, `D₅` form, conditional on Proposition 5.3.** *Assuming* `h1024`: every
-group of order `2^10` and class `≤ 3` has `D₅ = 1`. For class exactly 3 this is the paper's
-Proposition 5.3 (proved there by computer plus paper argument, [computer + paper]); for class
-`≤ 2` it follows from `D₃ = γ₃`. Conclusion: every group of order `2^11`, class `≤ 3` and rank
+/-- **Paper, Proposition 5.7, `D₅` form, conditional on Proposition 5.3.** *Assuming* `h1024`:
+every group of order `2^10` and class `≤ 3` has `D₅ = 1`. For class exactly 3 this is the
+paper's Proposition 5.3 (proved there by computer plus paper argument, [computer + paper]); for
+class `≤ 2` it follows from `D₃ = γ₃` (proved in the development). Conclusion: every group of order `2^11`, class `≤ 3` and rank
 `≥ 8` has `D₅ = 1`. The assumption is an explicit hypothesis. -/
 theorem D_five_eq_bot_of_rank
     (h1024 : ∀ (R : Type) [Group R] [Finite R], Nat.card R = 2 ^ 10 →
