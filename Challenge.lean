@@ -22,19 +22,19 @@ central series. Kourovka Problem 20.84 asks whether `D₅(G) ⊆ γ₄(G)` for e
 **Indexing.** Mathlib's `(⊤ : Subgroup G).lowerCentralSeries k` is `γ_{k+1}(G)`: so `γ₂ = (⊤ : Subgroup G).lowerCentralSeries 1`,
 `γ₃ = (⊤ : Subgroup G).lowerCentralSeries 2`, `γ₄ = (⊤ : Subgroup G).lowerCentralSeries 3`, `γ₅ = (⊤ : Subgroup G).lowerCentralSeries 4`.
 
-**What is unconditional and what is not.**
-* Unconditional: Theorems 6.6 and 6.8 of the paper (`D₅ = γ₅` when `G/γ₂` is a finite group of
-  exponent 3, or a finite 3-group whose cubes form a cyclic group); the inclusion
-  `D₅(G) ⊆ M₅(G)` (Jennings' "hard" inclusion in the case needed); Lemma 5.6 and the Lean
-  part of Proposition 5.7 (statements about *candidates*).
-* Conditional, with the hypotheses as explicit arguments (no axioms are added): the
-  reduction of Problem 20.84 to finite 2-groups of class 3 (Proposition 2.1), which assumes
-  `D₃ = γ₃`, Passi's `D₄² ⊆ γ₄` and a form of Gruenberg's theorem; the passage from a minimal
-  counterexample to a candidate (Lemma 5.2), which assumes `D₃ = γ₃`; and the `D₅` form of
-  Proposition 5.7, which assumes `D₃ = γ₃` and the computer result of the paper's
-  Proposition 5.3 (no group of order `2^10` and class `≤ 3` has `D₅ ≠ 1`).
-  These hypotheses are classical theorems (`D₃ = γ₃`, Passi, Gruenberg) or a computer
-  result of the paper (Proposition 5.3); none of them is proved here.
+**What is proved.** Every statement below is unconditional except one.
+* Theorems 6.6 and 6.8 of the paper (`D₅ = γ₅` when `G/γ₂` is a finite group of exponent 3,
+  or a finite 3-group whose cubes form a cyclic group); the inclusion `D₅(G) ⊆ M₅(G)`
+  (Jennings' "hard" inclusion in the case needed); Lemma 5.6 and the Lean part of
+  Proposition 5.7 (statements about *candidates*).
+* The reduction of Problem 20.84 to finite 2-groups of class 3 (Proposition 2.1) and the
+  passage from a minimal counterexample to a candidate (Lemma 5.2). Their proofs in the
+  development use `D₃ = γ₃` (Higman–Rees–Passi), Passi's `D₄² ⊆ γ₄` and Gruenberg's theorem
+  on finite 2-quotients, all three of which are proved there.
+* The one conditional statement is the `D₅` form of Proposition 5.7: it takes the computer
+  result of the paper's Proposition 5.3 (no group of order `2^10` and class `≤ 3` has
+  `D₅ ≠ 1`) as an explicit argument `h1024`. No axioms are added, and Proposition 5.3 is not
+  proved here.
 
 **Candidates.** In a candidate (paper, §5) `M₅` is *defined* by Jennings' product formula
 `M_n(G) = ∏_{i p^j ≥ n} γ_i(G)^{p^j}` (`jennings` below). The paper uses
@@ -106,33 +106,15 @@ structure IsCandidate (G : Type*) [Group G] (n : G) : Prop where
 /-- The abelian group `ℤ/4 × (ℤ/2)^7`, written multiplicatively. -/
 abbrev Z4Z2pow7 := Multiplicative (ZMod 4 × (Fin 7 → ZMod 2))
 
-/-! ## Named statements used only as hypotheses
+/-! ## The open question
 
-Each is a `Prop`; none is assumed globally and none is proved here. A theorem that needs one
-takes it as an explicit argument. They quantify over groups `G : Type` (universe 0), which keeps them in `Prop` without universe
-parameters. For `DimensionQuestion5` this is no loss: a counterexample `g ∈ D₅(G) \ γ₄(G)` already
+`DimensionQuestion5` quantifies over groups `G : Type` (universe 0), which keeps it in `Prop`
+without universe parameters. This is no loss: a counterexample `g ∈ D₅(G) \ γ₄(G)` already
 lives in a finitely generated subgroup, which is isomorphic to a group in `Type`. -/
 
 /-- Kourovka Problem 20.84 (**open**): `D₅(G) ⊆ γ₄(G)` for every group `G`. -/
 def DimensionQuestion5 : Prop :=
   ∀ (G : Type) [Group G], DSet 5 G ⊆ ((⊤ : Subgroup G).lowerCentralSeries 3 : Set G)
-
-/-- `D₃(G) = γ₃(G)` for every group (classical: G. Higman and R. Rees; I. B. S. Passi, 1968;
-see Passi, *Group rings and their augmentation ideals*, LNM 715, 1979). Not proved here. -/
-def DThreeEqGammaThree : Prop :=
-  ∀ (G : Type) [Group G], DSet 3 G = ((⊤ : Subgroup G).lowerCentralSeries 2 : Set G)
-
-/-- Passi (1968): `g ∈ D₄(G) ⇒ g² ∈ γ₄(G)` for every group. Not proved here. -/
-def PassiDFourSquare : Prop :=
-  ∀ (G : Type) [Group G], ∀ g ∈ DSet 4 G, g ^ 2 ∈ (⊤ : Subgroup G).lowerCentralSeries 3
-
-/-- Gruenberg (1957), in the form used in the paper's Proposition 2.1: in a finitely generated
-nilpotent group, an element none of whose odd powers is trivial survives in some finite
-2-group quotient. Not proved here. -/
-def GruenbergResidualTwo : Prop :=
-  ∀ (G : Type) [Group G], Group.FG G → Group.IsNilpotent G →
-    ∀ g : G, (∀ m : ℕ, Odd m → g ^ m ≠ 1) →
-      ∃ (N : Subgroup G) (_ : N.Normal), Finite (G ⧸ N) ∧ IsPGroup 2 (G ⧸ N) ∧ g ∉ N
 
 /-! ## Unconditional results -/
 
@@ -183,25 +165,22 @@ theorem not_isCandidate_of_rank {Q : Type*} [Group Q] [Finite Q] (hcard : Nat.ca
     (hrank : 8 ≤ Group.rank Q) (n : Q) : ¬ IsCandidate Q n := by
   sorry
 
-/-! ## Conditional results (hypotheses as explicit arguments) -/
+/-! ## The reduction and minimal counterexamples -/
 
-/-- **Paper, Proposition 2.1, (1) ⇔ (3), conditional.** *Assuming* `D₃ = γ₃`, Passi's
-`D₄² ⊆ γ₄` and Gruenberg's theorem (the three explicit hypotheses), Problem 20.84 has a
-positive answer if and only if `D₅(Q) = 1` for every finite 2-group `Q` of class exactly 3.
+/-- **Paper, Proposition 2.1, (1) ⇔ (3).** Problem 20.84 has a positive answer if and only if `D₅(Q) = 1` for every finite 2-group `Q` of class exactly 3.
 The paper's (3) also says "metabelian"; a group of class `≤ 3` is automatically metabelian
 (`[γ₂, γ₂] ⊆ γ₄`, the paper's Remark 2.2, not formalized), so the word is omitted here. -/
-theorem dimensionQuestion5_iff_class_three (hD3 : DThreeEqGammaThree) (hP : PassiDFourSquare)
-    (hG : GruenbergResidualTwo) :
+theorem dimensionQuestion5_iff_class_three :
     DimensionQuestion5 ↔
       ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥ →
         (⊤ : Subgroup Q).lowerCentralSeries 2 ≠ ⊥ → DSet 5 Q = {1} := by
   sorry
 
-/-- **Paper, Lemma 5.2, conditional on `D₃ = γ₃`.** Let `Q` be a finite 2-group of class
+/-- **Paper, Lemma 5.2 (a)–(c).** Let `Q` be a finite 2-group of class
 exactly 3 with `D₅(Q) ≠ 1`, minimal in the sense that `D₅(Q/N) = 1` for every central subgroup
-`N` of order 2. *Assuming* `D₃ = γ₃` (explicit hypothesis), `Q` is a candidate, with central
+`N` of order 2. Then `Q` is a candidate, with central
 involution `n` generating `D₅(Q)`. -/
-theorem isCandidate_of_minimal (hD3 : DThreeEqGammaThree) {Q : Type} [Group Q] [Finite Q]
+theorem isCandidate_of_minimal {Q : Type} [Group Q] [Finite Q]
     (hQ : IsPGroup 2 Q) (h4 : (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥) (h3 : (⊤ : Subgroup Q).lowerCentralSeries 2 ≠ ⊥)
     (hmin : ∀ N : Subgroup Q, ∀ _ : N.Normal, N ≤ Subgroup.center Q → Nat.card N = 2 →
       DSet 5 (Q ⧸ N) = {1})
@@ -209,12 +188,12 @@ theorem isCandidate_of_minimal (hD3 : DThreeEqGammaThree) {Q : Type} [Group Q] [
     ∃ n, IsCandidate Q n ∧ DSet 5 Q = (Subgroup.zpowers n : Set Q) := by
   sorry
 
-/-- **Paper, Proposition 5.7, `D₅` form, conditional.** *Assuming* `D₃ = γ₃` and `h1024`: every
+/-- **Paper, Proposition 5.7, `D₅` form, conditional on Proposition 5.3.** *Assuming* `h1024`: every
 group of order `2^10` and class `≤ 3` has `D₅ = 1`. For class exactly 3 this is the paper's
 Proposition 5.3 (proved there by computer plus paper argument, [computer + paper]); for class
 `≤ 2` it follows from `D₃ = γ₃`. Conclusion: every group of order `2^11`, class `≤ 3` and rank
-`≥ 8` has `D₅ = 1`. Both assumptions are explicit hypotheses. -/
-theorem D_five_eq_bot_of_rank (hD3 : DThreeEqGammaThree)
+`≥ 8` has `D₅ = 1`. The assumption is an explicit hypothesis. -/
+theorem D_five_eq_bot_of_rank
     (h1024 : ∀ (R : Type) [Group R] [Finite R], Nat.card R = 2 ^ 10 →
       (⊤ : Subgroup R).lowerCentralSeries 3 = ⊥ → DSet 5 R = {1})
     {Q : Type} [Group Q] [Finite Q] (hcard : Nat.card Q = 2 ^ 11)

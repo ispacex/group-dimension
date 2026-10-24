@@ -233,7 +233,8 @@ submission to the [Palomar registry](https://palomar-registry.org) of machine-ch
 statement from the development; Comparator checks that the two agree and that only `propext`,
 `Classical.choice`, `Quot.sound` are used. The workflow
 `.github/workflows/palomar-preflight.yml` runs Palomar's own verification on every relevant push.
-What is submitted, with the hypotheses of the conditional results, is described in
+What is submitted, with the one hypothesis that remains (Proposition 5.3, a computer result), is
+described in
 [`palomar/README.md`](palomar/README.md).
 
 ## Literature

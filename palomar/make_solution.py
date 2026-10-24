@@ -73,15 +73,6 @@ theorem dimensionQuestion5_iff :
     rw [DSet_eq, SetLike.coe_subset_coe]
     exact h G
 
-theorem dThreeEqGammaThree_bridge (h : DThreeEqGammaThree) : GroupDimension.DThreeEqGammaThree :=
-  fun G _ => SetLike.coe_injective (by rw [← DSet_eq]; exact h G)
-
-theorem passiDFourSquare_bridge (h : PassiDFourSquare) : GroupDimension.PassiDFourSquare :=
-  fun G _ g hg => h G g (by rw [DSet_eq]; exact hg)
-
-theorem gruenbergResidualTwo_bridge (h : GruenbergResidualTwo) :
-    GroupDimension.GruenbergResidualTwo := h
-
 '''
 
 PROOFS = {
@@ -98,15 +89,14 @@ PROOFS = {
 'false_of_card_expCentral_two_le': r'''  exact GroupDimension.false_of_card_expCentral_two_le (isCandidate_iff.1 hQ)
     (by rw [← expCentral_eq]; exact hP2le)''',
 'not_isCandidate_of_rank': r'''  exact fun hQ => GroupDimension.not_isCandidate_of_rank hcard hrank n (isCandidate_iff.1 hQ)''',
-'dimensionQuestion5_iff_class_three': r'''  rw [dimensionQuestion5_iff, GroupDimension.dimensionQuestion5_iff_class_three
-    (dThreeEqGammaThree_bridge hD3) (passiDFourSquare_bridge hP) (gruenbergResidualTwo_bridge hG)]
+'dimensionQuestion5_iff_class_three': r'''  rw [dimensionQuestion5_iff, GroupDimension.dimensionQuestion5_iff_class_three']
   simp only [DSet_eq_one_iff]''',
 'isCandidate_of_minimal': r'''  have hmin' : ∀ N : Subgroup Q, ∀ _ : N.Normal, N ≤ Subgroup.center Q → Nat.card N = 2 →
       GroupDimension.D 5 (Q ⧸ N) = ⊥ := fun N _ h1 h2 => DSet_eq_one_iff.1 (hmin N ‹_› h1 h2)
-  obtain ⟨n, hn, hD5⟩ := GroupDimension.isCandidate_of_minimal (dThreeEqGammaThree_bridge hD3)
+  obtain ⟨n, hn, hD5⟩ := GroupDimension.isCandidate_of_minimal'
     hQ h4 h3 hmin' (fun h => hD (DSet_eq_one_iff.2 h))
   exact ⟨n, isCandidate_iff.2 hn, by rw [DSet_eq, hD5]⟩''',
-'D_five_eq_bot_of_rank': r'''  exact DSet_eq_one_iff.2 (GroupDimension.D_five_eq_bot_of_rank (dThreeEqGammaThree_bridge hD3)
+'D_five_eq_bot_of_rank': r'''  exact DSet_eq_one_iff.2 (GroupDimension.D_five_eq_bot_of_rank'
     (fun R _ _ h1 h2 => DSet_eq_one_iff.1 (h1024 R h1 h2)) hcard h4 hrank)''',
 }
 
