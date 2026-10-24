@@ -16,15 +16,13 @@ project:
     product M_5(G) for finite 2-groups of class at most 3; and, for "candidates" (the
     paper's minimal-counterexample shape among finite 2-groups of class 3), there is no
     candidate of order 2^11 with Q/P_3 ≅ Z/4 × (Z/2)^7 and none of order 2^11 and rank at
-    least 8 (paper, Lemma 5.6 and Proposition 5.7). Conditional results, with every
-    assumption an explicit hypothesis: the reduction of Problem 20.84 to finite 2-groups of
-    class exactly 3 assuming D_3 = γ_3, Passi's D_4^2 ⊆ γ_4 and Gruenberg's residual theorem
-    (Proposition 2.1); a minimal counterexample is a candidate assuming D_3 = γ_3 (Lemma 5.2);
-    and D_5 = 1 for groups of order 2^11, class at most 3 and rank at least 8, assuming
-    D_3 = γ_3 and the paper's computer result for order 2^10 (Proposition 5.7, D_5 form).
-    D_3 = γ_3, Gruenberg's theorem and Passi's theorem are proved in the development
-    (dThreeEqGammaThree, gruenbergResidualTwo, passiDFourSquare), which also has these results
-    without those hypotheses; the compared statements keep them as hypotheses.
+    least 8 (paper, Lemma 5.6 and Proposition 5.7); the reduction of Problem 20.84 to finite
+    2-groups of class exactly 3 (Proposition 2.1); and a minimal counterexample is a candidate
+    (Lemma 5.2). The proofs of the last two use D_3 = γ_3, Passi's D_4^2 ⊆ γ_4 and Gruenberg's
+    residual theorem, all proved in the development (dThreeEqGammaThree, passiDFourSquare,
+    gruenbergResidualTwo). One conditional result, with the assumption an explicit hypothesis:
+    D_5 = 1 for groups of order 2^11, class at most 3 and rank at least 8, assuming the paper's
+    computer result for order 2^10 (Proposition 5.7, D_5 form, assuming Proposition 5.3).
   authors:
     - "Stanislav Vorobev"
   license: "MIT"
@@ -77,12 +75,12 @@ sources:
     authors: ["I. B. S. Passi"]
     type: paper
     relationship: background
-    note: "Source of D_3 = γ_3 (proved in the development as dThreeEqGammaThree, an explicit hypothesis of the compared statements) and of D_4^2 ⊆ γ_4 (proved in the development as passiDFourSquare, an explicit hypothesis of the compared statements)."
+    note: "Source of D_3 = γ_3 and of D_4^2 ⊆ γ_4, both proved in the development (dThreeEqGammaThree, passiDFourSquare) and used in the proofs of Proposition 2.1 and Lemma 5.2."
   - title: "K. W. Gruenberg, Residual properties of infinite soluble groups, Proc. London Math. Soc. (3) 7 (1957) 29-62"
     authors: ["K. W. Gruenberg"]
     type: paper
     relationship: background
-    note: "Source of GruenbergResidualTwo, an explicit hypothesis of the compared statement of Proposition 2.1; it is proved in the development (gruenbergResidualTwo, Gruenberg.lean)."
+    note: "Source of Gruenberg's theorem on finite 2-quotients, proved in the development (gruenbergResidualTwo, Gruenberg.lean) and used in the proof of Proposition 2.1."
 
 related_formalizations:
   - id: "https://github.com/TimmPeterson/lie-algebras"
@@ -101,9 +99,7 @@ status:
     is); the paper's computer results (Propositions 5.1, 5.3, 5.10, Theorems 5.4, 6.14), of
     which Proposition 5.3 enters D_five_eq_bot_of_rank as an explicit hypothesis; the classical
     result Gupta–Tahara's D_{p+2} = γ_{p+2} for metabelian p-groups, p odd [GT85, Thm.
-    3.2(c)], which enters as an explicit hypothesis (D_3 = γ_3, Gruenberg's theorem and Passi's
-    D_4^2 ⊆ γ_4, also hypotheses of the compared statements, are proved in the development:
-    dThreeEqGammaThree, gruenbergResidualTwo, passiDFourSquare); Lemma C.1 (that nonterminal means a nontrivial nucleus). Formalized in
+    3.2(c)], which enters Lemmas 6.1 and 6.2 of the development as an explicit hypothesis; Lemma C.1 (that nonterminal means a nontrivial nucleus). Formalized in
     the development but not compared here: Remark 2.2, Lemma 5.2 (d), Proposition 5.8, Lemma 5.9, Lemmas 6.1 and 6.2
     (with Gupta–Tahara as an explicit hypothesis), Lemma
     6.3, Proposition 6.5, Lemma 6.9 (for quotients E/U of any group E), Theorem 6.10 (for
@@ -151,13 +147,12 @@ fidelity:
     Jennings' product formula, not as G ∩ (1 + Δ_{F_2}(G)^n); the inclusion
     G ∩ (1 + Δ_{F_2}(G)^5) ⊆ M_5 (class ≤ 3) is proved, the reverse is not. Hence the
     non-existence results for candidates (Lemma 5.6, Proposition 5.7) are at least as strong
-    as the paper's, while Lemma 5.2 (b) gives n ∈ M_5 only in the product sense. (3) Proposition 2.1 is proved with
-    D_3 = γ_3, Passi's theorem and Gruenberg's theorem as explicit hypotheses, and with
+    as the paper's, while Lemma 5.2 (b) gives n ∈ M_5 only in the product sense. (3) Proposition 2.1 is stated with
     "metabelian" omitted, which is automatic for class ≤ 3 (Remark 2.2, metabelian_of_class_three). (4) Lemma 5.2 is compared in
-    parts (a)-(c), assuming D_3 = γ_3; part (d) is formalized as isDescendant_of_minimal but not
+    parts (a)-(c); part (d) is formalized as isDescendant_of_minimal but not
     compared. (5) The D_5 form of Proposition 5.7 assumes
-    D_3 = γ_3 and the order-2^10 statement of Proposition 5.3 for class ≤ 3 (class exactly 3
-    is the paper's Proposition 5.3, [computer + paper]; class ≤ 2 follows from D_3 = γ_3). (6) In Lemma 5.6 the isomorphism Q/P_3(Q) ≅ Z/4 × (Z/2)^7 is given as a
+    the order-2^10 statement of Proposition 5.3 for class ≤ 3 (class exactly 3
+    is the paper's Proposition 5.3, [computer + paper]; class ≤ 2 follows from D_3 = γ_3, proved in the development). (6) In Lemma 5.6 the isomorphism Q/P_3(Q) ≅ Z/4 × (Z/2)^7 is given as a
     surjective homomorphism with kernel P_3(Q). (7) In Theorem 6.8 "the cubes of G/γ_2 form
     a cyclic group" is stated as: for some t, every x^3 is congruent modulo γ_2 to a power
     of t^3.
@@ -204,17 +199,17 @@ alignment:
     - source: "Proposition 2.1, (1) ⇔ (3)"
       lean: "GroupDimension.Palomar.dimensionQuestion5_iff_class_three"
       module: "Challenge"
-      status: "proved, conditional"
-      note: "Hypotheses: D_3 = γ_3, Passi, Gruenberg; without 'metabelian'. D_3 = γ_3, Gruenberg and Passi are proved in the development; dimensionQuestion5_iff_class_three' has no hypotheses."
+      status: "proved"
+      note: "Without 'metabelian'. The proof uses D_3 = γ_3, Passi and Gruenberg, proved in the development."
     - source: "Lemma 5.2 (a)-(c)"
       lean: "GroupDimension.Palomar.isCandidate_of_minimal"
       module: "Challenge"
-      status: "proved, conditional"
-      note: "Hypothesis: D_3 = γ_3."
+      status: "proved"
+      note: "The proof uses D_3 = γ_3, proved in the development."
     - source: "Proposition 5.7 (D_5 form)"
       lean: "GroupDimension.Palomar.D_five_eq_bot_of_rank"
       module: "Challenge"
       status: "proved, conditional"
-      note: "Hypotheses: D_3 = γ_3 and Proposition 5.3 for order 2^10 (a computer result in the paper)."
+      note: "Hypothesis: Proposition 5.3 for order 2^10 (a computer result in the paper)."
 
 acknowledgements: "Mathlib."

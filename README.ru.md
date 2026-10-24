@@ -235,8 +235,8 @@ lake env lean AxiomAudit.lean
 из него скриптом `palomar/make_solution.py`) дословно повторяет определения и доказывает каждое
 утверждение из разработки; Comparator проверяет, что они совпадают и что используются только
 `propext`, `Classical.choice`, `Quot.sound`. Workflow `.github/workflows/palomar-preflight.yml`
-запускает собственную проверку Palomar на каждом существенном push. Что подано, с гипотезами
-условных результатов, описано в [`palomar/README.md`](palomar/README.md).
+запускает собственную проверку Palomar на каждом существенном push. Что подано, с единственной
+оставшейся гипотезой (предложение 5.3, результат вычисления), описано в [`palomar/README.md`](palomar/README.md).
 
 ## Литература
 

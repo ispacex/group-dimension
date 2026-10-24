@@ -35,14 +35,19 @@ Indexing: Mathlib's `(⊤ : Subgroup G).lowerCentralSeries k` is `γ_{k+1}(G)`.
 | Lemma 5.6 | no candidate of order `2^11` with `Q/P₃ ≅ ℤ/4 × (ℤ/2)^7` | `not_isCandidate_of_quotient_z4` |
 | Prop 5.7, part | every candidate has `\|P₂(Q)\| ≥ 16` | `false_of_card_expCentral_two_le` |
 | Prop 5.7, candidate form | no candidate of order `2^11` and rank `≥ 8` | `not_isCandidate_of_rank` |
+| Prop 2.1 (1) ⇔ (3) | `D₅ ⊆ γ₄` for all groups ⇔ `D₅(Q) = 1` for all finite 2-groups `Q` of class exactly 3; "metabelian" dropped (Remark 2.2, `metabelian_of_class_three`) | `dimensionQuestion5_iff_class_three` |
+| Lemma 5.2 (a)–(c) | a minimal finite 2-group of class 3 with `D₅ ≠ 1` is a candidate, `D₅ = ⟨n⟩` | `isCandidate_of_minimal` |
 
-### Conditional (hypotheses are explicit arguments, not axioms)
+The proofs of Prop 2.1 and Lemma 5.2 use `D₃ = γ₃` (Higman–Rees–Passi), Passi's `D₄² ⊆ γ₄`
+and Gruenberg's theorem on finite 2-quotients of finitely generated nilpotent groups; all three
+are proved in the development (`dThreeEqGammaThree`, `passiDFourSquare`,
+`gruenbergResidualTwo`).
 
-| Paper | Hypotheses | Lean |
+### Conditional (the hypothesis is an explicit argument, not an axiom)
+
+| Paper | Hypothesis | Lean |
 |---|---|---|
-| Prop 2.1 (1) ⇔ (3) | `D₃ = γ₃`, Passi's `D₄² ⊆ γ₄`, Gruenberg's theorem; "metabelian" dropped (Remark 2.2, `metabelian_of_class_three`) | `dimensionQuestion5_iff_class_three` |
-| Lemma 5.2 (a)–(c) | `D₃ = γ₃` | `isCandidate_of_minimal` |
-| Prop 5.7, `D₅` form | `D₃ = γ₃`; Prop 5.3 at order `2^10`, which the paper proves by computer | `D_five_eq_bot_of_rank` |
+| Prop 5.7, `D₅` form | Prop 5.3 at order `2^10` (`h1024`), which the paper proves by computer | `D_five_eq_bot_of_rank` |
 
 ### Caveats
 
@@ -55,11 +60,13 @@ Indexing: Mathlib's `(⊤ : Subgroup G).lowerCentralSeries k` is `γ_{k+1}(G)`.
 * Because the formalized inclusion is `G ∩ (1 + Δ_{𝔽₂}(G)^5) ⊆ jennings 2 G 5` (class ≤ 3), the
   non-existence results for candidates are at least as strong as the paper's. Lemma 5.2 (b),
   in contrast, gives `n ∈ M₅` only in the product sense.
-* `D₃ = γ₃` is a hypothesis of three compared statements above; it is now proved in the
-  development (`dThreeEqGammaThree`, `DThree.lean`), with versions of these theorems without it
-  (`DThreeCorollaries.lean`). The compared statements are unchanged.
-* The paper's computer results (Props 5.1, 5.3, 5.10, Thms 5.4, 6.14) and its paper-only results
-  (Lemmas 6.1, 6.2, Thm 6.12) are not submitted. Remark 2.2, Lemma 5.2 (d), Proposition 5.8,
-  Lemma 5.9, Lemma 6.3, Proposition 6.5, Lemma 6.9, Theorem 6.10 (for central extensions by a
-  subgroup of exponent `p`) and the inclusion part of Tahara's Theorem 6.1 are formalized in the
+* In the first version of this submission (2026-10-23), Prop 2.1, Lemma 5.2 and the `D₅` form
+  of Prop 5.7 took `D₃ = γ₃` (and Prop 2.1 also Passi's and Gruenberg's theorems) as explicit
+  hypotheses. These are now proved in the development, and the compared statements no longer
+  take them.
+* The paper's computer results (Props 5.1, 5.3, 5.10, Thms 5.4, 6.14) are not submitted.
+  Remark 2.2, Lemma 5.2 (d), Proposition 5.8, Lemma 5.9, Lemmas 6.1 and 6.2 (with Gupta–Tahara
+  as an explicit hypothesis), Lemma 6.3, Proposition 6.5, Lemma 6.9, Theorem 6.10 (for central
+  extensions by a subgroup of exponent `p`), Theorem 6.12 (for a given normal form), the Lie
+  algebra of Appendix A and the inclusion part of Tahara's Theorem 6.1 are formalized in the
   development but are not compared statements.
