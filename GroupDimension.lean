@@ -11,6 +11,7 @@ public import GroupDimension.CentralD8
 public import GroupDimension.CentralSqrt
 public import GroupDimension.CentralProduct
 public import GroupDimension.FiniteReduction
+public import GroupDimension.Gruenberg
 public import GroupDimension.ClassFour
 public import GroupDimension.ClassFourOrder
 public import GroupDimension.PCover
