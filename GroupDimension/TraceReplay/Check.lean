@@ -82,6 +82,9 @@ def degAux (d c : Nat) : Nat → Nat → Nat
   | 0, g => g
   | fuel + 1, g => bif Nat.blt c (off d (g + 1)) then g else degAux d c fuel (g + 1)
 
+/-- The degree of position `c` (fuel `c + 1` always suffices, as `off d g ≥ g` for `d ≥ 1`). -/
+def degOf (d c : Nat) : Nat := degAux d c (c + 1) 0
+
 /-- Add `a · e_k` to a vector sorted by position, dropping zeros. -/
 def ins (k a : Nat) : Vec → Vec
   | [] => bif a % D == 0 then [] else [(k, a % D)]
@@ -134,7 +137,7 @@ def genPowTerms (k j : Nat) (e : Int) (g a : Nat) : Nat → Nat → Nat → Vec 
 /-- `x · (1 + X_j)^e`, truncated below degree `k`. -/
 def mulGenPow (k j : Nat) (e : Int) (x : Vec) : Vec :=
   x.foldl (fun acc t =>
-    let g := degAux d t.1 k 0
+    let g := degOf d t.1
     genPowTerms d D k j e g t.2 k 1 (t.1 - off d g) acc) x
 
 /-- `μ(w)`, truncated below degree `k` (generators `1..d`). -/
@@ -144,13 +147,14 @@ def magnus (k : Nat) (w : List (Nat × Int)) : Vec :=
 /-- `μ(w) − 1`, truncated below degree `k`. -/
 def magnus1 (k : Nat) (w : List (Nat × Int)) : Vec := ins D 0 (D - 1) (magnus d D k w)
 
-/-- `X_j · v` and `v · X_j` for `v` of degree `< k − 1`. -/
-def lshift (j : Nat) (v : Vec) (k : Nat) : Vec :=
-  v.foldl (fun acc t => let g := degAux d t.1 k 0
+/-- `X_j · v` and `v · X_j` (no truncation: a level `k − 1` vector has degree `< k − 1`, and terms
+of degree `≥ k` would lie in the target anyway). -/
+def lshift (j : Nat) (v : Vec) : Vec :=
+  v.foldl (fun acc t => let g := degOf d t.1
     ins D (off d (g + 1) + j * d ^ g + (t.1 - off d g)) t.2 acc) []
 
-def rshift (j : Nat) (v : Vec) (k : Nat) : Vec :=
-  v.foldl (fun acc t => let g := degAux d t.1 k 0
+def rshift (j : Nat) (v : Vec) : Vec :=
+  v.foldl (fun acc t => let g := degOf d t.1
     ins D (off d (g + 1) + (t.1 - off d g) * d + j) t.2 acc) []
 
 end Magnus
@@ -164,8 +168,8 @@ def findWord (i : Nat) : List (Nat × List (Nat × Int)) → List (Nat × Int)
 def genVec (T : Trace) (k : Nat) (prev : List (Nat × Vec)) : Gen → Vec
   | .zero => []
   | .rel i => magnus1 T.d (T.p ^ T.E) k (findWord i T.rels)
-  | .lsh id j => bif Nat.blt j T.d then lshift T.d (T.p ^ T.E) j (find id prev) k else []
-  | .rsh id j => bif Nat.blt j T.d then rshift T.d (T.p ^ T.E) j (find id prev) k else []
+  | .lsh id j => bif Nat.blt j T.d then lshift T.d (T.p ^ T.E) j (find id prev) else []
+  | .rsh id j => bif Nat.blt j T.d then rshift T.d (T.p ^ T.E) j (find id prev) else []
 
 /-- One level: the vectors in order, each line seeing the earlier ones (newest first). -/
 def runLevel (T : Trace) (k : Nat) (prev : List (Nat × Vec)) :

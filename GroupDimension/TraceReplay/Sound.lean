@@ -28,6 +28,8 @@ Main results: every vector a trace defines at level `k` lies in `Lt k`; if `chec
 
 namespace GroupDimension.TraceReplay
 
+noncomputable section
+
 open MonoidAlgebra
 
 section Words
@@ -46,7 +48,7 @@ def wordOf : ℕ → ℕ → FreeMonoid (Fin d)
   | g + 1, idx => wordOf g (idx / d) * FreeMonoid.of (letter d idx)
 
 /-- The degree of position `c`. -/
-def deg (c : ℕ) : ℕ := degAux d c (c + 1) 0
+def deg (c : ℕ) : ℕ := degOf d c
 
 /-- The word at position `c`. -/
 def wordAt (c : ℕ) : FreeMonoid (Fin d) := wordOf d (deg d c) (c - off d (deg d c))
@@ -80,21 +82,21 @@ theorem off_mono (hd : 0 < d) {g h : ℕ} (hgh : g ≤ h) : off d g ≤ off d h 
 
 theorem off_lt_off (hd : 0 < d) {g h : ℕ} (hgh : g < h) : off d g < off d h := by
   induction hgh with
-  | refl => rw [off_succ]; have := Nat.pos_pow_of_pos g hd; omega
+  | refl => rw [off_succ]; have : 0 < d ^ g := Nat.pow_pos hd; omega
   | step _ ih => rw [off_succ]; omega
 
 theorem le_off (hd : 0 < d) (g : ℕ) : g ≤ off d g := by
   induction g with
   | zero => exact le_rfl
-  | succ g ih => rw [off_succ]; have := Nat.pos_pow_of_pos g hd; omega
+  | succ g ih => rw [off_succ]; have : 0 < d ^ g := Nat.pow_pos hd; omega
 
 /-- The degree is determined by `off g ≤ c < off (g + 1)`. -/
 theorem deg_unique (hd : 0 < d) {c g h : ℕ} (hg : off d g ≤ c ∧ c < off d (g + 1))
     (hh : off d h ≤ c ∧ c < off d (h + 1)) : g = h := by
   by_contra hne
   rcases Nat.lt_or_gt_of_ne hne with hlt | hlt
-  · have := off_mono hd (Nat.succ_le_of_lt hlt); omega
-  · have := off_mono hd (Nat.succ_le_of_lt hlt); omega
+  · have := off_mono hd (show g + 1 ≤ h by omega); omega
+  · have := off_mono hd (show h + 1 ≤ g by omega); omega
 
 /-- `degAux` finds the degree when there is enough fuel. -/
 theorem degAux_spec (hd : 0 < d) (c : ℕ) :
@@ -108,8 +110,9 @@ theorem degAux_spec (hd : 0 < d) (c : ℕ) :
     simp only [degAux]
     by_cases hc : c < off d (g + 1)
     · simp [Nat.blt_eq.mpr hc, h1, hc]
-    · have hb : Nat.blt c (off d (g + 1)) = false := by simpa [Nat.blt_eq] using hc
-      simp only [hb, cond_false]
+    · have hb : Nat.blt c (off d (g + 1)) = false :=
+        Bool.eq_false_iff.mpr fun h => hc (Nat.blt_eq.mp h)
+      simp only [hb, Bool.cond_false]
       exact ih (g + 1) (by omega) (by rw [show g + 1 + fuel = g + (fuel + 1) by omega]; exact h2)
 
 theorem deg_spec (hd : 0 < d) (c : ℕ) : off d (deg d c) ≤ c ∧ c < off d (deg d c + 1) :=
@@ -159,7 +162,7 @@ theorem wordOf_prepend (j : ℕ) (hj : j < d) :
     simp [wordOf]
   | succ g ih =>
     intro idx hidx
-    rw [wordOf_succ, wordOf_succ (g := g)]
+    rw [wordOf_succ (d := d) (g + 1) (j * d ^ (g + 1) + idx), wordOf_succ (d := d) g idx]
     have h1 : (j * d ^ (g + 1) + idx) / d = j * d ^ g + idx / d := by
       rw [pow_succ, ← Nat.mul_assoc, Nat.add_comm, Nat.add_mul_div_right _ _ hd, Nat.add_comm]
     have h2 : letter d (j * d ^ (g + 1) + idx) = letter d idx := by
@@ -201,9 +204,9 @@ theorem eval_ins (D k a : ℕ) (v : Vec) :
   | nil =>
     simp only [ins, eval_nil, zero_add]
     cases h : (a % D == 0)
-    · simp only [cond_false, eval_cons, eval_nil, add_zero]
+    · simp only [Bool.cond_false, eval_cons, eval_nil, add_zero]
       rw [← neg_sub, Submodule.neg_mem_iff]; exact natCast_smul_mod D a _
-    · simp only [cond_true, eval_nil, zero_sub, Submodule.neg_mem_iff]
+    · simp only [Bool.cond_true, eval_nil, zero_sub, Submodule.neg_mem_iff]
       have h0 : a % D = 0 := by simpa using h
       simpa [h0] using natCast_smul_mod D a (e d k)
   | cons t v ih =>
@@ -211,35 +214,35 @@ theorem eval_ins (D k a : ℕ) (v : Vec) :
     simp only [ins]
     cases hlt : Nat.blt k k'
     · cases heq : (k == k')
-      · simp only [cond_false, eval_cons]
+      · simp only [Bool.cond_false, eval_cons]
         have : ((b : ℕ) : ℤ) • e d k' + eval d (ins D k a v) - (((b : ℕ) : ℤ) • e d k' + eval d v + ((a : ℕ) : ℤ) • e d k) =
             eval d (ins D k a v) - (eval d v + ((a : ℕ) : ℤ) • e d k) := by abel
         rw [this]; exact ih
       · have hk : k = k' := by simpa using heq
         subst hk
-        simp only [cond_false, cond_true]
+        simp only [Bool.cond_false, Bool.cond_true]
         have hs := natCast_smul_mod D (a + b) (e d k)
         cases h : ((a + b) % D == 0)
-        · simp only [cond_false, eval_cons]
+        · simp only [Bool.cond_false, eval_cons]
           have : ((((a + b) % D : ℕ) : ℤ)) • e d k + eval d v - (((b : ℕ) : ℤ) • e d k + eval d v + ((a : ℕ) : ℤ) • e d k) =
               -(((a + b : ℕ) : ℤ) • e d k - (((a + b) % D : ℕ) : ℤ) • e d k) := by
             push_cast; rw [add_smul]; abel
           rw [this, Submodule.neg_mem_iff]; exact hs
         · have h0 : (a + b) % D = 0 := by simpa using h
-          simp only [cond_true, eval_cons]
+          simp only [Bool.cond_true, eval_cons]
           have : eval d v - (((b : ℕ) : ℤ) • e d k + eval d v + ((a : ℕ) : ℤ) • e d k) =
               -(((a + b : ℕ) : ℤ) • e d k - (((a + b) % D : ℕ) : ℤ) • e d k) := by
             rw [h0]; push_cast; rw [add_smul]; simp; abel
           rw [this, Submodule.neg_mem_iff]; exact hs
-    · simp only [cond_true]
+    · simp only [Bool.cond_true]
       cases h : (a % D == 0)
-      · simp only [cond_false, eval_cons]
+      · simp only [Bool.cond_false, eval_cons]
         have : ((a % D : ℕ) : ℤ) • e d k + (((b : ℕ) : ℤ) • e d k' + eval d v) -
             (((b : ℕ) : ℤ) • e d k' + eval d v + ((a : ℕ) : ℤ) • e d k) =
             -(((a : ℕ) : ℤ) • e d k - ((a % D : ℕ) : ℤ) • e d k) := by abel
         rw [this, Submodule.neg_mem_iff]; exact natCast_smul_mod D a _
       · have h0 : a % D = 0 := by simpa using h
-        simp only [cond_true, eval_cons]
+        simp only [Bool.cond_true, eval_cons]
         have : ((b : ℕ) : ℤ) • e d k' + eval d v - (((b : ℕ) : ℤ) • e d k' + eval d v + ((a : ℕ) : ℤ) • e d k) =
             -(((a : ℕ) : ℤ) • e d k - ((a % D : ℕ) : ℤ) • e d k) := by rw [h0]; simp
         rw [this, Submodule.neg_mem_iff]; exact natCast_smul_mod D a _
@@ -278,5 +281,7 @@ theorem red_smul (D : ℕ) (hD : 0 < D) (a : ℤ) (x : R d) :
   rw [this]; exact smul_mem_DR d D _
 
 end Modulo
+
+end
 
 end GroupDimension.TraceReplay
