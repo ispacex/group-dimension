@@ -14,7 +14,10 @@ A trace proves `x ∈ J_n` for the ideal `J_n ⊆ A_n^+` of the truncated Magnus
   combinations, the shifts follow Lemma N1);
 * a membership witness: `x ∈ L_n`;
 * exactness (X): `p^{E-1} e_c ∈ S + ℤ^F + p^E A_n^+` for every column `c`;
-* functionals `ν` (the products of polynomial maps) that vanish on `J_n` and are injective on `ℤ^F`.
+* functionals `ν` (the products of polynomial maps, checked to vanish on `J_{w+1}` for each map) whose
+  values on the monomials `X_f`, `f ∈ F`, have rank `|F|` modulo a prime, so that `a ↦ ν (Σ a_f X_f)` is
+  injective on `ℤ^F` (the hypothesis `hinj`). That `ν` is defined on `Q` (Passi, `ℤ[F]/Δⁿ ≅ A_n`) is not
+  formalized here.
 
 This file proves, in an abstract setting, that these checks imply `x ∈ J_n` whenever the image of
 `x` in `Q = A_n^+ / J_n` is killed by a power of `p` (`TraceCert.eq_zero_of_trace`). The rank of
@@ -145,7 +148,8 @@ theorem eq_zero_of_mem_pow (p : ℕ) (hp : p ≠ 0) (E : ℕ) (hE : 1 ≤ E) (Fb
 
 /-- `F̄ ∩ T = 0` from functionals: if `ν : Q → ℤ^κ` is additive and `a ↦ ν (Σ aᵢ vᵢ)` is injective,
 then the span of the `vᵢ` meets the torsion trivially (`ℤ^κ` is torsion-free). In the trace
-checker the `vᵢ` are the free columns and `ν` the products of polynomial maps. -/
+checker the `vᵢ` are the images in `Q` of the monomials `X_f`, `f ∈ F` (the free columns), and `ν` the
+products of polynomial maps. -/
 omit [Module.Finite ℤ Q] in
 theorem span_torsion_free {ι κ : Type*} [Fintype ι] (v : ι → Q) (ν : Q →+ (κ → ℤ))
     (hinj : Function.Injective fun a : ι → ℤ => ν (∑ i, a i • v i)) :
