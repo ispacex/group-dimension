@@ -1,11 +1,17 @@
 #!/usr/bin/env python3
 """Write a membership trace (cflint-fast-core cert/TRACE.md) as Lean data for TraceReplay.Check.
 
-    trace_to_lean.py PRESENTATION.json CLAIM TRACE MODULE_NAME > Data/NAME.lean
+    trace_to_lean.py PRESENTATION CLAIM TRACE MODULE_NAME > Data/NAME.lean
+
+PRESENTATION is a presentation JSON line, or a `.jsonl.gz` whose first line is used. The trace header,
+the claim and the presentation are cross-checked (sha256 of the presentation line, p, d, n, E, the
+claim's id and members) before anything is written.
 
 Only the relators the trace uses are written (a subset of the relators generates a smaller ideal,
 so membership in it is stronger). The presentation's word tests claimed in are written too.
 """
+import gzip
+import hashlib
 import json
 import sys
 
@@ -27,7 +33,10 @@ def terms(fs):
 
 def main():
     pres_path, claim_path, trace_path, name = sys.argv[1:5]
-    pres = json.loads(open(pres_path).readline())
+    opener = gzip.open if pres_path.endswith(".gz") else open
+    with opener(pres_path, "rt") as fh:
+        pres_line = fh.readline().rstrip("\n")
+    pres = json.loads(pres_line)
     claim = dict(l.split(" ", 1) for l in open(claim_path).read().splitlines() if " " in l)
     if "test_coeffs" in pres and pres["test_coeffs"]:
         sys.exit("test_coeffs are not supported")
@@ -46,9 +55,11 @@ def main():
             elif g[0] == "r":
                 gen = f".rel {int(g[1:])}"
                 used.add(int(g[1:]))
-            else:
+            elif g[0] in "LR":
                 a, b = g[1:].split(",")
                 gen = f".{'lsh' if g[0] == 'L' else 'rsh'} {int(a)} {int(b)}"
+            else:
+                sys.exit(f"unknown generator: {g}")
             levels[-1][1].append(f"⟨{f[1]}, {f[2]}, {gen}, {terms(f[4:])}⟩")
         elif f[0] == "F":
             F = [int(x) for x in f[2:]]
@@ -58,7 +69,24 @@ def main():
             ws.append(f"({f[1]}, {terms(f[2:])})")
         elif f[0] == "end":
             break
+        else:
+            sys.exit(f"unknown trace line: {f[0]}")
+    sha = hashlib.sha256(pres_line.encode()).hexdigest()
+    for src, val in (("trace", hdr.get("presentation-sha256")), ("claim", claim.get("presentation-sha256"))):
+        if val != sha:
+            sys.exit(f"{src} presentation-sha256 {val} != {sha}")
+    for key in ("p", "d", "n", "E"):
+        if hdr.get(key) != claim.get(key):
+            sys.exit(f"trace {key} {hdr.get(key)} != claim {claim.get(key)}")
+    if int(hdr["p"]) != pres["p"] or int(hdr["d"]) != pres["d"]:
+        sys.exit("p or d differs from the presentation")
+    if int(hdr["n"]) > pres["nmax"]:
+        sys.exit("n exceeds the presentation's nmax")
+    if F is None:
+        sys.exit("no F line")
     tests = pres.get("tests", [])
+    if not members or any(not 0 <= t < len(tests) or not tests[t][1] for t in members):
+        sys.exit("a member is not a non-empty test of the presentation")
     out = []
     w = out.append
     w("module\n\npublic import GroupDimension.TraceReplay.Sound\n\n@[expose] public section\n")
@@ -84,12 +112,20 @@ def main():
     w("/-- The replay, evaluated by the kernel (`decide +kernel`: no `native_decide`, no `ofReduceBool`). -/")
     w("theorem check_ok : check trace members = true := by decide +kernel\n")
     w("instance : NeZero trace.d := ⟨by decide⟩\n")
-    w("/-- The certified statement: every test claimed in has `μ(w_t) − 1 ∈ J_n + p^E A_n` and")
-    w("`p^{E−1} A_n^+ ⊆ J_n + p^E A_n` (both pulled back to `ℤ⟨X⟩`; `TraceReplay.Sound`). -/")
+    w("/-- The certified statement (`TraceReplay.Sound`): every test claimed in has `mt n w_t − 1 ∈ LT`,")
+    w("where `mt` is the Magnus map truncated below degree `n` (`mt = μ` modulo degree `≥ n` is not")
+    w("formalized here) and `LT` is `J_n + p^E A_n` for the relators listed in `rels`, pulled back to")
+    w("`ℤ⟨X⟩`; and `p^{E−1} X_w ∈ LT` for every word `w ≠ 1`. The statement is about the data in this")
+    w("file: `rels` and `tests` are transcribed from the presentation by `trace_to_lean.py`. -/")
     w("theorem certified :\n    (∀ t ∈ members, mt trace.d trace.n (findWord t trace.tests) - 1 ∈ LT trace trace.n) ∧")
     w("    (∀ w : FreeMonoid (Fin trace.d), w ≠ 1 →")
     w("      ((trace.p ^ (trace.E - 1) : ℕ) : ℤ) • MonoidAlgebra.single w 1 ∈ LT trace trace.n) :=")
     w("  check_sound trace members check_ok\n")
+    for t in members:
+        w(f"/-- Test {t} ({claim['id']}), its word written out. -/")
+        w(f"theorem certified_test{t} :")
+        w(f"    mt {hdr['d']} {hdr['n']} {word(tests[t][1])} - 1 ∈ LT trace {hdr['n']} :=")
+        w(f"  certified.1 {t} (by decide)\n")
     w(f"end GroupDimension.TraceReplay.{name}")
     print("\n".join(out))
 

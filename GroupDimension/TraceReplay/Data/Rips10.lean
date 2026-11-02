@@ -323,12 +323,20 @@ theorem check_ok : check trace members = true := by decide +kernel
 
 instance : NeZero trace.d := ⟨by decide⟩
 
-/-- The certified statement: every test claimed in has `μ(w_t) − 1 ∈ J_n + p^E A_n` and
-`p^{E−1} A_n^+ ⊆ J_n + p^E A_n` (both pulled back to `ℤ⟨X⟩`; `TraceReplay.Sound`). -/
+/-- The certified statement (`TraceReplay.Sound`): every test claimed in has `mt n w_t − 1 ∈ LT`,
+where `mt` is the Magnus map truncated below degree `n` (`mt = μ` modulo degree `≥ n` is not
+formalized here) and `LT` is `J_n + p^E A_n` for the relators listed in `rels`, pulled back to
+`ℤ⟨X⟩`; and `p^{E−1} X_w ∈ LT` for every word `w ≠ 1`. The statement is about the data in this
+file: `rels` and `tests` are transcribed from the presentation by `trace_to_lean.py`. -/
 theorem certified :
     (∀ t ∈ members, mt trace.d trace.n (findWord t trace.tests) - 1 ∈ LT trace trace.n) ∧
     (∀ w : FreeMonoid (Fin trace.d), w ≠ 1 →
       ((trace.p ^ (trace.E - 1) : ℕ) : ℤ) • MonoidAlgebra.single w 1 ∈ LT trace trace.n) :=
   check_sound trace members check_ok
+
+/-- Test 0 (rips_10_alpha), its word written out. -/
+theorem certified_test0 :
+    mt 4 4 [(2, -1), (4, -8), (2, 1), (4, 8), (2, -1), (4, -8), (2, -1), (4, 8), (2, 2)] - 1 ∈ LT trace 4 :=
+  certified.1 0 (by decide)
 
 end GroupDimension.TraceReplay.Rips10

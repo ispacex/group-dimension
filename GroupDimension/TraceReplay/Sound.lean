@@ -900,7 +900,7 @@ theorem check_sound (T : Trace) (members : List ℕ) [NeZero T.d] (h : check T m
     have hDL := DR_le_Lt (d := T.d) (rels := T.rels) (T.p ^ T.E) k
     constructor
     · intro t ht
-      obtain ⟨w, -, -, hw⟩ := hmem t ht
+      obtain ⟨-, w, -, -, hw⟩ := hmem t ht
       have h1 := combo_eq_nil_mem hDL hcur hw
       have hok : okWord T.d (findWord t T.tests) := by
         rcases findWord_cases t T.tests with h | ⟨y, hy, hyw⟩

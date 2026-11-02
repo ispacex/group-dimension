@@ -1543,3 +1543,4 @@ open GroupDimension
 #print axioms GroupDimension.TraceReplay.check_sound
 #print axioms GroupDimension.TraceReplay.Rips10.check_ok
 #print axioms GroupDimension.TraceReplay.Rips10.certified
+#print axioms GroupDimension.TraceReplay.Rips10.certified_test0

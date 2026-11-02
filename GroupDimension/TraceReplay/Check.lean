@@ -23,7 +23,8 @@ sits at `off g + Σ j_i d^{g−i}`, the first letter most significant, `off g = 
 
 **Vectors** are sparse: lists of `(position, coefficient)` with coefficients in `[0, D)`. Any id that
 is not found reads as the zero vector; this is sound (`0` lies in every `L_k`), so the replay needs
-no well-formedness checks of its own beyond the ones listed in `check`.
+no well-formedness checks of its own beyond the ones listed in `check`. The one exception is a test
+word: a missing one would be sound but vacuous, so `check` requires every member's word.
 -/
 
 namespace GroupDimension.TraceReplay
@@ -192,7 +193,9 @@ def runLevels (T : Trace) : List (Nat × List Line) → Nat → List (Nat × Vec
 * the levels are `2, …, n`;
 * every relator and test word uses generators `1..d` only, and `d ≥ 2`;
 * every `x` line: `p^{E−1} e_c + Σ c_i V_i ≡ 0`, and the `x` columns cover `1 .. T − 1`;
-* every test in `members` has a `w` line with `μ(w_t) − 1 + Σ c_i V_i ≡ 0`. -/
+* every test in `members` is present in `T.tests` with a non-empty word (a missing test would read
+  as the empty word, and its membership would say nothing), and has a `w` line with
+  `μ(w_t) − 1 + Σ c_i V_i ≡ 0`. -/
 def check (T : Trace) (members : List Nat) : Bool :=
   let D := T.p ^ T.E
   let okWord (w : List (Nat × Int)) := w.all fun f => Nat.blt 0 f.1 && Nat.ble f.1 T.d
@@ -204,7 +207,8 @@ def check (T : Trace) (members : List Nat) : Bool :=
     k == T.n &&
     T.xs.all (fun x => (combo D cur x.2 (ins D x.1 (T.p ^ (T.E - 1)) [])).isEmpty) &&
     (List.range (off T.d T.n)).all (fun c => c == 0 || T.xs.any (fun x => x.1 == c)) &&
-    members.all (fun t => T.ws.any (fun w => w.1 == t &&
-      (combo D cur w.2 (magnus1 T.d D T.n (findWord t T.tests))).isEmpty))
+    members.all (fun t => T.tests.any (fun y => y.1 == t && !y.2.isEmpty) &&
+      T.ws.any (fun w => w.1 == t &&
+        (combo D cur w.2 (magnus1 T.d D T.n (findWord t T.tests))).isEmpty))
 
 end GroupDimension.TraceReplay
