@@ -894,7 +894,7 @@ theorem check_sound (T : Trace) (members : List ℕ) [NeZero T.d] (h : check T m
     simp only [Bool.and_eq_true, List.all_eq_true, List.any_eq_true, beq_iff_eq, Bool.or_eq_true,
       List.isEmpty_iff, decide_eq_true_eq] at hm
     obtain ⟨⟨⟨hk, hxs⟩, hcov⟩, hmem⟩ := hm
-    rw [← hk]
+    rw [← hk] at hmem hcov ⊢
     have hrun := hr
     have hcur := runLevels_mem T hD hrels' T.levels 1 [] (by simp) k cur hrun
     have hDL := DR_le_Lt (d := T.d) (rels := T.rels) (T.p ^ T.E) k

@@ -1,6 +1,6 @@
 module
 
-public import GroupDimension.TraceReplay.Check
+public import GroupDimension.TraceReplay.Sound
 
 @[expose] public section
 
@@ -318,6 +318,17 @@ def trace : Trace where
   xs := xs
   ws := ws
 
+/-- The replay, evaluated by the kernel (`decide +kernel`: no `native_decide`, no `ofReduceBool`). -/
 theorem check_ok : check trace members = true := by decide +kernel
+
+instance : NeZero trace.d := ⟨by decide⟩
+
+/-- The certified statement: every test claimed in has `μ(w_t) − 1 ∈ J_n + p^E A_n` and
+`p^{E−1} A_n^+ ⊆ J_n + p^E A_n` (both pulled back to `ℤ⟨X⟩`; `TraceReplay.Sound`). -/
+theorem certified :
+    (∀ t ∈ members, mt trace.d trace.n (findWord t trace.tests) - 1 ∈ LT trace trace.n) ∧
+    (∀ w : FreeMonoid (Fin trace.d), w ≠ 1 →
+      ((trace.p ^ (trace.E - 1) : ℕ) : ℤ) • MonoidAlgebra.single w 1 ∈ LT trace trace.n) :=
+  check_sound trace members check_ok
 
 end GroupDimension.TraceReplay.Rips10
