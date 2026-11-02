@@ -47,11 +47,8 @@ def wordOf : ℕ → ℕ → FreeMonoid (Fin d)
   | 0, _ => 1
   | g + 1, idx => wordOf g (idx / d) * FreeMonoid.of (letter d idx)
 
-/-- The degree of position `c`. -/
-def deg (c : ℕ) : ℕ := degOf d c
-
 /-- The word at position `c`. -/
-def wordAt (c : ℕ) : FreeMonoid (Fin d) := wordOf d (deg d c) (c - off d (deg d c))
+def wordAt (c : ℕ) : FreeMonoid (Fin d) := wordOf d (degOf d c) (c - off d (degOf d c))
 
 /-- The monomial at position `c`. -/
 def e (c : ℕ) : R d := single (wordAt d c) 1
@@ -115,19 +112,19 @@ theorem degAux_spec (hd : 0 < d) (c : ℕ) :
       simp only [hb, Bool.cond_false]
       exact ih (g + 1) (by omega) (by rw [show g + 1 + fuel = g + (fuel + 1) by omega]; exact h2)
 
-theorem deg_spec (hd : 0 < d) (c : ℕ) : off d (deg d c) ≤ c ∧ c < off d (deg d c + 1) :=
+theorem deg_spec (hd : 0 < d) (c : ℕ) : off d (degOf d c) ≤ c ∧ c < off d (degOf d c + 1) :=
   degAux_spec hd c (c + 1) 0 (by simp [off]) (by
     simp only [Nat.zero_add]; have := le_off hd (c + 1)
     have := off_lt_off hd (Nat.lt_succ_self (c + 1)); omega)
 
 /-- `degAux` with fuel `k` computes `deg` below `off k`. -/
-theorem degAux_eq_deg (hd : 0 < d) {c k : ℕ} (hc : c < off d k) : degAux d c k 0 = deg d c :=
+theorem degAux_eq_deg (hd : 0 < d) {c k : ℕ} (hc : c < off d k) : degAux d c k 0 = degOf d c :=
   deg_unique hd (degAux_spec hd c k 0 (by simp [off]) (by simpa using hc)) (deg_spec hd c)
 
-theorem deg_eq (hd : 0 < d) {c g : ℕ} (h1 : off d g ≤ c) (h2 : c < off d (g + 1)) : deg d c = g :=
+theorem deg_eq (hd : 0 < d) {c g : ℕ} (h1 : off d g ≤ c) (h2 : c < off d (g + 1)) : degOf d c = g :=
   deg_unique hd (deg_spec hd c) ⟨h1, h2⟩
 
-theorem idx_lt (hd : 0 < d) (c : ℕ) : c - off d (deg d c) < d ^ deg d c := by
+theorem idx_lt (hd : 0 < d) (c : ℕ) : c - off d (degOf d c) < d ^ degOf d c := by
   have := deg_spec hd c; rw [off_succ] at this; omega
 
 end Positions
@@ -167,7 +164,7 @@ theorem wordOf_prepend (j : ℕ) (hj : j < d) :
       rw [pow_succ, ← Nat.mul_assoc, Nat.add_comm, Nat.add_mul_div_right _ _ hd, Nat.add_comm]
     have h2 : letter d (j * d ^ (g + 1) + idx) = letter d idx := by
       ext; simp [letter, pow_succ, ← Nat.mul_assoc, Nat.add_mod]
-    rw [h1, h2, ih _ (by rw [pow_succ] at hidx; exact Nat.div_lt_of_lt_mul hidx), mul_assoc]
+    rw [h1, h2, ih _ (by rw [pow_succ] at hidx; exact Nat.div_lt_of_lt_mul (by rw [pow_succ, Nat.mul_comm] at hidx; exact hidx)), mul_assoc]
 
 /-- The length of `wordOf g idx` is `g`. -/
 theorem length_wordOf (g idx : ℕ) : (wordOf d g idx).length = g := by
@@ -192,9 +189,10 @@ variable {d}
 
 theorem natCast_smul_mod (D a : ℕ) (x : R d) :
     ((a : ℕ) : ℤ) • x - ((a % D : ℕ) : ℤ) • x ∈ DR d D := by
+  have h : ((a : ℕ) : ℤ) = ((a % D : ℕ) : ℤ) + ((D : ℕ) : ℤ) * ((a / D : ℕ) : ℤ) := by
+    exact_mod_cast (Nat.mod_add_div a D).symm
   have : ((a : ℕ) : ℤ) • x - ((a % D : ℕ) : ℤ) • x = ((D : ℕ) : ℤ) • (((a / D : ℕ) : ℤ) • x) := by
-    rw [smul_smul, ← sub_smul]; congr 1
-    have := Nat.mod_add_div a D; push_cast; omega
+    rw [smul_smul, ← sub_smul]; congr 1; linarith
   rw [this]; exact smul_mem_DR d D _
 
 /-- `ins` adds `a · e_k`, modulo `D`. -/
@@ -277,8 +275,421 @@ theorem red_smul (D : ℕ) (hD : 0 < D) (a : ℤ) (x : R d) :
     simp only [red]; exact Int.toNat_of_nonneg (Int.emod_nonneg _ (by omega))
   have : ((red D a : ℕ) : ℤ) • x - a • x = ((D : ℕ) : ℤ) • ((-(a / (D : ℤ))) • x) := by
     rw [smul_smul, ← sub_smul, h1]; congr 1
-    have := Int.emod_add_ediv a D; linarith
+    have := Int.ediv_add_emod a (D : ℤ); linarith
   rw [this]; exact smul_mem_DR d D _
+
+
+theorem mem_DR {D : ℕ} {x : R d} : x ∈ DR d D ↔ ∃ y, ((D : ℕ) : ℤ) • y = x := by
+  simp [DR]
+
+/-! ## Monomials at positions, shifts -/
+
+/-- `X_j`. -/
+def X (j : ℕ) : R d := single (FreeMonoid.of (letter d j)) 1
+
+theorem e_of_pos {g idx : ℕ} (hidx : idx < d ^ g) :
+    e d (off d g + idx) = single (wordOf d g idx) 1 := by
+  have hd := NeZero.pos d
+  have hdeg : degOf d (off d g + idx) = g := deg_eq hd (by omega) (by rw [off_succ]; omega)
+  simp only [e, wordAt, hdeg, Nat.add_sub_cancel_left]
+
+theorem e_lshift (c : ℕ) {j : ℕ} (hj : j < d) :
+    e d (off d (degOf d c + 1) + j * d ^ degOf d c + (c - off d (degOf d c))) = X j * e d c := by
+  have hd := NeZero.pos d
+  have hidx := idx_lt hd c
+  have hlt : j * d ^ degOf d c + (c - off d (degOf d c)) < d ^ (degOf d c + 1) := by
+    calc j * d ^ degOf d c + (c - off d (degOf d c)) < j * d ^ degOf d c + d ^ degOf d c :=
+          Nat.add_lt_add_left hidx _
+      _ = (j + 1) * d ^ degOf d c := by ring
+      _ ≤ d * d ^ degOf d c := Nat.mul_le_mul_right _ hj
+      _ = d ^ (degOf d c + 1) := by ring
+  rw [Nat.add_assoc, e_of_pos hlt, wordOf_prepend j hj _ _ hidx]
+  simp [X, e, wordAt, single_mul_single]
+
+theorem e_rshift (c : ℕ) {j : ℕ} (hj : j < d) :
+    e d (off d (degOf d c + 1) + (c - off d (degOf d c)) * d + j) = e d c * X j := by
+  have hd := NeZero.pos d
+  have hidx := idx_lt hd c
+  have hlt : (c - off d (degOf d c)) * d + j < d ^ (degOf d c + 1) := by
+    calc (c - off d (degOf d c)) * d + j < (c - off d (degOf d c)) * d + d := Nat.add_lt_add_left hj _
+      _ = (c - off d (degOf d c) + 1) * d := by ring
+      _ ≤ d ^ degOf d c * d := Nat.mul_le_mul_right _ hidx
+      _ = d ^ (degOf d c + 1) := (pow_succ _ _).symm
+  rw [Nat.add_assoc, e_of_pos hlt, wordOf_append _ _ _ hj]
+  simp [X, e, wordAt, single_mul_single]
+
+/-- A fold of `ins` over a vector, with positions moved by `f`, computes `φ (eval v)`. -/
+theorem eval_foldl_ins (D : ℕ) (f : ℕ × ℕ → ℕ) (φ : R d →+ R d) (v : Vec)
+    (hf : ∀ t ∈ v, e d (f t) = φ (e d t.1)) (acc : Vec) :
+    eval d (v.foldl (fun acc t => ins D (f t) t.2 acc) acc) - (eval d acc + φ (eval d v)) ∈ DR d D := by
+  induction v generalizing acc with
+  | nil => simp
+  | cons t v ih =>
+    obtain ⟨c, a⟩ := t
+    have h1 := ih (fun t ht => hf t (List.mem_cons_of_mem _ ht)) (ins D (f (c, a)) a acc)
+    have h2 := eval_ins (d := d) D (f (c, a)) a acc
+    rw [hf (c, a) List.mem_cons_self] at h2
+    simp only [List.foldl_cons]
+    have : eval d (List.foldl (fun acc t => ins D (f t) t.2 acc) (ins D (f (c, a)) a acc) v) -
+          (eval d acc + φ (eval d ((c, a) :: v))) =
+        (eval d (List.foldl (fun acc t => ins D (f t) t.2 acc) (ins D (f (c, a)) a acc) v) -
+          (eval d (ins D (f (c, a)) a acc) + φ (eval d v))) +
+        (eval d (ins D (f (c, a)) a acc) - (eval d acc + ((a : ℕ) : ℤ) • φ (e d c))) := by
+      rw [eval_cons, map_add, map_zsmul]; abel
+    rw [this]; exact add_mem h1 h2
+
+theorem eval_lshift (D : ℕ) {j : ℕ} (hj : j < d) (v : Vec) :
+    eval d (lshift d D j v) - X j * eval d v ∈ DR d D := by
+  have h := eval_foldl_ins (d := d) D
+    (fun t => off d (degOf d t.1 + 1) + j * d ^ degOf d t.1 + (t.1 - off d (degOf d t.1)))
+    (AddMonoidHom.mulLeft (X j)) v (fun t _ => e_lshift t.1 hj) []
+  simp only [eval_nil, zero_add, AddMonoidHom.coe_mulLeft] at h
+  exact h
+
+theorem eval_rshift (D : ℕ) {j : ℕ} (hj : j < d) (v : Vec) :
+    eval d (rshift d D j v) - eval d v * X j ∈ DR d D := by
+  have h := eval_foldl_ins (d := d) D
+    (fun t => off d (degOf d t.1 + 1) + (t.1 - off d (degOf d t.1)) * d + j)
+    (AddMonoidHom.mulRight (X j)) v (fun t _ => e_rshift t.1 hj) []
+  simp only [eval_nil, zero_add, AddMonoidHom.coe_mulRight] at h
+  exact h
+
+/-! ## The degree ideal `I_k` -/
+
+variable (d) in
+/-- The monomials of length `≥ k`. -/
+def Ik (k : ℕ) : Submodule ℤ (R d) :=
+  Submodule.span ℤ {x | ∃ w : FreeMonoid (Fin d), k ≤ w.length ∧ x = single w 1}
+
+theorem single_mem_Ik {k : ℕ} {w : FreeMonoid (Fin d)} (hw : k ≤ w.length) (a : ℤ) :
+    single w a ∈ Ik d k := by
+  have : single w a = a • single w (1 : ℤ) := by rw [smul_single', mul_one]
+  rw [this]; exact Submodule.smul_mem _ a (Submodule.subset_span ⟨w, hw, rfl⟩)
+
+theorem Ik_mono {k k' : ℕ} (h : k ≤ k') : Ik d k' ≤ Ik d k :=
+  Submodule.span_mono fun _ ⟨w, hw, hx⟩ => ⟨w, by omega, hx⟩
+
+/-- `u · I_k · v ⊆ I_{k + |u| + |v|}`. -/
+theorem single_mul_mem_Ik {k : ℕ} {x : R d} (hx : x ∈ Ik d k) (u v : FreeMonoid (Fin d)) :
+    single u 1 * x * single v 1 ∈ Ik d (k + u.length + v.length) := by
+  induction hx using Submodule.span_induction with
+  | mem x hx =>
+    obtain ⟨w, hw, rfl⟩ := hx
+    rw [single_mul_single, single_mul_single]
+    exact single_mem_Ik (by simp only [FreeMonoid.length_mul]; omega) _
+  | zero => simp
+  | add x y _ _ hx hy => rw [mul_add, add_mul]; exact add_mem hx hy
+  | smul a x _ hx => rw [mul_smul_comm, smul_mul_assoc]; exact Submodule.smul_mem _ a hx
+
+theorem single_eq_smul (m : FreeMonoid (Fin d)) (r : ℤ) : (single m r : R d) = r • single m 1 := by
+  rw [smul_single', mul_one]
+
+theorem mul_mem_Ik {k : ℕ} {x : R d} (hx : x ∈ Ik d k) (y : R d) : x * y ∈ Ik d k := by
+  induction y using MonoidAlgebra.induction_linear with
+  | zero => simp
+  | add f g hf hg => rw [mul_add]; exact add_mem hf hg
+  | single m r =>
+    rw [single_eq_smul, mul_smul_comm]
+    refine Submodule.smul_mem _ r ?_
+    have h := single_mul_mem_Ik hx 1 m
+    rw [← one_def, one_mul] at h
+    exact Ik_mono (by omega) h
+
+theorem mem_Ik_mul {k : ℕ} {x : R d} (hx : x ∈ Ik d k) (y : R d) : y * x ∈ Ik d k := by
+  induction y using MonoidAlgebra.induction_linear with
+  | zero => simp
+  | add f g hf hg => rw [add_mul]; exact add_mem hf hg
+  | single m r =>
+    rw [single_eq_smul, smul_mul_assoc]
+    refine Submodule.smul_mem _ r ?_
+    have h := single_mul_mem_Ik hx m 1
+    rw [← one_def, mul_one] at h
+    exact Ik_mono (by omega) h
+
+theorem sup_mul_mem {D k : ℕ} {x : R d} (hx : x ∈ DR d D ⊔ Ik d k) (y : R d) :
+    x * y ∈ DR d D ⊔ Ik d k := by
+  obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.mp hx
+  rw [add_mul]
+  refine Submodule.add_mem_sup ?_ (mul_mem_Ik hb y)
+  obtain ⟨z, rfl⟩ := mem_DR.mp ha
+  rw [smul_mul_assoc]; exact smul_mem_DR d D _
+
+/-! ## Magnus terms -/
+
+/-- `Σ_{m<k} C(e, m) X_j^m`. -/
+def S (k j : ℕ) (ex : ℤ) : R d :=
+  ∑ m ∈ Finset.range k, binom ex m • single (FreeMonoid.of (letter d j) ^ m) 1
+
+variable (d) in
+/-- The Magnus image of a flat word, every factor `(1 + X_j)^e` cut below degree `k`. -/
+def mt (k : ℕ) (w : List (ℕ × ℤ)) : R d := (w.map fun f => S k (f.1 - 1) f.2).prod
+
+theorem binom_zero (ex : ℤ) : binom ex 0 = 1 := by simp [binom, descProd, fact]
+
+theorem length_pow_of (l : Fin d) (m : ℕ) : (FreeMonoid.of l ^ m).length = m := by
+  induction m with
+  | zero => simp
+  | succ m ih => rw [pow_succ, FreeMonoid.length_mul, ih, FreeMonoid.length_of]
+
+/-- The terms `genPowTerms` adds, from step `m` on. -/
+theorem eval_genPowTerms (D k j : ℕ) (hj : j < d) (hD : 0 < D) (ex : ℤ) (c a : ℕ) :
+    ∀ fuel m idx acc, 1 ≤ m → idx < d ^ (degOf d c + m - 1) →
+      wordOf d (degOf d c + m - 1) idx = wordAt d c * FreeMonoid.of (letter d j) ^ (m - 1) →
+      k ≤ degOf d c + m + fuel →
+      eval d (genPowTerms d D k j ex (degOf d c) a fuel m idx acc) -
+        (eval d acc + ((a : ℕ) : ℤ) • ∑ m' ∈ Finset.Ico m k,
+          binom ex m' • single (wordAt d c * FreeMonoid.of (letter d j) ^ m') 1) ∈ DR d D ⊔ Ik d k := by
+  have hd := NeZero.pos d
+  set g := degOf d c with hg
+  have hlen : (wordAt d c).length = g := length_wordOf _ _
+  -- the terms of degree `≥ k`
+  have high : ∀ m, k ≤ g + m → ((a : ℕ) : ℤ) • ∑ m' ∈ Finset.Ico m k,
+      binom ex m' • single (wordAt d c * FreeMonoid.of (letter d j) ^ m') (1 : ℤ) ∈ Ik d k := by
+    intro m hm
+    refine Submodule.smul_mem _ _ (Submodule.sum_mem _ fun m' hm' => Submodule.smul_mem _ _ ?_)
+    rw [Finset.mem_Ico] at hm'
+    exact single_mem_Ik (by rw [FreeMonoid.length_mul, hlen, length_pow_of]; omega) _
+  intro fuel
+  induction fuel with
+  | zero =>
+    intro m idx acc _ _ _ hk
+    simp only [genPowTerms, sub_add_cancel_left, Submodule.neg_mem_iff]
+    exact Submodule.mem_sup_right (high m (by omega))
+  | succ fuel ih =>
+    intro m idx acc hm hidx hw hk
+    simp only [genPowTerms]
+    by_cases hgm : g + m < k
+    · have hb : Nat.blt (g + m) k = true := Nat.blt_eq.mpr hgm
+      simp only [hb, Bool.cond_true]
+      have hgm1 : g + m - 1 + 1 = g + m := by omega
+      have hidx' : idx * d + j < d ^ (g + (m + 1) - 1) := by
+        rw [show g + (m + 1) - 1 = g + m - 1 + 1 by omega]
+        calc idx * d + j < idx * d + d := Nat.add_lt_add_left hj _
+          _ = (idx + 1) * d := by ring
+          _ ≤ d ^ (g + m - 1) * d := Nat.mul_le_mul_right _ hidx
+          _ = d ^ (g + m - 1 + 1) := (pow_succ _ _).symm
+      have hw' : wordOf d (g + (m + 1) - 1) (idx * d + j) =
+          wordAt d c * FreeMonoid.of (letter d j) ^ (m + 1 - 1) := by
+        rw [show g + (m + 1) - 1 = g + m - 1 + 1 by omega, wordOf_append _ _ _ hj, hw, mul_assoc,
+          ← pow_succ, show m - 1 + 1 = m + 1 - 1 by omega]
+      have h1 := ih (m + 1) (idx * d + j)
+        (ins D (off d (g + m) + (idx * d + j)) (a * red D (binom ex m)) acc) (by omega) hidx' hw'
+        (by omega)
+      have hpos : e d (off d (g + m) + (idx * d + j)) =
+          single (wordAt d c * FreeMonoid.of (letter d j) ^ m) 1 := by
+        have hlt : idx * d + j < d ^ (g + m) := by
+          have := hidx'; rwa [show g + (m + 1) - 1 = g + m by omega] at this
+        rw [e_of_pos hlt, ← hgm1, wordOf_append _ _ _ hj, hw, mul_assoc, ← pow_succ,
+          show m - 1 + 1 = m by omega]
+      have h2 := eval_ins (d := d) D (off d (g + m) + (idx * d + j)) (a * red D (binom ex m)) acc
+      rw [hpos] at h2
+      have h3 := red_smul (d := d) D hD (binom ex m)
+        (((a : ℕ) : ℤ) • single (wordAt d c * FreeMonoid.of (letter d j) ^ m) 1)
+      rw [Finset.sum_eq_sum_Ico_succ_bot (by omega : m < k)]
+      have : eval d (genPowTerms d D k j ex g a fuel (m + 1) (idx * d + j)
+            (ins D (off d (g + m) + (idx * d + j)) (a * red D (binom ex m)) acc)) -
+          (eval d acc + ((a : ℕ) : ℤ) • (binom ex m • single (wordAt d c * FreeMonoid.of (letter d j) ^ m) 1 +
+            ∑ m' ∈ Finset.Ico (m + 1) k,
+              binom ex m' • single (wordAt d c * FreeMonoid.of (letter d j) ^ m') 1)) =
+          (eval d (genPowTerms d D k j ex g a fuel (m + 1) (idx * d + j)
+            (ins D (off d (g + m) + (idx * d + j)) (a * red D (binom ex m)) acc)) -
+            (eval d (ins D (off d (g + m) + (idx * d + j)) (a * red D (binom ex m)) acc) +
+              ((a : ℕ) : ℤ) • ∑ m' ∈ Finset.Ico (m + 1) k,
+                binom ex m' • single (wordAt d c * FreeMonoid.of (letter d j) ^ m') 1)) +
+          (eval d (ins D (off d (g + m) + (idx * d + j)) (a * red D (binom ex m)) acc) -
+            (eval d acc + ((a * red D (binom ex m) : ℕ) : ℤ) •
+              single (wordAt d c * FreeMonoid.of (letter d j) ^ m) 1)) +
+          (((red D (binom ex m) : ℕ) : ℤ) • (((a : ℕ) : ℤ) •
+              single (wordAt d c * FreeMonoid.of (letter d j) ^ m) 1) -
+            binom ex m • (((a : ℕ) : ℤ) • single (wordAt d c * FreeMonoid.of (letter d j) ^ m) 1)) := by
+        push_cast
+        simp only [smul_add, smul_smul]
+        rw [mul_comm (binom ex m), mul_comm ((red D (binom ex m) : ℕ) : ℤ)]
+        abel
+      rw [this]
+      exact add_mem (add_mem h1 (Submodule.mem_sup_left h2)) (Submodule.mem_sup_left h3)
+    · have hb : Nat.blt (g + m) k = false := Bool.eq_false_iff.mpr fun h => hgm (Nat.blt_eq.mp h)
+      simp only [hb, Bool.cond_false, sub_add_cancel_left, Submodule.neg_mem_iff]
+      exact Submodule.mem_sup_right (high m (by omega))
+
+theorem e_mul_S (c k j : ℕ) (hk : 0 < k) (ex : ℤ) :
+    e d c * S k j ex = e d c + ∑ m' ∈ Finset.Ico 1 k,
+      binom ex m' • single (wordAt d c * FreeMonoid.of (letter d j) ^ m') 1 := by
+  rw [S, Finset.mul_sum, Finset.sum_range_eq_add_Ico _ hk]
+  simp only [mul_smul_comm, e, single_mul_single, mul_one, pow_zero, binom_zero, one_smul]
+
+/-- `mulGenPow` multiplies by `S k j e`, modulo `D` and degree `k`. -/
+theorem eval_mulGenPow (D k j : ℕ) (hj : j < d) (hD : 0 < D) (hk : 0 < k) (ex : ℤ) (x : Vec) :
+    eval d (mulGenPow d D k j ex x) - eval d x * S k j ex ∈ DR d D ⊔ Ik d k := by
+  have hd := NeZero.pos d
+  suffices h : ∀ v acc, eval d (v.foldl (fun acc t => let g := degOf d t.1
+      genPowTerms d D k j ex g t.2 k 1 (t.1 - off d g) acc) acc) -
+      (eval d acc + (eval d v * S k j ex - eval d v)) ∈ DR d D ⊔ Ik d k by
+    have := h x x; rw [add_sub_cancel] at this; exact this
+  intro v
+  induction v with
+  | nil => intro acc; simp
+  | cons t v ih =>
+    intro acc
+    obtain ⟨c, a⟩ := t
+    simp only [List.foldl_cons]
+    have h1 := ih (genPowTerms d D k j ex (degOf d c) a k 1 (c - off d (degOf d c)) acc)
+    have h2 := eval_genPowTerms (d := d) D k j hj hD ex c a k 1 (c - off d (degOf d c)) acc le_rfl
+      (by simpa using idx_lt hd c) (by simp [wordAt]) (by omega)
+    rw [← sub_eq_iff_eq_add'.mpr (e_mul_S c k j hk ex).symm] at h2
+    have : eval d (List.foldl (fun acc t => let g := degOf d t.1
+          genPowTerms d D k j ex g t.2 k 1 (t.1 - off d g) acc)
+          (genPowTerms d D k j ex (degOf d c) a k 1 (c - off d (degOf d c)) acc) v) -
+        (eval d acc + (eval d ((c, a) :: v) * S k j ex - eval d ((c, a) :: v))) =
+        (eval d (List.foldl (fun acc t => let g := degOf d t.1
+          genPowTerms d D k j ex g t.2 k 1 (t.1 - off d g) acc)
+          (genPowTerms d D k j ex (degOf d c) a k 1 (c - off d (degOf d c)) acc) v) -
+          (eval d (genPowTerms d D k j ex (degOf d c) a k 1 (c - off d (degOf d c)) acc) +
+            (eval d v * S k j ex - eval d v))) +
+        (eval d (genPowTerms d D k j ex (degOf d c) a k 1 (c - off d (degOf d c)) acc) -
+          (eval d acc + ((a : ℕ) : ℤ) • (e d c * S k j ex - e d c))) := by
+      rw [eval_cons, add_mul, smul_mul_assoc]; simp only [smul_sub]; abel
+    rw [this]; exact add_mem h1 h2
+
+/-- A word with letters `1..d`. -/
+def okWord (d : ℕ) (w : List (ℕ × ℤ)) : Prop := ∀ f ∈ w, 0 < f.1 ∧ f.1 ≤ d
+
+theorem eval_unit : eval d [(0, 1)] = 1 := by
+  have h0 : wordAt d 0 = 1 := by
+    have : degOf d 0 = 0 := by
+      simp [degOf, degAux, off]
+    simp [wordAt, this, wordOf]
+  simp [eval, e, h0, one_def]
+
+theorem eval_magnus (D k : ℕ) (hD : 0 < D) (hk : 0 < k) (w : List (ℕ × ℤ)) (hw : okWord d w) :
+    eval d (magnus d D k w) - mt d k w ∈ DR d D ⊔ Ik d k := by
+  suffices h : ∀ w : List (ℕ × ℤ), okWord d w → ∀ x : Vec,
+      eval d (w.foldl (fun x f => mulGenPow d D k (f.1 - 1) f.2 x) x) - eval d x * mt d k w ∈
+        DR d D ⊔ Ik d k by
+    have := h w hw [(0, 1)]; rwa [eval_unit, one_mul] at this
+  intro w
+  induction w with
+  | nil => intro _ x; simp [mt]
+  | cons f w ih =>
+    intro hw x
+    have hf := hw f List.mem_cons_self
+    have h1 := ih (fun f' hf' => hw f' (List.mem_cons_of_mem _ hf')) (mulGenPow d D k (f.1 - 1) f.2 x)
+    have h2 := sup_mul_mem (eval_mulGenPow (d := d) D k (f.1 - 1) (by omega) hD hk f.2 x) (mt d k w)
+    simp only [List.foldl_cons]
+    have : eval d (List.foldl (fun x f => mulGenPow d D k (f.1 - 1) f.2 x) (mulGenPow d D k (f.1 - 1) f.2 x) w) -
+        eval d x * mt d k (f :: w) =
+        (eval d (List.foldl (fun x f => mulGenPow d D k (f.1 - 1) f.2 x) (mulGenPow d D k (f.1 - 1) f.2 x) w) -
+          eval d (mulGenPow d D k (f.1 - 1) f.2 x) * mt d k w) +
+        (eval d (mulGenPow d D k (f.1 - 1) f.2 x) - eval d x * S k (f.1 - 1) f.2) * mt d k w := by
+      simp only [mt, List.map_cons, List.prod_cons]; noncomm_ring
+    rw [this]; exact add_mem h1 h2
+
+theorem eval_magnus1 (D k : ℕ) (hD : 0 < D) (hk : 0 < k) (w : List (ℕ × ℤ)) (hw : okWord d w) :
+    eval d (magnus1 d D k w) - (mt d k w - 1) ∈ DR d D ⊔ Ik d k := by
+  have h1 := eval_magnus (d := d) D k hD hk w hw
+  have h2 := eval_ins (d := d) D 0 (D - 1) (magnus d D k w)
+  have he0 : e d 0 = 1 := by have := eval_unit (d := d); simpa [eval] using this
+  rw [he0] at h2
+  have : eval d (magnus1 d D k w) - (mt d k w - 1) =
+      (eval d (ins D 0 (D - 1) (magnus d D k w)) - (eval d (magnus d D k w) + ((D - 1 : ℕ) : ℤ) • 1)) +
+      (eval d (magnus d D k w) - mt d k w) + ((D : ℕ) : ℤ) • 1 := by
+    rw [magnus1, Nat.cast_sub (by omega : 1 ≤ D)]; simp only [sub_smul, one_smul, Nat.cast_one]; abel
+  rw [this]
+  exact add_mem (add_mem (Submodule.mem_sup_left h2) h1) (Submodule.mem_sup_left (smul_mem_DR d D _))
+
+/-! ## The targets `Lt k` -/
+
+variable (d) in
+/-- The relator part: `X_u (mt k r − 1) X_v`. -/
+def Jt (rels : List (ℕ × List (ℕ × ℤ))) (k : ℕ) : Submodule ℤ (R d) :=
+  Submodule.span ℤ {x | ∃ r ∈ rels, ∃ u v : FreeMonoid (Fin d), x = single u 1 * (mt d k r.2 - 1) * single v 1}
+
+variable (d) in
+/-- `J_k + D·A_k`, pulled back to `R`. -/
+def Lt (rels : List (ℕ × List (ℕ × ℤ))) (D k : ℕ) : Submodule ℤ (R d) := Jt d rels k ⊔ Ik d k ⊔ DR d D
+
+variable {rels : List (ℕ × List (ℕ × ℤ))}
+
+theorem DR_le_Lt (D k : ℕ) : DR d D ≤ Lt d rels D k := le_sup_right
+theorem Ik_le_Lt (D k : ℕ) : Ik d k ≤ Lt d rels D k := le_sup_left.trans le_sup_left
+theorem Jt_le_Lt (D k : ℕ) : Jt d rels k ≤ Lt d rels D k := le_sup_left.trans le_sup_left
+theorem M_le_Lt (D k : ℕ) : DR d D ⊔ Ik d k ≤ Lt d rels D k := sup_le (DR_le_Lt D k) (Ik_le_Lt D k)
+
+theorem prod_sub_mem_Ik {k : ℕ} : ∀ (as bs : List (R d)), as.length = bs.length →
+    (∀ i (hi : i < as.length) (hi' : i < bs.length), as[i] - bs[i] ∈ Ik d k) → as.prod - bs.prod ∈ Ik d k
+  | [], [], _, _ => by simp
+  | a :: as, b :: bs, hl, h => by
+    have hab := h 0 (by simp) (by simp)
+    have ih := prod_sub_mem_Ik as bs (by simpa using hl) fun i hi hi' => h (i + 1) (by simpa using hi) (by simpa using hi')
+    simp only [List.getElem_cons_zero] at hab
+    rw [List.prod_cons, List.prod_cons, show a * as.prod - b * bs.prod = (a - b) * as.prod + b * (as.prod - bs.prod) by
+      noncomm_ring]
+    exact add_mem (mul_mem_Ik hab _) (mem_Ik_mul ih _)
+  | [], _ :: _, hl, _ => by simp at hl
+  | _ :: _, [], hl, _ => by simp at hl
+
+theorem S_sub_mem (k j : ℕ) (ex : ℤ) : (S k j ex : R d) - S (k + 1) j ex ∈ Ik d k := by
+  rw [S, S, Finset.sum_range_succ, sub_add_cancel_left, Submodule.neg_mem_iff, ← single_eq_smul]
+  sorry
+
+theorem mt_sub_mem (k : ℕ) (w : List (ℕ × ℤ)) : mt d k w - mt d (k + 1) w ∈ Ik d k := by
+  apply prod_sub_mem_Ik
+  · simp
+  · intro i hi hi'; simp only [List.getElem_map]; exact S_sub_mem k _ _
+
+/-- `X_j · L_k ⊆ L_{k+1}` (Lemma N1, easy direction). -/
+theorem X_mul_mem {D k j : ℕ} {x : R d} (hx : x ∈ Lt d rels D k) : X j * x ∈ Lt d rels D (k + 1) := by
+  obtain ⟨ab, hab, c, hc, rfl⟩ := Submodule.mem_sup.mp hx
+  obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.mp hab
+  rw [mul_add, mul_add]
+  refine add_mem (add_mem ?_ ?_) ?_
+  · induction ha using Submodule.span_induction with
+    | mem y hy =>
+      obtain ⟨r, hr, u, v, rfl⟩ := hy
+      have hsplit : X j * (single u 1 * (mt d k r.2 - 1) * single v 1) =
+          single (FreeMonoid.of (letter d j) * u) 1 * (mt d (k + 1) r.2 - 1) * single v 1 +
+          single (FreeMonoid.of (letter d j) * u) 1 * (mt d k r.2 - mt d (k + 1) r.2) * single v 1 := by
+        rw [X, ← mul_assoc, ← mul_assoc, single_mul_single, one_mul]; noncomm_ring
+      rw [hsplit]
+      refine add_mem (Jt_le_Lt D (k + 1) (Submodule.subset_span ⟨r, hr, _, v, rfl⟩)) (Ik_le_Lt D (k + 1) ?_)
+      have := single_mul_mem_Ik (mt_sub_mem (d := d) k r.2) (FreeMonoid.of (letter d j) * u) v
+      exact Ik_mono (by simp only [FreeMonoid.length_mul, FreeMonoid.length_of]; omega) this
+    | zero => simp
+    | add y z _ _ hy hz => rw [mul_add]; exact add_mem hy hz
+    | smul n y _ hy => rw [mul_smul_comm]; exact Submodule.smul_mem _ n hy
+  · refine Ik_le_Lt D (k + 1) ?_
+    have := single_mul_mem_Ik hb (FreeMonoid.of (letter d j)) 1
+    rw [← one_def, mul_one] at this
+    exact Ik_mono (by simp only [FreeMonoid.length_of, FreeMonoid.length_one]; omega) this
+  · obtain ⟨z, rfl⟩ := mem_DR.mp hc
+    rw [mul_smul_comm]; exact DR_le_Lt D (k + 1) (smul_mem_DR d D _)
+
+/-- `L_k · X_j ⊆ L_{k+1}`. -/
+theorem mul_X_mem {D k j : ℕ} {x : R d} (hx : x ∈ Lt d rels D k) : x * X j ∈ Lt d rels D (k + 1) := by
+  obtain ⟨ab, hab, c, hc, rfl⟩ := Submodule.mem_sup.mp hx
+  obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.mp hab
+  rw [add_mul, add_mul]
+  refine add_mem (add_mem ?_ ?_) ?_
+  · induction ha using Submodule.span_induction with
+    | mem y hy =>
+      obtain ⟨r, hr, u, v, rfl⟩ := hy
+      have hsplit : single u 1 * (mt d k r.2 - 1) * single v 1 * X j =
+          single u 1 * (mt d (k + 1) r.2 - 1) * single (v * FreeMonoid.of (letter d j)) 1 +
+          single u 1 * (mt d k r.2 - mt d (k + 1) r.2) * single (v * FreeMonoid.of (letter d j)) 1 := by
+        rw [X, mul_assoc _ (single v 1), single_mul_single, one_mul]; noncomm_ring
+      rw [hsplit]
+      refine add_mem (Jt_le_Lt D (k + 1) (Submodule.subset_span ⟨r, hr, u, _, rfl⟩)) (Ik_le_Lt D (k + 1) ?_)
+      have := single_mul_mem_Ik (mt_sub_mem (d := d) k r.2) u (v * FreeMonoid.of (letter d j))
+      exact Ik_mono (by simp only [FreeMonoid.length_mul, FreeMonoid.length_of]; omega) this
+    | zero => simp
+    | add y z _ _ hy hz => rw [add_mul]; exact add_mem hy hz
+    | smul n y _ hy => rw [smul_mul_assoc]; exact Submodule.smul_mem _ n hy
+  · refine Ik_le_Lt D (k + 1) ?_
+    have := single_mul_mem_Ik hb 1 (FreeMonoid.of (letter d j))
+    rw [← one_def, one_mul] at this
+    exact Ik_mono (by simp only [FreeMonoid.length_of, FreeMonoid.length_one]; omega) this
+  · obtain ⟨z, rfl⟩ := mem_DR.mp hc
+    rw [smul_mul_assoc]; exact DR_le_Lt D (k + 1) (smul_mem_DR d D _)
 
 end Modulo
 
