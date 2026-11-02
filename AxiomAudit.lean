@@ -1533,3 +1533,10 @@ open GroupDimension
 #print axioms GroupDimension.LieThreeThree.lie_lcs_one_ne_bot
 #print axioms GroupDimension.LieThreeThree.derivedSeries_two_ne_bot
 #print axioms GroupDimension.LieThreeThree.exists_lie_three_three
+#print axioms TraceCert.line_mem
+#print axioms TraceCert.shift_mem
+#print axioms TraceCert.smul_injective_of_surjective
+#print axioms TraceCert.pow_pred_smul_eq_zero
+#print axioms TraceCert.eq_zero_of_mem_pow
+#print axioms TraceCert.span_torsion_free
+#print axioms TraceCert.eq_zero_of_trace
