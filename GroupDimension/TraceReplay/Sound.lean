@@ -629,8 +629,8 @@ theorem prod_sub_mem_Ik {k : ℕ} : ∀ (as bs : List (R d)), as.length = bs.len
   | _ :: _, [], hl, _ => by simp at hl
 
 theorem S_sub_mem (k j : ℕ) (ex : ℤ) : (S k j ex : R d) - S (k + 1) j ex ∈ Ik d k := by
-  rw [S, S, Finset.sum_range_succ, sub_add_cancel_left, Submodule.neg_mem_iff, ← single_eq_smul]
-  sorry
+  rw [S, S, Finset.sum_range_succ, sub_add_cancel_left, Submodule.neg_mem_iff]
+  exact Submodule.smul_mem _ _ (single_mem_Ik (by rw [length_pow_of]) 1)
 
 theorem mt_sub_mem (k : ℕ) (w : List (ℕ × ℤ)) : mt d k w - mt d (k + 1) w ∈ Ik d k := by
   apply prod_sub_mem_Ik
