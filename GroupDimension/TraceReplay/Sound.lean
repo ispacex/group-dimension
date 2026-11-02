@@ -165,7 +165,7 @@ theorem wordOf_prepend (j : ℕ) (hj : j < d) :
       rw [pow_succ, ← Nat.mul_assoc, Nat.add_comm, Nat.add_mul_div_right _ _ hd, Nat.add_comm]
     have h2 : letter d (j * d ^ (g + 1) + idx) = letter d idx := by
       ext; simp [letter, pow_succ, ← Nat.mul_assoc, Nat.add_mod]
-    rw [h1, h2, ih _ (by rw [pow_succ] at hidx; exact Nat.div_lt_of_lt_mul (by rw [pow_succ, Nat.mul_comm] at hidx; exact hidx)), mul_assoc]
+    rw [h1, h2, ih _ (Nat.div_lt_of_lt_mul (by rw [pow_succ, Nat.mul_comm] at hidx; exact hidx)), mul_assoc]
 
 /-- The length of `wordOf g idx` is `g`. -/
 theorem length_wordOf (g idx : ℕ) : (wordOf d g idx).length = g := by
