@@ -121,21 +121,21 @@ def fact : Nat → Nat
 
 def binom (e : Int) (m : Nat) : Int := descProd e m / (fact m : Int)
 
-/-- The terms `a C(e,m) X_{c} X_j^m`, `m = 1 .. k − 1 − g`, of `X_c · (1 + X_j)^e`, for a word at
-position `c` of degree `g`, below degree `k`; `tail` is `j j … j` (`m − 1` letters) in base `d`. -/
-def genPowTerms (k j : Nat) (e : Int) (g loc a : Nat) : Nat → Nat → Vec → Vec
-  | 0, _, acc => acc
-  | fuel + 1, m, acc =>
+/-- The terms `a C(e,m) X_c X_j^m`, `m = 1 .. k − 1 − g`, of `X_c · (1 + X_j)^e`, below degree `k`;
+`c` has degree `g`, and `idx` is the index (within its degree) of `X_c X_j^{m−1}`. -/
+def genPowTerms (k j : Nat) (e : Int) (g a : Nat) : Nat → Nat → Nat → Vec → Vec
+  | 0, _, _, acc => acc
+  | fuel + 1, m, idx, acc =>
     bif Nat.blt (g + m) k then
-      genPowTerms k j e g loc a fuel (m + 1)
-        (ins D (off d (g + m) + loc * d ^ m + j * ((d ^ m - 1) / (d - 1))) (a * red D (binom e m)) acc)
+      genPowTerms k j e g a fuel (m + 1) (idx * d + j)
+        (ins D (off d (g + m) + (idx * d + j)) (a * red D (binom e m)) acc)
     else acc
 
 /-- `x · (1 + X_j)^e`, truncated below degree `k`. -/
 def mulGenPow (k j : Nat) (e : Int) (x : Vec) : Vec :=
   x.foldl (fun acc t =>
     let g := degAux d t.1 k 0
-    genPowTerms d D k j e g (t.1 - off d g) t.2 k 1 acc) x
+    genPowTerms d D k j e g t.2 k 1 (t.1 - off d g) acc) x
 
 /-- `μ(w)`, truncated below degree `k` (generators `1..d`). -/
 def magnus (k : Nat) (w : List (Nat × Int)) : Vec :=
