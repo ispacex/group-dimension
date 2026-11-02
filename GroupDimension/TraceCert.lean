@@ -66,9 +66,14 @@ variable {Q : Type*} [AddCommGroup Q] [Module.Finite ℤ Q]
 (Vasconcelos; `OrzechProperty` for commutative rings). -/
 theorem smul_injective_of_surjective {M : Type*} [AddCommGroup M] [Module.Finite ℤ M] (p : ℤ)
     (h : Function.Surjective fun x : M => p • x) : Function.Injective fun x : M => p • x := by
-  have := OrzechProperty.injective_of_surjective_endomorphism (R := ℤ) (p • LinearMap.id : M →ₗ[ℤ] M)
-    (by simpa using h)
-  simpa using this
+  let f : M →ₗ[ℤ] M := p • LinearMap.id
+  have hf : ∀ x, f x = p • x := fun x => rfl
+  have hs : Function.Surjective f := fun y => by
+    obtain ⟨x, hx⟩ := h y
+    exact ⟨x, by rw [hf]; exact hx⟩
+  have hi := OrzechProperty.injective_of_surjective_endomorphism f hs
+  intro a b hab
+  exact hi (by rw [hf, hf]; exact hab)
 
 /-- Step 5. Let `F̄ ⊆ Q` meet the torsion trivially and suppose (X):
 `p^{E-1} q ∈ F̄ + p^E Q` for every `q`. Then `p^{E-1}` kills every element of `p`-power order. -/
@@ -79,8 +84,8 @@ theorem pow_pred_smul_eq_zero (p : ℕ) (hp : p ≠ 0) (E : ℕ) (hE : 1 ≤ E) 
   set π := Fb.mkQ
   -- M = p^{E-1} (Q / F̄), a finitely generated module on which p· is onto
   let M : Submodule ℤ (Q ⧸ Fb) := LinearMap.range (((p : ℤ) ^ (E - 1)) • LinearMap.id)
-  haveI : IsNoetherian ℤ (Q ⧸ Fb) := isNoetherian_of_isNoetherianRing_of_finite ℤ _
-  haveI : Module.Finite ℤ M := Module.IsNoetherian.finite ℤ M
+  have : IsNoetherian ℤ (Q ⧸ Fb) := isNoetherian_of_isNoetherianRing_of_finite ℤ _
+  have : Module.Finite ℤ M := Module.IsNoetherian.finite ℤ M
   have hpE : (p : ℤ) ^ E = (p : ℤ) * (p : ℤ) ^ (E - 1) := by
     rw [← pow_succ']; congr 1; omega
   have hsurj : Function.Surjective fun x : M => (p : ℤ) • x := by
@@ -90,9 +95,9 @@ theorem pow_pred_smul_eq_zero (p : ℕ) (hp : p ≠ 0) (E : ℕ) (hE : 1 ≤ E) 
     refine ⟨⟨((p : ℤ) ^ (E - 1)) • π r, ⟨π r, rfl⟩⟩, ?_⟩
     apply Subtype.ext
     simp only [LinearMap.smul_apply, LinearMap.id_apply, SetLike.val_smul]
-    rw [smul_smul, ← hpE, ← map_zsmul, ← map_zsmul, hr, map_add,
-      (Submodule.Quotient.mk_eq_zero Fb).2 hf, zero_add]
-    rfl
+    have hf0 : Fb.mkQ f = 0 := by
+      rw [Submodule.mkQ_apply]; exact (Submodule.Quotient.mk_eq_zero Fb).2 hf
+    rw [smul_smul, ← hpE, ← map_zsmul, ← map_zsmul, hr, map_add, hf0, zero_add]
   have hinj := smul_injective_of_surjective (M := M) (p : ℤ) hsurj
   -- w = p^{E-1} ȳ ∈ M has p-power order, so it is 0
   let w : M := ⟨((p : ℤ) ^ (E - 1)) • π y, ⟨π y, rfl⟩⟩
@@ -118,7 +123,7 @@ theorem pow_pred_smul_eq_zero (p : ℕ) (hp : p ≠ 0) (E : ℕ) (hE : 1 ≤ E) 
       have := congrArg Subtype.val hw
       simpa [w, map_zsmul] using this
     exact (Submodule.Quotient.mk_eq_zero Fb).1 this
-  refine hF _ hmem (p ^ m) (pos_pow_of_pos m (Nat.pos_of_ne_zero hp)) ?_
+  refine hF _ hmem (p ^ m) (pow_pos (Nat.pos_of_ne_zero hp) m) ?_
   rw [smul_comm]
   push_cast
   rw [hy, smul_zero]
@@ -149,9 +154,12 @@ theorem span_torsion_free {ι κ : Type*} [Fintype ι] (v : ι → Q) (ν : Q �
   have h0 : ν (∑ i, a i • v i) = 0 := by
     have h1 : (k : ℤ) • ν (∑ i, a i • v i) = 0 := by rw [← map_zsmul, hkf, map_zero]
     funext j
-    have := congrFun h1 j
-    simp only [Pi.smul_apply, smul_eq_mul, Pi.zero_apply] at this
-    simpa [Pi.zero_apply, (by exact_mod_cast hk.ne' : (k : ℤ) ≠ 0)] using this
+    have h2 := congrFun h1 j
+    rw [Pi.smul_apply, smul_eq_mul, Pi.zero_apply] at h2
+    rw [Pi.zero_apply]
+    rcases mul_eq_zero.1 h2 with h | h
+    · exact absurd h (by exact_mod_cast hk.ne')
+    · exact h
   have : a = 0 := hinj (by simpa using h0)
   simp [this]
 
