@@ -3,6 +3,7 @@ module
 public import Mathlib.Algebra.MonoidAlgebra.Basic
 public import Mathlib.Algebra.FreeMonoid.Basic
 public import Mathlib.RingTheory.Binomial
+public import Mathlib.Tactic.NoncommRing
 public import GroupDimension.TraceReplay.Check
 
 @[expose] public section
@@ -275,7 +276,7 @@ theorem red_smul (D : ℕ) (hD : 0 < D) (a : ℤ) (x : R d) :
     simp only [red]; exact Int.toNat_of_nonneg (Int.emod_nonneg _ (by omega))
   have : ((red D a : ℕ) : ℤ) • x - a • x = ((D : ℕ) : ℤ) • ((-(a / (D : ℤ))) • x) := by
     rw [smul_smul, ← sub_smul, h1]; congr 1
-    have := Int.ediv_add_emod a (D : ℤ); linarith
+    have := Int.emod_def a (D : ℤ); linarith
   rw [this]; exact smul_mem_DR d D _
 
 
@@ -536,7 +537,9 @@ theorem eval_mulGenPow (D k j : ℕ) (hj : j < d) (hD : 0 < D) (hk : 0 < k) (ex 
     have h1 := ih (genPowTerms d D k j ex (degOf d c) a k 1 (c - off d (degOf d c)) acc)
     have h2 := eval_genPowTerms (d := d) D k j hj hD ex c a k 1 (c - off d (degOf d c)) acc le_rfl
       (by simpa using idx_lt hd c) (by simp [wordAt]) (by omega)
-    rw [← sub_eq_iff_eq_add'.mpr (e_mul_S c k j hk ex).symm] at h2
+    have hΣ : ∑ m' ∈ Finset.Ico 1 k, binom ex m' • single (wordAt d c * FreeMonoid.of (letter d j) ^ m') (1 : ℤ) =
+        e d c * S k j ex - e d c := by rw [e_mul_S c k j hk ex]; abel
+    rw [hΣ] at h2
     have : eval d (List.foldl (fun acc t => let g := degOf d t.1
           genPowTerms d D k j ex g t.2 k 1 (t.1 - off d g) acc)
           (genPowTerms d D k j ex (degOf d c) a k 1 (c - off d (degOf d c)) acc) v) -
@@ -611,31 +614,33 @@ def Lt (rels : List (ℕ × List (ℕ × ℤ))) (D k : ℕ) : Submodule ℤ (R d
 variable {rels : List (ℕ × List (ℕ × ℤ))}
 
 theorem DR_le_Lt (D k : ℕ) : DR d D ≤ Lt d rels D k := le_sup_right
-theorem Ik_le_Lt (D k : ℕ) : Ik d k ≤ Lt d rels D k := le_sup_left.trans le_sup_left
-theorem Jt_le_Lt (D k : ℕ) : Jt d rels k ≤ Lt d rels D k := le_sup_left.trans le_sup_left
+theorem Ik_le_Lt (D k : ℕ) : Ik d k ≤ Lt d rels D k :=
+  (le_sup_right : Ik d k ≤ Jt d rels k ⊔ Ik d k).trans le_sup_left
+theorem Jt_le_Lt (D k : ℕ) : Jt d rels k ≤ Lt d rels D k :=
+  (le_sup_left : Jt d rels k ≤ Jt d rels k ⊔ Ik d k).trans le_sup_left
 theorem M_le_Lt (D k : ℕ) : DR d D ⊔ Ik d k ≤ Lt d rels D k := sup_le (DR_le_Lt D k) (Ik_le_Lt D k)
 
-theorem prod_sub_mem_Ik {k : ℕ} : ∀ (as bs : List (R d)), as.length = bs.length →
-    (∀ i (hi : i < as.length) (hi' : i < bs.length), as[i] - bs[i] ∈ Ik d k) → as.prod - bs.prod ∈ Ik d k
-  | [], [], _, _ => by simp
-  | a :: as, b :: bs, hl, h => by
-    have hab := h 0 (by simp) (by simp)
-    have ih := prod_sub_mem_Ik as bs (by simpa using hl) fun i hi hi' => h (i + 1) (by simpa using hi) (by simpa using hi')
-    simp only [List.getElem_cons_zero] at hab
-    rw [List.prod_cons, List.prod_cons, show a * as.prod - b * bs.prod = (a - b) * as.prod + b * (as.prod - bs.prod) by
+theorem prod_sub_mem_Ik {k : ℕ} (l : List (R d × R d)) (h : ∀ q ∈ l, q.1 - q.2 ∈ Ik d k) :
+    (l.map Prod.fst).prod - (l.map Prod.snd).prod ∈ Ik d k := by
+  induction l with
+  | nil => simp
+  | cons q l ih =>
+    have hq := h q List.mem_cons_self
+    have hl := ih fun q' hq' => h q' (List.mem_cons_of_mem _ hq')
+    rw [List.map_cons, List.map_cons, List.prod_cons, List.prod_cons,
+      show q.1 * (l.map Prod.fst).prod - q.2 * (l.map Prod.snd).prod =
+        (q.1 - q.2) * (l.map Prod.fst).prod + q.2 * ((l.map Prod.fst).prod - (l.map Prod.snd).prod) by
       noncomm_ring]
-    exact add_mem (mul_mem_Ik hab _) (mem_Ik_mul ih _)
-  | [], _ :: _, hl, _ => by simp at hl
-  | _ :: _, [], hl, _ => by simp at hl
+    exact add_mem (mul_mem_Ik hq _) (mem_Ik_mul hl _)
 
 theorem S_sub_mem (k j : ℕ) (ex : ℤ) : (S k j ex : R d) - S (k + 1) j ex ∈ Ik d k := by
   rw [S, S, Finset.sum_range_succ, sub_add_cancel_left, Submodule.neg_mem_iff]
   exact Submodule.smul_mem _ _ (single_mem_Ik (by rw [length_pow_of]) 1)
 
 theorem mt_sub_mem (k : ℕ) (w : List (ℕ × ℤ)) : mt d k w - mt d (k + 1) w ∈ Ik d k := by
-  apply prod_sub_mem_Ik
-  · simp
-  · intro i hi hi'; simp only [List.getElem_map]; exact S_sub_mem k _ _
+  have := prod_sub_mem_Ik (d := d) (k := k) (w.map fun f => (S k (f.1 - 1) f.2, S (k + 1) (f.1 - 1) f.2))
+    (by intro q hq; obtain ⟨f, -, rfl⟩ := List.mem_map.mp hq; exact S_sub_mem k _ _)
+  simpa [mt, List.map_map, Function.comp_def] using this
 
 /-- `X_j · L_k ⊆ L_{k+1}` (Lemma N1, easy direction). -/
 theorem X_mul_mem {D k j : ℕ} {x : R d} (hx : x ∈ Lt d rels D k) : X j * x ∈ Lt d rels D (k + 1) := by
@@ -693,6 +698,235 @@ theorem mul_X_mem {D k j : ℕ} {x : R d} (hx : x ∈ Lt d rels D k) : x * X j �
 
 end Modulo
 
+/-! ## The replay -/
+
+section Replay
+
+variable {d : ℕ} [NeZero d]
+
+theorem find_mem {L : Submodule ℤ (R d)} (id : ℕ) :
+    ∀ cur : List (ℕ × Vec), (∀ y ∈ cur, eval d y.2 ∈ L) → eval d (find id cur) ∈ L
+  | [], _ => by simp [find]
+  | (i, v) :: t, h => by
+    simp only [find]
+    cases hb : (i == id)
+    · simp only [Bool.cond_false]; exact find_mem id t fun y hy => h y (List.mem_cons_of_mem _ hy)
+    · simp only [Bool.cond_true]; exact h (i, v) List.mem_cons_self
+
+theorem findWord_cases (i : ℕ) :
+    ∀ l : List (ℕ × List (ℕ × ℤ)), findWord i l = [] ∨ ∃ y ∈ l, y.2 = findWord i l
+  | [] => by simp [findWord]
+  | (i', w) :: t => by
+    simp only [findWord]
+    cases hb : (i' == i)
+    · simp only [Bool.cond_false]
+      rcases findWord_cases i t with h | ⟨y, hy, hyw⟩
+      · exact Or.inl h
+      · exact Or.inr ⟨y, List.mem_cons_of_mem _ hy, hyw⟩
+    · simp only [Bool.cond_true]; exact Or.inr ⟨(i', w), List.mem_cons_self, rfl⟩
+
+theorem combo_sub_mem {L : Submodule ℤ (R d)} {D : ℕ} (hDL : DR d D ≤ L)
+    (cur : List (ℕ × Vec)) (hcur : ∀ y ∈ cur, eval d y.2 ∈ L) (terms : List (ℕ × ℤ)) :
+    ∀ w : Vec, eval d (combo D cur terms w) - eval d w ∈ L := by
+  induction terms with
+  | nil => intro w; simp [combo]
+  | cons t terms ih =>
+    intro w
+    have h1 := ih (addSmul D (red D t.2) (find t.1 cur) w)
+    have h2 := eval_addSmul (d := d) D (red D t.2) (find t.1 cur) w
+    have h3 := Submodule.smul_mem L ((red D t.2 : ℕ) : ℤ) (find_mem t.1 cur hcur)
+    simp only [combo, List.foldl_cons] at h1 ⊢
+    rw [show ∀ a b c : R d, a - c = (a - b) + (b - (c + ((red D t.2 : ℕ) : ℤ) • eval d (find t.1 cur))) +
+      ((red D t.2 : ℕ) : ℤ) • eval d (find t.1 cur) from fun a b c => by abel]
+    exact add_mem (add_mem h1 (hDL h2)) h3
+
+theorem combo_eq_nil_mem {L : Submodule ℤ (R d)} {D : ℕ} (hDL : DR d D ≤ L)
+    {cur : List (ℕ × Vec)} (hcur : ∀ y ∈ cur, eval d y.2 ∈ L) {terms : List (ℕ × ℤ)} {w : Vec}
+    (h : combo D cur terms w = []) : eval d w ∈ L := by
+  have := combo_sub_mem hDL cur hcur terms w
+  rw [h, eval_nil, zero_sub, Submodule.neg_mem_iff] at this; exact this
+
+end Replay
+
+section Trace
+
+variable (T : Trace) [NeZero T.d]
+
+/-- The level-`k` target of a trace. -/
+abbrev LT (k : ℕ) : Submodule ℤ (R T.d) := Lt T.d T.rels (T.p ^ T.E) k
+
+theorem genVec_mem (hD : 0 < T.p ^ T.E) (hrels : ∀ r ∈ T.rels, okWord T.d r.2) (k : ℕ)
+    (prev : List (ℕ × Vec)) (hprev : ∀ y ∈ prev, eval T.d y.2 ∈ LT T k) (gen : Gen) :
+    eval T.d (genVec T (k + 1) prev gen) ∈ LT T (k + 1) := by
+  cases gen with
+  | zero => simp [genVec]
+  | rel i =>
+    simp only [genVec]
+    have hok : okWord T.d (findWord i T.rels) := by
+      rcases findWord_cases i T.rels with h | ⟨y, hy, hyw⟩
+      · rw [h]; intro f hf; simp at hf
+      · rw [← hyw]; exact hrels y hy
+    have h1 := M_le_Lt (rels := T.rels) _ _
+      (eval_magnus1 (d := T.d) (T.p ^ T.E) (k + 1) hD (Nat.succ_pos k) _ hok)
+    have h2 : mt T.d (k + 1) (findWord i T.rels) - 1 ∈ LT T (k + 1) := by
+      rcases findWord_cases i T.rels with h | ⟨y, hy, hyw⟩
+      · rw [h]; simp [mt]
+      · rw [← hyw]
+        refine Jt_le_Lt _ _ (Submodule.subset_span ⟨y, hy, 1, 1, ?_⟩)
+        rw [← one_def, one_mul, mul_one]
+    have := add_mem h1 h2; rwa [sub_add_cancel] at this
+  | lsh id j =>
+    simp only [genVec]
+    cases hj : Nat.blt j T.d
+    · simp
+    · have hj' : j < T.d := Nat.blt_eq.mp hj
+      simp only [Bool.cond_true]
+      have h1 := DR_le_Lt (rels := T.rels) (T.p ^ T.E) (k + 1)
+        (eval_lshift (d := T.d) (T.p ^ T.E) hj' (find id prev))
+      have h2 := X_mul_mem (j := j) (find_mem id prev hprev)
+      have := add_mem h1 h2; rwa [sub_add_cancel] at this
+  | rsh id j =>
+    simp only [genVec]
+    cases hj : Nat.blt j T.d
+    · simp
+    · have hj' : j < T.d := Nat.blt_eq.mp hj
+      simp only [Bool.cond_true]
+      have h1 := DR_le_Lt (rels := T.rels) (T.p ^ T.E) (k + 1)
+        (eval_rshift (d := T.d) (T.p ^ T.E) hj' (find id prev))
+      have h2 := mul_X_mem (j := j) (find_mem id prev hprev)
+      have := add_mem h1 h2; rwa [sub_add_cancel] at this
+
+/-- Lines (statement 3 of `cert/TRACE.md`): every vector of a level lies in its target. -/
+theorem runLevel_mem (hD : 0 < T.p ^ T.E) (hrels : ∀ r ∈ T.rels, okWord T.d r.2) (k : ℕ)
+    (prev : List (ℕ × Vec)) (hprev : ∀ y ∈ prev, eval T.d y.2 ∈ LT T k) :
+    ∀ (ls : List Line) (cur : List (ℕ × Vec)), (∀ y ∈ cur, eval T.d y.2 ∈ LT T (k + 1)) →
+      ∀ y ∈ runLevel T (k + 1) prev ls cur, eval T.d y.2 ∈ LT T (k + 1) := by
+  intro ls
+  induction ls with
+  | nil => intro cur hcur; simpa [runLevel] using hcur
+  | cons l ls ih =>
+    intro cur hcur
+    simp only [runLevel]
+    apply ih
+    intro y hy
+    rcases List.mem_cons.mp hy with rfl | hy
+    · have hg := genVec_mem T hD hrels k prev hprev l.gen
+      have hc := combo_sub_mem (DR_le_Lt (rels := T.rels) _ _) cur hcur l.terms (genVec T (k + 1) prev l.gen)
+      have hcm : eval T.d (combo (T.p ^ T.E) cur l.terms (genVec T (k + 1) prev l.gen)) ∈ LT T (k + 1) := by
+        have := add_mem hc hg; rwa [sub_add_cancel] at this
+      have hs := eval_smul (d := T.d) (T.p ^ T.E) (red (T.p ^ T.E) l.u)
+        (combo (T.p ^ T.E) cur l.terms (genVec T (k + 1) prev l.gen))
+      have := add_mem (DR_le_Lt (rels := T.rels) _ (k + 1) hs) (Submodule.smul_mem (LT T (k + 1)) _ hcm)
+      rwa [sub_add_cancel] at this
+    · exact hcur y hy
+
+theorem runLevels_mem (hD : 0 < T.p ^ T.E) (hrels : ∀ r ∈ T.rels, okWord T.d r.2) :
+    ∀ (lv : List (ℕ × List Line)) (k : ℕ) (prev : List (ℕ × Vec)),
+      (∀ y ∈ prev, eval T.d y.2 ∈ LT T k) →
+      ∀ k' cur, runLevels T lv k prev = some (k', cur) → ∀ y ∈ cur, eval T.d y.2 ∈ LT T k'
+  | [], k, prev, hprev, k', cur, h => by
+    simp only [runLevels, Option.some.injEq, Prod.mk.injEq] at h
+    obtain ⟨rfl, rfl⟩ := h; exact hprev
+  | (k1, ls) :: rest, k, prev, hprev, k', cur, h => by
+    simp only [runLevels] at h
+    cases hb : (k1 == k + 1)
+    · simp [hb] at h
+    · have hk : k1 = k + 1 := by simpa using hb
+      simp only [hb, Bool.cond_true] at h
+      subst hk
+      exact runLevels_mem hD hrels rest (k + 1) _
+        (runLevel_mem T hD hrels k prev hprev ls [] (by simp)) k' cur h
+
+end Trace
+
+/-! ## Positions of words -/
+
+section Index
+
+variable {d : ℕ} [NeZero d]
+
+/-- The index of a word within its degree. -/
+def idxOf (w : List (Fin d)) : ℕ := w.foldl (fun acc l => acc * d + l) 0
+
+theorem idxOf_spec (w : List (Fin d)) :
+    idxOf w < d ^ w.length ∧ wordOf d w.length (idxOf w) = FreeMonoid.ofList w := by
+  induction w using List.reverseRecOn with
+  | nil => simp [idxOf, wordOf]
+  | append_singleton w l ih =>
+    have hidx : idxOf (w ++ [l]) = idxOf w * d + l := by simp [idxOf, List.foldl_append]
+    rw [hidx, List.length_append, List.length_singleton]
+    constructor
+    · calc idxOf w * d + l < idxOf w * d + d := Nat.add_lt_add_left l.isLt _
+        _ = (idxOf w + 1) * d := by ring
+        _ ≤ d ^ w.length * d := Nat.mul_le_mul_right _ ih.1
+        _ = d ^ (w.length + 1) := (pow_succ _ _).symm
+    · rw [wordOf_append _ _ _ l.isLt, ih.2, FreeMonoid.ofList_append, FreeMonoid.ofList_singleton]
+      congr 2; ext; simp [letter, Nat.mod_eq_of_lt l.isLt]
+
+/-- The monomial `X_w` sits at position `off |w| + idx w`. -/
+theorem e_wordPos (w : FreeMonoid (Fin d)) :
+    e d (off d w.length + idxOf w.toList) = single w 1 := by
+  have h := idxOf_spec w.toList
+  rw [show w.length = w.toList.length from rfl, e_of_pos h.1, h.2, FreeMonoid.ofList_toList]
+
+end Index
+
+/-! ## The main theorem -/
+
+/-- **Soundness of the replay.** If `check T members` passes, then for every test `t` claimed in,
+`mt n w_t − 1 ∈ Lt n` (membership modulo `p^E`, statement 4 of `cert/TRACE.md`), and
+`p^{E−1} X_w ∈ Lt n` for every word `w ≠ 1` (exactness (X) with `F = ∅`, statement 5). -/
+theorem check_sound (T : Trace) (members : List ℕ) [NeZero T.d] (h : check T members = true) :
+    (∀ t ∈ members, mt T.d T.n (findWord t T.tests) - 1 ∈ LT T T.n) ∧
+    (∀ w : FreeMonoid (Fin T.d), w ≠ 1 → ((T.p ^ (T.E - 1) : ℕ) : ℤ) • single w 1 ∈ LT T T.n) := by
+  simp only [check, Bool.and_eq_true, List.all_eq_true, List.any_eq_true, beq_iff_eq, Nat.blt_eq,
+    Nat.ble_eq, Bool.or_eq_true, List.isEmpty_iff] at h
+  obtain ⟨⟨⟨⟨⟨⟨⟨hd1, hp1⟩, hE⟩, hn⟩, -⟩, hrels⟩, htests⟩, hm⟩ := h
+  have hD : 0 < T.p ^ T.E := Nat.pow_pos (by omega)
+  have hrels' : ∀ r ∈ T.rels, okWord T.d r.2 := fun r hr f hf => hrels r hr f hf
+  split at hm
+  · exact absurd hm (by simp)
+  · rename_i k cur hrun
+    simp only [Bool.and_eq_true, List.all_eq_true, List.any_eq_true, beq_iff_eq, Bool.or_eq_true,
+      List.isEmpty_iff, decide_eq_true_eq] at hm
+    obtain ⟨⟨⟨hk, hxs⟩, hcov⟩, hmem⟩ := hm
+    subst hk
+    have hcur := runLevels_mem T hD hrels' T.levels 1 [] (by simp) k cur hrun
+    have hDL := DR_le_Lt (d := T.d) (rels := T.rels) (T.p ^ T.E) k
+    constructor
+    · intro t ht
+      obtain ⟨w, -, -, hw⟩ := hmem t ht
+      have h1 := combo_eq_nil_mem hDL hcur hw
+      have hok : okWord T.d (findWord t T.tests) := by
+        rcases findWord_cases t T.tests with h | ⟨y, hy, hyw⟩
+        · rw [h]; intro f hf; simp at hf
+        · rw [← hyw]; exact fun f hf => htests y hy f hf
+      have h2 := M_le_Lt (rels := T.rels) _ _
+        (eval_magnus1 (d := T.d) (T.p ^ T.E) k hD (by omega) _ hok)
+      have := sub_mem h1 h2; rwa [sub_sub_cancel] at this
+    · intro w hw
+      by_cases hlen : k ≤ w.length
+      · rw [← single_eq_smul]; exact Ik_le_Lt _ _ (single_mem_Ik hlen _)
+      · have hd := NeZero.pos T.d
+        have hw1 : 1 ≤ w.length := by
+          rcases Nat.eq_zero_or_pos w.length with h0 | h0
+          · exact absurd (by simpa [FreeMonoid.length] using h0) hw
+          · exact h0
+        obtain ⟨c, hcdef⟩ : ∃ c, c = off T.d w.length + idxOf w.toList := ⟨_, rfl⟩
+        have hc : c < off T.d k := by
+          have h1 := (idxOf_spec w.toList).1
+          have h2 := off_mono hd (show w.length + 1 ≤ k by omega)
+          rw [off_succ] at h2
+          have h3 : w.toList.length = w.length := rfl
+          rw [h3] at h1; rw [hcdef]; omega
+        have hc0 : c ≠ 0 := by have := le_off hd w.length; rw [hcdef]; omega
+        obtain ⟨x, hx, hxc⟩ := (hcov c (List.mem_range.mpr hc)).resolve_left hc0
+        have h1 := combo_eq_nil_mem hDL hcur (hxs x hx)
+        have h2 := eval_ins (d := T.d) (T.p ^ T.E) x.1 (T.p ^ (T.E - 1)) []
+        rw [hxc] at h1 h2
+        rw [eval_nil, zero_add, hcdef, e_wordPos] at h2
+        rw [hcdef] at h1
+        have := sub_mem h1 (hDL h2); rwa [sub_sub_cancel] at this
 end
 
 end GroupDimension.TraceReplay
