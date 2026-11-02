@@ -537,9 +537,9 @@ theorem eval_mulGenPow (D k j : ℕ) (hj : j < d) (hD : 0 < D) (hk : 0 < k) (ex 
     have h1 := ih (genPowTerms d D k j ex (degOf d c) a k 1 (c - off d (degOf d c)) acc)
     have h2 := eval_genPowTerms (d := d) D k j hj hD ex c a k 1 (c - off d (degOf d c)) acc le_rfl
       (by simpa using idx_lt hd c) (by simp [wordAt]) (by omega)
-    have hΣ : ∑ m' ∈ Finset.Ico 1 k, binom ex m' • single (wordAt d c * FreeMonoid.of (letter d j) ^ m') (1 : ℤ) =
+    have hsum : ∑ m' ∈ Finset.Ico 1 k, binom ex m' • single (wordAt d c * FreeMonoid.of (letter d j) ^ m') (1 : ℤ) =
         e d c * S k j ex - e d c := by rw [e_mul_S c k j hk ex]; abel
-    rw [hΣ] at h2
+    rw [hsum] at h2
     have : eval d (List.foldl (fun acc t => let g := degOf d t.1
           genPowTerms d D k j ex g t.2 k 1 (t.1 - off d g) acc)
           (genPowTerms d D k j ex (degOf d c) a k 1 (c - off d (degOf d c)) acc) v) -
@@ -646,6 +646,7 @@ theorem mt_sub_mem (k : ℕ) (w : List (ℕ × ℤ)) : mt d k w - mt d (k + 1) w
 theorem X_mul_mem {D k j : ℕ} {x : R d} (hx : x ∈ Lt d rels D k) : X j * x ∈ Lt d rels D (k + 1) := by
   obtain ⟨ab, hab, c, hc, rfl⟩ := Submodule.mem_sup.mp hx
   obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.mp hab
+  clear hab hx
   rw [mul_add, mul_add]
   refine add_mem (add_mem ?_ ?_) ?_
   · induction ha using Submodule.span_induction with
@@ -673,6 +674,7 @@ theorem X_mul_mem {D k j : ℕ} {x : R d} (hx : x ∈ Lt d rels D k) : X j * x �
 theorem mul_X_mem {D k j : ℕ} {x : R d} (hx : x ∈ Lt d rels D k) : x * X j ∈ Lt d rels D (k + 1) := by
   obtain ⟨ab, hab, c, hc, rfl⟩ := Submodule.mem_sup.mp hx
   obtain ⟨a, ha, b, hb, rfl⟩ := Submodule.mem_sup.mp hab
+  clear hab hx
   rw [add_mul, add_mul]
   refine add_mem (add_mem ?_ ?_) ?_
   · induction ha using Submodule.span_induction with
@@ -816,7 +818,7 @@ theorem runLevel_mem (hD : 0 < T.p ^ T.E) (hrels : ∀ r ∈ T.rels, okWord T.d 
         have := add_mem hc hg; rwa [sub_add_cancel] at this
       have hs := eval_smul (d := T.d) (T.p ^ T.E) (red (T.p ^ T.E) l.u)
         (combo (T.p ^ T.E) cur l.terms (genVec T (k + 1) prev l.gen))
-      have := add_mem (DR_le_Lt (rels := T.rels) _ (k + 1) hs) (Submodule.smul_mem (LT T (k + 1)) _ hcm)
+      have := add_mem (DR_le_Lt (rels := T.rels) _ (k + 1) hs) (Submodule.smul_mem (LT T (k + 1)) ((red (T.p ^ T.E) l.u : ℕ) : ℤ) hcm)
       rwa [sub_add_cancel] at this
     · exact hcur y hy
 
@@ -884,13 +886,16 @@ theorem check_sound (T : Trace) (members : List ℕ) [NeZero T.d] (h : check T m
   obtain ⟨⟨⟨⟨⟨⟨⟨hd1, hp1⟩, hE⟩, hn⟩, -⟩, hrels⟩, htests⟩, hm⟩ := h
   have hD : 0 < T.p ^ T.E := Nat.pow_pos (by omega)
   have hrels' : ∀ r ∈ T.rels, okWord T.d r.2 := fun r hr f hf => hrels r hr f hf
-  split at hm
-  · exact absurd hm (by simp)
-  · rename_i k cur hrun
+  cases hr : runLevels T T.levels 1 [] with
+  | none => rw [hr] at hm; simp at hm
+  | some kc =>
+    obtain ⟨k, cur⟩ := kc
+    rw [hr] at hm
     simp only [Bool.and_eq_true, List.all_eq_true, List.any_eq_true, beq_iff_eq, Bool.or_eq_true,
       List.isEmpty_iff, decide_eq_true_eq] at hm
     obtain ⟨⟨⟨hk, hxs⟩, hcov⟩, hmem⟩ := hm
-    subst hk
+    rw [← hk]
+    have hrun := hr
     have hcur := runLevels_mem T hD hrels' T.levels 1 [] (by simp) k cur hrun
     have hDL := DR_le_Lt (d := T.d) (rels := T.rels) (T.p ^ T.E) k
     constructor
@@ -910,7 +915,9 @@ theorem check_sound (T : Trace) (members : List ℕ) [NeZero T.d] (h : check T m
       · have hd := NeZero.pos T.d
         have hw1 : 1 ≤ w.length := by
           rcases Nat.eq_zero_or_pos w.length with h0 | h0
-          · exact absurd (by simpa [FreeMonoid.length] using h0) hw
+          · exfalso; apply hw
+            have h0' : w.toList = [] := List.length_eq_zero_iff.mp h0
+            rw [← FreeMonoid.ofList_toList w, h0']; rfl
           · exact h0
         obtain ⟨c, hcdef⟩ : ∃ c, c = off T.d w.length + idxOf w.toList := ⟨_, rfl⟩
         have hc : c < off T.d k := by
