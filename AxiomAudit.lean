@@ -1540,3 +1540,7 @@ open GroupDimension
 #print axioms TraceCert.eq_zero_of_mem_pow
 #print axioms TraceCert.span_torsion_free
 #print axioms TraceCert.eq_zero_of_trace
+#print axioms GroupDimension.TraceReplay.check_sound
+#print axioms GroupDimension.TraceReplay.Rips10.check_ok
+#print axioms GroupDimension.TraceReplay.Rips10.certified
+#print axioms GroupDimension.TraceReplay.Rips10.certified_test0
