@@ -262,7 +262,7 @@ def main():
             w(f"theorem certified_test{t} :")
             w(f"    mt {hdr['d']} {nn} {elt(t)} - 1 ∈ LT trace {nn} := by")
             w(f"  have h := certified.1 {t} (by decide)")
-            w(f"  rw [testLin_of_word trace (by decide), linElt_single] at h")
+            w(f"  rw [testLin_of_word trace (t := {t}) (by decide), linElt_single] at h")
             w(f"  exact h\n")
         else:
             w(f"/-- {head} ({claim['id']}), written out. -/")
