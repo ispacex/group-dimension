@@ -1,0 +1,520 @@
+module
+
+public import GroupDimension.TraceReplay.PolyPres
+
+@[expose] public section
+
+/-!
+# A kernel check of `Vanish` (MATH-314, docs §3.2(e), check 1)
+
+`check_mem_D_poly_pres` takes `Vanish rels (w, λ)` as a hypothesis: `λ(X_u (μ(r) − 1) X_v) = 0` in
+`A_{w+1} = ℤ⟨X⟩/I_{w+1}` for every relator `r` and all monomials `u`, `v`. Here it becomes a Boolean
+check the kernel can run (`checkVanish`), with its soundness proof (`vanish_of_check`):
+
+* `μ(r)` is computed exactly over `ℤ`, cut below degree `w + 1`, as a sparse vector of monomial
+  positions (`VecZ`): `mulZ` multiplies two such vectors, `sVec` is `(1 + X_j)^e` (binomial
+  coefficients, any `e ∈ ℤ`), and a relator is a list of factors `(word, k)` (a flat relator is
+  `[(w, 1)]`; nested `[word, k]` factors of the presentations come out as `(word, k)`), each a power
+  computed by repeated squaring (`powZ`), a negative power from the inverse word.
+* `λ(X_u v X_v)` is evaluated through `baseVal`, the same reading of `λ` as `IsBase` and
+  `check_mem_D_poly_lin` use, over all `|u| + |v| ≤ w − 1` (`words`); `vanish_of_short` covers
+  the rest.
+
+`check_mem_D_poly_presN` is then `check_mem_D_poly_pres` for a list of relators in this form, with
+`Vanish` replaced by `checkVanish` (decidable, so no hypothesis is left outside the kernel beyond the
+trace's own and `hord`).
+-/
+
+namespace GroupDimension.TraceReplay
+
+open MonoidAlgebra
+
+/-! ## Exact sparse vectors (computable) -/
+
+/-- A sparse integer vector: `(position, coefficient)`, positions as in `e`. -/
+abbrev VecZ := List (Nat × Int)
+
+/-- Merge two vectors sorted by position, adding equal positions and dropping zero sums. When the
+fuel runs out the rest is appended, which is still the sum (sorting only matters for speed). -/
+def mergeZ : Nat → VecZ → VecZ → VecZ
+  | 0, a, b => a ++ b
+  | _ + 1, [], b => b
+  | _ + 1, a :: as, [] => a :: as
+  | n + 1, (i, x) :: a, (j, y) :: b =>
+    bif Nat.blt i j then (i, x) :: mergeZ n a ((j, y) :: b)
+    else bif Nat.blt j i then (j, y) :: mergeZ n ((i, x) :: a) b
+    else bif x + y == 0 then mergeZ n a b else (i, x + y) :: mergeZ n a b
+
+/-- `x · (a' X_{c'})` below degree `k`, where `c'` has degree `h` and index `i'`. -/
+def shiftZ (d k h i' : Nat) (a' : Int) : VecZ → VecZ
+  | [] => []
+  | t :: x =>
+    bif Nat.blt (degOf d t.1 + h) k then
+      (off d (degOf d t.1 + h) + (t.1 - off d (degOf d t.1)) * d ^ h + i', t.2 * a') :: shiftZ d k h i' a' x
+    else shiftZ d k h i' a' x
+
+/-- `x · y` below degree `k`. -/
+def mulZ (d k : Nat) (x y : VecZ) : VecZ :=
+  y.foldl (fun acc t => mergeZ (acc.length + x.length) acc
+    (shiftZ d k (degOf d t.1) (t.1 - off d (degOf d t.1)) t.2 x)) []
+
+/-- The index of `X_j^m` within degree `m`. -/
+def jIdx (d j : Nat) : Nat → Nat
+  | 0 => 0
+  | m + 1 => jIdx d j m * d + j
+
+/-- `Σ_{m<k} C(e, m) X_j^m`. -/
+def sVec (d j : Nat) (ex : Int) : Nat → VecZ
+  | 0 => []
+  | k + 1 => sVec d j ex k ++ (bif binom ex k == 0 then [] else [(off d k + jIdx d j k, binom ex k)])
+
+/-- `μ(w)` of a flat word below degree `k` (generators `1..d`, read modulo `d` as in `gword`). -/
+def magnusW (d k : Nat) (w : List (Nat × Int)) : VecZ :=
+  w.foldl (fun x f => mulZ d k x (sVec d ((f.1 - 1) % d) f.2 k)) [(0, 1)]
+
+/-- `acc · b^n` by repeated squaring (`fuel` steps at most). -/
+def powZ (d k : Nat) : Nat → VecZ → VecZ → Nat → VecZ
+  | 0, acc, _, _ => acc
+  | f + 1, acc, b, n =>
+    bif n == 0 then acc
+    else powZ d k f (bif n % 2 == 1 then mulZ d k acc b else acc) (mulZ d k b b) (n / 2)
+
+/-- The inverse of a flat word. -/
+def invW (w : List (Nat × Int)) : List (Nat × Int) := w.reverse.map fun f => (f.1, -f.2)
+
+/-- `μ(r)` below degree `k` for a relator `r = Π w_i^{k_i}`. -/
+def magnusN (d k : Nat) (r : List (List (Nat × Int) × Int)) : VecZ :=
+  r.foldl (fun acc f => mulZ d k acc
+    (powZ d k f.2.natAbs [(0, 1)] (magnusW d k (bif decide (f.2 < 0) then invW f.1 else f.1)) f.2.natAbs))
+    [(0, 1)]
+
+/-- All words of length `a` over `0..d−1`, as lists of letters. -/
+def words (d : Nat) : Nat → List (List Nat)
+  | 0 => [[]]
+  | a + 1 => (words d a).flatMap fun u => (List.range d).map fun j => u ++ [j]
+
+/-- The letters of the monomial at position `c`. -/
+def letters (d : Nat) [NeZero d] (c : Nat) : List Nat := (wordAt d c).toList.map (·.val)
+
+/-- `λ(X_U v X_V)`. -/
+def vanVal (d : Nat) [NeZero d] (m : Nat × List Int) (v : VecZ) (U V : List Nat) : Int :=
+  v.foldl (fun s t => s + t.2 * baseVal d m (U ++ letters d t.1 ++ V)) 0
+
+/-- `v − 1`. -/
+def subOne (v : VecZ) : VecZ := mergeZ (v.length + 1) v [(0, -1)]
+
+/-- Check 1 for one relator: `λ(X_U (μ(r) − 1) X_V) = 0` for `|U| + |V| ≤ w − 1`. -/
+def checkVanishRel (d : Nat) [NeZero d] (m : Nat × List Int) (r : List (List (Nat × Int) × Int)) : Bool :=
+  let v := subOne (magnusN d (m.1 + 1) r)
+  (List.range m.1).all fun a => (List.range (m.1 - a)).all fun b =>
+    (words d a).all fun U => (words d b).all fun V => vanVal d m v U V == 0
+
+/-- Check 1 for a base map against all relators. -/
+def checkVanish (d : Nat) [NeZero d] (m : Nat × List Int) (rels : List (List (List (Nat × Int) × Int))) :
+    Bool :=
+  rels.all fun r => checkVanishRel d m r
+
+/-! ## The group side -/
+
+/-- The element `Π w_i^{k_i}` of the free group. -/
+def relElt (d : ℕ) [NeZero d] (r : List (List (ℕ × ℤ) × ℤ)) : FreeGroup (Fin d) :=
+  (r.map fun f => gword FreeGroup.of f.1 ^ f.2).prod
+
+/-- The relators as a set. -/
+def relSetN (d : ℕ) [NeZero d] (rels : List (List (List (ℕ × ℤ) × ℤ))) : Set (FreeGroup (Fin d)) :=
+  {x | ∃ r ∈ rels, x = relElt d r}
+
+/-! ## Soundness -/
+
+section Sound
+
+variable {d : ℕ} [NeZero d]
+
+variable (d) in
+/-- The element a vector stands for. -/
+def evalZ (v : VecZ) : R d := (v.map fun t => t.2 • e d t.1).sum
+
+variable (d) in
+/-- The quotient map `R → A_k`. -/
+abbrev mkK (k : ℕ) : R d →+* Ak d k := Ideal.Quotient.mk (IkI k)
+
+@[simp] theorem evalZ_nil : evalZ d [] = 0 := rfl
+
+@[simp] theorem evalZ_cons (t : ℕ × ℤ) (v : VecZ) : evalZ d (t :: v) = t.2 • e d t.1 + evalZ d v := by
+  simp [evalZ]
+
+theorem evalZ_append (a b : VecZ) : evalZ d (a ++ b) = evalZ d a + evalZ d b := by
+  simp [evalZ]
+
+theorem e_zero : e d 0 = 1 := by
+  have h := e_of_pos (d := d) (g := 0) (idx := 0) (by simp)
+  simpa [off, wordOf, ← one_def] using h
+
+theorem evalZ_one : evalZ d [(0, 1)] = 1 := by simp [e_zero]
+
+theorem evalZ_mergeZ : ∀ (n : ℕ) (a b : VecZ), evalZ d (mergeZ n a b) = evalZ d a + evalZ d b
+  | 0, a, b => evalZ_append a b
+  | _ + 1, [], b => by simp [mergeZ]
+  | _ + 1, a :: as, [] => by simp [mergeZ]
+  | n + 1, (i, x) :: a, (j, y) :: b => by
+    simp only [mergeZ]
+    cases h1 : Nat.blt i j
+    · cases h2 : Nat.blt j i
+      · have hij : i = j := by simp only [Nat.blt_eq, Bool.not_eq_true] at h1 h2; omega
+        subst hij
+        cases h3 : (x + y == 0)
+        · simp only [cond_false, evalZ_cons, evalZ_mergeZ n, add_smul]; abel
+        · have h0 : x + y = 0 := by simpa using h3
+          simp only [cond_false, cond_true, evalZ_mergeZ n, evalZ_cons]
+          rw [show x • e d i + evalZ d a + (y • e d i + evalZ d b) =
+            (x + y) • e d i + (evalZ d a + evalZ d b) by rw [add_smul]; abel, h0, zero_smul, zero_add]
+      · simp only [cond_false, cond_true, evalZ_cons, evalZ_mergeZ n]; abel
+    · simp only [cond_true, evalZ_cons, evalZ_mergeZ n]; abel
+
+/-- `w(g + h, idx·d^h + idx') = w(g, idx) w(h, idx')`. -/
+theorem wordOf_mul (g : ℕ) : ∀ (h idx idx' : ℕ), idx' < d ^ h →
+    wordOf d (g + h) (idx * d ^ h + idx') = wordOf d g idx * wordOf d h idx'
+  | 0, idx, idx', hi => by
+    have : idx' = 0 := by simpa using hi
+    subst this; simp [wordOf]
+  | h + 1, idx, idx', hi => by
+    have hd := NeZero.pos d
+    have e1 : idx * d ^ (h + 1) + idx' = (idx * d ^ h + idx' / d) * d + idx' % d := by
+      calc idx * d ^ (h + 1) + idx' = idx * d ^ (h + 1) + (idx' / d * d + idx' % d) := by
+            rw [Nat.div_add_mod']
+        _ = (idx * d ^ h + idx' / d) * d + idx' % d := by ring
+    have hq : idx' / d < d ^ h := Nat.div_lt_of_lt_mul (by rw [pow_succ, Nat.mul_comm] at hi; exact hi)
+    rw [e1, show g + (h + 1) = (g + h) + 1 by omega, wordOf_append _ _ _ (Nat.mod_lt _ hd),
+      wordOf_mul g h idx (idx' / d) hq, mul_assoc, wordOf_succ (d := d) h idx']
+    congr 2
+    ext; simp [letter, Nat.mod_mod]
+
+theorem length_wordAt (c : ℕ) : (wordAt d c).length = degOf d c := length_wordOf _ _
+
+theorem e_mul (c c' : ℕ) :
+    e d c * e d c' = e d (off d (degOf d c + degOf d c') + (c - off d (degOf d c)) * d ^ degOf d c' +
+      (c' - off d (degOf d c'))) := by
+  have hd := NeZero.pos d
+  have h1 := idx_lt hd c
+  have h2 := idx_lt hd c'
+  have hlt : (c - off d (degOf d c)) * d ^ degOf d c' + (c' - off d (degOf d c')) <
+      d ^ (degOf d c + degOf d c') := by
+    calc (c - off d (degOf d c)) * d ^ degOf d c' + (c' - off d (degOf d c'))
+        < (c - off d (degOf d c)) * d ^ degOf d c' + d ^ degOf d c' := Nat.add_lt_add_left h2 _
+      _ = (c - off d (degOf d c) + 1) * d ^ degOf d c' := by ring
+      _ ≤ d ^ degOf d c * d ^ degOf d c' := Nat.mul_le_mul_right _ h1
+      _ = d ^ (degOf d c + degOf d c') := (pow_add _ _ _).symm
+  rw [Nat.add_assoc, e_of_pos hlt, wordOf_mul _ _ _ _ h2]
+  simp only [e, wordAt, single_mul_single, one_mul]
+
+theorem e_mul_mem_Ik {k c c' : ℕ} (h : k ≤ degOf d c + degOf d c') : e d c * e d c' ∈ Ik d k := by
+  simp only [e, single_mul_single, one_mul]
+  exact single_mem_Ik (by rw [FreeMonoid.length_mul, length_wordAt, length_wordAt]; exact h) _
+
+theorem mkK_shiftZ (k c' : ℕ) (a' : ℤ) (x : VecZ) :
+    mkK d k (evalZ d (shiftZ d k (degOf d c') (c' - off d (degOf d c')) a' x)) =
+      mkK d k (evalZ d x) * mkK d k (a' • e d c') := by
+  induction x with
+  | nil => simp [shiftZ]
+  | cons t x ih =>
+    simp only [shiftZ]
+    cases h : Nat.blt (degOf d t.1 + degOf d c') k
+    · simp only [cond_false]
+      rw [ih, evalZ_cons, map_add, add_mul]
+      have h0 : mkK d k (t.2 • e d t.1) * mkK d k (a' • e d c') = 0 := by
+        rw [← map_mul, smul_mul_smul_comm, Ideal.Quotient.eq_zero_iff_mem]
+        exact Submodule.smul_mem _ _ (e_mul_mem_Ik (by simp only [Nat.blt_eq, Bool.not_eq_true] at h; omega))
+      rw [h0, zero_add]
+    · simp only [cond_true]
+      rw [evalZ_cons, ih, evalZ_cons, map_add, add_mul, ← map_mul, smul_mul_smul_comm, e_mul]
+
+theorem mkK_mulZ (k : ℕ) (x y : VecZ) :
+    mkK d k (evalZ d (mulZ d k x y)) = mkK d k (evalZ d x) * mkK d k (evalZ d y) := by
+  suffices h : ∀ acc, mkK d k (evalZ d (y.foldl (fun acc t => mergeZ (acc.length + x.length) acc
+      (shiftZ d k (degOf d t.1) (t.1 - off d (degOf d t.1)) t.2 x)) acc)) =
+      mkK d k (evalZ d acc) + mkK d k (evalZ d x) * mkK d k (evalZ d y) by
+    simpa [mulZ] using h []
+  induction y with
+  | nil => intro acc; simp
+  | cons t y ih =>
+    intro acc
+    rw [List.foldl_cons, ih, evalZ_mergeZ, map_add, mkK_shiftZ, evalZ_cons, map_add, mul_add]
+    abel
+
+theorem jIdx_spec {j : ℕ} (hj : j < d) :
+    ∀ m, jIdx d j m < d ^ m ∧ wordOf d m (jIdx d j m) = FreeMonoid.of (letter d j) ^ m
+  | 0 => by simp [jIdx, wordOf]
+  | m + 1 => by
+    obtain ⟨h1, h2⟩ := jIdx_spec hj m
+    refine ⟨?_, ?_⟩
+    · show jIdx d j m * d + j < d ^ (m + 1)
+      calc jIdx d j m * d + j < jIdx d j m * d + d := Nat.add_lt_add_left hj _
+        _ = (jIdx d j m + 1) * d := by ring
+        _ ≤ d ^ m * d := Nat.mul_le_mul_right _ h1
+        _ = d ^ (m + 1) := (pow_succ _ _).symm
+    · show wordOf d (m + 1) (jIdx d j m * d + j) = _
+      rw [wordOf_append _ _ _ hj, h2, pow_succ]
+
+theorem evalZ_sVec {j : ℕ} (hj : j < d) (ex : ℤ) : ∀ k, evalZ d (sVec d j ex k) = S (d := d) k j ex
+  | 0 => by simp [sVec, S]
+  | k + 1 => by
+    rw [sVec, evalZ_append, evalZ_sVec hj ex k, S, S, Finset.sum_range_succ]
+    congr 1
+    have he : e d (off d k + jIdx d j k) = single (FreeMonoid.of (letter d j) ^ k) 1 := by
+      rw [e_of_pos (jIdx_spec hj k).1, (jIdx_spec hj k).2]
+    cases h : (binom ex k == 0)
+    · simp [he]
+    · have h0 : binom ex k = 0 := by simpa using h
+      simp [h0]
+
+/-- `Σ_{m<k} C(e, m) y^m = u^e` when `u = 1 + y` and `y^k = 0`. -/
+theorem bser_eq_zpow {A : Type*} [Ring A] (y : A) (u : Aˣ) (hu : (u : A) = 1 + y) (k : ℕ)
+    (hk : y ^ k = 0) (ex : ℤ) : bser y k ex = ((u ^ ex : Aˣ) : A) := by
+  rcases k with _ | k
+  · have h10 : (1 : A) = 0 := by simpa using hk
+    exact (subsingleton_of_zero_eq_one h10.symm).elim _ _
+  have hstep : ∀ e : ℤ, bser y (k + 1) e * u = bser y (k + 1) (e + 1) := by
+    intro e; rw [hu, bser_mul, hk, smul_zero, add_zero]
+  induction ex using Int.induction_on with
+  | zero => rw [bser_at_zero, zpow_zero, Units.val_one]
+  | succ i ih => rw [← hstep, ih, zpow_add_one, Units.val_mul]
+  | pred i ih =>
+    have h := hstep (-(i : ℤ) - 1)
+    rw [sub_add_cancel, ih] at h
+    calc bser y (k + 1) (-(i : ℤ) - 1) = bser y (k + 1) (-(i : ℤ) - 1) * u * ((u⁻¹ : Aˣ) : A) := by
+          rw [mul_assoc, Units.mul_inv, mul_one]
+      _ = ((u ^ (-(i : ℤ) - 1) : Aˣ) : A) := by rw [h, ← Units.val_mul, ← zpow_sub_one]
+
+theorem mkK_S (k j : ℕ) (ex : ℤ) :
+    mkK d k (S (d := d) k j ex) = ((unitX k j ^ ex : (Ak d k)ˣ) : Ak d k) := by
+  have hS : S (d := d) k j ex = bser (X (d := d) j) k ex := by
+    simp only [S, bser, binom_eq_choose, X, single_pow, one_pow]
+  have hmap : mkK d k (bser (X (d := d) j) k ex) = bser (mkK d k (X j)) k ex := by
+    simp only [bser, map_sum, map_zsmul, map_pow]
+  rw [hS, hmap]
+  apply bser_eq_zpow
+  · rw [unitX, IsUnit.unit_spec]
+  · rw [← map_pow]; exact Ideal.Quotient.eq_zero_iff_mem.2 (X_pow_mem_Ik k j)
+
+theorem gword_cons {G : Type*} [Group G] (g : Fin d → G) (f : ℕ × ℤ) (w : List (ℕ × ℤ)) :
+    gword g (f :: w) = g (letter d (f.1 - 1)) ^ f.2 * gword g w := by
+  simp [gword]
+
+theorem mkK_magnusW (k : ℕ) (w : List (ℕ × ℤ)) :
+    mkK d k (evalZ d (magnusW d k w)) = ((muA k (gword FreeGroup.of w) : (Ak d k)ˣ) : Ak d k) := by
+  suffices h : ∀ x, mkK d k (evalZ d (w.foldl (fun x f => mulZ d k x (sVec d ((f.1 - 1) % d) f.2 k)) x)) =
+      mkK d k (evalZ d x) * ((muA k (gword FreeGroup.of w) : (Ak d k)ˣ) : Ak d k) by
+    rw [magnusW, h, evalZ_one, map_one, one_mul]
+  induction w with
+  | nil => intro x; simp [gword]
+  | cons f w ih =>
+    intro x
+    rw [List.foldl_cons, ih, mkK_mulZ, evalZ_sVec (Nat.mod_lt _ (NeZero.pos d)), mkK_S, mul_assoc,
+      gword_cons, map_mul, Units.val_mul, map_zpow]
+    congr 3
+    rw [muA, FreeGroup.lift_apply_of]
+    rfl
+
+theorem mkK_powZ (k : ℕ) : ∀ (f : ℕ) (acc b : VecZ) (n : ℕ), n < 2 ^ f →
+    mkK d k (evalZ d (powZ d k f acc b n)) = mkK d k (evalZ d acc) * mkK d k (evalZ d b) ^ n
+  | 0, acc, b, n, hn => by
+    have : n = 0 := by simpa using hn
+    subst this; simp [powZ]
+  | f + 1, acc, b, n, hn => by
+    simp only [powZ]
+    cases h0 : (n == 0)
+    · simp only [cond_false]
+      have hn2 : n / 2 < 2 ^ f := Nat.div_lt_of_lt_mul (by rw [pow_succ, Nat.mul_comm] at hn; exact hn)
+      rw [mkK_powZ k f _ _ _ hn2, mkK_mulZ]
+      cases h1 : (n % 2 == 1)
+      · simp only [cond_false]
+        have h1' : n % 2 = 0 := by simp only [beq_eq_false_iff_ne, ne_eq] at h1; omega
+        rw [show mkK d k (evalZ d b) ^ n = (mkK d k (evalZ d b) * mkK d k (evalZ d b)) ^ (n / 2) by
+          rw [← sq, ← pow_mul]; congr 1; omega]
+      · simp only [cond_true]
+        have h1' : n % 2 = 1 := by simpa using h1
+        rw [mkK_mulZ, mul_assoc, show mkK d k (evalZ d b) ^ n =
+          mkK d k (evalZ d b) * (mkK d k (evalZ d b) * mkK d k (evalZ d b)) ^ (n / 2) by
+          rw [← sq, ← pow_mul, ← pow_succ']; congr 1; omega]
+    · have : n = 0 := by simpa using h0
+      subst this; simp
+
+theorem gword_invW {G : Type*} [Group G] (g : Fin d → G) (w : List (ℕ × ℤ)) :
+    gword g (invW w) = (gword g w)⁻¹ := by
+  simp only [gword, invW, List.map_map, List.prod_inv_reverse, List.map_reverse, Function.comp_def,
+    zpow_neg]
+
+theorem mkK_powFactor (k : ℕ) (w : List (ℕ × ℤ)) (ex : ℤ) :
+    mkK d k (evalZ d (powZ d k ex.natAbs [(0, 1)]
+      (magnusW d k (bif decide (ex < 0) then invW w else w)) ex.natAbs)) =
+      ((muA k (gword FreeGroup.of w ^ ex) : (Ak d k)ˣ) : Ak d k) := by
+  rw [mkK_powZ k _ _ _ _ Nat.lt_two_pow_self, evalZ_one, map_one, one_mul, mkK_magnusW,
+    ← Units.val_pow_eq_pow_val, ← map_pow]
+  congr 2
+  cases h : decide (ex < 0)
+  · have h' : 0 ≤ ex := by simpa using h
+    simp only [cond_false]
+    rw [← zpow_natCast, Int.natAbs_of_nonneg h']
+  · have h' : ex < 0 := by simpa using h
+    simp only [cond_true]
+    rw [gword_invW, inv_pow, ← zpow_natCast, Int.ofNat_natAbs_of_nonpos h'.le, zpow_neg, inv_inv]
+
+theorem relElt_cons (f : List (ℕ × ℤ) × ℤ) (r : List (List (ℕ × ℤ) × ℤ)) :
+    relElt d (f :: r) = gword FreeGroup.of f.1 ^ f.2 * relElt d r := by
+  simp [relElt]
+
+theorem mkK_magnusN (k : ℕ) (r : List (List (ℕ × ℤ) × ℤ)) :
+    mkK d k (evalZ d (magnusN d k r)) = ((muA k (relElt d r) : (Ak d k)ˣ) : Ak d k) := by
+  suffices h : ∀ x, mkK d k (evalZ d (r.foldl (fun acc f => mulZ d k acc
+      (powZ d k f.2.natAbs [(0, 1)] (magnusW d k (bif decide (f.2 < 0) then invW f.1 else f.1)) f.2.natAbs))
+      x)) = mkK d k (evalZ d x) * ((muA k (relElt d r) : (Ak d k)ˣ) : Ak d k) by
+    rw [magnusN, h, evalZ_one, map_one, one_mul]
+  induction r with
+  | nil => intro x; simp [relElt]
+  | cons f r ih =>
+    intro x
+    rw [List.foldl_cons, ih, mkK_mulZ, mkK_powFactor, mul_assoc, ← Units.val_mul, ← map_mul,
+      relElt_cons]
+
+theorem mkK_subOne (k : ℕ) (v : VecZ) : mkK d k (evalZ d (subOne v)) = mkK d k (evalZ d v) - 1 := by
+  rw [subOne, evalZ_mergeZ, map_add]
+  simp [e_zero, sub_eq_add_neg]
+
+theorem lamW_eq_baseVal (m : ℕ × List ℤ) (w : FreeMonoid (Fin d)) :
+    lamW m w = baseVal d m (w.toList.map (·.val)) := by
+  have hl : w.length = w.toList.length := rfl
+  unfold lamW baseVal
+  rw [List.length_map, ← hl]
+  by_cases h : 1 ≤ w.length ∧ w.length ≤ m.1
+  · have hb : (Nat.blt 0 w.length && Nat.ble w.length m.1) = true := by
+      rw [Bool.and_eq_true, Nat.blt_eq, Nat.ble_eq]; omega
+    simp only [h, and_self, ↓reduceIte, hb, cond_true]
+  · have hb : (Nat.blt 0 w.length && Nat.ble w.length m.1) = false := by
+      rw [Bool.and_eq_false_iff, Nat.blt_eq, Nat.ble_eq]
+      by_contra hc; push_neg at hc; exact h ⟨hc.1, hc.2⟩
+    simp only [h, ↓reduceIte, hb, cond_false]
+
+theorem toList_ofList_letters (U : List ℕ) (hU : ∀ j ∈ U, j < d) :
+    (FreeMonoid.ofList (U.map (letter d))).toList.map (·.val) = U := by
+  rw [FreeMonoid.toList_ofList, List.map_map]
+  conv_rhs => rw [← List.map_id U]
+  exact List.map_congr_left fun j hj => letter_of_lt (hU j hj)
+
+theorem vanVal_eq (m : ℕ × List ℤ) (v : VecZ) (U V : List ℕ) (hU : ∀ j ∈ U, j < d)
+    (hV : ∀ j ∈ V, j < d) :
+    vanVal d m v U V = lamA m (mkK d (m.1 + 1) (single (FreeMonoid.ofList (U.map (letter d))) 1) *
+      mkK d (m.1 + 1) (evalZ d v) * mkK d (m.1 + 1) (single (FreeMonoid.ofList (V.map (letter d))) 1)) := by
+  suffices h : ∀ s, v.foldl (fun s t => s + t.2 * baseVal d m (U ++ letters d t.1 ++ V)) s =
+      s + lamA m (mkK d (m.1 + 1) (single (FreeMonoid.ofList (U.map (letter d))) 1) *
+        mkK d (m.1 + 1) (evalZ d v) * mkK d (m.1 + 1) (single (FreeMonoid.ofList (V.map (letter d))) 1)) by
+    simpa [vanVal] using h 0
+  induction v with
+  | nil => intro s; simp
+  | cons t v ih =>
+    intro s
+    rw [List.foldl_cons, ih, evalZ_cons, map_add, mul_add, add_mul, map_add, add_assoc]
+    congr 2
+    rw [← map_mul, ← map_mul, lamA_mk, mul_smul_comm, smul_mul_assoc, map_zsmul, smul_eq_mul, e,
+      single_mul_single, single_mul_single, one_mul, one_mul, lamR_single, one_mul, lamW_eq_baseVal,
+      FreeMonoid.toList_mul, FreeMonoid.toList_mul, List.map_append, List.map_append,
+      toList_ofList_letters U hU, toList_ofList_letters V hV]
+    rfl
+
+theorem mem_words : ∀ (a : ℕ) (U : List (Fin d)), U.length = a → U.map (·.val) ∈ words d a
+  | 0, U, h => by rw [List.length_eq_zero_iff.mp h]; simp [words]
+  | a + 1, U, h => by
+    rcases U.eq_nil_or_concat with rfl | ⟨U', l, rfl⟩
+    · simp at h
+    · rw [List.length_append, List.length_singleton, Nat.add_right_cancel_iff] at h
+      simp only [words, List.mem_flatMap, List.mem_map, List.mem_range]
+      exact ⟨U'.map (·.val), mem_words a U' h, l.val, l.isLt, by simp⟩
+
+theorem ofList_letters (u : FreeMonoid (Fin d)) :
+    FreeMonoid.ofList ((u.toList.map (·.val)).map (letter d)) = u := by
+  rw [List.map_map]
+  conv_rhs => rw [← FreeMonoid.ofList_toList u]
+  congr 1
+  conv_rhs => rw [← List.map_id u.toList]
+  exact List.map_congr_left fun j _ => letter_val j
+
+theorem checkVanishRel_sound {m : ℕ × List ℤ} {r : List (List (ℕ × ℤ) × ℤ)}
+    (h : checkVanishRel d m r = true) (u v : FreeMonoid (Fin d)) (huv : u.length + v.length + 1 ≤ m.1) :
+    lamA m (Ideal.Quotient.mk _ (single u 1) * ((muA (m.1 + 1) (relElt d r) : Ak d (m.1 + 1)) - 1) *
+      Ideal.Quotient.mk _ (single v 1)) = 0 := by
+  simp only [checkVanishRel, List.all_eq_true, List.mem_range, beq_iff_eq] at h
+  have hU : ∀ j ∈ u.toList.map (·.val), j < d := by
+    intro j hj; obtain ⟨l, -, rfl⟩ := List.mem_map.1 hj; exact l.isLt
+  have hV : ∀ j ∈ v.toList.map (·.val), j < d := by
+    intro j hj; obtain ⟨l, -, rfl⟩ := List.mem_map.1 hj; exact l.isLt
+  have hv := h u.length (by omega) v.length (by omega) _ (mem_words _ u.toList rfl) _
+    (mem_words _ v.toList rfl)
+  rw [vanVal_eq m _ _ _ hU hV, ofList_letters, ofList_letters, mkK_subOne, mkK_magnusN] at hv
+  exact hv
+
+/-- **Soundness of the kernel check of `Vanish`.** -/
+theorem vanish_of_check {m : ℕ × List ℤ} {rels : List (List (List (ℕ × ℤ) × ℤ))}
+    (h : checkVanish d m rels = true) : Vanish (relSetN d rels) m := by
+  apply vanish_of_short
+  rintro _ ⟨r, hr, rfl⟩ u v huv
+  exact checkVanishRel_sound (List.all_eq_true.1 h r hr) u v huv
+
+end Sound
+
+/-! ## Membership in a presented group, checked in full -/
+
+theorem relElt_single {d : ℕ} [NeZero d] (w : List (ℕ × ℤ)) : relElt d [(w, 1)] = gword FreeGroup.of w := by
+  simp [relElt]
+
+theorem rel_hold_of_sub (T : Trace) [NeZero T.d] (allRels : List (List (List (ℕ × ℤ) × ℤ)))
+    (hsub : T.rels.all (fun r => allRels.any (fun R => R == [(r.2, 1)])) = true) :
+    ∀ r ∈ T.rels, gword (PresentedGroup.of (rels := relSetN T.d allRels)) r.2 = 1 := by
+  simp only [List.all_eq_true, List.any_eq_true, beq_iff_eq] at hsub
+  intro r hr
+  obtain ⟨R, hR, hRr⟩ := hsub r hr
+  have e : (PresentedGroup.of : Fin T.d → PresentedGroup (relSetN T.d allRels)) =
+      PresentedGroup.mk _ ∘ FreeGroup.of := rfl
+  rw [e, ← map_gword]
+  exact PresentedGroup.one_of_mem ⟨R, hR, by rw [hRr, relElt_single]⟩
+
+theorem maps_isBase (T : Trace) [NeZero T.d] (P : PolyCert) (allRels : List (List (List (ℕ × ℤ) × ℤ)))
+    (hvan : P.maps.all (fun m => checkVanish T.d m allRels) = true) :
+    ∀ i < P.maps.length, ∃ φ : PresentedGroup (relSetN T.d allRels) → ℤ,
+      IsBase (PresentedGroup.of (rels := relSetN T.d allRels)) (P.maps.getD i (0, [])) φ := by
+  intro i hi
+  have hm : P.maps.getD i (0, []) ∈ P.maps := by
+    rw [List.getD_eq_getElem _ _ hi]; exact List.getElem_mem hi
+  exact ⟨_, isBase_of_vanish (vanish_of_check (List.all_eq_true.1 hvan _ hm))⟩
+
+/-- **Exact membership in a presented group, every hypothesis but `hord` decidable.** `check`,
+`checkPoly`, `hsub` (each relator of the trace is a relator of the presentation) and `hvan` (check 1
+for every base map against all relators) are Boolean checks; then in
+`G = ⟨x_1, …, x_d | allRels⟩` every lintest claimed whose element has `p`-power order in `Δ/Δ^n`
+lies in `Δ^n`. -/
+theorem check_mem_D_poly_lin_presN (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
+    (P : PolyCert) (hP : checkPoly T P = true) (allRels : List (List (List (ℕ × ℤ) × ℤ)))
+    (hsub : T.rels.all (fun r => allRels.any (fun R => R == [(r.2, 1)])) = true)
+    (hvan : P.maps.all (fun m => checkVanish T.d m allRels) = true)
+    (t : ℕ) (ht : t ∈ members)
+    (hord : ∃ m : ℕ, ((T.p : ℤ) ^ m) • linG (PresentedGroup.of (rels := relSetN T.d allRels)) (testLin T t) ∈
+      augIdeal (PresentedGroup (relSetN T.d allRels)) ^ T.n) :
+    linG (PresentedGroup.of (rels := relSetN T.d allRels)) (testLin T t) ∈
+      augIdeal (PresentedGroup (relSetN T.d allRels)) ^ T.n :=
+  check_mem_D_poly_lin T members hc P hP _ (rel_hold_of_sub T allRels hsub)
+    (PresentedGroup.closure_range_of _) (maps_isBase T P allRels hvan) t ht hord
+
+/-- `check_mem_D_poly_lin_presN` for a word test: `w_t ∈ D_n(G)`. -/
+theorem check_mem_D_poly_presN (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
+    (P : PolyCert) (hP : checkPoly T P = true) (allRels : List (List (List (ℕ × ℤ) × ℤ)))
+    (hsub : T.rels.all (fun r => allRels.any (fun R => R == [(r.2, 1)])) = true)
+    (hvan : P.maps.all (fun m => checkVanish T.d m allRels) = true)
+    (t : ℕ) (ht : t ∈ members) (hw : T.tests.any (fun y => y.1 == t) = true)
+    (hord : ∃ m : ℕ, ((T.p : ℤ) ^ m) •
+      (of ℤ (PresentedGroup (relSetN T.d allRels))
+        (gword (PresentedGroup.of (rels := relSetN T.d allRels)) (findWord t T.tests)) - 1) ∈
+      augIdeal (PresentedGroup (relSetN T.d allRels)) ^ T.n) :
+    gword (PresentedGroup.of (rels := relSetN T.d allRels)) (findWord t T.tests) ∈
+      GroupDimension.D T.n (PresentedGroup (relSetN T.d allRels)) :=
+  check_mem_D_poly T members hc P hP _ (rel_hold_of_sub T allRels hsub)
+    (PresentedGroup.closure_range_of _) (maps_isBase T P allRels hvan) t ht hw hord
+
+end GroupDimension.TraceReplay
