@@ -1549,4 +1549,6 @@ open GroupDimension
 #print axioms GroupDimension.TraceReplay.mem_D_of_mem_Jt_sup_Ik
 #print axioms GroupDimension.TraceReplay.check_group
 #print axioms GroupDimension.TraceReplay.check_mem_D
+#print axioms GroupDimension.TraceReplay.nu_eq_zero
+#print axioms GroupDimension.TraceReplay.nu_psi
 #print axioms GroupDimension.TraceReplay.Rips10.mem_D_test0
