@@ -44,5 +44,6 @@ public import GroupDimension.TraceReplay.HomPow
 public import GroupDimension.TraceReplay.HomExact
 public import GroupDimension.TraceReplay.PolyProd
 public import GroupDimension.TraceReplay.PolyExact
+public import GroupDimension.TraceReplay.PolyPres
 
 @[expose] public section
