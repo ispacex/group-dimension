@@ -132,11 +132,11 @@ variable {d : ℕ} [NeZero d]
 
 variable (d) in
 /-- The element a vector stands for. -/
-def evalZ (v : VecZ) : R d := (v.map fun t => t.2 • e d t.1).sum
+noncomputable def evalZ (v : VecZ) : R d := (v.map fun t => t.2 • e d t.1).sum
 
 variable (d) in
 /-- The quotient map `R → A_k`. -/
-abbrev mkK (k : ℕ) : R d →+* Ak d k := Ideal.Quotient.mk (IkI k)
+noncomputable abbrev mkK (k : ℕ) : R d →+* Ak d k := Ideal.Quotient.mk (IkI k)
 
 @[simp] theorem evalZ_nil : evalZ d [] = 0 := rfl
 
@@ -160,16 +160,16 @@ theorem evalZ_mergeZ : ∀ (n : ℕ) (a b : VecZ), evalZ d (mergeZ n a b) = eval
     simp only [mergeZ]
     cases h1 : Nat.blt i j
     · cases h2 : Nat.blt j i
-      · have hij : i = j := by simp only [Nat.blt_eq, Bool.not_eq_true] at h1 h2; omega
+      · have hij : i = j := by simp only [← Bool.not_eq_true, Nat.blt_eq] at h1 h2; omega
         subst hij
         cases h3 : (x + y == 0)
-        · simp only [cond_false, evalZ_cons, evalZ_mergeZ n, add_smul]; abel
+        · simp only [Bool.cond_false, evalZ_cons, evalZ_mergeZ n, add_smul]; abel
         · have h0 : x + y = 0 := by simpa using h3
-          simp only [cond_false, cond_true, evalZ_mergeZ n, evalZ_cons]
+          simp only [Bool.cond_false, Bool.cond_true, evalZ_mergeZ n, evalZ_cons]
           rw [show x • e d i + evalZ d a + (y • e d i + evalZ d b) =
             (x + y) • e d i + (evalZ d a + evalZ d b) by rw [add_smul]; abel, h0, zero_smul, zero_add]
-      · simp only [cond_false, cond_true, evalZ_cons, evalZ_mergeZ n]; abel
-    · simp only [cond_true, evalZ_cons, evalZ_mergeZ n]; abel
+      · simp only [Bool.cond_false, Bool.cond_true, evalZ_cons, evalZ_mergeZ n]; abel
+    · simp only [Bool.cond_true, evalZ_cons, evalZ_mergeZ n]; abel
 
 /-- `w(g + h, idx·d^h + idx') = w(g, idx) w(h, idx')`. -/
 theorem wordOf_mul (g : ℕ) : ∀ (h idx idx' : ℕ), idx' < d ^ h →
@@ -186,8 +186,7 @@ theorem wordOf_mul (g : ℕ) : ∀ (h idx idx' : ℕ), idx' < d ^ h →
     have hq : idx' / d < d ^ h := Nat.div_lt_of_lt_mul (by rw [pow_succ, Nat.mul_comm] at hi; exact hi)
     rw [e1, show g + (h + 1) = (g + h) + 1 by omega, wordOf_append _ _ _ (Nat.mod_lt _ hd),
       wordOf_mul g h idx (idx' / d) hq, mul_assoc, wordOf_succ (d := d) h idx']
-    congr 2
-    ext; simp [letter, Nat.mod_mod]
+    rw [show letter d (idx' % d) = letter d idx' by ext; simp [letter, Nat.mod_mod]]
 
 theorem length_wordAt (c : ℕ) : (wordAt d c).length = degOf d c := length_wordOf _ _
 
@@ -219,14 +218,14 @@ theorem mkK_shiftZ (k c' : ℕ) (a' : ℤ) (x : VecZ) :
   | cons t x ih =>
     simp only [shiftZ]
     cases h : Nat.blt (degOf d t.1 + degOf d c') k
-    · simp only [cond_false]
+    · simp only [Bool.cond_false]
       rw [ih, evalZ_cons, map_add, add_mul]
       have h0 : mkK d k (t.2 • e d t.1) * mkK d k (a' • e d c') = 0 := by
         rw [← map_mul, smul_mul_smul_comm, Ideal.Quotient.eq_zero_iff_mem]
-        exact Submodule.smul_mem _ _ (e_mul_mem_Ik (by simp only [Nat.blt_eq, Bool.not_eq_true] at h; omega))
+        exact Submodule.smul_mem _ _ (e_mul_mem_Ik (by simp only [← Bool.not_eq_true, Nat.blt_eq] at h; omega))
       rw [h0, zero_add]
-    · simp only [cond_true]
-      rw [evalZ_cons, ih, evalZ_cons, map_add, add_mul, ← map_mul, smul_mul_smul_comm, e_mul]
+    · simp only [Bool.cond_true]
+      rw [evalZ_cons, map_add, ih, evalZ_cons, map_add, add_mul, ← map_mul, smul_mul_smul_comm, e_mul]
 
 theorem mkK_mulZ (k : ℕ) (x y : VecZ) :
     mkK d k (evalZ d (mulZ d k x y)) = mkK d k (evalZ d x) * mkK d k (evalZ d y) := by
@@ -323,15 +322,15 @@ theorem mkK_powZ (k : ℕ) : ∀ (f : ℕ) (acc b : VecZ) (n : ℕ), n < 2 ^ f �
   | f + 1, acc, b, n, hn => by
     simp only [powZ]
     cases h0 : (n == 0)
-    · simp only [cond_false]
+    · simp only [Bool.cond_false]
       have hn2 : n / 2 < 2 ^ f := Nat.div_lt_of_lt_mul (by rw [pow_succ, Nat.mul_comm] at hn; exact hn)
       rw [mkK_powZ k f _ _ _ hn2, mkK_mulZ]
       cases h1 : (n % 2 == 1)
-      · simp only [cond_false]
+      · simp only [Bool.cond_false]
         have h1' : n % 2 = 0 := by simp only [beq_eq_false_iff_ne, ne_eq] at h1; omega
         rw [show mkK d k (evalZ d b) ^ n = (mkK d k (evalZ d b) * mkK d k (evalZ d b)) ^ (n / 2) by
           rw [← sq, ← pow_mul]; congr 1; omega]
-      · simp only [cond_true]
+      · simp only [Bool.cond_true]
         have h1' : n % 2 = 1 := by simpa using h1
         rw [mkK_mulZ, mul_assoc, show mkK d k (evalZ d b) ^ n =
           mkK d k (evalZ d b) * (mkK d k (evalZ d b) * mkK d k (evalZ d b)) ^ (n / 2) by
@@ -353,10 +352,10 @@ theorem mkK_powFactor (k : ℕ) (w : List (ℕ × ℤ)) (ex : ℤ) :
   congr 2
   cases h : decide (ex < 0)
   · have h' : 0 ≤ ex := by simpa using h
-    simp only [cond_false]
+    simp only [Bool.cond_false]
     rw [← zpow_natCast, Int.natAbs_of_nonneg h']
   · have h' : ex < 0 := by simpa using h
-    simp only [cond_true]
+    simp only [Bool.cond_true]
     rw [gword_invW, inv_pow, ← zpow_natCast, Int.ofNat_natAbs_of_nonpos h'.le, zpow_neg, inv_inv]
 
 theorem relElt_cons (f : List (ℕ × ℤ) × ℤ) (r : List (List (ℕ × ℤ) × ℤ)) :
@@ -388,11 +387,11 @@ theorem lamW_eq_baseVal (m : ℕ × List ℤ) (w : FreeMonoid (Fin d)) :
   by_cases h : 1 ≤ w.length ∧ w.length ≤ m.1
   · have hb : (Nat.blt 0 w.length && Nat.ble w.length m.1) = true := by
       rw [Bool.and_eq_true, Nat.blt_eq, Nat.ble_eq]; omega
-    simp only [h, and_self, ↓reduceIte, hb, cond_true]
+    simp only [h, and_self, ↓reduceIte, hb, Bool.cond_true]
   · have hb : (Nat.blt 0 w.length && Nat.ble w.length m.1) = false := by
-      rw [Bool.and_eq_false_iff, Nat.blt_eq, Nat.ble_eq]
-      by_contra hc; push_neg at hc; exact h ⟨hc.1, hc.2⟩
-    simp only [h, ↓reduceIte, hb, cond_false]
+      rw [Bool.eq_false_iff]
+      intro hc; rw [Bool.and_eq_true, Nat.blt_eq, Nat.ble_eq] at hc; exact h ⟨hc.1, hc.2⟩
+    simp only [h, ↓reduceIte, hb, Bool.cond_false]
 
 theorem toList_ofList_letters (U : List ℕ) (hU : ∀ j ∈ U, j < d) :
     (FreeMonoid.ofList (U.map (letter d))).toList.map (·.val) = U := by
@@ -425,7 +424,8 @@ theorem mem_words : ∀ (a : ℕ) (U : List (Fin d)), U.length = a → U.map (·
   | a + 1, U, h => by
     rcases U.eq_nil_or_concat with rfl | ⟨U', l, rfl⟩
     · simp at h
-    · rw [List.length_append, List.length_singleton, Nat.add_right_cancel_iff] at h
+    · rw [List.concat_eq_append] at h ⊢
+      rw [List.length_append, List.length_singleton, Nat.add_right_cancel_iff] at h
       simp only [words, List.mem_flatMap, List.mem_map, List.mem_range]
       exact ⟨U'.map (·.val), mem_words a U' h, l.val, l.isLt, by simp⟩
 
