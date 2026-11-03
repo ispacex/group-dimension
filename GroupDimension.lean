@@ -42,5 +42,8 @@ public import GroupDimension.TraceReplay.Data.C4aT4
 public import GroupDimension.TraceReplay.Magnus
 public import GroupDimension.TraceReplay.HomPow
 public import GroupDimension.TraceReplay.HomExact
+public import GroupDimension.TraceReplay.PolyProd
+public import GroupDimension.TraceReplay.PolyExact
+public import GroupDimension.TraceReplay.PolyPres
 
 @[expose] public section

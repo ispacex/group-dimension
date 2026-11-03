@@ -31,8 +31,12 @@ Contents:
   lies in `Δ^n` (`check_mem_D_hom_lin`); for a word test, the word lies in `D_n(G)`
   (`check_mem_D_hom`). `hord_of_pow_eq_one` and `hord_lin_of_pow_eq_one` derive the order
   hypothesis from `w^{p^k} = 1` in `G`.
-* `check_mem_D_pres`: the same, for word tests, for the group presented by `allRels`. The homomorphisms then come
-  from a kernel check (exponent sums), and the generation and relator hypotheses come for free.
+* `check_mem_D_pres`: the same, for word tests, for the group presented by `allRels`. The
+  homomorphisms then come from a kernel check (exponent sums), and the generation and relator
+  hypotheses come for free.
+* `check_mem_D_funcs`: the argument for any functionals `ν_k : ℤ[G] → ℚ` vanishing on `Δ^n` with a
+  certified matrix; `check_mem_D_hom_lin` is its case `ν_k = nu φ K` (the `K`-th power of `φ`,
+  linearised), and `TraceReplay/PolyExact.lean` its case of products of polynomial maps of any weight.
 -/
 
 namespace GroupDimension.TraceReplay
@@ -178,6 +182,19 @@ theorem nuQ_toQ (φ : G →* Multiplicative ℤ) {K : ℕ} (hK : K < n) {y : Mon
     (hy : y ∈ augIdeal G) : nuQ φ K hK (toQ n y) = nu φ K y := by
   rw [toQ_of_mem hy]; rfl
 
+/-- Any functional `ν : ℤ[G] → ℚ` vanishing on `Δ^n`, on `Δ/Δ^n`. -/
+noncomputable def funcQ (ν : MonoidAlgebra ℤ G →+ ℚ) (hν : ∀ x ∈ augIdeal G ^ n, ν x = 0) :
+    Qn G n →ₗ[ℤ] ℚ :=
+  (NnD G n).liftQ (ν.toIntLinearMap ∘ₗ (Del G).subtype) (by
+    intro x hx
+    rw [LinearMap.mem_ker, LinearMap.comp_apply, Submodule.subtype_apply,
+      AddMonoidHom.coe_toIntLinearMap]
+    exact hν _ hx)
+
+theorem funcQ_toQ (ν : MonoidAlgebra ℤ G →+ ℚ) (hν : ∀ x ∈ augIdeal G ^ n, ν x = 0)
+    {y : MonoidAlgebra ℤ G} (hy : y ∈ augIdeal G) : funcQ ν hν (toQ n y) = ν y := by
+  rw [toQ_of_mem hy]; rfl
+
 end Q
 
 /-! ## `Δ/Δ^n` is finitely generated -/
@@ -319,29 +336,29 @@ theorem check_F_pos (T : Trace) (members : List ℕ) (h : check T members = true
   simp only [check, Bool.and_eq_true, List.all_eq_true, Nat.blt_eq] at h
   exact h.1.1.1.2
 
-/-- **Exact membership with free columns.** Suppose `check` accepts the trace and `checkHom` the
-certificate. Let `G` be a group and `g : Fin d → G` such that:
-* the `g j` generate `G`, and the relators listed in the trace hold at `g`;
-* every functional `(a, K)` of the certificate comes from a homomorphism `φ : G → ℤ` with
-  `φ(g_j) = a_j`;
-* the test element `x_t` (`w_t(g) − 1` for a word test, `Σ c_k (w_k(g) − 1)` for a lintest;
-  `linG g (testLin T t)`) has `p`-power order in `Δ/Δ^n` (`hord`).
+/-- **Exact membership with free columns, for any functionals.** Suppose `check` accepts the trace.
+Let `G` be a group and `g : Fin d → G` such that the `g j` generate `G` and the relators listed in
+the trace hold at `g`. Let `ν_0, …, ν_{nk−1} : ℤ[G] → ℚ` be additive maps vanishing on `Δ^n`, with
+values `M k j = ν_k(ψ(X_{F_j}))` on the free columns, and `C · M = diag(D)`, `D_i ≠ 0`. If the test
+element `x_t = linG g (testLin T t)` has `p`-power order in `Δ/Δ^n` (`hord`), then `x_t ∈ Δ^n`.
 
-Then `x_t ∈ Δ^n`; for a word test, `w_t(g) ∈ D_n(G)` (`check_mem_D_hom`). Generator `i` of a word
-(1-based) is `g ⟨i − 1⟩`. -/
-theorem check_mem_D_hom_lin (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
-    (H : HomCert) (hH : checkHom T H = true)
+The functionals are powers of homomorphisms `G → ℤ` in `check_mem_D_hom_lin`, and products of
+polynomial maps in `TraceReplay/PolyExact.lean`. -/
+theorem check_mem_D_funcs (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
     {G : Type*} [Group G] (g : Fin T.d → G) (hrel : ∀ r ∈ T.rels, gword g r.2 = 1)
     (hgen : Subgroup.closure (Set.range g) = ⊤)
-    (hφ : ∀ k < H.funcs.length, ∃ φ : G →* Multiplicative ℤ,
-      ∀ j : Fin T.d, Multiplicative.toAdd (φ (g j)) = (H.funcs.getD k ([], 0)).1.getD j.val 0)
+    (nk : ℕ) (ν : ℕ → MonoidAlgebra ℤ G →+ ℚ) (hν : ∀ k < nk, ∀ x ∈ augIdeal G ^ T.n, ν k x = 0)
+    (M C : ℕ → ℕ → ℤ) (Dg : ℕ → ℤ)
+    (hM : ∀ k < nk, ∀ j < T.F.length, ν k (psi g (e T.d (T.F.getD j 0))) = (M k j : ℚ))
+    (hDg : ∀ i < T.F.length, Dg i ≠ 0)
+    (hCM : ∀ i < T.F.length, ∀ j < T.F.length,
+      ∑ k ∈ Finset.range nk, C i k * M k j = if i = j then Dg i else 0)
     (t : ℕ) (ht : t ∈ members)
     (hord : ∃ m : ℕ, ((T.p : ℤ) ^ m) • linG g (testLin T t) ∈ augIdeal G ^ T.n) :
     linG g (testLin T t) ∈ augIdeal G ^ T.n := by
   obtain ⟨hp, hE, hn⟩ := check_params T members hc
   have hn0 : T.n ≠ 0 := by omega
   have hFpos := check_F_pos T members hc
-  obtain ⟨hK, hDg, hCM⟩ := checkHom_spec T H hH
   have : Module.Finite ℤ (Qn G T.n) := finite_Qn g hgen (n := T.n) (by omega)
   have hD0 : ((T.p ^ T.E : ℕ) : ℤ) ≠ 0 := by
     have : 0 < T.p ^ T.E := Nat.pow_pos (by omega)
@@ -411,43 +428,31 @@ theorem check_mem_D_hom_lin (T : Trace) (members : List ℕ) [NeZero T.d] (hc : 
       refine ⟨c • f1, Submodule.smul_mem _ c hf1, c • r1, ?_⟩
       rw [toQ_smul c (span_gensF_le_aug g T.n hx), smul_comm, e1, smul_add, smul_comm c]
   -- `F̄` meets the torsion trivially
-  choose! φ hφ' using hφ
   have hFt : ∀ f ∈ Fb, ∀ k : ℕ, 0 < k → (k : ℤ) • f = 0 → f = 0 := by
     intro f hf k hk hkf
     obtain ⟨a, rfl⟩ := (Submodule.mem_span_range_iff_exists_fun ℤ).1 hf
     let a' : ℕ → ℤ := fun j => if h : j < nf then a ⟨j, h⟩ else 0
-    have hzero : ∀ k' < H.funcs.length, ∑ j ∈ Finset.range nf,
-        a' j * colVal T.d (H.funcs.getD k' ([], 0)) (T.F.getD j 0) = 0 := by
+    have hzero : ∀ k' < nk, ∑ j ∈ Finset.range nf, a' j * M k' j = 0 := by
       intro k' hk'
-      have hKk : (H.funcs.getD k' ([], 0)).2 < T.n := by
-        apply hK; rw [List.getD_eq_getElem _ _ hk']; exact List.getElem_mem hk'
-      have h0 : nuQ (φ k') _ hKk (∑ i, a i • v i) = 0 := by
-        have h1 : (k : ℚ) * nuQ (φ k') _ hKk (∑ i, a i • v i) = 0 := by
-          have := congrArg (nuQ (φ k') _ hKk) hkf
+      have h0 : funcQ (ν k') (hν k' hk') (∑ i, a i • v i) = 0 := by
+        have h1 : (k : ℚ) * funcQ (ν k') (hν k' hk') (∑ i, a i • v i) = 0 := by
+          have := congrArg (funcQ (ν k') (hν k' hk')) hkf
           rw [map_zsmul, map_zero, zsmul_eq_mul] at this
           exact_mod_cast this
         exact (mul_eq_zero.mp h1).resolve_left (by exact_mod_cast hk.ne')
       rw [map_sum] at h0
-      have hval_i : ∀ i : Fin nf, nuQ (φ k') _ hKk (a i • v i) =
-          ((a i * colVal T.d (H.funcs.getD k' ([], 0)) (T.F.getD i 0) : ℤ) : ℚ) := by
+      have hval_i : ∀ i : Fin nf, funcQ (ν k') (hν k' hk') (a i • v i) = ((a i * M k' i : ℤ) : ℚ) := by
         intro i
         rw [map_zsmul, show v i = toQ T.n (psi g (e T.d (T.F.getD i 0))) from rfl,
-          nuQ_toQ _ hKk (psi_e_mem g (hFget i i.2)),
-          show e T.d (T.F.getD i 0) = single (wordAt T.d (T.F.getD i 0)) 1 from rfl,
-          nu_psi (φ k') g _ (hφ' k' hk'), colVal, zsmul_eq_mul]
+          funcQ_toQ _ _ (psi_e_mem g (hFget i i.2)), hM k' hk' i i.2, zsmul_eq_mul]
         push_cast; ring
       simp only [hval_i] at h0
-      rw [← Fin.sum_univ_eq_sum_range (fun j => a' j * colVal T.d (H.funcs.getD k' ([], 0))
-        (T.F.getD j 0)) nf]
-      have h2 : ((∑ i : Fin nf, a i * colVal T.d (H.funcs.getD k' ([], 0)) (T.F.getD i 0) : ℤ) :
-          ℚ) = 0 := by exact_mod_cast h0
+      rw [← Fin.sum_univ_eq_sum_range (fun j => a' j * M k' j) nf]
+      have h2 : ((∑ i : Fin nf, a i * M k' i : ℤ) : ℚ) = 0 := by exact_mod_cast h0
       have h3 := (Int.cast_eq_zero (α := ℚ)).mp h2
       refine Eq.trans (Finset.sum_congr rfl fun i _ => ?_) h3
       simp only [a', dif_pos i.2]
-    have ha0 := eq_zero_of_cert (nf := nf) (nk := H.funcs.length)
-      (fun i k' => (H.rows.getD i ([], 0)).1.getD k' 0)
-      (fun k' j => colVal T.d (H.funcs.getD k' ([], 0)) (T.F.getD j 0))
-      (fun i => (H.rows.getD i ([], 0)).2) hDg hCM a' hzero
+    have ha0 := eq_zero_of_cert (nf := nf) (nk := nk) C M Dg hDg hCM a' hzero
     have : a = 0 := by
       funext i
       have := ha0 i i.2
@@ -466,6 +471,37 @@ theorem check_mem_D_hom_lin (T : Trace) (members : List ℕ) [NeZero T.d] (hc : 
       rw [← toQ_smul _ (linG_mem_aug g _)]
       exact toQ_eq_zero hn0 hm
   exact (toQ_eq_zero_iff (linG_mem_aug g _)).1 hx0
+
+/-- **Exact membership with free columns.** Suppose `check` accepts the trace and `checkHom` the
+certificate. Let `G` be a group and `g : Fin d → G` such that:
+* the `g j` generate `G`, and the relators listed in the trace hold at `g`;
+* every functional `(a, K)` of the certificate comes from a homomorphism `φ : G → ℤ` with
+  `φ(g_j) = a_j`;
+* the test element `x_t` (`w_t(g) − 1` for a word test, `Σ c_k (w_k(g) − 1)` for a lintest;
+  `linG g (testLin T t)`) has `p`-power order in `Δ/Δ^n` (`hord`).
+
+Then `x_t ∈ Δ^n`; for a word test, `w_t(g) ∈ D_n(G)` (`check_mem_D_hom`). Generator `i` of a word
+(1-based) is `g ⟨i − 1⟩`. -/
+theorem check_mem_D_hom_lin (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
+    (H : HomCert) (hH : checkHom T H = true)
+    {G : Type*} [Group G] (g : Fin T.d → G) (hrel : ∀ r ∈ T.rels, gword g r.2 = 1)
+    (hgen : Subgroup.closure (Set.range g) = ⊤)
+    (hφ : ∀ k < H.funcs.length, ∃ φ : G →* Multiplicative ℤ,
+      ∀ j : Fin T.d, Multiplicative.toAdd (φ (g j)) = (H.funcs.getD k ([], 0)).1.getD j.val 0)
+    (t : ℕ) (ht : t ∈ members)
+    (hord : ∃ m : ℕ, ((T.p : ℤ) ^ m) • linG g (testLin T t) ∈ augIdeal G ^ T.n) :
+    linG g (testLin T t) ∈ augIdeal G ^ T.n := by
+  obtain ⟨hK, hDg, hCM⟩ := checkHom_spec T H hH
+  choose! φ hφ' using hφ
+  have hKk : ∀ k < H.funcs.length, (H.funcs.getD k ([], 0)).2 < T.n := fun k hk => by
+    apply hK; rw [List.getD_eq_getElem _ _ hk]; exact List.getElem_mem hk
+  refine check_mem_D_funcs T members hc g hrel hgen H.funcs.length
+    (fun k => nu (φ k) (H.funcs.getD k ([], 0)).2) (fun k hk x hx => nu_eq_zero (φ k) (hKk k hk) hx)
+    (fun k j => colVal T.d (H.funcs.getD k ([], 0)) (T.F.getD j 0))
+    (fun i k => (H.rows.getD i ([], 0)).1.getD k 0) (fun i => (H.rows.getD i ([], 0)).2)
+    (fun k hk j _ => ?_) hDg hCM t ht hord
+  show nu (φ k) _ (psi g (single (wordAt T.d (T.F.getD j 0)) 1)) = _
+  rw [nu_psi (φ k) g _ (hφ' k hk), colVal]
 
 /-- `check_mem_D_hom_lin` for a word test (`hw`): if `w_t(g) − 1` has `p`-power order in `Δ/Δ^n`,
 then `w_t(g) ∈ D_n(G)`. -/
