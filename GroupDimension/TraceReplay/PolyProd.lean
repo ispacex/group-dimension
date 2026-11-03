@@ -159,6 +159,7 @@ theorem pow_le_spanE (N : ℕ) :
       (by rw [mul_zero]; exact zero_mem _) ?_ (fun y h => by rw [mul_neg]; exact neg_mem h)
       (fun y z h h' => by rw [mul_add]; exact add_mem h h')
     intro g
+    clear ha
     induction ha' using Submodule.span_induction with
     | mem y hy =>
       obtain ⟨l, hl, rfl⟩ := hy
@@ -194,22 +195,52 @@ def covW (F H : List ℕ → ℤ) : List ℕ → List ℕ → List ℕ → ℤ
   | a, b, [] => F a * H b
   | a, b, j :: l => covW F H (a ++ [j]) b l + covW F H a (b ++ [j]) l + covW F H (a ++ [j]) (b ++ [j]) l
 
-theorem cov_eq_covW (g : ℕ → G) (F H : List ℕ → ℤ)
-    (hF : ∀ w, lin φ (E (w.map g)) = F w) (hH : ∀ w, lin χ (E (w.map g)) = H w) (l : List ℕ) :
-    ∀ a b : List ℕ, cov φ χ (E (a.map g)) (E (b.map g)) (l.map g) = covW F H a b l := by
+theorem cov_eq_covW (g : ℕ → G) (P : ℕ → Prop) (F H : List ℕ → ℤ)
+    (hF : ∀ w, (∀ j ∈ w, P j) → lin φ (E (w.map g)) = F w)
+    (hH : ∀ w, (∀ j ∈ w, P j) → lin χ (E (w.map g)) = H w) (l : List ℕ) (hl : ∀ j ∈ l, P j) :
+    ∀ a b : List ℕ, (∀ j ∈ a, P j) → (∀ j ∈ b, P j) →
+      cov φ χ (E (a.map g)) (E (b.map g)) (l.map g) = covW F H a b l := by
   induction l with
-  | nil => intro a b; simp only [List.map_nil, cov, covW, hF, hH]
+  | nil => intro a b ha hb; simp only [List.map_nil, cov, covW, hF a ha, hH b hb]
   | cons j l ih =>
-    intro a b
+    intro a b ha hb
+    have hj : P j := hl j List.mem_cons_self
+    have hl' : ∀ i ∈ l, P i := fun i hi => hl i (List.mem_cons_of_mem _ hi)
     have ej : ∀ c : List ℕ, E (c.map g) * (of ℤ G (g j) - 1) = E ((c ++ [j]).map g) := by
       intro c; rw [List.map_append, E_append]; simp [E]
-    simp only [List.map_cons, cov, covW, ej, ih]
+    have hc : ∀ c : List ℕ, (∀ i ∈ c, P i) → ∀ i ∈ c ++ [j], P i := by
+      intro c hc i hi
+      rcases List.mem_append.mp hi with h | h
+      · exact hc i h
+      · rw [List.mem_singleton.mp h]; exact hj
+    simp only [List.map_cons, cov, covW, ej]
+    rw [ih hl' _ _ (hc a ha) hb, ih hl' _ _ ha (hc b hb), ih hl' _ _ (hc a ha) (hc b hb)]
 
 /-- The value of `φ·χ` on `E (w.map g)` from the values of `φ` and `χ` on sub-words. -/
-theorem lin_mul_E_map (g : ℕ → G) (F H : List ℕ → ℤ)
-    (hF : ∀ w, lin φ (E (w.map g)) = F w) (hH : ∀ w, lin χ (E (w.map g)) = H w) (w : List ℕ) :
+theorem lin_mul_E_map (g : ℕ → G) (P : ℕ → Prop) (F H : List ℕ → ℤ)
+    (hF : ∀ w, (∀ j ∈ w, P j) → lin φ (E (w.map g)) = F w)
+    (hH : ∀ w, (∀ j ∈ w, P j) → lin χ (E (w.map g)) = H w) (w : List ℕ) (hw : ∀ j ∈ w, P j) :
     lin (fun x => φ x * χ x) (E (w.map g)) = covW F H [] [] w := by
-  rw [lin_mul_E, ← cov_eq_covW φ χ g F H hF hH w [] []]; rfl
+  rw [lin_mul_E, ← cov_eq_covW φ χ g P F H hF hH w hw [] [] (by simp) (by simp)]; rfl
+
+/-- The constant map `1` is `1` on `E []` and `0` on every other `E l`. -/
+theorem lin_one_E (l : List G) : lin (fun _ => (1 : ℤ)) (E l) = if l = [] then 1 else 0 := by
+  cases l with
+  | nil => rw [E_nil, lin_one, if_pos rfl]
+  | cons g l => rw [E_cons, sub_mul, one_mul, map_sub, lin_of_mul, sub_self, if_neg (List.cons_ne_nil _ _)]
+
+/-- `lin 1` vanishes on `Δ`: the constant map is a polynomial map of degree `0`. -/
+theorem lin_one_eq_zero : ∀ x ∈ augIdeal G ^ (0 + 1), lin (fun _ : G => (1 : ℤ)) x = 0 := by
+  intro x hx
+  have hx' := pow_le_spanE (G := G) 0 (by rwa [Submodule.restrictScalars_mem])
+  clear hx
+  induction hx' using Submodule.span_induction with
+  | mem y hy =>
+    obtain ⟨l, hl, rfl⟩ := hy
+    rw [lin_one_E, if_neg (by rintro rfl; simp at hl)]
+  | zero => exact map_zero _
+  | add y z _ _ hy hz => rw [map_add, hy, hz, add_zero]
+  | smul c y _ hy => rw [map_zsmul, hy, smul_zero]
 
 end PolyProd
 
