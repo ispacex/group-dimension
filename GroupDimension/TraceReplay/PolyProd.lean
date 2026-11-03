@@ -32,6 +32,7 @@ variable {G : Type*} [Group G]
 noncomputable def lin (φ : G → ℤ) : MonoidAlgebra ℤ G →+ ℤ :=
   (Finsupp.linearCombination ℤ φ).toAddMonoidHom.comp MonoidAlgebra.coeffAddEquiv.toAddMonoidHom
 
+omit [Group G] in
 theorem lin_single (φ : G → ℤ) (g : G) (a : ℤ) : lin φ (single g a) = a * φ g := by
   show Finsupp.linearCombination ℤ φ (Finsupp.single g a) = _
   rw [Finsupp.linearCombination_single, smul_eq_mul]
@@ -106,7 +107,7 @@ theorem lin_mul_E (l : List G) :
     have e1 : lin (fun h => φ h * χ h) (E (g :: l)) =
         lin (fun h => φ (g * h) * χ (g * h)) (E l) - lin (fun h => φ h * χ h) (E l) := by
       rw [E_cons, sub_mul, one_mul, map_sub, lin_of_mul]
-    rw [e1, ih, ih (fun h => φ (g * h)) (fun h => χ (g * h)), cov_translate, mul_one]
+    rw [e1, ih (fun h => φ (g * h)) (fun h => χ (g * h)), ih φ χ, cov_translate, mul_one]
     have e2 : of ℤ G g = (of ℤ G g - 1) + 1 := by abel
     rw [e2, cov_add_left, cov_add_right, cov_add_right]
     simp only [cov, one_mul]
@@ -153,7 +154,6 @@ theorem pow_le_spanE (N : ℕ) :
     rw [Submodule.restrictScalars_mem, Submodule.pow_succ] at hx
     refine Submodule.mul_induction_on hx (fun a ha b hb => ?_) (fun _ _ h h' => add_mem h h')
     have ha' : a ∈ Submodule.span ℤ {x | ∃ l : List G, l.length = N + 1 ∧ x = E l} := ih ha
-    rw [Submodule.pow_one] at hb
     refine CentralRoot.augIdeal_induction
       (p := fun b => a * b ∈ Submodule.span ℤ {x | ∃ l : List G, l.length = N + 1 + 1 ∧ x = E l}) hb
       (by rw [mul_zero]; exact zero_mem _) ?_ (fun y h => by rw [mul_neg]; exact neg_mem h)
@@ -175,6 +175,7 @@ theorem lin_mul_eq_zero {p q : ℕ} (hφ : ∀ x ∈ augIdeal G ^ (p + 1), lin �
     ∀ x ∈ augIdeal G ^ (p + q + 1), lin (fun g => φ g * χ g) x = 0 := by
   intro x hx
   have hx' := pow_le_spanE (G := G) (p + q) (by rwa [Submodule.restrictScalars_mem])
+  clear hx
   induction hx' using Submodule.span_induction with
   | mem y hy =>
     obtain ⟨l, hl, rfl⟩ := hy
