@@ -481,6 +481,65 @@ theorem homs_of_maps {G : Type*} [Group G] {d : ℕ} (g : Fin d → G) (maps : L
   rw [← hak]
   exact h a ha
 
+/-! ## `hord` from the order of the element -/
+
+section Order
+
+variable {G : Type*} [Group G]
+
+/-- `x^N − 1 = N (x − 1) + (x − 1)² u` with `u` commuting with `x − 1`. -/
+theorem of_pow_sub_one_eq (x : G) (N : ℕ) : ∃ u : MonoidAlgebra ℤ G,
+    Commute (of ℤ G x - 1) u ∧
+    of ℤ G (x ^ N) - 1 = (N : ℤ) • (of ℤ G x - 1) + (of ℤ G x - 1) ^ 2 * u := by
+  set y := of ℤ G x - 1 with hy
+  induction N with
+  | zero => exact ⟨0, Commute.zero_right _, by simp⟩
+  | succ N ih =>
+    obtain ⟨u, hc, e⟩ := ih
+    refine ⟨u + (N : ℤ) • 1 + y * u, ?_, ?_⟩
+    · exact ((hc.add_right ((Commute.one_right y).smul_right _)).add_right
+        ((Commute.refl y).mul_right hc))
+    · have hx : of ℤ G x = 1 + y := by rw [hy]; abel
+      have hN' : of ℤ G (x ^ N) = 1 + ((N : ℤ) • y + y ^ 2 * u) := by rw [← e]; abel
+      rw [pow_succ', map_mul, hx, hN']
+      push_cast
+      simp only [add_mul, mul_add, one_mul, mul_one, add_smul, one_smul, smul_add,
+        mul_smul_comm, pow_two, mul_assoc]
+      abel
+
+/-- If `x^N = 1`, then `N^j (x − 1) ∈ Δ^{j+1}`. -/
+theorem pow_smul_sub_one_mem (x : G) (N : ℕ) (hx : x ^ N = 1) (j : ℕ) :
+    ((N : ℤ) ^ j) • (of ℤ G x - 1) ∈ augIdeal G ^ (j + 1) := by
+  obtain ⟨u, hc, e⟩ := of_pow_sub_one_eq x N
+  set y := of ℤ G x - 1
+  rw [hx, map_one, sub_self] at e
+  -- `N y = y² v`, `v = −u`
+  have hN : (N : ℤ) • y = y ^ 2 * (-u) := by
+    rw [mul_neg, eq_neg_iff_add_eq_zero]; exact e.symm
+  have hcv : Commute y (-u) := hc.neg_right
+  have key : ∀ j : ℕ, ((N : ℤ) ^ j) • y = y ^ (j + 1) * (-u) ^ j := by
+    intro j
+    induction j with
+    | zero => simp
+    | succ j ih =>
+      have hvy : (-u) ^ j * y = y * (-u) ^ j := ((hcv.pow_right j).eq).symm
+      calc ((N : ℤ) ^ (j + 1)) • y = ((N : ℤ) ^ j) • ((N : ℤ) • y) := by rw [pow_succ, mul_smul]
+        _ = (((N : ℤ) ^ j) • y) * (y * -u) := by rw [hN, pow_two, mul_assoc, smul_mul_assoc]
+        _ = y ^ (j + 1) * ((-u) ^ j * y) * -u := by rw [ih]; simp only [mul_assoc]
+        _ = y ^ (j + 1 + 1) * (-u) ^ (j + 1) := by rw [hvy]; simp only [pow_succ, mul_assoc]
+  rw [key]
+  exact Ideal.mul_mem_right _ _ (Ideal.pow_mem_pow (of_sub_one_mem_augIdeal x) _)
+
+/-- `hord` of `check_mem_D_hom` from `x^{p^k} = 1`. -/
+theorem hord_of_pow_eq_one {p n k : ℕ} (hn : 1 ≤ n) (x : G) (hx : x ^ (p ^ k) = 1) :
+    ∃ m : ℕ, ((p : ℤ) ^ m) • (of ℤ G x - 1) ∈ augIdeal G ^ n := by
+  refine ⟨k * (n - 1), ?_⟩
+  have h := pow_smul_sub_one_mem x (p ^ k) hx (n - 1)
+  rw [Nat.sub_add_cancel hn] at h
+  rwa [Nat.cast_pow, ← pow_mul] at h
+
+end Order
+
 /-! ## The presented group -/
 
 section Pres

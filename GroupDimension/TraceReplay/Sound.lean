@@ -23,8 +23,8 @@ For a list of relators `rels` (flat words) and a modulus `D`, the level-`k` targ
 So `Lt k` is the preimage of `J_k + D·A_k` under `R → A_k = R / (degree ≥ k)`.
 
 Main results: every vector a trace defines at level `k` lies in `Lt k`; if `check` passes, then
-`mt n w_t − 1 ∈ Lt n` for every test claimed in, and `p^{E−1} X_w ∈ Lt n` for every word `w ≠ 1`
-(exactness (X) with no free columns).
+`mt n w_t − 1 ∈ Lt n` for every test claimed in, and `p^{E−1} X_w ∈ Lt n + span{X_f : f ∈ F}` for
+every word `w ≠ 1` (exactness (X); with no free columns, `F = []`, the span is `0`).
 -/
 
 namespace GroupDimension.TraceReplay
@@ -903,7 +903,7 @@ end Index
 
 /-- **Soundness of the replay.** If `check T members` passes, then for every test `t` claimed in,
 `mt n w_t − 1 ∈ Lt n` (membership modulo `p^E`, statement 4 of `cert/TRACE.md`), and
-`p^{E−1} X_w ∈ Lt n` for every word `w ≠ 1` (exactness (X) with `F = ∅`, statement 5). -/
+`p^{E−1} X_w ∈ Lt n + span{X_f : f ∈ F}` (`Fspan`) for every word `w ≠ 1` (exactness (X), statement 5). -/
 theorem check_sound (T : Trace) (members : List ℕ) [NeZero T.d] (h : check T members = true) :
     (∀ t ∈ members, mt T.d T.n (findWord t T.tests) - 1 ∈ LT T T.n) ∧
     (∀ w : FreeMonoid (Fin T.d), w ≠ 1 →
