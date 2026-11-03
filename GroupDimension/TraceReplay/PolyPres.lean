@@ -128,6 +128,7 @@ def lamW (m : ℕ × List ℤ) (u : FreeMonoid (Fin d)) : ℤ :=
 noncomputable def lamR (m : ℕ × List ℤ) : R d →+ ℤ :=
   (Finsupp.linearCombination ℤ (lamW m)).toAddMonoidHom.comp MonoidAlgebra.coeffAddEquiv.toAddMonoidHom
 
+omit [NeZero d] in
 theorem lamR_single (m : ℕ × List ℤ) (u : FreeMonoid (Fin d)) (a : ℤ) :
     lamR m (single u a) = a * lamW m u := by
   show Finsupp.linearCombination ℤ (lamW m) (Finsupp.single u a) = _
@@ -137,7 +138,7 @@ theorem lamR_Ik (m : ℕ × List ℤ) {x : R d} (hx : x ∈ Ik d (m.1 + 1)) : la
   induction hx using Submodule.span_induction with
   | mem y hy =>
     obtain ⟨u, hu, rfl⟩ := hy
-    rw [lamR_single, lamW, if_neg (by omega), mul_zero]
+    rw [lamR_single, lamW, ite_cond_eq_false _ _ (eq_false (by omega)), mul_zero]
   | zero => exact map_zero _
   | add y z _ _ hy hz => rw [map_add, hy, hz, add_zero]
   | smul c y _ hy => rw [map_zsmul, hy, smul_zero]
@@ -267,7 +268,7 @@ theorem isBase_of_vanish (hvan : Vanish rels m) :
     IsBase (fun j : Fin d => (PresentedGroup.of j : PresentedGroup rels)) m (phiA hvan 1) := by
   refine ⟨?_, fun x hx => ?_, fun u hu h1 hw => ?_⟩
   · rw [← map_one (PresentedGroup.mk rels), phiA_mk, map_one, Units.val_one, mul_one, ← map_one
-      (Ideal.Quotient.mk _), lamA_mk, one_def, lamR_single, lamW, if_neg (by simp), mul_zero]
+      (Ideal.Quotient.mk _), lamA_mk, one_def, lamR_single, lamW, ite_cond_eq_false _ _ (eq_false (by simp)), mul_zero]
   · have hs := pow_le_spanE (G := PresentedGroup rels) m.1 (show x ∈ (augIdeal _ ^ (m.1 + 1)).restrictScalars ℤ from hx)
     clear hx
     induction hs using Submodule.span_induction with
@@ -297,7 +298,7 @@ theorem isBase_of_vanish (hvan : Vanish rels m) :
       rw [FreeMonoid.toList_ofList, List.map_map]
       conv_rhs => rw [← List.map_id u]
       exact List.map_congr_left fun j hj => letter_of_lt (hu j hj)
-    rw [if_pos (by rw [hl]; exact ⟨h1, hw⟩), hv]
+    rw [ite_cond_eq_true _ _ (eq_true (by rw [hl]; exact ⟨h1, hw⟩)), hv]
 
 end Pres
 
