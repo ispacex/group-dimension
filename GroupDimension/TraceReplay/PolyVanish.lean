@@ -88,31 +88,36 @@ def magnusN (d k : Nat) (r : List (List (Nat × Int) × Int)) : VecZ :=
     (powZ d k f.2.natAbs [(0, 1)] (magnusW d k (bif decide (f.2 < 0) then invW f.1 else f.1)) f.2.natAbs))
     [(0, 1)]
 
-/-- All words of length `a` over `0..d−1`, as lists of letters. -/
-def words (d : Nat) : Nat → List (List Nat)
-  | 0 => [[]]
-  | a + 1 => (words d a).flatMap fun u => (List.range d).map fun j => u ++ [j]
+/-- The position of `X_c X_{c'}`. -/
+def posMul (d c c' : Nat) : Nat :=
+  off d (degOf d c + degOf d c') + (c - off d (degOf d c)) * d ^ degOf d c' + (c' - off d (degOf d c'))
 
-/-- The letters of the monomial at position `c`. -/
-def letters (d : Nat) [NeZero d] (c : Nat) : List Nat := (wordAt d c).toList.map (·.val)
+/-- `λ` on the monomial at position `p` (degrees `1..w`, else `0`). -/
+def lamPos (d : Nat) (m : Nat × List Int) (p : Nat) : Int :=
+  bif Nat.blt 0 (degOf d p) && Nat.ble (degOf d p) m.1 then m.2.getD (p - 1) 0 else 0
 
-/-- `λ(X_U v X_V)`. -/
-def vanVal (d : Nat) [NeZero d] (m : Nat × List Int) (v : VecZ) (U V : List Nat) : Int :=
-  v.foldl (fun s t => s + t.2 * baseVal d m (U ++ letters d t.1 ++ V)) 0
+/-- `λ(X_U v X_V)`, `U` the word of length `a` and index `u`, `V` of length `b` and index `vv`. -/
+def vanVal (d : Nat) (m : Nat × List Int) (v : VecZ) (a u b vv : Nat) : Int :=
+  v.foldl (fun s t => s + t.2 * lamPos d m (posMul d (posMul d (off d a + u) t.1) (off d b + vv))) 0
 
 /-- `v − 1`. -/
 def subOne (v : VecZ) : VecZ := mergeZ (v.length + 1) v [(0, -1)]
 
-/-- Check 1 for one relator: `λ(X_U (μ(r) − 1) X_V) = 0` for `|U| + |V| ≤ w − 1`. -/
-def checkVanishRel (d : Nat) [NeZero d] (m : Nat × List Int) (r : List (List (Nat × Int) × Int)) : Bool :=
-  let v := subOne (magnusN d (m.1 + 1) r)
+/-- Check 1 for one map, given `v = μ(r) − 1`: `λ(X_U v X_V) = 0` for `|U| + |V| ≤ w − 1`. -/
+def checkMap (d : Nat) (m : Nat × List Int) (v : VecZ) : Bool :=
   (List.range m.1).all fun a => (List.range (m.1 - a)).all fun b =>
-    (words d a).all fun U => (words d b).all fun V => vanVal d m v U V == 0
+    (List.range (d ^ a)).all fun u => (List.range (d ^ b)).all fun vv => vanVal d m v a u b vv == 0
 
-/-- Check 1 for a base map against all relators. -/
-def checkVanish (d : Nat) [NeZero d] (m : Nat × List Int) (rels : List (List (List (Nat × Int) × Int))) :
+/-- Check 1 for one relator and all maps, `μ(r)` computed once below degree `K` (`K > w` for every
+map). -/
+def checkVanishRel (d K : Nat) (maps : List (Nat × List Int)) (r : List (List (Nat × Int) × Int)) : Bool :=
+  let v := subOne (magnusN d K r)
+  maps.all fun m => Nat.ble (m.1 + 1) K && checkMap d m v
+
+/-- Check 1 for all maps against all relators. -/
+def checkVanish (d K : Nat) (maps : List (Nat × List Int)) (rels : List (List (List (Nat × Int) × Int))) :
     Bool :=
-  rels.all fun r => checkVanishRel d m r
+  rels.all fun r => checkVanishRel d K maps r
 
 /-! ## The group side -/
 
@@ -210,14 +215,14 @@ theorem e_mul_mem_Ik {k c c' : ℕ} (h : k ≤ degOf d c + degOf d c') : e d c *
   simp only [e, single_mul_single, one_mul]
   exact single_mem_Ik (by rw [FreeMonoid.length_mul, length_wordAt, length_wordAt]; exact h) _
 
-theorem mkK_shiftZ (k c' : ℕ) (a' : ℤ) (x : VecZ) :
-    mkK d k (evalZ d (shiftZ d k (degOf d c') (c' - off d (degOf d c')) a' x)) =
+theorem mkK_shiftZ {k K : ℕ} (hk : k ≤ K) (c' : ℕ) (a' : ℤ) (x : VecZ) :
+    mkK d k (evalZ d (shiftZ d K (degOf d c') (c' - off d (degOf d c')) a' x)) =
       mkK d k (evalZ d x) * mkK d k (a' • e d c') := by
   induction x with
   | nil => simp [shiftZ]
   | cons t x ih =>
     simp only [shiftZ]
-    cases h : Nat.blt (degOf d t.1 + degOf d c') k
+    cases h : Nat.blt (degOf d t.1 + degOf d c') K
     · simp only [Bool.cond_false]
       rw [ih, evalZ_cons, map_add, add_mul]
       have h0 : mkK d k (t.2 • e d t.1) * mkK d k (a' • e d c') = 0 := by
@@ -229,17 +234,17 @@ theorem mkK_shiftZ (k c' : ℕ) (a' : ℤ) (x : VecZ) :
       congr 1
       rw [← map_mul, smul_mul_smul_comm, e_mul]
 
-theorem mkK_mulZ (k : ℕ) (x y : VecZ) :
-    mkK d k (evalZ d (mulZ d k x y)) = mkK d k (evalZ d x) * mkK d k (evalZ d y) := by
+theorem mkK_mulZ {k K : ℕ} (hk : k ≤ K) (x y : VecZ) :
+    mkK d k (evalZ d (mulZ d K x y)) = mkK d k (evalZ d x) * mkK d k (evalZ d y) := by
   suffices h : ∀ acc, mkK d k (evalZ d (y.foldl (fun acc t => mergeZ (acc.length + x.length) acc
-      (shiftZ d k (degOf d t.1) (t.1 - off d (degOf d t.1)) t.2 x)) acc)) =
+      (shiftZ d K (degOf d t.1) (t.1 - off d (degOf d t.1)) t.2 x)) acc)) =
       mkK d k (evalZ d acc) + mkK d k (evalZ d x) * mkK d k (evalZ d y) by
     simpa [mulZ] using h []
   induction y with
   | nil => intro acc; simp
   | cons t y ih =>
     intro acc
-    rw [List.foldl_cons, ih, evalZ_mergeZ, map_add, mkK_shiftZ, evalZ_cons, map_add, mul_add]
+    rw [List.foldl_cons, ih, evalZ_mergeZ, map_add, mkK_shiftZ hk, evalZ_cons, map_add, mul_add]
     abel
 
 theorem jIdx_spec {j : ℕ} (hj : j < d) :
@@ -286,38 +291,38 @@ theorem bser_eq_zpow {A : Type*} [Ring A] (y : A) (u : Aˣ) (hu : (u : A) = 1 + 
           rw [mul_assoc, Units.mul_inv, mul_one]
       _ = ((u ^ (-(i : ℤ) - 1) : Aˣ) : A) := by rw [h, ← Units.val_mul, ← zpow_sub_one]
 
-theorem mkK_S (k j : ℕ) (ex : ℤ) :
-    mkK d k (S (d := d) k j ex) = ((unitX k j ^ ex : (Ak d k)ˣ) : Ak d k) := by
-  have hS : S (d := d) k j ex = bser (X (d := d) j) k ex := by
+theorem mkK_S {k K : ℕ} (hk : k ≤ K) (j : ℕ) (ex : ℤ) :
+    mkK d k (S (d := d) K j ex) = ((unitX k j ^ ex : (Ak d k)ˣ) : Ak d k) := by
+  have hS : S (d := d) K j ex = bser (X (d := d) j) K ex := by
     simp only [S, bser, binom_eq_choose, X, single_pow, one_pow]
-  have hmap : mkK d k (bser (X (d := d) j) k ex) = bser (mkK d k (X j)) k ex := by
+  have hmap : mkK d k (bser (X (d := d) j) K ex) = bser (mkK d k (X j)) K ex := by
     simp only [bser, map_sum, map_zsmul, map_pow]
   rw [hS, hmap]
   apply bser_eq_zpow
   · rw [unitX, IsUnit.unit_spec]
-  · rw [← map_pow]; exact Ideal.Quotient.eq_zero_iff_mem.2 (X_pow_mem_Ik k j)
+  · rw [← map_pow]; exact Ideal.Quotient.eq_zero_iff_mem.2 (Ik_mono hk (X_pow_mem_Ik K j))
 
 theorem gword_cons {G : Type*} [Group G] (g : Fin d → G) (f : ℕ × ℤ) (w : List (ℕ × ℤ)) :
     gword g (f :: w) = g (letter d (f.1 - 1)) ^ f.2 * gword g w := by
   simp [gword]
 
-theorem mkK_magnusW (k : ℕ) (w : List (ℕ × ℤ)) :
-    mkK d k (evalZ d (magnusW d k w)) = ((muA k (gword FreeGroup.of w) : (Ak d k)ˣ) : Ak d k) := by
-  suffices h : ∀ x, mkK d k (evalZ d (w.foldl (fun x f => mulZ d k x (sVec d ((f.1 - 1) % d) f.2 k)) x)) =
+theorem mkK_magnusW {k K : ℕ} (hk : k ≤ K) (w : List (ℕ × ℤ)) :
+    mkK d k (evalZ d (magnusW d K w)) = ((muA k (gword FreeGroup.of w) : (Ak d k)ˣ) : Ak d k) := by
+  suffices h : ∀ x, mkK d k (evalZ d (w.foldl (fun x f => mulZ d K x (sVec d ((f.1 - 1) % d) f.2 K)) x)) =
       mkK d k (evalZ d x) * ((muA k (gword FreeGroup.of w) : (Ak d k)ˣ) : Ak d k) by
     rw [magnusW, h, evalZ_one, map_one, one_mul]
   induction w with
   | nil => intro x; simp [gword]
   | cons f w ih =>
     intro x
-    rw [List.foldl_cons, ih, mkK_mulZ, evalZ_sVec (Nat.mod_lt _ (NeZero.pos d)), mkK_S, mul_assoc,
+    rw [List.foldl_cons, ih, mkK_mulZ hk, evalZ_sVec (Nat.mod_lt _ (NeZero.pos d)), mkK_S hk, mul_assoc,
       gword_cons, map_mul, Units.val_mul, map_zpow]
     congr 3
     rw [muA, FreeGroup.lift_apply_of]
     rfl
 
-theorem mkK_powZ (k : ℕ) : ∀ (f : ℕ) (acc b : VecZ) (n : ℕ), n < 2 ^ f →
-    mkK d k (evalZ d (powZ d k f acc b n)) = mkK d k (evalZ d acc) * mkK d k (evalZ d b) ^ n
+theorem mkK_powZ {k K : ℕ} (hk : k ≤ K) : ∀ (f : ℕ) (acc b : VecZ) (n : ℕ), n < 2 ^ f →
+    mkK d k (evalZ d (powZ d K f acc b n)) = mkK d k (evalZ d acc) * mkK d k (evalZ d b) ^ n
   | 0, acc, b, n, hn => by
     have : n = 0 := by simpa using hn
     subst this; simp [powZ]
@@ -326,7 +331,7 @@ theorem mkK_powZ (k : ℕ) : ∀ (f : ℕ) (acc b : VecZ) (n : ℕ), n < 2 ^ f �
     cases h0 : (n == 0)
     · simp only [Bool.cond_false]
       have hn2 : n / 2 < 2 ^ f := Nat.div_lt_of_lt_mul (by rw [pow_succ, Nat.mul_comm] at hn; exact hn)
-      rw [mkK_powZ k f _ _ _ hn2, mkK_mulZ]
+      rw [mkK_powZ hk f _ _ _ hn2, mkK_mulZ hk]
       cases h1 : (n % 2 == 1)
       · simp only [Bool.cond_false]
         have h1' : n % 2 = 0 := by simp only [beq_eq_false_iff_ne, ne_eq] at h1; omega
@@ -334,7 +339,7 @@ theorem mkK_powZ (k : ℕ) : ∀ (f : ℕ) (acc b : VecZ) (n : ℕ), n < 2 ^ f �
           rw [← sq, ← pow_mul]; congr 1; omega]
       · simp only [Bool.cond_true]
         have h1' : n % 2 = 1 := by simpa using h1
-        rw [mkK_mulZ, mul_assoc, show mkK d k (evalZ d b) ^ n =
+        rw [mkK_mulZ hk, mul_assoc, show mkK d k (evalZ d b) ^ n =
           mkK d k (evalZ d b) * (mkK d k (evalZ d b) * mkK d k (evalZ d b)) ^ (n / 2) by
           rw [← sq, ← pow_mul, ← pow_succ']; congr 1; omega]
     · have : n = 0 := by simpa using h0
@@ -345,11 +350,11 @@ theorem gword_invW {G : Type*} [Group G] (g : Fin d → G) (w : List (ℕ × ℤ
   simp only [gword, invW, List.map_map, List.prod_inv_reverse, List.map_reverse, Function.comp_def,
     zpow_neg]
 
-theorem mkK_powFactor (k : ℕ) (w : List (ℕ × ℤ)) (ex : ℤ) :
-    mkK d k (evalZ d (powZ d k ex.natAbs [(0, 1)]
-      (magnusW d k (bif decide (ex < 0) then invW w else w)) ex.natAbs)) =
+theorem mkK_powFactor {k K : ℕ} (hk : k ≤ K) (w : List (ℕ × ℤ)) (ex : ℤ) :
+    mkK d k (evalZ d (powZ d K ex.natAbs [(0, 1)]
+      (magnusW d K (bif decide (ex < 0) then invW w else w)) ex.natAbs)) =
       ((muA k (gword FreeGroup.of w ^ ex) : (Ak d k)ˣ) : Ak d k) := by
-  rw [mkK_powZ k _ _ _ _ Nat.lt_two_pow_self, evalZ_one, map_one, one_mul, mkK_magnusW,
+  rw [mkK_powZ hk _ _ _ _ Nat.lt_two_pow_self, evalZ_one, map_one, one_mul, mkK_magnusW hk,
     ← Units.val_pow_eq_pow_val, ← map_pow]
   congr 2
   cases h : decide (ex < 0)
@@ -364,17 +369,17 @@ theorem relElt_cons (f : List (ℕ × ℤ) × ℤ) (r : List (List (ℕ × ℤ) 
     relElt d (f :: r) = gword FreeGroup.of f.1 ^ f.2 * relElt d r := by
   simp [relElt]
 
-theorem mkK_magnusN (k : ℕ) (r : List (List (ℕ × ℤ) × ℤ)) :
-    mkK d k (evalZ d (magnusN d k r)) = ((muA k (relElt d r) : (Ak d k)ˣ) : Ak d k) := by
-  suffices h : ∀ x, mkK d k (evalZ d (r.foldl (fun acc f => mulZ d k acc
-      (powZ d k f.2.natAbs [(0, 1)] (magnusW d k (bif decide (f.2 < 0) then invW f.1 else f.1)) f.2.natAbs))
+theorem mkK_magnusN {k K : ℕ} (hk : k ≤ K) (r : List (List (ℕ × ℤ) × ℤ)) :
+    mkK d k (evalZ d (magnusN d K r)) = ((muA k (relElt d r) : (Ak d k)ˣ) : Ak d k) := by
+  suffices h : ∀ x, mkK d k (evalZ d (r.foldl (fun acc f => mulZ d K acc
+      (powZ d K f.2.natAbs [(0, 1)] (magnusW d K (bif decide (f.2 < 0) then invW f.1 else f.1)) f.2.natAbs))
       x)) = mkK d k (evalZ d x) * ((muA k (relElt d r) : (Ak d k)ˣ) : Ak d k) by
     rw [magnusN, h, evalZ_one, map_one, one_mul]
   induction r with
   | nil => intro x; simp [relElt]
   | cons f r ih =>
     intro x
-    rw [List.foldl_cons, ih, mkK_mulZ, mkK_powFactor, mul_assoc, ← Units.val_mul, ← map_mul,
+    rw [List.foldl_cons, ih, mkK_mulZ hk, mkK_powFactor hk, mul_assoc, ← Units.val_mul, ← map_mul,
       relElt_cons]
 
 theorem mkK_subOne (k : ℕ) (v : VecZ) : mkK d k (evalZ d (subOne v)) = mkK d k (evalZ d v) - 1 := by
@@ -395,19 +400,43 @@ theorem lamW_eq_baseVal (m : ℕ × List ℤ) (w : FreeMonoid (Fin d)) :
       intro hc; rw [Bool.and_eq_true, Nat.blt_eq, Nat.ble_eq] at hc; exact h ⟨hc.1, hc.2⟩
     simp only [h, ↓reduceIte, hb, Bool.cond_false]
 
-theorem toList_ofList_letters (U : List ℕ) (hU : ∀ j ∈ U, j < d) :
-    (FreeMonoid.ofList (U.map (letter d))).toList.map (·.val) = U := by
-  rw [FreeMonoid.toList_ofList, List.map_map]
-  conv_rhs => rw [← List.map_id U]
-  exact List.map_congr_left fun j hj => letter_of_lt (hU j hj)
+theorem foldl_wordOf : ∀ (g i : ℕ), i < d ^ g →
+    ((wordOf d g i).toList.map (·.val)).foldl (fun acc j => acc * d + j) 0 = i
+  | 0, i, hi => by
+    have : i = 0 := by simpa using hi
+    subst this; rfl
+  | g + 1, i, hi => by
+    have hq : i / d < d ^ g := Nat.div_lt_of_lt_mul (by rw [pow_succ, Nat.mul_comm] at hi; exact hi)
+    rw [wordOf_succ, FreeMonoid.toList_mul, FreeMonoid.toList_of, List.map_append, List.foldl_append,
+      foldl_wordOf g (i / d) hq]
+    simp [letter, Nat.div_add_mod']
 
-theorem vanVal_eq (m : ℕ × List ℤ) (v : VecZ) (U V : List ℕ) (hU : ∀ j ∈ U, j < d)
-    (hV : ∀ j ∈ V, j < d) :
-    vanVal d m v U V = lamA m (mkK d (m.1 + 1) (single (FreeMonoid.ofList (U.map (letter d))) 1) *
-      mkK d (m.1 + 1) (evalZ d v) * mkK d (m.1 + 1) (single (FreeMonoid.ofList (V.map (letter d))) 1)) := by
-  suffices h : ∀ s, v.foldl (fun s t => s + t.2 * baseVal d m (U ++ letters d t.1 ++ V)) s =
-      s + lamA m (mkK d (m.1 + 1) (single (FreeMonoid.ofList (U.map (letter d))) 1) *
-        mkK d (m.1 + 1) (evalZ d v) * mkK d (m.1 + 1) (single (FreeMonoid.ofList (V.map (letter d))) 1)) by
+theorem posN_wordAt (p : ℕ) : posN d ((wordAt d p).toList.map (·.val)) = p := by
+  have hd := NeZero.pos d
+  have hs := deg_spec hd p
+  unfold posN
+  rw [List.length_map]
+  show off d (wordAt d p).length + _ = p
+  rw [length_wordAt]
+  have := foldl_wordOf (d := d) (degOf d p) (p - off d (degOf d p)) (idx_lt hd p)
+  simp only [wordAt] at this ⊢
+  rw [this]; omega
+
+theorem lamR_e (m : ℕ × List ℤ) (p : ℕ) : lamR m (e d p) = lamPos d m p := by
+  rw [e, lamR_single, one_mul, lamW_eq_baseVal]
+  unfold baseVal lamPos
+  rw [List.length_map]
+  show (bif Nat.blt 0 (wordAt d p).length && Nat.ble (wordAt d p).length m.1 then _ else _) = _
+  rw [length_wordAt, posN_wordAt]
+
+theorem e_posMul (c c' : ℕ) : e d c * e d c' = e d (posMul d c c') := e_mul c c'
+
+theorem vanVal_eq (m : ℕ × List ℤ) (v : VecZ) (a u b vv : ℕ) (hu : u < d ^ a) (hv : vv < d ^ b) :
+    vanVal d m v a u b vv = lamA m (mkK d (m.1 + 1) (single (wordOf d a u) 1) *
+      mkK d (m.1 + 1) (evalZ d v) * mkK d (m.1 + 1) (single (wordOf d b vv) 1)) := by
+  suffices h : ∀ s, v.foldl (fun s t => s + t.2 * lamPos d m (posMul d (posMul d (off d a + u) t.1)
+      (off d b + vv))) s = s + lamA m (mkK d (m.1 + 1) (single (wordOf d a u) 1) *
+        mkK d (m.1 + 1) (evalZ d v) * mkK d (m.1 + 1) (single (wordOf d b vv) 1)) by
     simpa [vanVal] using h 0
   induction v with
   | nil => intro s; simp
@@ -415,50 +444,41 @@ theorem vanVal_eq (m : ℕ × List ℤ) (v : VecZ) (U V : List ℕ) (hU : ∀ j 
     intro s
     rw [List.foldl_cons, ih, evalZ_cons, map_add, mul_add, add_mul, map_add, add_assoc]
     congr 2
-    rw [← map_mul, ← map_mul, lamA_mk, mul_smul_comm, smul_mul_assoc, map_zsmul, smul_eq_mul, e,
-      single_mul_single, single_mul_single, one_mul, one_mul, lamR_single, one_mul, lamW_eq_baseVal,
-      FreeMonoid.toList_mul, FreeMonoid.toList_mul, List.map_append, List.map_append,
-      toList_ofList_letters U hU, toList_ofList_letters V hV]
-    rfl
+    rw [← map_mul, ← map_mul, lamA_mk, mul_smul_comm, smul_mul_assoc, map_zsmul, smul_eq_mul,
+      ← e_of_pos hu, ← e_of_pos hv, e_posMul, e_posMul, lamR_e]
 
-theorem mem_words : ∀ (a : ℕ) (U : List (Fin d)), U.length = a → U.map (·.val) ∈ words d a
-  | 0, U, h => by rw [List.length_eq_zero_iff.mp h]; simp [words]
-  | a + 1, U, h => by
-    rcases U.eq_nil_or_concat with rfl | ⟨U', l, rfl⟩
-    · simp at h
-    · rw [List.concat_eq_append] at h ⊢
-      rw [List.length_append, List.length_singleton, Nat.add_right_cancel_iff] at h
-      simp only [words, List.mem_flatMap, List.mem_map, List.mem_range]
-      exact ⟨U'.map (·.val), mem_words a U' h, l.val, l.isLt, by simp⟩
-
-theorem ofList_letters (u : FreeMonoid (Fin d)) :
-    FreeMonoid.ofList ((u.toList.map (·.val)).map (letter d)) = u := by
-  rw [List.map_map]
-  conv_rhs => rw [← FreeMonoid.ofList_toList u]
-  congr 1
-  conv_rhs => rw [← List.map_id u.toList]
-  exact List.map_congr_left fun j _ => letter_val j
-
-theorem checkVanishRel_sound {m : ℕ × List ℤ} {r : List (List (ℕ × ℤ) × ℤ)}
-    (h : checkVanishRel d m r = true) (u v : FreeMonoid (Fin d)) (huv : u.length + v.length + 1 ≤ m.1) :
-    lamA m (Ideal.Quotient.mk _ (single u 1) * ((muA (m.1 + 1) (relElt d r) : Ak d (m.1 + 1)) - 1) *
-      Ideal.Quotient.mk _ (single v 1)) = 0 := by
-  simp only [checkVanishRel, List.all_eq_true, List.mem_range, beq_iff_eq] at h
-  have hU : ∀ j ∈ u.toList.map (·.val), j < d := by
-    intro j hj; obtain ⟨l, -, rfl⟩ := List.mem_map.1 hj; exact l.isLt
-  have hV : ∀ j ∈ v.toList.map (·.val), j < d := by
-    intro j hj; obtain ⟨l, -, rfl⟩ := List.mem_map.1 hj; exact l.isLt
-  have hv := h u.length (by omega) v.length (by omega) _ (mem_words _ u.toList rfl) _
-    (mem_words _ v.toList rfl)
-  rw [vanVal_eq m _ _ _ hU hV, ofList_letters, ofList_letters, mkK_subOne, mkK_magnusN] at hv
-  exact hv
+theorem checkMap_sound {m : ℕ × List ℤ} {v : VecZ} (h : checkMap d m v = true) (u w : FreeMonoid (Fin d))
+    (huw : u.length + w.length + 1 ≤ m.1) :
+    lamA m (mkK d (m.1 + 1) (single u 1) * mkK d (m.1 + 1) (evalZ d v) * mkK d (m.1 + 1) (single w 1)) = 0 := by
+  simp only [checkMap, List.all_eq_true, List.mem_range, beq_iff_eq] at h
+  have hu := idxOf_spec u.toList
+  have hw := idxOf_spec w.toList
+  have hu2 : wordOf d u.length (idxOf u.toList) = u := by
+    rw [show u.length = u.toList.length from rfl, hu.2, FreeMonoid.ofList_toList]
+  have hw2 : wordOf d w.length (idxOf w.toList) = w := by
+    rw [show w.length = w.toList.length from rfl, hw.2, FreeMonoid.ofList_toList]
+  have := h u.length (by omega) w.length (by omega) _ hu.1 _ hw.1
+  rw [vanVal_eq m v _ _ _ _ hu.1 hw.1, hu2, hw2] at this
+  exact this
 
 /-- **Soundness of the kernel check of `Vanish`.** -/
-theorem vanish_of_check {m : ℕ × List ℤ} {rels : List (List (List (ℕ × ℤ) × ℤ))}
-    (h : checkVanish d m rels = true) : Vanish (relSetN d rels) m := by
+theorem vanish_of_check {K : ℕ} {maps : List (ℕ × List ℤ)} {rels : List (List (List (ℕ × ℤ) × ℤ))}
+    (h : checkVanish d K maps rels = true) : ∀ m ∈ maps, Vanish (relSetN d rels) m := by
+  intro m hm
   apply vanish_of_short
-  rintro _ ⟨r, hr, rfl⟩ u v huv
-  exact checkVanishRel_sound (List.all_eq_true.1 h r hr) u v huv
+  rintro _ ⟨r, hr, rfl⟩ u w huw
+  have hr' := List.all_eq_true.1 h r hr
+  simp only [checkVanishRel, List.all_eq_true, Bool.and_eq_true, Nat.ble_eq] at hr'
+  obtain ⟨hK, hc⟩ := hr' m hm
+  have := checkMap_sound hc u w huw
+  rw [mkK_subOne, mkK_magnusN hK] at this
+  exact this
+
+theorem checkVanish_append {K : ℕ} {maps : List (ℕ × List ℤ)} {a b : List (List (List (ℕ × ℤ) × ℤ))}
+    (ha : checkVanish d K maps a = true) (hb : checkVanish d K maps b = true) :
+    checkVanish d K maps (a ++ b) = true := by
+  simp only [checkVanish, List.all_append, Bool.and_eq_true] at *
+  exact ⟨ha, hb⟩
 
 end Sound
 
@@ -479,13 +499,13 @@ theorem rel_hold_of_sub (T : Trace) [NeZero T.d] (allRels : List (List (List (�
   exact PresentedGroup.one_of_mem ⟨R, hR, by rw [hRr, relElt_single]⟩
 
 theorem maps_isBase (T : Trace) [NeZero T.d] (P : PolyCert) (allRels : List (List (List (ℕ × ℤ) × ℤ)))
-    (hvan : P.maps.all (fun m => checkVanish T.d m allRels) = true) :
+    (K : ℕ) (hvan : checkVanish T.d K P.maps allRels = true) :
     ∀ i < P.maps.length, ∃ φ : PresentedGroup (relSetN T.d allRels) → ℤ,
       IsBase (PresentedGroup.of (rels := relSetN T.d allRels)) (P.maps.getD i (0, [])) φ := by
   intro i hi
   have hm : P.maps.getD i (0, []) ∈ P.maps := by
     rw [List.getD_eq_getElem _ _ hi]; exact List.getElem_mem hi
-  exact ⟨_, isBase_of_vanish (vanish_of_check (List.all_eq_true.1 hvan _ hm))⟩
+  exact ⟨_, isBase_of_vanish (vanish_of_check hvan _ hm)⟩
 
 /-- **Exact membership in a presented group, every hypothesis but `hord` decidable.** `check`,
 `checkPoly`, `hsub` (each relator of the trace is a relator of the presentation) and `hvan` (check 1
@@ -495,20 +515,20 @@ lies in `Δ^n`. -/
 theorem check_mem_D_poly_lin_presN (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
     (P : PolyCert) (hP : checkPoly T P = true) (allRels : List (List (List (ℕ × ℤ) × ℤ)))
     (hsub : T.rels.all (fun r => allRels.any (fun R => R == [(r.2, 1)])) = true)
-    (hvan : P.maps.all (fun m => checkVanish T.d m allRels) = true)
+    (K : ℕ) (hvan : checkVanish T.d K P.maps allRels = true)
     (t : ℕ) (ht : t ∈ members)
     (hord : ∃ m : ℕ, ((T.p : ℤ) ^ m) • linG (PresentedGroup.of (rels := relSetN T.d allRels)) (testLin T t) ∈
       augIdeal (PresentedGroup (relSetN T.d allRels)) ^ T.n) :
     linG (PresentedGroup.of (rels := relSetN T.d allRels)) (testLin T t) ∈
       augIdeal (PresentedGroup (relSetN T.d allRels)) ^ T.n :=
   check_mem_D_poly_lin T members hc P hP _ (rel_hold_of_sub T allRels hsub)
-    (PresentedGroup.closure_range_of _) (maps_isBase T P allRels hvan) t ht hord
+    (PresentedGroup.closure_range_of _) (maps_isBase T P allRels K hvan) t ht hord
 
 /-- `check_mem_D_poly_lin_presN` for a word test: `w_t ∈ D_n(G)`. -/
 theorem check_mem_D_poly_presN (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
     (P : PolyCert) (hP : checkPoly T P = true) (allRels : List (List (List (ℕ × ℤ) × ℤ)))
     (hsub : T.rels.all (fun r => allRels.any (fun R => R == [(r.2, 1)])) = true)
-    (hvan : P.maps.all (fun m => checkVanish T.d m allRels) = true)
+    (K : ℕ) (hvan : checkVanish T.d K P.maps allRels = true)
     (t : ℕ) (ht : t ∈ members) (hw : T.tests.any (fun y => y.1 == t) = true)
     (hord : ∃ m : ℕ, ((T.p : ℤ) ^ m) •
       (of ℤ (PresentedGroup (relSetN T.d allRels))
@@ -517,6 +537,6 @@ theorem check_mem_D_poly_presN (T : Trace) (members : List ℕ) [NeZero T.d] (hc
     gword (PresentedGroup.of (rels := relSetN T.d allRels)) (findWord t T.tests) ∈
       GroupDimension.D T.n (PresentedGroup (relSetN T.d allRels)) :=
   check_mem_D_poly T members hc P hP _ (rel_hold_of_sub T allRels hsub)
-    (PresentedGroup.closure_range_of _) (maps_isBase T P allRels hvan) t ht hw hord
+    (PresentedGroup.closure_range_of _) (maps_isBase T P allRels K hvan) t ht hw hord
 
 end GroupDimension.TraceReplay

@@ -60,16 +60,20 @@ def wt (maps : List (Nat × List Int)) (κ : List Nat) : Nat := (κ.map fun i =>
 def colValP (d : Nat) [NeZero d] (maps : List (Nat × List Int)) (κ : List Nat) (f : Nat) : Int :=
   prodVal d maps κ ((wordAt d f).toList.map (·.val))
 
-/-- The certificate check: every product uses valid indices and has weight `< n`, and
-`C · M = diag(D)` with `D_f ≠ 0`, `M_{κ,f} = ν_κ(ψ(X_f))`. -/
-def checkPoly (T : Trace) [NeZero T.d] (P : PolyCert) : Bool :=
-  P.maps.all (fun m => Nat.blt m.1 T.n) &&
-  P.funcs.all (fun κ => κ.all (fun i => Nat.blt i P.maps.length) && Nat.blt (wt P.maps κ) T.n) &&
-  (List.range T.F.length).all (fun i => decide ((P.rows.getD i ([], 0)).2 ≠ 0) &&
-    (List.range T.F.length).all (fun j => decide (
+/-- The certificate check on the free columns `F` of a trace with `d` generators and level `n`: every
+base map has weight `< n`, every product uses valid indices and has weight `< n`, and `C · M = diag(D)`
+with `D_f ≠ 0`, `M_{κ,f} = ν_κ(ψ(X_f))`. -/
+def checkPolyF (d n : Nat) [NeZero d] (F : List Nat) (P : PolyCert) : Bool :=
+  P.maps.all (fun m => Nat.blt m.1 n) &&
+  P.funcs.all (fun κ => κ.all (fun i => Nat.blt i P.maps.length) && Nat.blt (wt P.maps κ) n) &&
+  (List.range F.length).all (fun i => decide ((P.rows.getD i ([], 0)).2 ≠ 0) &&
+    (List.range F.length).all (fun j => decide (
       lsum P.funcs.length (fun k => (P.rows.getD i ([], 0)).1.getD k 0 *
-        colValP T.d P.maps (P.funcs.getD k []) (T.F.getD j 0)) =
+        colValP d P.maps (P.funcs.getD k []) (F.getD j 0)) =
       if i = j then (P.rows.getD i ([], 0)).2 else 0)))
+
+/-- `checkPolyF` on the trace's own `d`, `n` and `F`. -/
+def checkPoly (T : Trace) [NeZero T.d] (P : PolyCert) : Bool := checkPolyF T.d T.n T.F P
 
 theorem checkPoly_spec (T : Trace) [NeZero T.d] (P : PolyCert) (h : checkPoly T P = true) :
     (∀ m ∈ P.maps, m.1 < T.n) ∧
@@ -79,7 +83,7 @@ theorem checkPoly_spec (T : Trace) [NeZero T.d] (P : PolyCert) (h : checkPoly T 
       ∑ k ∈ Finset.range P.funcs.length, (P.rows.getD i ([], 0)).1.getD k 0 *
         colValP T.d P.maps (P.funcs.getD k []) (T.F.getD j 0) =
       if i = j then (P.rows.getD i ([], 0)).2 else 0) := by
-  simp only [checkPoly, Bool.and_eq_true, List.all_eq_true, decide_eq_true_eq, List.mem_range,
+  simp only [checkPoly, checkPolyF, Bool.and_eq_true, List.all_eq_true, decide_eq_true_eq, List.mem_range,
     Nat.blt_eq] at h
   obtain ⟨⟨hM, hK⟩, hrows⟩ := h
   refine ⟨hM, hK, fun i hi => (hrows i hi).1, fun i hi j hj => ?_⟩
