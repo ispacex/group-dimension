@@ -27,9 +27,11 @@ Contents:
   hypothesis on the exponent: `x^{−1} − 1` is a geometric series modulo `Δ^n`.
 * `check_mem_D_hom`. Suppose the trace and the certificate pass, the `g_j` generate `G`, the
   relators hold, each `a` is the restriction of a homomorphism `G → ℤ`, and the test element has
-  `p`-power order in `Δ/Δ^n` (a hypothesis, as in `cert/TRACE.md`, step 6). Then the test word
-  lies in `D_n(G)`.
-* `check_mem_D_pres`: the same for the group presented by `allRels`. The homomorphisms then come
+  `p`-power order in `Δ/Δ^n` (a hypothesis, as in `cert/TRACE.md`, step 6). Then the test element
+  lies in `Δ^n` (`check_mem_D_hom_lin`); for a word test, the word lies in `D_n(G)`
+  (`check_mem_D_hom`). `hord_of_pow_eq_one` and `hord_lin_of_pow_eq_one` derive the order
+  hypothesis from `w^{p^k} = 1` in `G`.
+* `check_mem_D_pres`: the same, for word tests, for the group presented by `allRels`. The homomorphisms then come
   from a kernel check (exponent sums), and the generation and relator hypotheses come for free.
 -/
 
@@ -322,19 +324,20 @@ certificate. Let `G` be a group and `g : Fin d → G` such that:
 * the `g j` generate `G`, and the relators listed in the trace hold at `g`;
 * every functional `(a, K)` of the certificate comes from a homomorphism `φ : G → ℤ` with
   `φ(g_j) = a_j`;
-* the test element `w_t(g) − 1` has `p`-power order in `Δ/Δ^n` (`hord`).
+* the test element `x_t` (`w_t(g) − 1` for a word test, `Σ c_k (w_k(g) − 1)` for a lintest;
+  `linG g (testLin T t)`) has `p`-power order in `Δ/Δ^n` (`hord`).
 
-Then `w_t(g) ∈ D_n(G)`. Generator `i` of a word (1-based) is `g ⟨i − 1⟩`. -/
-theorem check_mem_D_hom (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
+Then `x_t ∈ Δ^n`; for a word test, `w_t(g) ∈ D_n(G)` (`check_mem_D_hom`). Generator `i` of a word
+(1-based) is `g ⟨i − 1⟩`. -/
+theorem check_mem_D_hom_lin (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
     (H : HomCert) (hH : checkHom T H = true)
     {G : Type*} [Group G] (g : Fin T.d → G) (hrel : ∀ r ∈ T.rels, gword g r.2 = 1)
     (hgen : Subgroup.closure (Set.range g) = ⊤)
     (hφ : ∀ k < H.funcs.length, ∃ φ : G →* Multiplicative ℤ,
       ∀ j : Fin T.d, Multiplicative.toAdd (φ (g j)) = (H.funcs.getD k ([], 0)).1.getD j.val 0)
     (t : ℕ) (ht : t ∈ members)
-    (hord : ∃ m : ℕ, ((T.p : ℤ) ^ m) • (of ℤ G (gword g (findWord t T.tests)) - 1) ∈
-      augIdeal G ^ T.n) :
-    gword g (findWord t T.tests) ∈ GroupDimension.D T.n G := by
+    (hord : ∃ m : ℕ, ((T.p : ℤ) ^ m) • linG g (testLin T t) ∈ augIdeal G ^ T.n) :
+    linG g (testLin T t) ∈ augIdeal G ^ T.n := by
   obtain ⟨hp, hE, hn⟩ := check_params T members hc
   have hn0 : T.n ≠ 0 := by omega
   have hFpos := check_F_pos T members hc
@@ -452,18 +455,35 @@ theorem check_mem_D_hom (T : Trace) (members : List ℕ) [NeZero T.d] (hc : chec
     simp [this]
   -- the test element
   obtain ⟨a, ha, b, e⟩ := check_group T members hc g hrel t ht
-  have hb : b ∈ augIdeal G := mem_aug_of_eq hn0 hD0 (of_sub_one_mem_augIdeal _) ha e
-  have hx0 : toQ T.n (of ℤ G (gword g (findWord t T.tests)) - 1) = 0 := by
+  have hb : b ∈ augIdeal G := mem_aug_of_eq hn0 hD0 (linG_mem_aug g _) ha e
+  have hx0 : toQ T.n (linG g (testLin T t)) = 0 := by
     refine TraceCert.eq_zero_of_mem_pow T.p (by omega) T.E hE Fb hX hFt _ ?_ ?_
     · refine ⟨toQ T.n b, ?_⟩
       rw [e, toQ_add (Ideal.pow_le_self hn0 ha) (Submodule.smul_of_tower_mem _ ((T.p ^ T.E : ℕ) : ℤ) hb),
         toQ_eq_zero hn0 ha, zero_add, toQ_smul ((T.p ^ T.E : ℕ) : ℤ) hb, hDp]
     · obtain ⟨m, hm⟩ := hord
       refine ⟨m, ?_⟩
-      rw [← toQ_smul _ (of_sub_one_mem_augIdeal _)]
+      rw [← toQ_smul _ (linG_mem_aug g _)]
       exact toQ_eq_zero hn0 hm
-  rw [mem_D]
-  exact (toQ_eq_zero_iff (of_sub_one_mem_augIdeal _)).1 hx0
+  exact (toQ_eq_zero_iff (linG_mem_aug g _)).1 hx0
+
+/-- `check_mem_D_hom_lin` for a word test (`hw`): if `w_t(g) − 1` has `p`-power order in `Δ/Δ^n`,
+then `w_t(g) ∈ D_n(G)`. -/
+theorem check_mem_D_hom (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
+    (H : HomCert) (hH : checkHom T H = true)
+    {G : Type*} [Group G] (g : Fin T.d → G) (hrel : ∀ r ∈ T.rels, gword g r.2 = 1)
+    (hgen : Subgroup.closure (Set.range g) = ⊤)
+    (hφ : ∀ k < H.funcs.length, ∃ φ : G →* Multiplicative ℤ,
+      ∀ j : Fin T.d, Multiplicative.toAdd (φ (g j)) = (H.funcs.getD k ([], 0)).1.getD j.val 0)
+    (t : ℕ) (ht : t ∈ members) (hw : T.tests.any (fun y => y.1 == t) = true)
+    (hord : ∃ m : ℕ, ((T.p : ℤ) ^ m) • (of ℤ G (gword g (findWord t T.tests)) - 1) ∈
+      augIdeal G ^ T.n) :
+    gword g (findWord t T.tests) ∈ GroupDimension.D T.n G := by
+  have e : linG g (testLin T t) = of ℤ G (gword g (findWord t T.tests)) - 1 := by
+    rw [testLin_of_word T hw, linG_single]
+  have h := check_mem_D_hom_lin T members hc H hH g hrel hgen hφ t ht (by rw [e]; exact hord)
+  rw [e] at h
+  exact mem_D.2 h
 
 /-- The functionals' `a` are among the polynomial maps `maps` (kernel-checked), so homomorphisms for
 the maps give homomorphisms for the functionals. -/
@@ -539,6 +559,22 @@ theorem hord_of_pow_eq_one {p n k : ℕ} (hn : 1 ≤ n) (x : G) (hx : x ^ (p ^ k
   rw [Nat.sub_add_cancel hn] at h
   rwa [Nat.cast_pow, ← pow_mul] at h
 
+/-- `hord` for a lintest from the group: if every `w_k(g)` has order dividing `p^k`, then
+`Σ c_k (w_k(g) − 1)` has `p`-power order in `Δ/Δ^n`. -/
+theorem hord_lin_of_pow_eq_one {d : ℕ} [NeZero d] {p n k : ℕ} (hn : 1 ≤ n) (g : Fin d → G)
+    (l : List (ℤ × List (ℕ × ℤ))) (hl : ∀ c ∈ l, gword g c.2 ^ (p ^ k) = 1) :
+    ∃ m : ℕ, ((p : ℤ) ^ m) • linG g l ∈ augIdeal G ^ n := by
+  refine ⟨k * (n - 1), ?_⟩
+  induction l with
+  | nil => simp only [linG, List.map_nil, List.sum_nil, smul_zero]; exact zero_mem _
+  | cons c l ih =>
+    rw [linG_cons, smul_add]
+    refine add_mem ?_ (ih fun c' hc' => hl c' (List.mem_cons_of_mem _ hc'))
+    have h := pow_smul_sub_one_mem (gword g c.2) (p ^ k) (hl c List.mem_cons_self) (n - 1)
+    rw [Nat.sub_add_cancel hn, Nat.cast_pow, ← pow_mul] at h
+    rw [smul_comm ((p : ℤ) ^ (k * (n - 1))) c.1]
+    exact Submodule.smul_of_tower_mem _ c.1 h
+
 end Order
 
 /-! ## The presented group -/
@@ -579,11 +615,12 @@ def checkPres (T : Trace) (H : HomCert) (allRels : List (List (ℕ × ℤ))) : B
   H.funcs.all (fun κ => allRels.all (fun r => expSum T.d κ.1 r == 0))
 
 /-- **Exact membership in the presented group.** If `check`, `checkHom` and `checkPres` pass, then
-in `G = ⟨x_1, …, x_d | allRels⟩` every test claimed in whose element has `p`-power order in
-`Δ/Δ^n` (`hord`) lies in `D_n(G)`. -/
+in `G = ⟨x_1, …, x_d | allRels⟩` every word test claimed in (`hw`) whose element has `p`-power
+order in `Δ/Δ^n` (`hord`) lies in `D_n(G)`. -/
 theorem check_mem_D_pres (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
     (H : HomCert) (hH : checkHom T H = true) (allRels : List (List (ℕ × ℤ)))
     (hP : checkPres T H allRels = true) (t : ℕ) (ht : t ∈ members)
+    (hw : T.tests.any (fun y => y.1 == t) = true)
     (hord : ∃ m : ℕ, ((T.p : ℤ) ^ m) •
       (of ℤ (PresentedGroup (relSet T.d allRels))
         (gword (PresentedGroup.of (rels := relSet T.d allRels)) (findWord t T.tests)) - 1) ∈
@@ -593,7 +630,7 @@ theorem check_mem_D_pres (T : Trace) (members : List ℕ) [NeZero T.d] (hc : che
   simp only [checkPres, Bool.and_eq_true, List.all_eq_true, List.any_eq_true, beq_iff_eq] at hP
   obtain ⟨hsub, hexp⟩ := hP
   refine check_mem_D_hom T members hc H hH (PresentedGroup.of (rels := relSet T.d allRels)) ?_
-    (PresentedGroup.closure_range_of _) ?_ t ht hord
+    (PresentedGroup.closure_range_of _) ?_ t ht hw hord
   · intro r hr
     obtain ⟨r', hr', hrr⟩ := hsub r hr
     have e : (PresentedGroup.of : Fin T.d → PresentedGroup (relSet T.d allRels)) =

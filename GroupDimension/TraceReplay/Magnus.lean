@@ -22,9 +22,10 @@ are `1` in `G`), and `D·R` into `D·ℤ[G]`. So
 
   `w(g) − 1 ∈ Δ^n + D·ℤ[G]`   (`sub_one_mem_of_mem_Lt`, `check_group`),
 
+and likewise `Σ c_k (w_k(g) − 1) ∈ Δ^n + D·ℤ[G]` for a lintest (`linG`, `linG_mem_of_mem_Lt`),
 and `w(g) ∈ D_n(G)` when the `D·R` part is absent (`mem_D_of_mem_Jt_sup_Ik`; unused by the pipeline,
 since `check_sound` always lands in `Lt`, with the `D·R` part: `D_n` is reached by exactness,
-`check_mem_D`). This is the easy
+`check_mem_D`; for lintests `check_mem_D_lin`). This is the easy
 direction of §3.1 of the paper (`J_n ↦ Δ^n`), the one a certificate of membership needs; removing
 `D·ℤ[G]` below completes it. `binom` (the checker's own generalised binomial coefficient) is
 `Ring.choose` (`binom_eq_choose`).
@@ -216,6 +217,39 @@ theorem psi_mt_sub_mem (k : ℕ) (w : List (ℕ × ℤ)) :
     rw [e1]
     exact add_mem (Ideal.mul_mem_right _ _ (bser_sub_mem _ k f.2)) (Ideal.mul_mem_left _ _ ih)
 
+/-- `Σ c_k (w_k(g) − 1)` in `ℤ[G]`: the image of a lintest (a word test `w` is `[(1, w)]`). -/
+noncomputable def linG (l : List (ℤ × List (ℕ × ℤ))) : MonoidAlgebra ℤ G :=
+  (l.map fun c => c.1 • (of ℤ G (gword g c.2) - 1)).sum
+
+theorem linG_cons (c : ℤ × List (ℕ × ℤ)) (l : List (ℤ × List (ℕ × ℤ))) :
+    linG g (c :: l) = c.1 • (of ℤ G (gword g c.2) - 1) + linG g l := by
+  simp [linG]
+
+theorem linG_single (w : List (ℕ × ℤ)) : linG g [(1, w)] = of ℤ G (gword g w) - 1 := by
+  simp [linG]
+
+theorem linG_mem_aug (l : List (ℤ × List (ℕ × ℤ))) : linG g l ∈ augIdeal G := by
+  induction l with
+  | nil => simp only [linG, List.map_nil, List.sum_nil]; exact zero_mem _
+  | cons c l ih =>
+    rw [linG_cons]
+    exact add_mem (Submodule.smul_of_tower_mem _ c.1 (of_sub_one_mem_augIdeal _)) ih
+
+/-- `ψ (Σ c_k (mt k w_k − 1)) ≡ Σ c_k (w_k(g) − 1)` modulo `Δ^k`. -/
+theorem psi_linElt_sub_mem (k : ℕ) (l : List (ℤ × List (ℕ × ℤ))) :
+    psi g (linElt d k l) - linG g l ∈ augIdeal G ^ k := by
+  induction l with
+  | nil => simp only [linElt, linG, List.map_nil, List.sum_nil, map_zero, sub_self]; exact zero_mem _
+  | cons c l ih =>
+    have hl : linElt d k (c :: l) = c.1 • (mt d k c.2 - 1) + linElt d k l := by simp [linElt]
+    rw [hl, linG_cons, map_add, map_zsmul, map_sub, map_one]
+    have e : c.1 • (psi g (mt d k c.2) - 1) + psi g (linElt d k l) -
+        (c.1 • (of ℤ G (gword g c.2) - 1) + linG g l) =
+        c.1 • (psi g (mt d k c.2) - of ℤ G (gword g c.2)) + (psi g (linElt d k l) - linG g l) := by
+      simp only [smul_sub]; abel
+    rw [e]
+    exact add_mem (Submodule.smul_of_tower_mem _ c.1 (psi_mt_sub_mem g k c.2)) ih
+
 variable {rels : List (ℕ × List (ℕ × ℤ))}
 
 theorem psi_Jt (hrel : ∀ r ∈ rels, gword g r.2 = 1) {k : ℕ} {x : R d} (hx : x ∈ Jt d rels k) :
@@ -256,6 +290,17 @@ theorem sub_one_mem_of_mem_Lt (hrel : ∀ r ∈ rels, gword g r.2 = 1) {D n : �
       (a + (D : ℤ) • b) - (psi g (mt d n w) - of ℤ G (gword g w)) := by abel
   rw [e1, ← hb]; abel
 
+/-- The Magnus link for a lintest: if `Σ c_k (mt n w_k − 1) ∈ Jt + I_n + D·R` and the relators
+hold in `G` at `g`, then `Σ c_k (w_k(g) − 1) ∈ Δ^n + D·ℤ[G]`. -/
+theorem linG_mem_of_mem_Lt (hrel : ∀ r ∈ rels, gword g r.2 = 1) {D n : ℕ}
+    {l : List (ℤ × List (ℕ × ℤ))} (h : linElt d n l ∈ Lt d rels D n) :
+    ∃ a ∈ augIdeal G ^ n, ∃ b, linG g l = a + (D : ℤ) • b := by
+  obtain ⟨a, ha, b, hb⟩ := psi_Lt g hrel h
+  refine ⟨a - (psi g (linElt d n l) - linG g l), sub_mem ha (psi_linElt_sub_mem g n l), b, ?_⟩
+  have e1 : a - (psi g (linElt d n l) - linG g l) + (D : ℤ) • b =
+      (a + (D : ℤ) • b) - (psi g (linElt d n l) - linG g l) := by abel
+  rw [e1, ← hb]; abel
+
 /-- Without the `D·R` part: `w(g) ∈ D_n(G)`. -/
 theorem mem_D_of_mem_Jt_sup_Ik (hrel : ∀ r ∈ rels, gword g r.2 = 1) {n : ℕ}
     {w : List (ℕ × ℤ)} (h : mt d n w - 1 ∈ Jt d rels n ⊔ Ik d n) :
@@ -271,7 +316,8 @@ theorem mem_D_of_mem_Jt_sup_Ik (hrel : ∀ r ∈ rels, gword g r.2 = 1) {n : ℕ
 end Psi
 
 /-- `check_sound`, in the group ring: for any group `G` and `g : Fin d → G` in which the trace's
-relators hold, every test claimed in has `w_t(g) − 1 ∈ Δ^n + p^E ℤ[G]`. This is informative only
+relators hold, every test claimed in has `x_t ∈ Δ^n + p^E ℤ[G]`, where `x_t = linG g (testLin T t)` is
+`w_t(g) − 1` for a word test and `Σ c_k (w_k(g) − 1)` for a lintest. This is informative only
 when `H_1(G; 𝔽_p) ≠ 0` (e.g. `G` a nontrivial finite `p`-group), and it is `w_t(g) ∈ D_n(G)` once
 `p^E Δ ⊆ Δ^n`. Fewer relators listed in the trace make it stronger. That `T.tests` holds the
 intended words, and `g` the presentation's generators in order, is the reader's to check (the data
@@ -279,8 +325,8 @@ file transcribes them; `trace_to_lean.py`). -/
 theorem check_group (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
     {G : Type*} [Group G] (g : Fin T.d → G) (hrel : ∀ r ∈ T.rels, gword g r.2 = 1) :
     ∀ t ∈ members, ∃ a ∈ augIdeal G ^ T.n, ∃ b,
-      of ℤ G (gword g (findWord t T.tests)) - 1 = a + ((T.p ^ T.E : ℕ) : ℤ) • b :=
-  fun t ht => sub_one_mem_of_mem_Lt g hrel ((check_sound T members hc).1 t ht)
+      linG g (testLin T t) = a + ((T.p ^ T.E : ℕ) : ℤ) • b :=
+  fun t ht => linG_mem_of_mem_Lt g hrel ((check_sound T members hc).1 t ht)
 
 
 /-! ## Exactness: removing `p^E ℤ[G]`
@@ -461,20 +507,22 @@ theorem check_params (T : Trace) (members : List ℕ) (h : check T members = tru
 
 /-- **Exact membership.** If `check` accepts the trace, then for every group `G` and `g : Fin d → G`
 such that the `g j` generate `G`, the relators listed in the trace hold at `g`, and `x^{p^N} = 1`
-for all `x : G` (some `N`), every test claimed in lies in `D_n(G)`. Generator `i` of a word (1-based)
+for all `x : G` (some `N`), every test claimed in has `x_t ∈ Δ^n`: for a word test,
+`w_t(g) − 1 ∈ Δ^n`, i.e. `w_t(g) ∈ D_n(G)` (`check_mem_D`); for a lintest, `Σ c_k (w_k(g) − 1) ∈ Δ^n`. Generator `i` of a word (1-based)
 is `g ⟨i − 1⟩`.
 
 For the paper's group the reader supplies `g` = the images of `x_1, …, x_d` and discharges the
 hypotheses (for a finite `p`-group, `hexp` holds with `p^N = |G|`). The trace lists a subset of the
 relators (fewer make the statement stronger), and no free columns (`hF`; for `F ≠ []` see
-`TraceReplay/HomExact.lean`); that `T.rels` and `T.tests` are the presentation's
-relators and test words is the data file's transcription (`trace_to_lean.py`), not checked here.
-The conclusion is about the word: that it is `≠ 1`, or not in `γ_n`, is a separate claim. -/
-theorem check_mem_D (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
+`TraceReplay/HomExact.lean`); that `T.rels`, `T.tests` and `T.lintests` are the presentation's
+relators, test words and lintests is the data file's transcription (`trace_to_lean.py`), not checked
+here. The conclusion is about the element: that it is nonzero (for a word, `≠ 1` or not in `γ_n`)
+is a separate claim. -/
+theorem check_mem_D_lin (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
     (hF : T.F = [])
     {G : Type*} [Group G] (g : Fin T.d → G) (hrel : ∀ r ∈ T.rels, gword g r.2 = 1)
     (hgen : Subgroup.closure (Set.range g) = ⊤) (N : ℕ) (hexp : ∀ x : G, x ^ (T.p ^ N) = 1) :
-    ∀ t ∈ members, gword g (findWord t T.tests) ∈ GroupDimension.D T.n G := by
+    ∀ t ∈ members, linG g (testLin T t) ∈ augIdeal G ^ T.n := by
   obtain ⟨hp, hE, hn⟩ := check_params T members hc
   have hn0 : T.n ≠ 0 := by omega
   have hq : 0 < T.p ^ N := Nat.pow_pos (by omega)
@@ -527,9 +575,20 @@ theorem check_mem_D (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T 
     exact Submodule.smul_of_tower_mem _ r hK
   intro t ht
   obtain ⟨a, ha, b, e⟩ := check_group T members hc g hrel t ht
-  have hb : b ∈ augIdeal G := mem_aug_of_eq hn0 hD0 (of_sub_one_mem_augIdeal _) ha e
-  rw [mem_D, e, hDe, mul_smul]
+  have hb : b ∈ augIdeal G := mem_aug_of_eq hn0 hD0 (linG_mem_aug g _) ha e
+  rw [e, hDe, mul_smul]
   exact add_mem ha (Submodule.smul_of_tower_mem _ _ (h2 b hb))
+
+/-- `check_mem_D_lin` for a word test (`hw`): `w_t(g) ∈ D_n(G)`. -/
+theorem check_mem_D (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
+    (hF : T.F = [])
+    {G : Type*} [Group G] (g : Fin T.d → G) (hrel : ∀ r ∈ T.rels, gword g r.2 = 1)
+    (hgen : Subgroup.closure (Set.range g) = ⊤) (N : ℕ) (hexp : ∀ x : G, x ^ (T.p ^ N) = 1)
+    (t : ℕ) (ht : t ∈ members) (hw : T.tests.any (fun y => y.1 == t) = true) :
+    gword g (findWord t T.tests) ∈ GroupDimension.D T.n G := by
+  have h := check_mem_D_lin T members hc hF g hrel hgen N hexp t ht
+  rw [testLin_of_word T hw, linG_single] at h
+  exact mem_D.2 h
 
 end
 

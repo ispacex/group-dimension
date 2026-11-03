@@ -61,6 +61,8 @@ structure Trace where
   rels : List (Nat × List (Nat × Int))
   /-- `(t, w_t)`: the word tests claimed in -/
   tests : List (Nat × List (Nat × Int))
+  /-- `(t, [(c_k, w_k)])`: the lintests claimed in, the elements `Σ c_k (w_k − 1)` -/
+  lintests : List (Nat × List (Int × List (Nat × Int))) := []
   levels : List (Nat × List Line)
   F : List Nat
   xs : List (Nat × List (Nat × Int))
@@ -165,6 +167,20 @@ def findWord (i : Nat) : List (Nat × List (Nat × Int)) → List (Nat × Int)
   | [] => []
   | (i', w) :: t => bif i' == i then w else findWord i t
 
+/-- Look up a lintest by index; a missing one reads as the empty combination (`0`). -/
+def findLin (i : Nat) : List (Nat × List (Int × List (Nat × Int))) → List (Int × List (Nat × Int))
+  | [] => []
+  | (i', l) :: t => bif i' == i then l else findLin i t
+
+/-- Test `t` as a combination `Σ c_k (w_k − 1)`: a word test `w` is `[(1, w)]`; otherwise the
+lintest `t`. -/
+def testLin (T : Trace) (t : Nat) : List (Int × List (Nat × Int)) :=
+  bif T.tests.any (fun y => y.1 == t) then [(1, findWord t T.tests)] else findLin t T.lintests
+
+/-- `Σ c_k (μ(w_k) − 1)`, truncated below degree `k`. -/
+def linVec (d D k : Nat) (l : List (Int × List (Nat × Int))) : Vec :=
+  l.foldl (fun acc c => addSmul D (red D c.1) (magnus1 d D k c.2) acc) []
+
 /-- The generator of a line at level `k`. Shifts with a letter `j ≥ d` read as `0`. -/
 def genVec (T : Trace) (k : Nat) (prev : List (Nat × Vec)) : Gen → Vec
   | .zero => []
@@ -195,9 +211,13 @@ def runLevels (T : Trace) : List (Nat × List Line) → Nat → List (Nat × Vec
 * the free columns `F` are positive (not the constant term);
 * every `x` line: `p^{E−1} e_c + Σ c_i V_i` has no nonzero entry outside `F`, and every column
   `1 .. T − 1` is in `F` or has an `x` line;
-* every test in `members` is present in `T.tests` with a non-empty word (a missing test would read
-  as the empty word, and its membership would say nothing), and has a `w` line with
-  `μ(w_t) − 1 + Σ c_i V_i ≡ 0`.
+* every test in `members` reads (`testLin`: the first word test with index `t`, else the first
+  lintest) as a non-empty combination of non-empty words (a missing or empty test would read as
+  `0`, and its membership would say nothing; the guard is on the entry actually used), and has a
+  `w` line with `x_t + Σ c_i V_i ≡ 0`, where `x_t` is `μ(w_t) − 1` for a word test and
+  `Σ c_k (μ(w_k) − 1)` for a lintest (`testLin`, `linVec`). Non-empty is not nonzero: a lintest
+  such as `[(1, w), (−1, w)]` is accepted and says nothing; that a test element is nonzero is a
+  separate claim.
 
 With `F = []` (rank bound `0`) this is the whole exactness certificate. With `F ≠ []` the free
 columns must be shown to meet the torsion trivially; that is `TraceReplay/HomExact.lean`. -/
@@ -205,7 +225,7 @@ def check (T : Trace) (members : List Nat) : Bool :=
   let D := T.p ^ T.E
   let okWord (w : List (Nat × Int)) := w.all fun f => Nat.blt 0 f.1 && Nat.ble f.1 T.d
   Nat.blt 1 T.d && Nat.blt 1 T.p && Nat.blt 0 T.E && Nat.blt 1 T.n && T.F.all (fun f => Nat.blt 0 f) &&
-  T.rels.all (fun r => okWord r.2) && T.tests.all (fun t => okWord t.2) &&
+  T.rels.all (fun r => okWord r.2) && (T.tests.all (fun t => okWord t.2) && T.lintests.all (fun l => l.2.all (fun c => okWord c.2))) &&
   match runLevels T T.levels 1 [] with
   | none => false
   | some (k, cur) =>
@@ -214,8 +234,8 @@ def check (T : Trace) (members : List Nat) : Bool :=
       (fun e => T.F.any (fun f => f == e.1))) &&
     (List.range (off T.d T.n)).all (fun c => c == 0 || T.F.any (fun f => f == c) ||
       T.xs.any (fun x => x.1 == c)) &&
-    members.all (fun t => T.tests.any (fun y => y.1 == t && !y.2.isEmpty) &&
+    members.all (fun t => !(testLin T t).isEmpty && (testLin T t).all (fun c => !c.2.isEmpty) &&
       T.ws.any (fun w => w.1 == t &&
-        (combo D cur w.2 (magnus1 T.d D T.n (findWord t T.tests))).isEmpty))
+        (combo D cur w.2 (linVec T.d D T.n (testLin T t))).isEmpty))
 
 end GroupDimension.TraceReplay
