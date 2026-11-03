@@ -225,7 +225,9 @@ theorem mkK_shiftZ (k c' : ℕ) (a' : ℤ) (x : VecZ) :
         exact Submodule.smul_mem _ _ (e_mul_mem_Ik (by simp only [← Bool.not_eq_true, Nat.blt_eq] at h; omega))
       rw [h0, zero_add]
     · simp only [Bool.cond_true]
-      rw [evalZ_cons, map_add, ih, evalZ_cons, map_add, add_mul, ← map_mul, smul_mul_smul_comm, e_mul]
+      rw [evalZ_cons, map_add, ih, evalZ_cons, map_add, add_mul]
+      congr 1
+      rw [← map_mul, smul_mul_smul_comm, e_mul]
 
 theorem mkK_mulZ (k : ℕ) (x y : VecZ) :
     mkK d k (evalZ d (mulZ d k x y)) = mkK d k (evalZ d x) * mkK d k (evalZ d y) := by
