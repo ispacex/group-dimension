@@ -167,7 +167,7 @@ def invisible : Subgroup (FreeGroup (Fin d)) where
     rw [mul_assoc a, ← Units.val_mul, ← (muA (m.1 + 1)).map_mul, inv_mul_cancel, (muA (m.1 + 1)).map_one, Units.val_one, mul_one] at this
     exact this.symm
 
-instance invisible_normal : (invisible m).Normal where
+instance invisible_normal : (invisible (d := d) m).Normal where
   conj_mem x hx c a b := by
     rw [(muA (m.1 + 1)).map_mul, (muA (m.1 + 1)).map_mul, Units.val_mul, Units.val_mul]
     have := hx (a * (muA (m.1 + 1) c : Ak d (m.1 + 1))) ((muA (m.1 + 1) c⁻¹ : Ak d (m.1 + 1)) * b)
