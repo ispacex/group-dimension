@@ -1554,4 +1554,5 @@ open GroupDimension
 #print axioms GroupDimension.TraceReplay.finite_Qn
 #print axioms GroupDimension.TraceReplay.check_mem_D_hom
 #print axioms GroupDimension.TraceReplay.check_mem_D_pres
+#print axioms GroupDimension.TraceReplay.homs_of_maps
 #print axioms GroupDimension.TraceReplay.Rips10.mem_D_test0

@@ -120,10 +120,10 @@ section Q
 variable (G : Type*) [Group G]
 
 /-- `Δ` as a `ℤ`-module. -/
-abbrev Del : Submodule ℤ (MonoidAlgebra ℤ G) := (augIdeal G).restrictScalars ℤ
+noncomputable abbrev Del : Submodule ℤ (MonoidAlgebra ℤ G) := (augIdeal G).restrictScalars ℤ
 
 /-- `Δ^n` inside `Δ`. -/
-abbrev NnD (n : ℕ) : Submodule ℤ (Del G) :=
+noncomputable abbrev NnD (n : ℕ) : Submodule ℤ (Del G) :=
   ((augIdeal G ^ n).restrictScalars ℤ).comap (Del G).subtype
 
 /-- `Q = Δ/Δ^n`. -/
@@ -244,6 +244,7 @@ theorem aug_le_Sp' (hgen : Subgroup.closure (Set.range g) = ⊤) {n : ℕ} (hn :
 def gensF (n : ℕ) : Set (MonoidAlgebra ℤ G) :=
   {y | ∃ w : FreeMonoid (Fin d), w ≠ 1 ∧ w.length < n ∧ y = psi g (single w 1)}
 
+omit [NeZero d] in
 theorem one_le_length {w : FreeMonoid (Fin d)} (hw : w ≠ 1) : 1 ≤ w.length := by
   rcases Nat.eq_zero_or_pos w.length with h0 | h0
   · exfalso; apply hw
@@ -258,7 +259,7 @@ theorem psi_mem_aug {w : FreeMonoid (Fin d)} (hw : w ≠ 1) : psi g (single w 1)
 theorem aug_le_spanF (hgen : Subgroup.closure (Set.range g) = ⊤) {n : ℕ} (hn : 1 ≤ n)
     {y : MonoidAlgebra ℤ G} (hy : y ∈ augIdeal G) :
     y ∈ Submodule.span ℤ (gensF g n) ⊔ (augIdeal G ^ n).restrictScalars ℤ := by
-  refine (sup_le ?_ le_sup_right) (aug_le_Sp' g hgen hn hy)
+  refine (show Sp g n ≤ _ from sup_le ?_ le_sup_right) (aug_le_Sp' g hgen hn hy)
   rw [Submodule.span_le]
   rintro _ ⟨w, hw, rfl⟩
   by_cases hlt : w.length < n
@@ -281,7 +282,7 @@ theorem finite_Qn (hgen : Subgroup.closure (Set.range g) = ⊤) {n : ℕ} (hn : 
     induction hs using Submodule.span_induction with
     | mem x hx =>
       obtain ⟨w, -, hlt, rfl⟩ := hx
-      exact Submodule.subset_span ⟨w.toList, hlt, by rw [FreeMonoid.ofList_toList]⟩
+      exact Submodule.subset_span ⟨w.toList, hlt, by simp only [FreeMonoid.ofList_toList]⟩
     | zero => rw [toQ_zero]; exact zero_mem _
     | add x y hx hy ihx ihy =>
       rw [toQ_add (span_gensF_le_aug g n hx) (span_gensF_le_aug g n hy)]; exact add_mem ihx ihy
@@ -338,7 +339,7 @@ theorem check_mem_D_hom (T : Trace) (members : List ℕ) [NeZero T.d] (hc : chec
   have hn0 : T.n ≠ 0 := by omega
   have hFpos := check_F_pos T members hc
   obtain ⟨hK, hDg, hCM⟩ := checkHom_spec T H hH
-  haveI : Module.Finite ℤ (Qn G T.n) := finite_Qn g hgen (by omega)
+  have : Module.Finite ℤ (Qn G T.n) := finite_Qn g hgen (n := T.n) (by omega)
   have hD0 : ((T.p ^ T.E : ℕ) : ℤ) ≠ 0 := by
     have : 0 < T.p ^ T.E := Nat.pow_pos (by omega)
     exact_mod_cast this.ne'
@@ -356,7 +357,7 @@ theorem check_mem_D_hom (T : Trace) (members : List ℕ) [NeZero T.d] (hc : chec
     | mem x hx =>
       obtain ⟨f, hf, rfl⟩ := hx
       obtain ⟨i, hi, rfl⟩ := List.getElem_of_mem hf
-      have hget : T.F.getD i 0 = T.F[i] := List.getD_eq_getElem _ _ hi
+      have hget := List.getD_eq_getElem T.F 0 hi
       refine ⟨psi_e_mem g (hFpos _ hf), Submodule.subset_span ⟨⟨i, hi⟩, ?_⟩⟩
       show toQ T.n (psi g (e T.d (T.F.getD i 0))) = _
       rw [hget]
@@ -372,7 +373,7 @@ theorem check_mem_D_hom (T : Trace) (members : List ℕ) [NeZero T.d] (hc : chec
       ((T.p : ℤ) ^ (T.E - 1)) • q = f + ((T.p : ℤ) ^ T.E) • r := by
     intro q
     obtain ⟨y, hy, rfl⟩ := toQ_surj q
-    obtain ⟨s, hs, δ, hδ, rfl⟩ := Submodule.mem_sup.mp (aug_le_spanF g hgen (by omega) hy)
+    obtain ⟨s, hs, δ, hδ, rfl⟩ := Submodule.mem_sup.mp (aug_le_spanF g hgen (n := T.n) (by omega) hy)
     have hsD : s ∈ augIdeal G := span_gensF_le_aug g T.n hs
     rw [toQ_add hsD (Ideal.pow_le_self hn0 hδ), toQ_eq_zero hn0 hδ, add_zero]
     clear hy hδ
@@ -463,6 +464,22 @@ theorem check_mem_D_hom (T : Trace) (members : List ℕ) [NeZero T.d] (hc : chec
       exact toQ_eq_zero hn0 hm
   rw [mem_D]
   exact (toQ_eq_zero_iff (of_sub_one_mem_augIdeal _)).1 hx0
+
+/-- The functionals' `a` are among the polynomial maps `maps` (kernel-checked), so homomorphisms for
+the maps give homomorphisms for the functionals. -/
+theorem homs_of_maps {G : Type*} [Group G] {d : ℕ} (g : Fin d → G) (maps : List (List ℤ))
+    (H : HomCert) (hm : H.funcs.all (fun κ => maps.any (fun a => a == κ.1)) = true)
+    (h : ∀ a ∈ maps, ∃ φ : G →* Multiplicative ℤ,
+      ∀ j : Fin d, Multiplicative.toAdd (φ (g j)) = a.getD j.val 0) :
+    ∀ k < H.funcs.length, ∃ φ : G →* Multiplicative ℤ,
+      ∀ j : Fin d, Multiplicative.toAdd (φ (g j)) = (H.funcs.getD k ([], 0)).1.getD j.val 0 := by
+  intro k hk
+  simp only [List.all_eq_true, List.any_eq_true, beq_iff_eq] at hm
+  have hκ : H.funcs.getD k ([], 0) ∈ H.funcs := by
+    rw [List.getD_eq_getElem _ _ hk]; exact List.getElem_mem hk
+  obtain ⟨a, ha, hak⟩ := hm _ hκ
+  rw [← hak]
+  exact h a ha
 
 /-! ## The presented group -/
 
