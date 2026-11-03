@@ -159,20 +159,20 @@ def invisible : Subgroup (FreeGroup (Fin d)) where
   carrier := {x | ∀ a b : Ak d (m.1 + 1), lamA m (a * (muA (m.1 + 1) x : Ak d (m.1 + 1)) * b) = lamA m (a * b)}
   mul_mem' := by
     intro x y hx hy a b
-    rw [map_mul, Units.val_mul, ← mul_assoc, hy, hx]
+    rw [(muA (m.1 + 1)).map_mul, Units.val_mul, ← mul_assoc, hy, hx]
   one_mem' := by intro a b; rw [map_one, Units.val_one, mul_one]
   inv_mem' := by
     intro x hx a b
     have := hx (a * (muA (m.1 + 1) x⁻¹ : Ak d (m.1 + 1))) b
-    rw [mul_assoc a, ← Units.val_mul, ← map_mul, inv_mul_cancel, map_one, Units.val_one, mul_one] at this
+    rw [mul_assoc a, ← Units.val_mul, ← (muA (m.1 + 1)).map_mul, inv_mul_cancel, (muA (m.1 + 1)).map_one, Units.val_one, mul_one] at this
     exact this.symm
 
 instance invisible_normal : (invisible m).Normal where
   conj_mem x hx c a b := by
-    rw [map_mul, map_mul, Units.val_mul, Units.val_mul]
+    rw [(muA (m.1 + 1)).map_mul, (muA (m.1 + 1)).map_mul, Units.val_mul, Units.val_mul]
     have := hx (a * (muA (m.1 + 1) c : Ak d (m.1 + 1))) ((muA (m.1 + 1) c⁻¹ : Ak d (m.1 + 1)) * b)
     simp only [mul_assoc] at this ⊢
-    rw [this, ← mul_assoc ((muA (m.1 + 1) c : Ak d (m.1 + 1))), ← Units.val_mul, ← map_mul, mul_inv_cancel, map_one,
+    rw [this, ← mul_assoc ((muA (m.1 + 1) c : Ak d (m.1 + 1))), ← Units.val_mul, ← (muA (m.1 + 1)).map_mul, mul_inv_cancel, (muA (m.1 + 1)).map_one,
       Units.val_one, one_mul]
 
 /-- Check 1 of §3.2(e) for `(w, λ)`: `λ(X_u · (μ(r) − 1) · X_v) = 0` in `A_{w+1}` for every relator
@@ -211,7 +211,7 @@ noncomputable def phiA (hvan : Vanish rels m)
       normalClosure_le_invisible hvan (QuotientGroup.leftRel_apply.mp hxy)
     have e : y = x * (x⁻¹ * y) := by group
     show lamA m (a * (muA (m.1 + 1) x : Ak d (m.1 + 1))) = lamA m (a * (muA (m.1 + 1) y : Ak d (m.1 + 1)))
-    rw [e, map_mul, Units.val_mul, ← mul_assoc]
+    rw [e, (muA (m.1 + 1)).map_mul, Units.val_mul, ← mul_assoc]
     have := hn (a * (muA (m.1 + 1) x : Ak d (m.1 + 1))) 1
     rw [mul_one, mul_one] at this
     exact this.symm
@@ -224,8 +224,8 @@ theorem phiA_mul (hvan : Vanish rels m) (a : Ak d (m.1 + 1)) (x : FreeGroup (Fin
     phiA hvan a (PresentedGroup.mk rels x * q) = phiA hvan (a * (muA (m.1 + 1) x : Ak d (m.1 + 1))) q := by
   induction q using QuotientGroup.induction_on with
   | H y =>
-    rw [show (QuotientGroup.mk y : PresentedGroup rels) = PresentedGroup.mk rels y from rfl, ← map_mul,
-      phiA_mk, phiA_mk, map_mul, Units.val_mul, mul_assoc]
+    rw [show (QuotientGroup.mk y : PresentedGroup rels) = PresentedGroup.mk rels y from rfl, ← (PresentedGroup.mk rels).map_mul,
+      phiA_mk, phiA_mk, (muA (m.1 + 1)).map_mul, Units.val_mul, mul_assoc]
 
 /-- `lin φ_a (E (l̂)) = λ(a · Π (μ(x) − 1))`. -/
 theorem lin_phiA_E (hvan : Vanish rels m) (l : List (FreeGroup (Fin d))) (a : Ak d (m.1 + 1)) :
@@ -291,7 +291,8 @@ theorem isBase_of_vanish (hvan : Vanish rels m) :
     rw [show ((fun x => ((muA (m.1 + 1) x : Ak d (m.1 + 1)) - 1)) ∘ fun j => FreeGroup.of (letter d j)) =
       fun j => ((muA (m.1 + 1) (FreeGroup.of (letter d j)) : Ak d (m.1 + 1)) - 1) from rfl, prod_muA_letters, lamA_mk,
       lamR_single, one_mul, lamW]
-    have hl : (FreeMonoid.ofList (u.map (letter d))).length = u.length := by simp
+    have hl : (FreeMonoid.ofList (u.map (letter d))).length = u.length := by
+      show (u.map (letter d)).length = u.length; simp
     have hv : (FreeMonoid.ofList (u.map (letter d))).toList.map (·.val) = u := by
       rw [FreeMonoid.toList_ofList, List.map_map]
       conv_rhs => rw [← List.map_id u]
