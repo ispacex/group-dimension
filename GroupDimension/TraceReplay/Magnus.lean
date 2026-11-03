@@ -21,12 +21,20 @@ are `1` in `G`), and `D·R` into `D·ℤ[G]`. So
 
   `w(g) − 1 ∈ Δ^n + D·ℤ[G]`   (`sub_one_mem_of_mem_Lt`, `check_group`),
 
-and `w(g) ∈ D_n(G)` when the `D·R` part is absent (`mem_D_of_mem_Jt_sup_Ik`). This is the easy
-direction of §3.1 of the paper (`J_n ↦ Δ^n`); only it is needed for a certificate of membership.
-`binom` (the checker's own generalised binomial coefficient) is `Ring.choose` (`binom_eq_choose`).
+and `w(g) ∈ D_n(G)` when the `D·R` part is absent (`mem_D_of_mem_Jt_sup_Ik`; `check_sound` always
+lands in `Lt`, with the `D·R` part, so the pipeline does not reach it yet). This is the easy
+direction of §3.1 of the paper (`J_n ↦ Δ^n`), the one a certificate of membership needs; removing
+`D·ℤ[G]` below completes it. `binom` (the checker's own generalised binomial coefficient) is
+`Ring.choose` (`binom_eq_choose`).
 
-Removing `D·ℤ[G]` (exactness) is a separate step: it needs `p^{E−1} Δ ⊆ Δ^n + p^E Δ` (the second
-half of `check_sound`, pushed by `ψ`) and that `Δ/Δ^n` is a `p`-group.
+Since `ε(Δ^n) = 0`, `w(g) − 1 ∈ Δ^n + D·ℤ[G]` is the same as `w(g) − 1 ∈ Δ^n + D·Δ`. It says
+nothing when `Δ = Δ^2 + pΔ` (`H_1(G; 𝔽_p) = 0`, e.g. `G` of order prime to `p`), and it is `D_n`
+membership as soon as `p^E Δ ⊆ Δ^n`; the intended case is `G` a finite `p`-group.
+
+Removing `D·ℤ[G]` (exactness) is a separate step. It needs `p^{E−1} Δ ⊆ Δ^n + p^E Δ` (the second
+half of `check_sound`, pushed by `ψ`, which covers `Δ` modulo `Δ^n` only when the `g_j` generate
+`G`), and that `Δ/Δ^n` has bounded `p`-power exponent (e.g. `x^{p^N} = 1` for all `x : G`, which
+gives `p^N Δ ⊆ Δ^2`, hence `p^{N(n−1)} Δ ⊆ Δ^n`).
 -/
 
 namespace GroupDimension.TraceReplay
@@ -186,7 +194,7 @@ theorem bser_sub_mem (h : G) (k : ℕ) (e : ℤ) :
     rw [e1]
     exact add_mem (Ideal.mul_mem_right _ _ ih) (Ideal.mul_mem_right _ _ (hZ _))
 
-/-- A flat word evaluated in `G` (generators `1..d`, as in `mt`). -/
+/-- A flat word evaluated in `G` (generators `1..d`; other indices read modulo `d`, exactly as in `mt`). -/
 def gword (w : List (ℕ × ℤ)) : G := (w.map fun f => g (letter d (f.1 - 1)) ^ f.2).prod
 
 /-- `ψ (mt k w) ≡ w(g)` modulo `Δ^k`. -/
@@ -261,7 +269,11 @@ theorem mem_D_of_mem_Jt_sup_Ik (hrel : ∀ r ∈ rels, gword g r.2 = 1) {n : ℕ
 end Psi
 
 /-- `check_sound`, in the group ring: for any group `G` and `g : Fin d → G` in which the trace's
-relators hold, every test claimed in has `w_t(g) − 1 ∈ Δ^n + p^E ℤ[G]`. -/
+relators hold, every test claimed in has `w_t(g) − 1 ∈ Δ^n + p^E ℤ[G]`. This is informative only
+when `H_1(G; 𝔽_p) ≠ 0` (e.g. `G` a nontrivial finite `p`-group), and it is `w_t(g) ∈ D_n(G)` once
+`p^E Δ ⊆ Δ^n`. Fewer relators listed in the trace make it stronger. That `T.tests` holds the
+intended words, and `g` the presentation's generators in order, is the reader's to check (the data
+file transcribes them; `trace_to_lean.py`). -/
 theorem check_group (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
     {G : Type*} [Group G] (g : Fin T.d → G) (hrel : ∀ r ∈ T.rels, gword g r.2 = 1) :
     ∀ t ∈ members, ∃ a ∈ augIdeal G ^ T.n, ∃ b,
