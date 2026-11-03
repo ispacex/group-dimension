@@ -58,8 +58,8 @@ theorem coeff_rescale_exp (a : ℚ) (K : ℕ) :
   field_simp
 
 theorem X_dvd_Phi {x : MonoidAlgebra ℤ G} (hx : x ∈ augIdeal G) :
-    (X : PowerSeries ℚ) ∣ Phi φ x := by
-  refine CentralRoot.augIdeal_induction (p := fun x => (X : PowerSeries ℚ) ∣ Phi φ x) hx
+    (PowerSeries.X : PowerSeries ℚ) ∣ Phi φ x := by
+  refine CentralRoot.augIdeal_induction (p := fun x => (PowerSeries.X : PowerSeries ℚ) ∣ Phi φ x) hx
     (by rw [map_zero]; exact dvd_zero _) ?_
     (fun y h => by rw [map_neg]; exact (dvd_neg).2 h)
     (fun y z h h' => by rw [map_add]; exact dvd_add h h')
@@ -69,7 +69,7 @@ theorem X_dvd_Phi {x : MonoidAlgebra ℤ G} (hx : x ∈ augIdeal G) :
   simp
 
 theorem X_pow_dvd_Phi (k : ℕ) {x : MonoidAlgebra ℤ G} (hx : x ∈ augIdeal G ^ k) :
-    (X : PowerSeries ℚ) ^ k ∣ Phi φ x := by
+    (PowerSeries.X : PowerSeries ℚ) ^ k ∣ Phi φ x := by
   induction k generalizing x with
   | zero => rw [pow_zero]; exact one_dvd _
   | succ k ih =>
@@ -96,6 +96,7 @@ theorem nu_eq_zero {n K : ℕ} (hK : K < n) {x : MonoidAlgebra ℤ G} (hx : x �
 
 variable {d : ℕ} [NeZero d] (g : Fin d → G) (a : List ℤ)
 
+omit [NeZero d] in
 theorem nu_prod_aux (ha : ∀ j : Fin d, Multiplicative.toAdd (φ (g j)) = a.getD j.val 0) (K : ℕ)
     (l : List (Fin d)) : ∀ s : ℤ,
       (K.factorial : ℚ) * coeff K (rescale (s : ℚ) (exp ℚ) *
