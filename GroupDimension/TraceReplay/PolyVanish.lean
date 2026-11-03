@@ -358,7 +358,50 @@ theorem vanVal_eq (m : ℕ × List ℤ) (v : VecZ) (a u b vv : ℕ) (hu : u < d 
     rw [← map_mul, ← map_mul, lamA_mk, mul_smul_comm, smul_mul_assoc, map_zsmul, smul_eq_mul,
       ← e_of_pos hu, ← e_of_pos hv, e_posMul, e_posMul, lamR_e]
 
-theorem checkMap_sound {m : ℕ × List ℤ} {v : VecZ} (h : checkMap d m v = true) (u w : FreeMonoid (Fin d))
+theorem degOf_pos {a x : ℕ} (hx : x < d ^ a) : degOf d (off d a + x) = a :=
+  deg_eq (NeZero.pos d) (by omega) (by rw [off_succ]; omega)
+
+theorem concat_lt {a b x y : ℕ} (hx : x < d ^ a) (hy : y < d ^ b) : x * d ^ b + y < d ^ (a + b) := by
+  calc x * d ^ b + y < x * d ^ b + d ^ b := Nat.add_lt_add_left hy _
+    _ = (x + 1) * d ^ b := by ring
+    _ ≤ d ^ a * d ^ b := Nat.mul_le_mul_right _ hx
+    _ = d ^ (a + b) := (pow_add _ _ _).symm
+
+theorem posMul_pos {a b x y : ℕ} (hx : x < d ^ a) (hy : y < d ^ b) :
+    posMul d (off d a + x) (off d b + y) = off d (a + b) + (x * d ^ b + y) := by
+  simp only [posMul, degOf_pos hx, degOf_pos hy, Nat.add_sub_cancel_left]
+  omega
+
+theorem lamPos_pos (m : ℕ × List ℤ) {a x : ℕ} (hx : x < d ^ a) :
+    lamPos d m (off d a + x) =
+      bif Nat.blt 0 a && Nat.ble a m.1 then m.2.getD (off d a + x - 1) 0 else 0 := by
+  simp only [lamPos, degOf_pos hx]
+
+theorem vanValD_eq (m : ℕ × List ℤ) (v : VecZ) {a u b vv : ℕ} (hu : u < d ^ a) (hv : vv < d ^ b) :
+    vanValD d m (withDeg d v) a u b vv = vanVal d m v a u b vv := by
+  have hd := NeZero.pos d
+  suffices h : ∀ s, (withDeg d v).foldl (fun s t =>
+      bif Nat.blt 0 (a + t.1 + b) && Nat.ble (a + t.1 + b) m.1 then
+        s + t.2.2 * m.2.getD (off d (a + t.1 + b) + (u * d ^ t.1 + t.2.1) * d ^ b + vv - 1) 0
+      else s) s =
+      v.foldl (fun s t => s + t.2 * lamPos d m (posMul d (posMul d (off d a + u) t.1) (off d b + vv))) s by
+    exact h 0
+  induction v with
+  | nil => intro s; rfl
+  | cons t v ih =>
+    intro s
+    simp only [withDeg, List.map_cons, List.foldl_cons] at ih ⊢
+    rw [← ih]
+    congr 1
+    set g := degOf d t.1
+    set i := t.1 - off d g
+    have hi : i < d ^ g := idx_lt hd t.1
+    have ht : t.1 = off d g + i := by have := (deg_spec hd t.1).1; omega
+    have hc := concat_lt hu hi
+    rw [ht, posMul_pos hu hi, posMul_pos hc hv, lamPos_pos m (concat_lt hc hv)]
+    cases (Nat.blt 0 (a + g + b) && Nat.ble (a + g + b) m.1) <;> simp [Nat.add_assoc]
+
+theorem checkMap_sound {m : ℕ × List ℤ} {v : VecZ} (h : checkMap d m (withDeg d v) = true) (u w : FreeMonoid (Fin d))
     (huw : u.length + w.length + 1 ≤ m.1) :
     lamA m (mkK d (m.1 + 1) (single u 1) * mkK d (m.1 + 1) (evalZ d v) * mkK d (m.1 + 1) (single w 1)) = 0 := by
   simp only [checkMap, List.all_eq_true, List.mem_range, beq_iff_eq] at h
@@ -369,7 +412,7 @@ theorem checkMap_sound {m : ℕ × List ℤ} {v : VecZ} (h : checkMap d m v = tr
   have hw2 : wordOf d w.length (idxOf w.toList) = w := by
     rw [show w.length = w.toList.length from rfl, hw.2, FreeMonoid.ofList_toList]
   have := h u.length (by omega) w.length (by omega) _ hu.1 _ hw.1
-  rw [vanVal_eq m v u.length _ w.length _ hu.1 hw.1, hu2, hw2] at this
+  rw [vanValD_eq m v hu.1 hw.1, vanVal_eq m v u.length _ w.length _ hu.1 hw.1, hu2, hw2] at this
   exact this
 
 /-- **Soundness of the kernel check of `Vanish`.** -/

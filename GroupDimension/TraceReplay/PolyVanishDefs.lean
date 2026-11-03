@@ -88,16 +88,28 @@ def vanVal (d : Nat) (m : Nat × List Int) (v : VecZ) (a u b vv : Nat) : Int :=
 /-- `v − 1`. -/
 def subOne (v : VecZ) : VecZ := mergeZ (v.length + 1) v [(0, -1)]
 
-/-- Check 1 for one map, given `v = μ(r) − 1`: `λ(X_U v X_V) = 0` for `|U| + |V| ≤ w − 1`. -/
-def checkMap (d : Nat) (m : Nat × List Int) (v : VecZ) : Bool :=
+/-- The terms with their degree and index: `(g, i, c)` for `c · X` at position `off g + i`. -/
+def withDeg (d : Nat) (v : VecZ) : List (Nat × Nat × Int) :=
+  v.map fun t => (degOf d t.1, t.1 - off d (degOf d t.1), t.2)
+
+/-- `vanVal` on the terms with degrees (the position of `X_U X_c X_V` by arithmetic, `vanValD_eq`). -/
+def vanValD (d : Nat) (m : Nat × List Int) (vd : List (Nat × Nat × Int)) (a u b vv : Nat) : Int :=
+  vd.foldl (fun s t =>
+    bif Nat.blt 0 (a + t.1 + b) && Nat.ble (a + t.1 + b) m.1 then
+      s + t.2.2 * m.2.getD (off d (a + t.1 + b) + (u * d ^ t.1 + t.2.1) * d ^ b + vv - 1) 0
+    else s) 0
+
+/-- Check 1 for one map, given `vd = withDeg (μ(r) − 1)`: `λ(X_U (μ(r) − 1) X_V) = 0` for
+`|U| + |V| ≤ w − 1`. -/
+def checkMap (d : Nat) (m : Nat × List Int) (vd : List (Nat × Nat × Int)) : Bool :=
   (List.range m.1).all fun a => (List.range (m.1 - a)).all fun b =>
-    (List.range (d ^ a)).all fun u => (List.range (d ^ b)).all fun vv => vanVal d m v a u b vv == 0
+    (List.range (d ^ a)).all fun u => (List.range (d ^ b)).all fun vv => vanValD d m vd a u b vv == 0
 
 /-- Check 1 for one relator and all maps, `μ(r)` computed once below degree `K` (`K > w` for every
 map). -/
 def checkVanishRel (d K : Nat) (maps : List (Nat × List Int)) (r : List (List (Nat × Int) × Int)) : Bool :=
-  let v := subOne (magnusN d K r)
-  maps.all fun m => Nat.ble (m.1 + 1) K && checkMap d m v
+  let vd := withDeg d (subOne (magnusN d K r))
+  maps.all fun m => Nat.ble (m.1 + 1) K && checkMap d m vd
 
 /-- Check 1 for all maps against all relators. -/
 def checkVanish (d K : Nat) (maps : List (Nat × List Int)) (rels : List (List (List (Nat × Int) × Int))) :
