@@ -31,11 +31,12 @@ Contents:
   lies in `Δ^n` (`check_mem_D_hom_lin`); for a word test, the word lies in `D_n(G)`
   (`check_mem_D_hom`). `hord_of_pow_eq_one` and `hord_lin_of_pow_eq_one` derive the order
   hypothesis from `w^{p^k} = 1` in `G`.
-* `check_mem_D_pres`: the same, for word tests, for the group presented by `allRels`.
+* `check_mem_D_pres`: the same, for word tests, for the group presented by `allRels`. The
+  homomorphisms then come from a kernel check (exponent sums), and the generation and relator
+  hypotheses come for free.
 * `check_mem_D_funcs`: the argument for any functionals `ν_k : ℤ[G] → ℚ` vanishing on `Δ^n` with a
-  certified matrix; `check_mem_D_hom_lin` is its case `ν = φ^K`, and `TraceReplay/PolyExact.lean`
-  its case of products of polynomial maps of any weight. The homomorphisms then come
-  from a kernel check (exponent sums), and the generation and relator hypotheses come for free.
+  certified matrix; `check_mem_D_hom_lin` is its case `ν_k = nu φ K` (the `K`-th power of `φ`,
+  linearised), and `TraceReplay/PolyExact.lean` its case of products of polynomial maps of any weight.
 -/
 
 namespace GroupDimension.TraceReplay

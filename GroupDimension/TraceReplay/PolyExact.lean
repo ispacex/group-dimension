@@ -19,6 +19,11 @@ computed by the covering sum `covW` (`prodVal`), and an integer matrix `C` with
 `check_mem_D_poly_lin`: if the trace and the certificate pass, the `g j` generate `G`, the relators
 hold, every base map is a polynomial map of `G` with the stated values (`hmaps`), and the test
 element has `p`-power order in `Δ/Δ^n`, then the test element lies in `Δ^n`.
+
+Unlike the weight-1 case (`check_mem_D_pres`, exponent sums), `hmaps` is a hypothesis here; for a
+presented group it follows from check 1 of §3.2(e) by `TraceReplay/PolyPres.lean`. `prodVal` is a
+specification, not a fast evaluator: it recomputes the inner product at every leaf of `covW`, so
+the kernel can run it only on short words.
 -/
 
 namespace GroupDimension.TraceReplay
@@ -27,7 +32,8 @@ open MonoidAlgebra
 
 /-- Polynomial maps for a trace with free columns. -/
 structure PolyCert where
-  /-- base maps `(w, λ)`: `λ[c − 1]` is the value on the monomial at position `c`, degrees `1..w` -/
+  /-- base maps `(w, λ)`: `λ[c − 1]` is the value on the monomial at position `c`, degrees `1..w`
+  (`cert/polymaps` writes exactly `off d (w + 1) − 1` values; missing ones read as `0`) -/
   maps : List (Nat × List Int)
   /-- the functionals: products of base maps, by index -/
   funcs : List (List Nat)
