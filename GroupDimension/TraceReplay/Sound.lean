@@ -23,8 +23,8 @@ For a list of relators `rels` (flat words) and a modulus `D`, the level-`k` targ
 So `Lt k` is the preimage of `J_k + D·A_k` under `R → A_k = R / (degree ≥ k)`.
 
 Main results: every vector a trace defines at level `k` lies in `Lt k`; if `check` passes, then
-`mt n w_t − 1 ∈ Lt n` for every test claimed in, and `p^{E−1} X_w ∈ Lt n` for every word `w ≠ 1`
-(exactness (X) with no free columns).
+`mt n w_t − 1 ∈ Lt n` for every test claimed in, and `p^{E−1} X_w ∈ Lt n + span{X_f : f ∈ F}` for
+every word `w ≠ 1` (exactness (X); with no free columns, `F = []`, the span is `0`).
 -/
 
 namespace GroupDimension.TraceReplay
@@ -748,6 +748,32 @@ theorem combo_eq_nil_mem {L : Submodule ℤ (R d)} {D : ℕ} (hDL : DR d D ≤ L
   have := combo_sub_mem hDL cur hcur terms w
   rw [h, eval_nil, zero_sub, Submodule.neg_mem_iff] at this; exact this
 
+variable (d) in
+/-- The `ℤ`-span of the monomials at the positions in `S` (the free columns). -/
+def Fspan (S : List ℕ) : Submodule ℤ (R d) := Submodule.span ℤ {x | ∃ f ∈ S, x = e d f}
+
+theorem eval_mem_Fspan {S : List ℕ} (v : Vec) (h : ∀ t ∈ v, ∃ f ∈ S, f = t.1) :
+    eval d v ∈ Fspan d S := by
+  induction v with
+  | nil => rw [eval_nil]; exact zero_mem _
+  | cons t v ih =>
+    obtain ⟨c, a⟩ := t
+    rw [eval_cons]
+    refine add_mem (Submodule.smul_mem _ _ (Submodule.subset_span ?_))
+      (ih fun t ht => h t (List.mem_cons_of_mem _ ht))
+    obtain ⟨f, hf, hfc⟩ := h (c, a) List.mem_cons_self
+    exact ⟨f, hf, by rw [hfc]⟩
+
+/-- A combination whose entries all lie in `S` (an `x` line with free columns). -/
+theorem combo_all_mem {L : Submodule ℤ (R d)} {D : ℕ} (hDL : DR d D ≤ L) {S : List ℕ}
+    {cur : List (ℕ × Vec)} (hcur : ∀ y ∈ cur, eval d y.2 ∈ L) {terms : List (ℕ × ℤ)} {w : Vec}
+    (h : ∀ t ∈ combo D cur terms w, ∃ f ∈ S, f = t.1) : eval d w ∈ L ⊔ Fspan d S := by
+  have h1 := combo_sub_mem hDL cur hcur terms w
+  have h2 := eval_mem_Fspan (d := d) _ h
+  rw [show eval d w = eval d (combo D cur terms w) - (eval d (combo D cur terms w) - eval d w) by
+    abel]
+  exact sub_mem (Submodule.mem_sup_right h2) (Submodule.mem_sup_left h1)
+
 end Replay
 
 section Trace
@@ -877,10 +903,11 @@ end Index
 
 /-- **Soundness of the replay.** If `check T members` passes, then for every test `t` claimed in,
 `mt n w_t − 1 ∈ Lt n` (membership modulo `p^E`, statement 4 of `cert/TRACE.md`), and
-`p^{E−1} X_w ∈ Lt n` for every word `w ≠ 1` (exactness (X) with `F = ∅`, statement 5). -/
+`p^{E−1} X_w ∈ Lt n + span{X_f : f ∈ F}` (`Fspan`) for every word `w ≠ 1` (exactness (X), statement 5). -/
 theorem check_sound (T : Trace) (members : List ℕ) [NeZero T.d] (h : check T members = true) :
     (∀ t ∈ members, mt T.d T.n (findWord t T.tests) - 1 ∈ LT T T.n) ∧
-    (∀ w : FreeMonoid (Fin T.d), w ≠ 1 → ((T.p ^ (T.E - 1) : ℕ) : ℤ) • single w 1 ∈ LT T T.n) := by
+    (∀ w : FreeMonoid (Fin T.d), w ≠ 1 →
+      ((T.p ^ (T.E - 1) : ℕ) : ℤ) • single w 1 ∈ LT T T.n ⊔ Fspan T.d T.F) := by
   simp only [check, Bool.and_eq_true, List.all_eq_true, List.any_eq_true, beq_iff_eq, Nat.blt_eq,
     Nat.ble_eq, Bool.or_eq_true, List.isEmpty_iff] at h
   obtain ⟨⟨⟨⟨⟨⟨⟨hd1, hp1⟩, hE⟩, hn⟩, -⟩, hrels⟩, htests⟩, hm⟩ := h
@@ -911,7 +938,7 @@ theorem check_sound (T : Trace) (members : List ℕ) [NeZero T.d] (h : check T m
       have := sub_mem h1 h2; rwa [sub_sub_cancel] at this
     · intro w hw
       by_cases hlen : k ≤ w.length
-      · rw [← single_eq_smul]; exact Ik_le_Lt _ _ (single_mem_Ik hlen _)
+      · rw [← single_eq_smul]; exact Submodule.mem_sup_left (Ik_le_Lt _ _ (single_mem_Ik hlen _))
       · have hd := NeZero.pos T.d
         have hw1 : 1 ≤ w.length := by
           rcases Nat.eq_zero_or_pos w.length with h0 | h0
@@ -927,13 +954,16 @@ theorem check_sound (T : Trace) (members : List ℕ) [NeZero T.d] (h : check T m
           have h3 : w.toList.length = w.length := rfl
           rw [h3] at h1; rw [hcdef]; omega
         have hc0 : c ≠ 0 := by have := le_off hd w.length; rw [hcdef]; omega
-        obtain ⟨x, hx, hxc⟩ := (hcov c (List.mem_range.mpr hc)).resolve_left hc0
-        have h1 := combo_eq_nil_mem hDL hcur (hxs x hx)
-        have h2 := eval_ins (d := T.d) (T.p ^ T.E) x.1 (T.p ^ (T.E - 1)) []
-        rw [hxc] at h1 h2
-        rw [eval_nil, zero_add, hcdef, e_wordPos] at h2
-        rw [hcdef] at h1
-        have := sub_mem h1 (hDL h2); rwa [sub_sub_cancel] at this
+        rcases hcov c (List.mem_range.mpr hc) with (h0 | ⟨f, hf, hfc⟩) | ⟨x, hx, hxc⟩
+        · exact absurd h0 hc0
+        · refine Submodule.mem_sup_right (Submodule.smul_mem _ _ (Submodule.subset_span ⟨f, hf, ?_⟩))
+          rw [hfc, hcdef, e_wordPos]
+        · have h1 := combo_all_mem (S := T.F) hDL hcur (hxs x hx)
+          have h2 := eval_ins (d := T.d) (T.p ^ T.E) x.1 (T.p ^ (T.E - 1)) []
+          rw [hxc] at h1 h2
+          rw [eval_nil, zero_add, hcdef, e_wordPos] at h2
+          rw [hcdef] at h1
+          have := sub_mem h1 (Submodule.mem_sup_left (hDL h2)); rwa [sub_sub_cancel] at this
 end
 
 end GroupDimension.TraceReplay

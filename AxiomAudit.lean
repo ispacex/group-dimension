@@ -1549,4 +1549,14 @@ open GroupDimension
 #print axioms GroupDimension.TraceReplay.mem_D_of_mem_Jt_sup_Ik
 #print axioms GroupDimension.TraceReplay.check_group
 #print axioms GroupDimension.TraceReplay.check_mem_D
+#print axioms GroupDimension.TraceReplay.nu_eq_zero
+#print axioms GroupDimension.TraceReplay.nu_psi
+#print axioms GroupDimension.TraceReplay.finite_Qn
+#print axioms GroupDimension.TraceReplay.check_mem_D_hom
+#print axioms GroupDimension.TraceReplay.check_mem_D_pres
+#print axioms GroupDimension.TraceReplay.homs_of_maps
+#print axioms GroupDimension.TraceReplay.hord_of_pow_eq_one
+#print axioms GroupDimension.TraceReplay.C4aT4.check_ok
+#print axioms GroupDimension.TraceReplay.C4aT4.hom_ok
+#print axioms GroupDimension.TraceReplay.C4aT4.mem_D_test0
 #print axioms GroupDimension.TraceReplay.Rips10.mem_D_test0

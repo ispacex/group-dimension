@@ -189,24 +189,31 @@ def runLevels (T : Trace) : List (Nat × List Line) → Nat → List (Nat × Vec
   | (k', ls) :: rest, k, prev =>
     bif k' == k + 1 then runLevels T rest k' (runLevel T k' prev ls []) else none
 
-/-- The full check, for a trace with no free columns (`F = []`, i.e. rank bound `0`):
+/-- The full check:
 * the levels are `2, …, n`;
 * every relator and test word uses generators `1..d` only, and `d ≥ 2`;
-* every `x` line: `p^{E−1} e_c + Σ c_i V_i ≡ 0`, and the `x` columns cover `1 .. T − 1`;
+* the free columns `F` are positive (not the constant term);
+* every `x` line: `p^{E−1} e_c + Σ c_i V_i` has no nonzero entry outside `F`, and every column
+  `1 .. T − 1` is in `F` or has an `x` line;
 * every test in `members` is present in `T.tests` with a non-empty word (a missing test would read
   as the empty word, and its membership would say nothing), and has a `w` line with
-  `μ(w_t) − 1 + Σ c_i V_i ≡ 0`. -/
+  `μ(w_t) − 1 + Σ c_i V_i ≡ 0`.
+
+With `F = []` (rank bound `0`) this is the whole exactness certificate. With `F ≠ []` the free
+columns must be shown to meet the torsion trivially; that is `TraceReplay/HomExact.lean`. -/
 def check (T : Trace) (members : List Nat) : Bool :=
   let D := T.p ^ T.E
   let okWord (w : List (Nat × Int)) := w.all fun f => Nat.blt 0 f.1 && Nat.ble f.1 T.d
-  Nat.blt 1 T.d && Nat.blt 1 T.p && Nat.blt 0 T.E && Nat.blt 1 T.n && T.F.isEmpty &&
+  Nat.blt 1 T.d && Nat.blt 1 T.p && Nat.blt 0 T.E && Nat.blt 1 T.n && T.F.all (fun f => Nat.blt 0 f) &&
   T.rels.all (fun r => okWord r.2) && T.tests.all (fun t => okWord t.2) &&
   match runLevels T T.levels 1 [] with
   | none => false
   | some (k, cur) =>
     k == T.n &&
-    T.xs.all (fun x => (combo D cur x.2 (ins D x.1 (T.p ^ (T.E - 1)) [])).isEmpty) &&
-    (List.range (off T.d T.n)).all (fun c => c == 0 || T.xs.any (fun x => x.1 == c)) &&
+    T.xs.all (fun x => (combo D cur x.2 (ins D x.1 (T.p ^ (T.E - 1)) [])).all
+      (fun e => T.F.any (fun f => f == e.1))) &&
+    (List.range (off T.d T.n)).all (fun c => c == 0 || T.F.any (fun f => f == c) ||
+      T.xs.any (fun x => x.1 == c)) &&
     members.all (fun t => T.tests.any (fun y => y.1 == t && !y.2.isEmpty) &&
       T.ws.any (fun w => w.1 == t &&
         (combo D cur w.2 (magnus1 T.d D T.n (findWord t T.tests))).isEmpty))

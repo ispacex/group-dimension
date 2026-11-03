@@ -38,6 +38,9 @@ public import GroupDimension.Cert1024.Check
 public import GroupDimension.Cert1024.Decode
 public import GroupDimension.TraceCert
 public import GroupDimension.TraceReplay.Data.Rips10
+public import GroupDimension.TraceReplay.Data.C4aT4
 public import GroupDimension.TraceReplay.Magnus
+public import GroupDimension.TraceReplay.HomPow
+public import GroupDimension.TraceReplay.HomExact
 
 @[expose] public section
