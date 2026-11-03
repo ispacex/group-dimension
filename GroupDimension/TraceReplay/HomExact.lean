@@ -493,7 +493,8 @@ theorem of_pow_sub_one_eq (x : G) (N : ℕ) : ∃ u : MonoidAlgebra ℤ G,
     of ℤ G (x ^ N) - 1 = (N : ℤ) • (of ℤ G x - 1) + (of ℤ G x - 1) ^ 2 * u := by
   set y := of ℤ G x - 1 with hy
   induction N with
-  | zero => exact ⟨0, Commute.zero_right _, by simp⟩
+  | zero => exact ⟨0, Commute.zero_right _, by
+      simp only [pow_zero, map_one, sub_self, Nat.cast_zero, zero_smul, mul_zero, add_zero]⟩
   | succ N ih =>
     obtain ⟨u, hc, e⟩ := ih
     refine ⟨u + (N : ℤ) • 1 + y * u, ?_, ?_⟩
