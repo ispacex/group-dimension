@@ -1,6 +1,7 @@
 module
 
 public import GroupDimension.Basic
+public import GroupDimension.CentralRoot
 public import GroupDimension.TraceReplay.Sound
 
 @[expose] public section
@@ -21,8 +22,9 @@ are `1` in `G`), and `D·R` into `D·ℤ[G]`. So
 
   `w(g) − 1 ∈ Δ^n + D·ℤ[G]`   (`sub_one_mem_of_mem_Lt`, `check_group`),
 
-and `w(g) ∈ D_n(G)` when the `D·R` part is absent (`mem_D_of_mem_Jt_sup_Ik`; `check_sound` always
-lands in `Lt`, with the `D·R` part, so the pipeline does not reach it yet). This is the easy
+and `w(g) ∈ D_n(G)` when the `D·R` part is absent (`mem_D_of_mem_Jt_sup_Ik`; unused by the pipeline,
+since `check_sound` always lands in `Lt`, with the `D·R` part: `D_n` is reached by exactness,
+`check_mem_D`). This is the easy
 direction of §3.1 of the paper (`J_n ↦ Δ^n`), the one a certificate of membership needs; removing
 `D·ℤ[G]` below completes it. `binom` (the checker's own generalised binomial coefficient) is
 `Ring.choose` (`binom_eq_choose`).
@@ -31,7 +33,7 @@ Since `ε(Δ^n) = 0`, `w(g) − 1 ∈ Δ^n + D·ℤ[G]` is the same as `w(g) −
 nothing when `Δ = Δ^2 + pΔ` (`H_1(G; 𝔽_p) = 0`, e.g. `G` of order prime to `p`), and it is `D_n`
 membership as soon as `p^E Δ ⊆ Δ^n`; the intended case is `G` a finite `p`-group.
 
-Removing `D·ℤ[G]` (exactness) is a separate step. It needs `p^{E−1} Δ ⊆ Δ^n + p^E Δ` (the second
+Removing `D·ℤ[G]` (exactness, `check_mem_D` at the end) needs `p^{E−1} Δ ⊆ Δ^n + p^E Δ` (the second
 half of `check_sound`, pushed by `ψ`, which covers `Δ` modulo `Δ^n` only when the `g_j` generate
 `G`), and that `Δ/Δ^n` has bounded `p`-power exponent (e.g. `x^{p^N} = 1` for all `x : G`, which
 gives `p^N Δ ⊆ Δ^2`, hence `p^{N(n−1)} Δ ⊆ Δ^n`).
@@ -279,6 +281,251 @@ theorem check_group (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T 
     ∀ t ∈ members, ∃ a ∈ augIdeal G ^ T.n, ∃ b,
       of ℤ G (gword g (findWord t T.tests)) - 1 = a + ((T.p ^ T.E : ℕ) : ℤ) • b :=
   fun t ht => sub_one_mem_of_mem_Lt g hrel ((check_sound T members hc).1 t ht)
+
+
+/-! ## Exactness: removing `p^E ℤ[G]`
+
+If the `g_j` generate `G` and `x^{p^N} = 1` in `G`, the second half of `check_sound` gives
+`p^{E−1} Δ ⊆ Δ^n` (below), so the `p^E ℤ[G]` of `check_group` drops and `w_t(g) ∈ D_n(G)`. -/
+
+section Exact
+
+variable {G : Type*} [Group G]
+
+/-- `x^m − 1 ≡ m (x − 1)` modulo `Δ²`. -/
+theorem of_pow_sub_mem (x : G) : ∀ m : ℕ,
+    of ℤ G (x ^ m) - 1 - (m : ℤ) • (of ℤ G x - 1) ∈ augIdeal G ^ 2
+  | 0 => by
+    simp only [pow_zero, map_one, sub_self, Nat.cast_zero, zero_smul]; exact zero_mem _
+  | m + 1 => by
+    have hx : of ℤ G x - 1 ∈ augIdeal G ^ 1 := by
+      rw [Submodule.pow_one]; exact of_sub_one_mem_augIdeal x
+    have hxm : of ℤ G (x ^ m) - 1 ∈ augIdeal G ^ 1 := by
+      rw [Submodule.pow_one]; exact of_sub_one_mem_augIdeal _
+    have e : of ℤ G (x ^ (m + 1)) - 1 - ((m + 1 : ℕ) : ℤ) • (of ℤ G x - 1) =
+        (of ℤ G (x ^ m) - 1) * (of ℤ G x - 1) + (of ℤ G (x ^ m) - 1 - (m : ℤ) • (of ℤ G x - 1)) := by
+      rw [pow_succ, map_mul, Nat.cast_succ, add_smul, one_smul]; noncomm_ring
+    rw [e]
+    exact add_mem (mul_mem_augIdeal_pow hxm hx) (of_pow_sub_mem x m)
+
+theorem smul_mem_sq {q : ℕ} (hexp : ∀ x : G, x ^ q = 1) {y : MonoidAlgebra ℤ G}
+    (hy : y ∈ augIdeal G) : (q : ℤ) • y ∈ augIdeal G ^ 2 := by
+  refine CentralRoot.augIdeal_induction (p := fun y => (q : ℤ) • y ∈ augIdeal G ^ 2) hy
+    (by simp) (fun x => ?_) (fun y h => by rw [smul_neg]; exact neg_mem h)
+    (fun y z hy hz => by rw [smul_add]; exact add_mem hy hz)
+  have := of_pow_sub_mem x q
+  rwa [hexp, map_one, sub_self, zero_sub, neg_mem_iff] at this
+
+/-- `q Δ^{k+1} ⊆ Δ^{k+2}` when `x^q = 1` in `G`. -/
+theorem smul_pow_mem {q : ℕ} (hexp : ∀ x : G, x ^ q = 1) :
+    ∀ k : ℕ, ∀ y ∈ augIdeal G ^ (k + 1), (q : ℤ) • y ∈ augIdeal G ^ (k + 2)
+  | 0, y, hy => by rw [zero_add, Submodule.pow_one] at hy; exact smul_mem_sq hexp hy
+  | k + 1, y, hy => by
+    rw [Submodule.pow_succ] at hy
+    refine Submodule.mul_induction_on hy (fun a ha b hb => ?_)
+      (fun _ _ h h' => by rw [smul_add]; exact add_mem h h')
+    rw [← smul_mul_assoc]
+    have hb1 : b ∈ augIdeal G ^ 1 := by rw [Submodule.pow_one]; exact hb
+    have := mul_mem_augIdeal_pow (smul_pow_mem hexp k a ha) hb1
+    rwa [show k + 2 + 1 = k + 1 + 2 by omega] at this
+
+/-- `q^j Δ ⊆ Δ^{j+1}` when `x^q = 1` in `G`. -/
+theorem pow_smul_mem {q : ℕ} (hexp : ∀ x : G, x ^ q = 1) :
+    ∀ j : ℕ, ∀ y ∈ augIdeal G, ((q ^ j : ℕ) : ℤ) • y ∈ augIdeal G ^ (j + 1)
+  | 0, y, hy => by simpa [Submodule.pow_one] using hy
+  | j + 1, y, hy => by
+    rw [pow_succ', Nat.cast_mul, mul_smul]
+    exact smul_pow_mem hexp j _ (pow_smul_mem hexp j y hy)
+
+/-- If `x ∈ Δ` and `x = a + D b` with `a ∈ Δ^n` (`n ≥ 1`, `D ≠ 0`), then `b ∈ Δ`. -/
+theorem mem_aug_of_eq {n : ℕ} (hn : n ≠ 0) {D : ℤ} (hD : D ≠ 0) {x a b : MonoidAlgebra ℤ G}
+    (hx : x ∈ augIdeal G) (ha : a ∈ augIdeal G ^ n) (h : x = a + D • b) : b ∈ augIdeal G := by
+  rw [mem_augIdeal] at hx ⊢
+  have ha' : augmentation G a = 0 := mem_augIdeal.mp (Ideal.pow_le_self hn ha)
+  have hs : augmentation G (D • b) = D * augmentation G b := by simp [Algebra.smul_def]
+  rw [h, map_add, ha', zero_add, hs] at hx
+  exact (mul_eq_zero.mp hx).resolve_left hD
+
+/-- `x ∈ Δ^n + D Δ`. -/
+def InT (n : ℕ) (D : ℤ) (x : MonoidAlgebra ℤ G) : Prop :=
+  ∃ a ∈ augIdeal G ^ n, ∃ b ∈ augIdeal G, x = a + D • b
+
+theorem InT.of_pow {n : ℕ} {D : ℤ} {x : MonoidAlgebra ℤ G} (hx : x ∈ augIdeal G ^ n) :
+    InT n D x := ⟨x, hx, 0, zero_mem _, by simp⟩
+
+theorem InT.add {n : ℕ} {D : ℤ} {x y : MonoidAlgebra ℤ G} (hx : InT n D x) (hy : InT n D y) :
+    InT n D (x + y) := by
+  obtain ⟨a, ha, b, hb, rfl⟩ := hx
+  obtain ⟨a', ha', b', hb', rfl⟩ := hy
+  exact ⟨a + a', add_mem ha ha', b + b', add_mem hb hb', by rw [smul_add]; abel⟩
+
+theorem InT.smul {n : ℕ} {D : ℤ} {x : MonoidAlgebra ℤ G} (c : ℤ) (hx : InT n D x) :
+    InT n D (c • x) := by
+  obtain ⟨a, ha, b, hb, rfl⟩ := hx
+  exact ⟨c • a, Submodule.smul_of_tower_mem _ c ha, c • b, Submodule.smul_of_tower_mem _ c hb,
+    by rw [smul_add, smul_comm c D b]⟩
+
+/-- Iterating `r Δ ⊆ Δ^n + P r Δ`: `r Δ ⊆ Δ^n + P^j r Δ` for every `j`. -/
+theorem iterate_exact {n : ℕ} (P r : ℤ)
+    (h1 : ∀ x ∈ augIdeal G, InT n (P * r) (r • x)) :
+    ∀ j : ℕ, ∀ x ∈ augIdeal G, InT n (P ^ j * r) (r • x)
+  | 0, x, hx => ⟨0, zero_mem _, x, hx, by simp⟩
+  | j + 1, x, hx => by
+    obtain ⟨a, ha, b, hb, e⟩ := iterate_exact P r h1 j x hx
+    obtain ⟨a', ha', b', hb', e'⟩ := h1 b hb
+    refine ⟨a + P ^ j • a', add_mem ha (Submodule.smul_of_tower_mem _ _ ha'), b', hb', ?_⟩
+    rw [e, mul_smul, e', smul_add, smul_smul, show P ^ (j + 1) * r = P ^ j * (P * r) by ring,
+      add_assoc]
+
+variable {d : ℕ} [NeZero d] (g : Fin d → G)
+
+/-- The `ℤ`-span of the `ψ(X_w)`, `w ≠ 1`, plus `Δ^n`. -/
+def Sp (n : ℕ) : Submodule ℤ (MonoidAlgebra ℤ G) :=
+  Submodule.span ℤ {y | ∃ w : FreeMonoid (Fin d), w ≠ 1 ∧ y = psi g (single w 1)} ⊔
+    (augIdeal G ^ n).restrictScalars ℤ
+
+theorem ne_one_of_mul_ne_one {u v : FreeMonoid (Fin d)} (hu : u ≠ 1) : u * v ≠ 1 := by
+  intro h; apply hu
+  have h2 := congrArg FreeMonoid.toList h
+  rw [FreeMonoid.toList_mul, FreeMonoid.toList_one, List.append_eq_nil_iff] at h2
+  rw [← FreeMonoid.ofList_toList u, h2.1]; rfl
+
+theorem Sp_mul {n : ℕ} {a b : MonoidAlgebra ℤ G} (ha : a ∈ Sp g n) (hb : b ∈ Sp g n) :
+    a * b ∈ Sp g n := by
+  obtain ⟨s, hs, δ, hδ, rfl⟩ := Submodule.mem_sup.mp ha
+  obtain ⟨s', hs', δ', hδ', rfl⟩ := Submodule.mem_sup.mp hb
+  have e : (s + δ) * (s' + δ') = s * s' + (s * δ' + δ * (s' + δ')) := by noncomm_ring
+  rw [e]
+  refine Submodule.add_mem_sup ?_ (add_mem (Ideal.mul_mem_left _ s hδ') (Ideal.mul_mem_right _ _ hδ))
+  clear e ha hb
+  induction hs using Submodule.span_induction with
+  | mem x hx =>
+    induction hs' using Submodule.span_induction with
+    | mem y hy =>
+      obtain ⟨u, hu, rfl⟩ := hx
+      obtain ⟨v, -, rfl⟩ := hy
+      refine Submodule.subset_span ⟨u * v, ne_one_of_mul_ne_one hu, ?_⟩
+      rw [← map_mul, single_mul_single, one_mul]
+    | zero => simp
+    | add y z _ _ hy hz => rw [mul_add]; exact add_mem hy hz
+    | smul c y _ hy => rw [mul_smul_comm]; exact Submodule.smul_mem _ c hy
+  | zero => simp
+  | add x y _ _ hx hy => rw [add_mul]; exact add_mem hx hy
+  | smul c x _ hx => rw [smul_mul_assoc]; exact Submodule.smul_mem _ c hx
+
+/-- If the `g_j` generate `G` (of finite exponent `q`), every `x − 1` lies in `Sp`. -/
+theorem sub_one_mem_Sp (hgen : Subgroup.closure (Set.range g) = ⊤) {q : ℕ} (hq : 0 < q)
+    (hexp : ∀ x : G, x ^ q = 1) (n : ℕ) (x : G) : of ℤ G x - 1 ∈ Sp g n := by
+  have hmul : ∀ a b : G, of ℤ G a - 1 ∈ Sp g n → of ℤ G b - 1 ∈ Sp g n →
+      of ℤ G (a * b) - 1 ∈ Sp g n := by
+    intro a b ha hb
+    have e : of ℤ G (a * b) - 1 =
+        (of ℤ G a - 1) * (of ℤ G b - 1) + (of ℤ G a - 1) + (of ℤ G b - 1) := by
+      rw [map_mul]; noncomm_ring
+    rw [e]; exact add_mem (add_mem (Sp_mul g ha hb) ha) hb
+  have hpow : ∀ a : G, of ℤ G a - 1 ∈ Sp g n → ∀ m : ℕ, of ℤ G (a ^ m) - 1 ∈ Sp g n := by
+    intro a ha m
+    induction m with
+    | zero => simp only [pow_zero, map_one, sub_self]; exact zero_mem _
+    | succ m ih => rw [pow_succ]; exact hmul _ _ ih ha
+  have hx : x ∈ Subgroup.closure (Set.range g) := by rw [hgen]; trivial
+  induction hx using Subgroup.closure_induction with
+  | mem y hy =>
+    obtain ⟨j, rfl⟩ := hy
+    refine Submodule.mem_sup_left (Submodule.subset_span ⟨FreeMonoid.of j, ?_, ?_⟩)
+    · intro h
+      have := congrArg FreeMonoid.length h
+      simp at this
+    · rw [psi_single, FreeMonoid.toList_of, List.map_singleton, List.prod_singleton, one_smul]
+  | one => simp only [map_one, sub_self]; exact zero_mem _
+  | mul a b _ _ ha hb => exact hmul a b ha hb
+  | inv a _ ha =>
+    have h1 : a ^ (q - 1) * a = 1 := by rw [← pow_succ, Nat.sub_add_cancel hq, hexp]
+    rw [← eq_inv_of_mul_eq_one_left h1]
+    exact hpow a ha (q - 1)
+
+theorem aug_le_Sp (hgen : Subgroup.closure (Set.range g) = ⊤) {q : ℕ} (hq : 0 < q)
+    (hexp : ∀ x : G, x ^ q = 1) (n : ℕ) {y : MonoidAlgebra ℤ G} (hy : y ∈ augIdeal G) :
+    y ∈ Sp g n :=
+  CentralRoot.augIdeal_induction (p := fun y => y ∈ Sp g n) hy (zero_mem _)
+    (sub_one_mem_Sp g hgen hq hexp n) (fun _ h => neg_mem h) (fun _ _ h h' => add_mem h h')
+
+end Exact
+
+theorem check_params (T : Trace) (members : List ℕ) (h : check T members = true) :
+    1 < T.p ∧ 0 < T.E ∧ 1 < T.n := by
+  simp only [check, Bool.and_eq_true, List.all_eq_true, List.any_eq_true, beq_iff_eq, Nat.blt_eq,
+    Nat.ble_eq, Bool.or_eq_true, List.isEmpty_iff] at h
+  obtain ⟨⟨⟨⟨⟨⟨⟨-, hp1⟩, hE⟩, hn⟩, -⟩, -⟩, -⟩, -⟩ := h
+  exact ⟨hp1, hE, hn⟩
+
+/-- **Exact membership.** If `check` accepts the trace, then for every group `G` and `g : Fin d → G`
+such that the `g j` generate `G`, the relators listed in the trace hold at `g`, and `x^{p^N} = 1`
+for all `x : G` (some `N`), every test claimed in lies in `D_n(G)`. Generator `i` of a word (1-based)
+is `g ⟨i − 1⟩`.
+
+For the paper's group the reader supplies `g` = the images of `x_1, …, x_d` and discharges the
+hypotheses (for a finite `p`-group, `hexp` holds with `p^N = |G|`). The trace lists a subset of the
+relators (fewer make the statement stronger); that `T.rels` and `T.tests` are the presentation's
+relators and test words is the data file's transcription (`trace_to_lean.py`), not checked here.
+The conclusion is about the word: that it is `≠ 1`, or not in `γ_n`, is a separate claim. -/
+theorem check_mem_D (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
+    {G : Type*} [Group G] (g : Fin T.d → G) (hrel : ∀ r ∈ T.rels, gword g r.2 = 1)
+    (hgen : Subgroup.closure (Set.range g) = ⊤) (N : ℕ) (hexp : ∀ x : G, x ^ (T.p ^ N) = 1) :
+    ∀ t ∈ members, gword g (findWord t T.tests) ∈ GroupDimension.D T.n G := by
+  obtain ⟨hp, hE, hn⟩ := check_params T members hc
+  have hn0 : T.n ≠ 0 := by omega
+  have hq : 0 < T.p ^ N := Nat.pow_pos (by omega)
+  set r : ℤ := ((T.p ^ (T.E - 1) : ℕ) : ℤ) with hr
+  have hDe : ((T.p ^ T.E : ℕ) : ℤ) = (T.p : ℤ) * r := by
+    rw [hr, ← Nat.cast_mul, ← pow_succ', Nat.sub_add_cancel hE]
+  have hD0 : ((T.p ^ T.E : ℕ) : ℤ) ≠ 0 := by
+    have : 0 < T.p ^ T.E := Nat.pow_pos (by omega)
+    exact_mod_cast this.ne'
+  -- `r Δ ⊆ Δ^n + p r Δ`
+  have h1 : ∀ x ∈ augIdeal G, InT T.n ((T.p : ℤ) * r) (r • x) := by
+    intro x hx
+    obtain ⟨s, hs, δ, hδ, rfl⟩ := Submodule.mem_sup.mp (aug_le_Sp g hgen hq hexp T.n hx)
+    rw [smul_add]
+    refine InT.add ?_ (InT.of_pow (Submodule.smul_of_tower_mem _ r hδ))
+    clear hx
+    induction hs using Submodule.span_induction with
+    | mem y hy =>
+      obtain ⟨w, hw, rfl⟩ := hy
+      have hL := (check_sound T members hc).2 w hw
+      obtain ⟨a, ha, b, hb⟩ := psi_Lt g hrel hL
+      rw [map_smul] at hb
+      have hmem : r • psi g (single w 1) ∈ augIdeal G := by
+        refine Submodule.smul_of_tower_mem _ r ?_
+        have hw1 : 1 ≤ w.length := by
+          rcases Nat.eq_zero_or_pos w.length with h0 | h0
+          · exfalso; apply hw
+            have h0' : w.toList = [] := List.length_eq_zero_iff.mp h0
+            rw [← FreeMonoid.ofList_toList w, h0']; rfl
+          · exact h0
+        exact Ideal.pow_le_self (by omega) (psi_single_mem g w 1)
+      rw [← hDe]
+      exact ⟨a, ha, b, mem_aug_of_eq hn0 hD0 hmem ha hb, hb⟩
+    | zero => rw [smul_zero]; exact InT.of_pow (zero_mem _)
+    | add y z _ _ hy hz => rw [smul_add]; exact InT.add hy hz
+    | smul c y _ hy => rw [smul_comm]; exact InT.smul c hy
+  -- `r Δ ⊆ Δ^n`
+  have h2 : ∀ x ∈ augIdeal G, r • x ∈ augIdeal G ^ T.n := by
+    intro x hx
+    obtain ⟨a, ha, b, hb, e⟩ := iterate_exact (T.p : ℤ) r h1 (N * (T.n - 1)) x hx
+    rw [e]
+    refine add_mem ha ?_
+    have hK := pow_smul_mem hexp (T.n - 1) b hb
+    rw [Nat.sub_add_cancel (by omega)] at hK
+    have hc' : ((T.p : ℤ) ^ (N * (T.n - 1)) * r) • b = r • (((T.p ^ N) ^ (T.n - 1) : ℕ) : ℤ) • b := by
+      rw [smul_smul]; congr 1; push_cast; rw [← pow_mul, mul_comm]
+    rw [hc']
+    exact Submodule.smul_of_tower_mem _ r hK
+  intro t ht
+  obtain ⟨a, ha, b, e⟩ := check_group T members hc g hrel t ht
+  have hb : b ∈ augIdeal G := mem_aug_of_eq hn0 hD0 (of_sub_one_mem_augIdeal _) ha e
+  rw [mem_D, e, hDe, mul_smul]
+  exact add_mem ha (Submodule.smul_of_tower_mem _ _ (h2 b hb))
 
 end
 
