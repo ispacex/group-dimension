@@ -600,6 +600,40 @@ theorem eval_magnus1 (D k : ℕ) (hD : 0 < D) (hk : 0 < k) (w : List (ℕ × ℤ
   rw [this]
   exact add_mem (add_mem (Submodule.mem_sup_left h2) h1) (Submodule.mem_sup_left (smul_mem_DR d D _))
 
+variable (d) in
+/-- `Σ c_k (mt k w_k − 1)`: a lintest (a word test `w` is `[(1, w)]`). -/
+def linElt (k : ℕ) (l : List (ℤ × List (ℕ × ℤ))) : R d := (l.map fun c => c.1 • (mt d k c.2 - 1)).sum
+
+theorem linElt_single (k : ℕ) (w : List (ℕ × ℤ)) : linElt d k [(1, w)] = mt d k w - 1 := by
+  simp [linElt]
+
+theorem eval_linVec (D k : ℕ) (hD : 0 < D) (hk : 0 < k) (l : List (ℤ × List (ℕ × ℤ)))
+    (hl : ∀ c ∈ l, okWord d c.2) :
+    eval d (linVec d D k l) - linElt d k l ∈ DR d D ⊔ Ik d k := by
+  suffices h : ∀ acc : Vec, eval d (l.foldl (fun acc c => addSmul D (red D c.1) (magnus1 d D k c.2) acc)
+      acc) - (eval d acc + linElt d k l) ∈ DR d D ⊔ Ik d k by
+    simpa [linVec] using h []
+  induction l with
+  | nil => intro acc; simp [linElt]
+  | cons c l ih =>
+    intro acc
+    set m := eval d (magnus1 d D k c.2)
+    set a := addSmul D (red D c.1) (magnus1 d D k c.2) acc
+    have h1 := ih (fun c hc => hl c (List.mem_cons_of_mem _ hc)) a
+    have h2 := eval_addSmul (d := d) D (red D c.1) (magnus1 d D k c.2) acc
+    have h3 := red_smul (d := d) D hD c.1 m
+    have h4 := eval_magnus1 (d := d) D k hD hk c.2 (hl c List.mem_cons_self)
+    have hlin : linElt d k (c :: l) = c.1 • (mt d k c.2 - 1) + linElt d k l := by simp [linElt]
+    rw [List.foldl_cons, hlin]
+    set F := List.foldl (fun acc c => addSmul D (red D c.1) (magnus1 d D k c.2) acc) a l
+    have e : eval d F - (eval d acc + (c.1 • (mt d k c.2 - 1) + linElt d k l)) =
+        (eval d F - (eval d a + linElt d k l)) + (eval d a - (eval d acc + ((red D c.1 : ℕ) : ℤ) • m))
+        + (((red D c.1 : ℕ) : ℤ) • m - c.1 • m) + c.1 • (m - (mt d k c.2 - 1)) := by
+      simp only [smul_sub]; abel
+    rw [e]
+    exact add_mem (add_mem (add_mem h1 (Submodule.mem_sup_left h2)) (Submodule.mem_sup_left h3))
+      (Submodule.smul_of_tower_mem _ c.1 h4)
+
 /-! ## The targets `Lt k` -/
 
 variable (d) in
@@ -726,6 +760,23 @@ theorem findWord_cases (i : ℕ) :
       · exact Or.inl h
       · exact Or.inr ⟨y, List.mem_cons_of_mem _ hy, hyw⟩
     · simp only [Bool.cond_true]; exact Or.inr ⟨(i', w), List.mem_cons_self, rfl⟩
+
+theorem findLin_cases (i : ℕ) :
+    ∀ l : List (ℕ × List (ℤ × List (ℕ × ℤ))), findLin i l = [] ∨ ∃ y ∈ l, y.2 = findLin i l
+  | [] => by simp [findLin]
+  | (i', w) :: t => by
+    simp only [findLin]
+    cases hb : (i' == i)
+    · simp only [Bool.cond_false]
+      rcases findLin_cases i t with h | ⟨y, hy, hyw⟩
+      · exact Or.inl h
+      · exact Or.inr ⟨y, List.mem_cons_of_mem _ hy, hyw⟩
+    · simp only [Bool.cond_true]; exact Or.inr ⟨(i', w), List.mem_cons_self, rfl⟩
+
+/-- `testLin` of a word test is `[(1, w_t)]`. -/
+theorem testLin_of_word (T : Trace) {t : ℕ} (ht : T.tests.any (fun y => y.1 == t) = true) :
+    testLin T t = [(1, findWord t T.tests)] := by
+  simp only [testLin, ht, Bool.cond_true]
 
 theorem combo_sub_mem {L : Submodule ℤ (R d)} {D : ℕ} (hDL : DR d D ≤ L)
     (cur : List (ℕ × Vec)) (hcur : ∀ y ∈ cur, eval d y.2 ∈ L) (terms : List (ℕ × ℤ)) :
@@ -902,15 +953,16 @@ end Index
 /-! ## The main theorem -/
 
 /-- **Soundness of the replay.** If `check T members` passes, then for every test `t` claimed in,
-`mt n w_t − 1 ∈ Lt n` (membership modulo `p^E`, statement 4 of `cert/TRACE.md`), and
+`linElt n (testLin T t) ∈ Lt n`, i.e. `mt n w_t − 1` for a word test and `Σ c_k (mt n w_k − 1)` for a
+lintest (membership modulo `p^E`, statement 4 of `cert/TRACE.md`), and
 `p^{E−1} X_w ∈ Lt n + span{X_f : f ∈ F}` (`Fspan`) for every word `w ≠ 1` (exactness (X), statement 5). -/
 theorem check_sound (T : Trace) (members : List ℕ) [NeZero T.d] (h : check T members = true) :
-    (∀ t ∈ members, mt T.d T.n (findWord t T.tests) - 1 ∈ LT T T.n) ∧
+    (∀ t ∈ members, linElt T.d T.n (testLin T t) ∈ LT T T.n) ∧
     (∀ w : FreeMonoid (Fin T.d), w ≠ 1 →
       ((T.p ^ (T.E - 1) : ℕ) : ℤ) • single w 1 ∈ LT T T.n ⊔ Fspan T.d T.F) := by
   simp only [check, Bool.and_eq_true, List.all_eq_true, List.any_eq_true, beq_iff_eq, Nat.blt_eq,
     Nat.ble_eq, Bool.or_eq_true, List.isEmpty_iff] at h
-  obtain ⟨⟨⟨⟨⟨⟨⟨hd1, hp1⟩, hE⟩, hn⟩, -⟩, hrels⟩, htests⟩, hm⟩ := h
+  obtain ⟨⟨⟨⟨⟨⟨⟨hd1, hp1⟩, hE⟩, hn⟩, -⟩, hrels⟩, htests, hlins⟩, hm⟩ := h
   have hD : 0 < T.p ^ T.E := Nat.pow_pos (by omega)
   have hrels' : ∀ r ∈ T.rels, okWord T.d r.2 := fun r hr f hf => hrels r hr f hf
   cases hr : runLevels T T.levels 1 [] with
@@ -929,12 +981,20 @@ theorem check_sound (T : Trace) (members : List ℕ) [NeZero T.d] (h : check T m
     · intro t ht
       obtain ⟨-, w, -, -, hw⟩ := hmem t ht
       have h1 := combo_eq_nil_mem hDL hcur hw
-      have hok : okWord T.d (findWord t T.tests) := by
-        rcases findWord_cases t T.tests with h | ⟨y, hy, hyw⟩
-        · rw [h]; intro f hf; simp at hf
-        · rw [← hyw]; exact fun f hf => htests y hy f hf
+      have hok : ∀ c ∈ testLin T t, okWord T.d c.2 := by
+        unfold testLin
+        cases hb : T.tests.any (fun y => y.1 == t)
+        · simp only [Bool.cond_false]
+          rcases findLin_cases t T.lintests with h | ⟨y, hy, hyw⟩
+          · rw [h]; intro c hc; simp at hc
+          · rw [← hyw]; exact fun c hc f hf => hlins y hy c hc f hf
+        · simp only [Bool.cond_true, List.mem_singleton]
+          rintro c rfl
+          rcases findWord_cases t T.tests with h | ⟨y, hy, hyw⟩
+          · rw [h]; intro f hf; simp at hf
+          · rw [← hyw]; exact fun f hf => htests y hy f hf
       have h2 := M_le_Lt (rels := T.rels) _ _
-        (eval_magnus1 (d := T.d) (T.p ^ T.E) k hD (by omega) _ hok)
+        (eval_linVec (d := T.d) (T.p ^ T.E) k hD (by omega) _ hok)
       have := sub_mem h1 h2; rwa [sub_sub_cancel] at this
     · intro w hw
       by_cases hlen : k ≤ w.length
