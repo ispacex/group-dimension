@@ -294,7 +294,8 @@ variable {G : Type*} [Group G]
 /-- `x^m − 1 ≡ m (x − 1)` modulo `Δ²`. -/
 theorem of_pow_sub_mem (x : G) : ∀ m : ℕ,
     of ℤ G (x ^ m) - 1 - (m : ℤ) • (of ℤ G x - 1) ∈ augIdeal G ^ 2
-  | 0 => by simp
+  | 0 => by
+    simp only [pow_zero, map_one, sub_self, Nat.cast_zero, zero_smul]; exact zero_mem _
   | m + 1 => by
     have hx : of ℤ G x - 1 ∈ augIdeal G ^ 1 := by
       rw [Submodule.pow_one]; exact of_sub_one_mem_augIdeal x
@@ -395,6 +396,7 @@ theorem Sp_mul {n : ℕ} {a b : MonoidAlgebra ℤ G} (ha : a ∈ Sp g n) (hb : b
   have e : (s + δ) * (s' + δ') = s * s' + (s * δ' + δ * (s' + δ')) := by noncomm_ring
   rw [e]
   refine Submodule.add_mem_sup ?_ (add_mem (Ideal.mul_mem_left _ s hδ') (Ideal.mul_mem_right _ _ hδ))
+  clear e ha hb
   induction hs using Submodule.span_induction with
   | mem x hx =>
     induction hs' using Submodule.span_induction with
@@ -423,7 +425,7 @@ theorem sub_one_mem_Sp (hgen : Subgroup.closure (Set.range g) = ⊤) {q : ℕ} (
   have hpow : ∀ a : G, of ℤ G a - 1 ∈ Sp g n → ∀ m : ℕ, of ℤ G (a ^ m) - 1 ∈ Sp g n := by
     intro a ha m
     induction m with
-    | zero => simp
+    | zero => simp only [pow_zero, map_one, sub_self]; exact zero_mem _
     | succ m ih => rw [pow_succ]; exact hmul _ _ ih ha
   have hx : x ∈ Subgroup.closure (Set.range g) := by rw [hgen]; trivial
   induction hx using Subgroup.closure_induction with
@@ -434,7 +436,7 @@ theorem sub_one_mem_Sp (hgen : Subgroup.closure (Set.range g) = ⊤) {q : ℕ} (
       have := congrArg FreeMonoid.length h
       simp at this
     · rw [psi_single, FreeMonoid.toList_of, List.map_singleton, List.prod_singleton, one_smul]
-  | one => simp
+  | one => simp only [map_one, sub_self]; exact zero_mem _
   | mul a b _ _ ha hb => exact hmul a b ha hb
   | inv a _ ha =>
     have h1 : a ^ (q - 1) * a = 1 := by rw [← pow_succ, Nat.sub_add_cancel hq, hexp]
@@ -478,6 +480,7 @@ theorem check_mem_D (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T 
     obtain ⟨s, hs, δ, hδ, rfl⟩ := Submodule.mem_sup.mp (aug_le_Sp g hgen hq hexp T.n hx)
     rw [smul_add]
     refine InT.add ?_ (InT.of_pow (Submodule.smul_of_tower_mem _ r hδ))
+    clear hx
     induction hs using Submodule.span_induction with
     | mem y hy =>
       obtain ⟨w, hw, rfl⟩ := hy
