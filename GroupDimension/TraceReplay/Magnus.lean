@@ -90,7 +90,7 @@ theorem bser_mul (y : A) (e : ℤ) :
     rw [bser_one, bser_one, Ring.choose_zero_right, one_smul, one_mul, pow_one]
   | k + 1 => by
     rw [bser_succ y (k + 1) e, add_mul, bser_mul y e k, bser_succ y (k + 1) (e + 1),
-      Ring.choose_succ_succ, add_smul, smul_mul_assoc, mul_add, mul_one, ← pow_succ]
+      Ring.choose_succ_succ, add_smul, smul_mul_assoc, mul_add, mul_one, ← pow_succ, smul_add]
     abel
 
 end Series
@@ -159,8 +159,8 @@ theorem bser_sub_mem (h : G) (k : ℕ) (e : ℤ) :
     Submodule.smul_of_tower_mem _ _ (Ideal.pow_mem_pow (of_sub_one_mem_augIdeal h) _)
   have hinv : of ℤ G h * of ℤ G h⁻¹ = 1 := by rw [← map_mul, mul_inv_cancel, map_one]
   induction e using Int.induction_on with
-  | hz => rw [bser_at_zero, zpow_zero, map_one, sub_self]; exact zero_mem _
-  | hp i ih =>
+  | zero => rw [bser_at_zero, zpow_zero, map_one, sub_self]; exact zero_mem _
+  | succ i ih =>
     have hQ := bser_mul y (i : ℤ) k
     rw [hy] at hQ
     have e1 : bser y (k + 1) ((i : ℤ) + 1) - of ℤ G (h ^ ((i : ℤ) + 1)) =
@@ -169,7 +169,7 @@ theorem bser_sub_mem (h : G) (k : ℕ) (e : ℤ) :
       rw [zpow_add_one, map_mul, sub_mul, hQ]; abel
     rw [e1]
     exact sub_mem (Ideal.mul_mem_right _ _ ih) (hZ _)
-  | hn i ih =>
+  | pred i ih =>
     have hQ := bser_mul y (-(i : ℤ) - 1) k
     rw [hy, sub_add_cancel] at hQ
     have hX : bser y (k + 1) (-(i : ℤ) - 1) =
@@ -193,7 +193,8 @@ def gword (w : List (ℕ × ℤ)) : G := (w.map fun f => g (letter d (f.1 - 1)) 
 theorem psi_mt_sub_mem (k : ℕ) (w : List (ℕ × ℤ)) :
     psi g (mt d k w) - of ℤ G (gword g w) ∈ augIdeal G ^ k := by
   induction w with
-  | nil => simp [mt, gword]
+  | nil =>
+    simp only [mt, gword, List.map_nil, List.prod_nil, map_one, sub_self]; exact zero_mem _
   | cons f t ih =>
     simp only [mt, gword, List.map_cons, List.prod_cons] at ih ⊢
     rw [map_mul, map_mul, psi_S]
