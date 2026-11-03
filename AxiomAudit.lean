@@ -1544,3 +1544,7 @@ open GroupDimension
 #print axioms GroupDimension.TraceReplay.Rips10.check_ok
 #print axioms GroupDimension.TraceReplay.Rips10.certified
 #print axioms GroupDimension.TraceReplay.Rips10.certified_test0
+#print axioms GroupDimension.TraceReplay.binom_eq_choose
+#print axioms GroupDimension.TraceReplay.sub_one_mem_of_mem_Lt
+#print axioms GroupDimension.TraceReplay.mem_D_of_mem_Jt_sup_Ik
+#print axioms GroupDimension.TraceReplay.check_group

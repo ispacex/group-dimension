@@ -38,5 +38,6 @@ public import GroupDimension.Cert1024.Check
 public import GroupDimension.Cert1024.Decode
 public import GroupDimension.TraceCert
 public import GroupDimension.TraceReplay.Data.Rips10
+public import GroupDimension.TraceReplay.Magnus
 
 @[expose] public section
