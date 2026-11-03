@@ -458,7 +458,7 @@ theorem checkMap_sound {m : ℕ × List ℤ} {v : VecZ} (h : checkMap d m v = tr
   have hw2 : wordOf d w.length (idxOf w.toList) = w := by
     rw [show w.length = w.toList.length from rfl, hw.2, FreeMonoid.ofList_toList]
   have := h u.length (by omega) w.length (by omega) _ hu.1 _ hw.1
-  rw [vanVal_eq m v _ _ _ _ hu.1 hw.1, hu2, hw2] at this
+  rw [vanVal_eq m v u.length _ w.length _ hu.1 hw.1, hu2, hw2] at this
   exact this
 
 /-- **Soundness of the kernel check of `Vanish`.** -/
