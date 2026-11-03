@@ -1563,5 +1563,7 @@ open GroupDimension
 #print axioms GroupDimension.TraceReplay.check_mem_D_lin
 #print axioms GroupDimension.TraceReplay.check_mem_D_hom_lin
 #print axioms GroupDimension.TraceReplay.C4aT4.maps_vanish
+#print axioms GroupDimension.TraceReplay.hord_lin_of_pow_eq_one
 #print axioms GroupDimension.TraceReplay.C4aT4.mem_D_test16
+#print axioms GroupDimension.TraceReplay.C4aT4.mem_D_test28
 #print axioms GroupDimension.TraceReplay.C4aT4.mem_D_test36

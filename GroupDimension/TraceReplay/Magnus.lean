@@ -22,9 +22,10 @@ are `1` in `G`), and `D·R` into `D·ℤ[G]`. So
 
   `w(g) − 1 ∈ Δ^n + D·ℤ[G]`   (`sub_one_mem_of_mem_Lt`, `check_group`),
 
+and likewise `Σ c_k (w_k(g) − 1) ∈ Δ^n + D·ℤ[G]` for a lintest (`linG`, `linG_mem_of_mem_Lt`),
 and `w(g) ∈ D_n(G)` when the `D·R` part is absent (`mem_D_of_mem_Jt_sup_Ik`; unused by the pipeline,
 since `check_sound` always lands in `Lt`, with the `D·R` part: `D_n` is reached by exactness,
-`check_mem_D`). This is the easy
+`check_mem_D`; for lintests `check_mem_D_lin`). This is the easy
 direction of §3.1 of the paper (`J_n ↦ Δ^n`), the one a certificate of membership needs; removing
 `D·ℤ[G]` below completes it. `binom` (the checker's own generalised binomial coefficient) is
 `Ring.choose` (`binom_eq_choose`).
@@ -513,9 +514,10 @@ is `g ⟨i − 1⟩`.
 For the paper's group the reader supplies `g` = the images of `x_1, …, x_d` and discharges the
 hypotheses (for a finite `p`-group, `hexp` holds with `p^N = |G|`). The trace lists a subset of the
 relators (fewer make the statement stronger), and no free columns (`hF`; for `F ≠ []` see
-`TraceReplay/HomExact.lean`); that `T.rels` and `T.tests` are the presentation's
-relators and test words is the data file's transcription (`trace_to_lean.py`), not checked here.
-The conclusion is about the word: that it is `≠ 1`, or not in `γ_n`, is a separate claim. -/
+`TraceReplay/HomExact.lean`); that `T.rels`, `T.tests` and `T.lintests` are the presentation's
+relators, test words and lintests is the data file's transcription (`trace_to_lean.py`), not checked
+here. The conclusion is about the element: that it is nonzero (for a word, `≠ 1` or not in `γ_n`)
+is a separate claim. -/
 theorem check_mem_D_lin (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
     (hF : T.F = [])
     {G : Type*} [Group G] (g : Fin T.d → G) (hrel : ∀ r ∈ T.rels, gword g r.2 = 1)

@@ -211,10 +211,13 @@ def runLevels (T : Trace) : List (Nat × List Line) → Nat → List (Nat × Vec
 * the free columns `F` are positive (not the constant term);
 * every `x` line: `p^{E−1} e_c + Σ c_i V_i` has no nonzero entry outside `F`, and every column
   `1 .. T − 1` is in `F` or has an `x` line;
-* every test in `members` is present in `T.tests` with a non-empty word, or in `T.lintests` with a
-  non-empty combination (a missing test would read as `0`, and its membership would say nothing),
-  and has a `w` line with `x_t + Σ c_i V_i ≡ 0`, where `x_t` is `μ(w_t) − 1` for a word test and
-  `Σ c_k (μ(w_k) − 1)` for a lintest (`testLin`, `linVec`).
+* every test in `members` reads (`testLin`: the first word test with index `t`, else the first
+  lintest) as a non-empty combination of non-empty words (a missing or empty test would read as
+  `0`, and its membership would say nothing; the guard is on the entry actually used), and has a
+  `w` line with `x_t + Σ c_i V_i ≡ 0`, where `x_t` is `μ(w_t) − 1` for a word test and
+  `Σ c_k (μ(w_k) − 1)` for a lintest (`testLin`, `linVec`). Non-empty is not nonzero: a lintest
+  such as `[(1, w), (−1, w)]` is accepted and says nothing; that a test element is nonzero is a
+  separate claim.
 
 With `F = []` (rank bound `0`) this is the whole exactness certificate. With `F ≠ []` the free
 columns must be shown to meet the torsion trivially; that is `TraceReplay/HomExact.lean`. -/
@@ -231,8 +234,7 @@ def check (T : Trace) (members : List Nat) : Bool :=
       (fun e => T.F.any (fun f => f == e.1))) &&
     (List.range (off T.d T.n)).all (fun c => c == 0 || T.F.any (fun f => f == c) ||
       T.xs.any (fun x => x.1 == c)) &&
-    members.all (fun t => (T.tests.any (fun y => y.1 == t && !y.2.isEmpty) ||
-        T.lintests.any (fun y => y.1 == t && !y.2.isEmpty)) &&
+    members.all (fun t => !(testLin T t).isEmpty && (testLin T t).all (fun c => !c.2.isEmpty) &&
       T.ws.any (fun w => w.1 == t &&
         (combo D cur w.2 (linVec T.d D T.n (testLin T t))).isEmpty))
 

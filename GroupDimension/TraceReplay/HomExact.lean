@@ -27,9 +27,11 @@ Contents:
   hypothesis on the exponent: `x^{−1} − 1` is a geometric series modulo `Δ^n`.
 * `check_mem_D_hom`. Suppose the trace and the certificate pass, the `g_j` generate `G`, the
   relators hold, each `a` is the restriction of a homomorphism `G → ℤ`, and the test element has
-  `p`-power order in `Δ/Δ^n` (a hypothesis, as in `cert/TRACE.md`, step 6). Then the test word
-  lies in `D_n(G)`.
-* `check_mem_D_pres`: the same for the group presented by `allRels`. The homomorphisms then come
+  `p`-power order in `Δ/Δ^n` (a hypothesis, as in `cert/TRACE.md`, step 6). Then the test element
+  lies in `Δ^n` (`check_mem_D_hom_lin`); for a word test, the word lies in `D_n(G)`
+  (`check_mem_D_hom`). `hord_of_pow_eq_one` and `hord_lin_of_pow_eq_one` derive the order
+  hypothesis from `w^{p^k} = 1` in `G`.
+* `check_mem_D_pres`: the same, for word tests, for the group presented by `allRels`. The homomorphisms then come
   from a kernel check (exponent sums), and the generation and relator hypotheses come for free.
 -/
 
@@ -557,6 +559,22 @@ theorem hord_of_pow_eq_one {p n k : ℕ} (hn : 1 ≤ n) (x : G) (hx : x ^ (p ^ k
   rw [Nat.sub_add_cancel hn] at h
   rwa [Nat.cast_pow, ← pow_mul] at h
 
+/-- `hord` for a lintest from the group: if every `w_k(g)` has order dividing `p^k`, then
+`Σ c_k (w_k(g) − 1)` has `p`-power order in `Δ/Δ^n`. -/
+theorem hord_lin_of_pow_eq_one {d : ℕ} [NeZero d] {p n k : ℕ} (hn : 1 ≤ n) (g : Fin d → G)
+    (l : List (ℤ × List (ℕ × ℤ))) (hl : ∀ c ∈ l, gword g c.2 ^ (p ^ k) = 1) :
+    ∃ m : ℕ, ((p : ℤ) ^ m) • linG g l ∈ augIdeal G ^ n := by
+  refine ⟨k * (n - 1), ?_⟩
+  induction l with
+  | nil => simp only [linG, List.map_nil, List.sum_nil, smul_zero]; exact zero_mem _
+  | cons c l ih =>
+    rw [linG_cons, smul_add]
+    refine add_mem ?_ (ih fun c' hc' => hl c' (List.mem_cons_of_mem _ hc'))
+    have h := pow_smul_sub_one_mem (gword g c.2) (p ^ k) (hl c List.mem_cons_self) (n - 1)
+    rw [Nat.sub_add_cancel hn, Nat.cast_pow, ← pow_mul] at h
+    rw [smul_comm ((p : ℤ) ^ (k * (n - 1))) c.1]
+    exact Submodule.smul_of_tower_mem _ c.1 h
+
 end Order
 
 /-! ## The presented group -/
@@ -597,8 +615,8 @@ def checkPres (T : Trace) (H : HomCert) (allRels : List (List (ℕ × ℤ))) : B
   H.funcs.all (fun κ => allRels.all (fun r => expSum T.d κ.1 r == 0))
 
 /-- **Exact membership in the presented group.** If `check`, `checkHom` and `checkPres` pass, then
-in `G = ⟨x_1, …, x_d | allRels⟩` every test claimed in whose element has `p`-power order in
-`Δ/Δ^n` (`hord`) lies in `D_n(G)`. -/
+in `G = ⟨x_1, …, x_d | allRels⟩` every word test claimed in (`hw`) whose element has `p`-power
+order in `Δ/Δ^n` (`hord`) lies in `D_n(G)`. -/
 theorem check_mem_D_pres (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
     (H : HomCert) (hH : checkHom T H = true) (allRels : List (List (ℕ × ℤ)))
     (hP : checkPres T H allRels = true) (t : ℕ) (ht : t ∈ members)
