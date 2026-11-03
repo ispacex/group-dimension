@@ -466,10 +466,12 @@ is `g ⟨i − 1⟩`.
 
 For the paper's group the reader supplies `g` = the images of `x_1, …, x_d` and discharges the
 hypotheses (for a finite `p`-group, `hexp` holds with `p^N = |G|`). The trace lists a subset of the
-relators (fewer make the statement stronger); that `T.rels` and `T.tests` are the presentation's
+relators (fewer make the statement stronger), and no free columns (`hF`; for `F ≠ []` see
+`TraceReplay/HomExact.lean`); that `T.rels` and `T.tests` are the presentation's
 relators and test words is the data file's transcription (`trace_to_lean.py`), not checked here.
 The conclusion is about the word: that it is `≠ 1`, or not in `γ_n`, is a separate claim. -/
 theorem check_mem_D (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
+    (hF : T.F = [])
     {G : Type*} [Group G] (g : Fin T.d → G) (hrel : ∀ r ∈ T.rels, gword g r.2 = 1)
     (hgen : Subgroup.closure (Set.range g) = ⊤) (N : ℕ) (hexp : ∀ x : G, x ^ (T.p ^ N) = 1) :
     ∀ t ∈ members, gword g (findWord t T.tests) ∈ GroupDimension.D T.n G := by
@@ -492,7 +494,9 @@ theorem check_mem_D (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T 
     induction hs using Submodule.span_induction with
     | mem y hy =>
       obtain ⟨w, hw, rfl⟩ := hy
-      have hL := (check_sound T members hc).2 w hw
+      have hL0 := (check_sound T members hc).2 w hw
+      rw [hF, show Fspan T.d ([] : List ℕ) = ⊥ by simp [Fspan], sup_bot_eq] at hL0
+      have hL := hL0
       obtain ⟨a, ha, b, hb⟩ := psi_Lt g hrel hL
       rw [map_smul] at hb
       have hmem : r • psi g (single w 1) ∈ augIdeal G := by

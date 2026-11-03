@@ -347,6 +347,6 @@ theorem mem_D_test0 {G : Type*} [Group G] (g : Fin trace.d → G)
     (hrel : ∀ r ∈ trace.rels, gword g r.2 = 1) (hgen : Subgroup.closure (Set.range g) = ⊤)
     (N : ℕ) (hexp : ∀ x : G, x ^ (trace.p ^ N) = 1) :
     gword g [(2, -1), (4, -8), (2, 1), (4, 8), (2, -1), (4, -8), (2, -1), (4, 8), (2, 2)] ∈ GroupDimension.D 4 G :=
-  check_mem_D trace members check_ok g hrel hgen N hexp 0 (by decide)
+  check_mem_D trace members check_ok rfl g hrel hgen N hexp 0 (by decide)
 
 end GroupDimension.TraceReplay.Rips10

@@ -134,7 +134,7 @@ def main():
         w("    (hrel : ∀ r ∈ trace.rels, gword g r.2 = 1) (hgen : Subgroup.closure (Set.range g) = ⊤)")
         w("    (N : ℕ) (hexp : ∀ x : G, x ^ (trace.p ^ N) = 1) :")
         w(f"    gword g {word(tests[t][1])} ∈ GroupDimension.D {hdr['n']} G :=")
-        w(f"  check_mem_D trace members check_ok g hrel hgen N hexp {t} (by decide)\n")
+        w(f"  check_mem_D trace members check_ok rfl g hrel hgen N hexp {t} (by decide)\n")
     w(f"end GroupDimension.TraceReplay.{name}")
     print("\n".join(out))
 
