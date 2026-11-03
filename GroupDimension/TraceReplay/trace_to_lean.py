@@ -237,7 +237,7 @@ def main():
         w("/-- Not vacuous: every map has exponent sum `0` on the relators in `rels` (else `hrel` and `hφ`")
         w("contradict each other) and on the tests (else a test has infinite order). -/")
         w("theorem maps_vanish : maps.all (fun a => trace.rels.all (fun r => expSum trace.d a r.2 == 0) &&")
-        w("    trace.tests.all (fun r => expSum trace.d a r.2 == 0)) = true := by decide\n")
+        w("    trace.tests.all (fun r => expSum trace.d a r.2 == 0)) = true := by decide +kernel\n")
     for t in members:
         w(f"/-- Test {t} ({claim['id']}), its word written out. -/")
         w(f"theorem certified_test{t} :")

@@ -492,7 +492,7 @@ theorem maps_ok : hcert.funcs.all (fun κ => maps.any (fun a => a == κ.1)) = tr
 /-- Not vacuous: every map has exponent sum `0` on the relators in `rels` (else `hrel` and `hφ`
 contradict each other) and on the tests (else a test has infinite order). -/
 theorem maps_vanish : maps.all (fun a => trace.rels.all (fun r => expSum trace.d a r.2 == 0) &&
-    trace.tests.all (fun r => expSum trace.d a r.2 == 0)) = true := by decide
+    trace.tests.all (fun r => expSum trace.d a r.2 == 0)) = true := by decide +kernel
 
 /-- Test 0 (carrier_c4aT4), its word written out. -/
 theorem certified_test0 :
