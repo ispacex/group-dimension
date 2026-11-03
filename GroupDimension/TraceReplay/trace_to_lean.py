@@ -120,17 +120,8 @@ def terms(fs):
     return "[" + ", ".join(f"({fs[1 + 2 * i]}, {fs[2 + 2 * i]})" for i in range(k)) + "]"
 
 
-def main():
-    pres_path, claim_path, trace_path, name = sys.argv[1:5]
-    pm_path = sys.argv[5] if len(sys.argv) > 5 else None
-    opener = gzip.open if pres_path.endswith(".gz") else open
-    with opener(pres_path, "rt") as fh:
-        pres_line = fh.readline().rstrip("\n")
-    pres = json.loads(pres_line)
-    claim = dict(l.split(" ", 1) for l in open(claim_path).read().splitlines() if " " in l)
-    if "test_coeffs" in pres and pres["test_coeffs"]:
-        sys.exit("test_coeffs are not supported")
-    members = [int(x) for x in claim["member"].split(",")]
+def parse_trace(trace_path):
+    """The trace's header, levels (Lean `Line`s), F, x and w lines (Lean), and the relators it uses."""
     hdr, levels, F, xs, ws, used = {}, [], None, [], [], set()
     for line in open(trace_path).read().splitlines():
         f = line.split()
@@ -161,6 +152,21 @@ def main():
             break
         else:
             sys.exit(f"unknown trace line: {f[0]}")
+    return hdr, levels, F, xs, ws, used
+
+
+def main():
+    pres_path, claim_path, trace_path, name = sys.argv[1:5]
+    pm_path = sys.argv[5] if len(sys.argv) > 5 else None
+    opener = gzip.open if pres_path.endswith(".gz") else open
+    with opener(pres_path, "rt") as fh:
+        pres_line = fh.readline().rstrip("\n")
+    pres = json.loads(pres_line)
+    claim = dict(l.split(" ", 1) for l in open(claim_path).read().splitlines() if " " in l)
+    if "test_coeffs" in pres and pres["test_coeffs"]:
+        sys.exit("test_coeffs are not supported")
+    members = [int(x) for x in claim["member"].split(",")]
+    hdr, levels, F, xs, ws, used = parse_trace(trace_path)
     sha = hashlib.sha256(pres_line.encode()).hexdigest()
     for src, val in (("trace", hdr.get("presentation-sha256")), ("claim", claim.get("presentation-sha256"))):
         if val != sha:
@@ -337,4 +343,5 @@ def main():
     print("\n".join(out))
 
 
-main()
+if __name__ == "__main__":
+    main()
