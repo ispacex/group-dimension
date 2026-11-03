@@ -119,7 +119,7 @@ def main():
     w("file: `rels` and `tests` are transcribed from the presentation by `trace_to_lean.py`. -/")
     w("theorem certified :\n    (∀ t ∈ members, mt trace.d trace.n (findWord t trace.tests) - 1 ∈ LT trace trace.n) ∧")
     w("    (∀ w : FreeMonoid (Fin trace.d), w ≠ 1 →")
-    w("      ((trace.p ^ (trace.E - 1) : ℕ) : ℤ) • MonoidAlgebra.single w 1 ∈ LT trace trace.n) :=")
+    w("      ((trace.p ^ (trace.E - 1) : ℕ) : ℤ) • MonoidAlgebra.single w 1 ∈\n        LT trace trace.n ⊔ Fspan trace.d trace.F) :=")
     w("  check_sound trace members check_ok\n")
     for t in members:
         w(f"/-- Test {t} ({claim['id']}), its word written out. -/")

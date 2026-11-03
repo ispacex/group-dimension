@@ -331,7 +331,8 @@ file: `rels` and `tests` are transcribed from the presentation by `trace_to_lean
 theorem certified :
     (∀ t ∈ members, mt trace.d trace.n (findWord t trace.tests) - 1 ∈ LT trace trace.n) ∧
     (∀ w : FreeMonoid (Fin trace.d), w ≠ 1 →
-      ((trace.p ^ (trace.E - 1) : ℕ) : ℤ) • MonoidAlgebra.single w 1 ∈ LT trace trace.n) :=
+      ((trace.p ^ (trace.E - 1) : ℕ) : ℤ) • MonoidAlgebra.single w 1 ∈
+        LT trace trace.n ⊔ Fspan trace.d trace.F) :=
   check_sound trace members check_ok
 
 /-- Test 0 (rips_10_alpha), its word written out. -/

@@ -40,5 +40,6 @@ public import GroupDimension.TraceCert
 public import GroupDimension.TraceReplay.Data.Rips10
 public import GroupDimension.TraceReplay.Magnus
 public import GroupDimension.TraceReplay.HomPow
+public import GroupDimension.TraceReplay.HomExact
 
 @[expose] public section
