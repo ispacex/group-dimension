@@ -111,8 +111,8 @@ theorem prod_Pos_eq_zero (k : ℕ) (l : List (Ak d k)) (hl : ∀ a ∈ l, a ∈ 
     obtain ⟨y, hy, ey⟩ := hl a List.mem_cons_self
     obtain ⟨z, hz, ez⟩ := ih fun b hb => hl b (List.mem_cons_of_mem _ hb)
     refine ⟨y * z, ?_, by rw [map_mul, ey, ez, List.prod_cons]⟩
-    have := mul_mem_Ik_add hy hz
-    rwa [List.length_cons, add_comm] at this ⊢
+    rw [List.length_cons, add_comm]
+    exact mul_mem_Ik_add hy hz
 
 end Trunc
 
@@ -154,39 +154,37 @@ section Pres
 
 variable {d : ℕ} [NeZero d] (rels : Set (FreeGroup (Fin d))) (m : ℕ × List ℤ)
 
-local notation "A" => Ak d (m.1 + 1)
-
 /-- The elements of `F` that `λ` cannot see inside a product. -/
 def invisible : Subgroup (FreeGroup (Fin d)) where
-  carrier := {x | ∀ a b : A, lamA m (a * (muA _ x : A) * b) = lamA m (a * b)}
+  carrier := {x | ∀ a b : Ak d (m.1 + 1), lamA m (a * (muA _ x : Ak d (m.1 + 1)) * b) = lamA m (a * b)}
   mul_mem' := by
     intro x y hx hy a b
     rw [map_mul, Units.val_mul, ← mul_assoc, hy, hx]
   one_mem' := by intro a b; rw [map_one, Units.val_one, mul_one]
   inv_mem' := by
     intro x hx a b
-    have := hx (a * (muA _ x⁻¹ : A)) b
+    have := hx (a * (muA _ x⁻¹ : Ak d (m.1 + 1))) b
     rw [mul_assoc a, ← Units.val_mul, ← map_mul, inv_mul_cancel, map_one, Units.val_one, mul_one] at this
     exact this.symm
 
 instance invisible_normal : (invisible m).Normal where
   conj_mem x hx c a b := by
     rw [map_mul, map_mul, Units.val_mul, Units.val_mul]
-    have := hx (a * (muA _ c : A)) ((muA _ c⁻¹ : A) * b)
+    have := hx (a * (muA _ c : Ak d (m.1 + 1))) ((muA _ c⁻¹ : Ak d (m.1 + 1)) * b)
     simp only [mul_assoc] at this ⊢
-    rw [this, ← mul_assoc ((muA _ c : A)), ← Units.val_mul, ← map_mul, mul_inv_cancel, map_one,
+    rw [this, ← mul_assoc ((muA _ c : Ak d (m.1 + 1))), ← Units.val_mul, ← map_mul, mul_inv_cancel, map_one,
       Units.val_one, one_mul]
 
 /-- Check 1 of §3.2(e) for `(w, λ)`: `λ(X_u · (μ(r) − 1) · X_v) = 0` in `A_{w+1}` for every relator
 `r` and all monomials `u`, `v`. -/
 def Vanish : Prop :=
   ∀ r ∈ rels, ∀ u v : FreeMonoid (Fin d),
-    lamA m (Ideal.Quotient.mk _ (single u 1) * ((muA _ r : A) - 1) * Ideal.Quotient.mk _ (single v 1)) = 0
+    lamA m (Ideal.Quotient.mk _ (single u 1) * ((muA _ r : Ak d (m.1 + 1)) - 1) * Ideal.Quotient.mk _ (single v 1)) = 0
 
 variable {rels m}
 
 theorem vanish_all (hvan : Vanish rels m)
-    {r : FreeGroup (Fin d)} (hr : r ∈ rels) (a b : A) : lamA m (a * ((muA _ r : A) - 1) * b) = 0 := by
+    {r : FreeGroup (Fin d)} (hr : r ∈ rels) (a b : Ak d (m.1 + 1)) : lamA m (a * ((muA _ r : Ak d (m.1 + 1)) - 1) * b) = 0 := by
   obtain ⟨a, rfl⟩ := Ideal.Quotient.mk_surjective a
   obtain ⟨b, rfl⟩ := Ideal.Quotient.mk_surjective b
   induction a using MonoidAlgebra.induction_on with
@@ -207,43 +205,44 @@ theorem normalClosure_le_invisible (hvan : Vanish rels m) :
 
 /-- `φ_a(ĝ) = λ(a · μ(ĝ))` on `G = F/⟨⟨rels⟩⟩`. -/
 noncomputable def phiA (hvan : Vanish rels m)
-    (a : A) : PresentedGroup rels → ℤ :=
-  fun q => Quotient.liftOn' q (fun x => lamA m (a * (muA _ x : A))) fun x y hxy => by
+    (a : Ak d (m.1 + 1)) : PresentedGroup rels → ℤ :=
+  fun q => Quotient.liftOn' q (fun x => lamA m (a * (muA _ x : Ak d (m.1 + 1)))) fun x y hxy => by
     have hn : x⁻¹ * y ∈ invisible m :=
       normalClosure_le_invisible hvan (QuotientGroup.leftRel_apply.mp hxy)
     have e : y = x * (x⁻¹ * y) := by group
-    show lamA m (a * (muA _ x : A)) = lamA m (a * (muA _ y : A))
+    show lamA m (a * (muA _ x : Ak d (m.1 + 1))) = lamA m (a * (muA _ y : Ak d (m.1 + 1)))
     rw [e, map_mul, Units.val_mul, ← mul_assoc]
-    have := hn (a * (muA _ x : A)) 1
+    have := hn (a * (muA _ x : Ak d (m.1 + 1))) 1
     rw [mul_one, mul_one] at this
     exact this.symm
 
-theorem phiA_mk (hvan : Vanish rels m) (a : A) (x : FreeGroup (Fin d)) :
-    phiA hvan a (PresentedGroup.mk rels x) = lamA m (a * (muA _ x : A)) := rfl
+theorem phiA_mk (hvan : Vanish rels m) (a : Ak d (m.1 + 1)) (x : FreeGroup (Fin d)) :
+    phiA hvan a (PresentedGroup.mk rels x) = lamA m (a * (muA _ x : Ak d (m.1 + 1))) := rfl
 
 /-- Translation: `φ_a(x̂ q) = φ_{a μ(x)}(q)`. -/
-theorem phiA_mul (hvan : Vanish rels m) (a : A) (x : FreeGroup (Fin d)) (q : PresentedGroup rels) :
-    phiA hvan a (PresentedGroup.mk rels x * q) = phiA hvan (a * (muA _ x : A)) q := by
+theorem phiA_mul (hvan : Vanish rels m) (a : Ak d (m.1 + 1)) (x : FreeGroup (Fin d)) (q : PresentedGroup rels) :
+    phiA hvan a (PresentedGroup.mk rels x * q) = phiA hvan (a * (muA _ x : Ak d (m.1 + 1))) q := by
   induction q using QuotientGroup.induction_on with
   | H y =>
     rw [show (QuotientGroup.mk y : PresentedGroup rels) = PresentedGroup.mk rels y from rfl, ← map_mul,
       phiA_mk, phiA_mk, map_mul, Units.val_mul, mul_assoc]
 
 /-- `lin φ_a (E (l̂)) = λ(a · Π (μ(x) − 1))`. -/
-theorem lin_phiA_E (hvan : Vanish rels m) (l : List (FreeGroup (Fin d))) (a : A) :
+theorem lin_phiA_E (hvan : Vanish rels m) (l : List (FreeGroup (Fin d))) (a : Ak d (m.1 + 1)) :
     lin (phiA hvan a) (E (l.map (PresentedGroup.mk rels))) =
-      lamA m (a * (l.map fun x => (muA _ x : A) - 1).prod) := by
+      lamA m (a * (l.map fun x => (muA _ x : Ak d (m.1 + 1)) - 1).prod) := by
   induction l generalizing a with
   | nil =>
     rw [List.map_nil, E_nil, lin_one, List.map_nil, List.prod_nil, mul_one, ← map_one (PresentedGroup.mk rels),
       phiA_mk, map_one, Units.val_one, mul_one]
   | cons x l ih =>
     rw [List.map_cons, E_cons, sub_mul, one_mul, map_sub, lin_of_mul,
-      show (fun h => phiA hvan a (PresentedGroup.mk rels x * h)) = phiA hvan (a * (muA _ x : A)) from
+      show (fun h => phiA hvan a (PresentedGroup.mk rels x * h)) = phiA hvan (a * (muA _ x : Ak d (m.1 + 1))) from
         funext (phiA_mul hvan a x),
       ih, ih, List.map_cons, List.prod_cons, ← map_sub]
     congr 1; noncomm_ring
 
+omit [NeZero d] in
 theorem exists_lift (l : List (PresentedGroup rels)) :
     ∃ l' : List (FreeGroup (Fin d)), l'.map (PresentedGroup.mk rels) = l := by
   induction l with
@@ -254,8 +253,8 @@ theorem exists_lift (l : List (PresentedGroup rels)) :
     exact ⟨x :: l', rfl⟩
 
 theorem prod_muA_letters (u : List ℕ) :
-    (u.map fun j => ((muA (m.1 + 1) (FreeGroup.of (letter d j)) : A) - 1)).prod =
-      Ideal.Quotient.mk _ (single (FreeMonoid.ofList (u.map (letter d))) 1) := by
+    (u.map fun j => ((muA (m.1 + 1) (FreeGroup.of (letter d j)) : Ak d (m.1 + 1)) - 1)).prod =
+      Ideal.Quotient.mk _ (single (FreeMonoid.ofList (u.map (letter d))) (1 : ℤ)) := by
   induction u with
   | nil => rw [List.map_nil, List.prod_nil, List.map_nil, FreeMonoid.ofList_nil, ← one_def, map_one]
   | cons j u ih =>
@@ -276,7 +275,7 @@ theorem isBase_of_vanish (hvan : Vanish rels m) :
       obtain ⟨l, hl, rfl⟩ := hy
       obtain ⟨l', rfl⟩ := exists_lift l
       rw [lin_phiA_E, one_mul]
-      obtain ⟨z, hz, ez⟩ := prod_Pos_eq_zero (m.1 + 1) (l'.map fun x => (muA _ x : A) - 1)
+      obtain ⟨z, hz, ez⟩ := prod_Pos_eq_zero (m.1 + 1) (l'.map fun x => (muA _ x : Ak d (m.1 + 1)) - 1)
         (fun b hb => by obtain ⟨x, -, rfl⟩ := List.mem_map.mp hb; exact muA_sub_one_mem _ x)
       rw [← ez, lamA_mk]
       refine lamR_Ik m ?_
@@ -289,8 +288,8 @@ theorem isBase_of_vanish (hvan : Vanish rels m) :
         (u.map fun j => FreeGroup.of (letter d j)).map (PresentedGroup.mk rels) := by
       rw [List.map_map]; rfl
     rw [e, lin_phiA_E, List.map_map, one_mul]
-    rw [show ((fun x => ((muA (m.1 + 1) x : A) - 1)) ∘ fun j => FreeGroup.of (letter d j)) =
-      fun j => ((muA (m.1 + 1) (FreeGroup.of (letter d j)) : A) - 1) from rfl, prod_muA_letters, lamA_mk,
+    rw [show ((fun x => ((muA (m.1 + 1) x : Ak d (m.1 + 1)) - 1)) ∘ fun j => FreeGroup.of (letter d j)) =
+      fun j => ((muA (m.1 + 1) (FreeGroup.of (letter d j)) : Ak d (m.1 + 1)) - 1) from rfl, prod_muA_letters, lamA_mk,
       lamR_single, one_mul, lamW]
     have hl : (FreeMonoid.ofList (u.map (letter d))).length = u.length := by simp
     have hv : (FreeMonoid.ofList (u.map (letter d))).toList.map (·.val) = u := by
