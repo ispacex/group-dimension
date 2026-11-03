@@ -1,7 +1,12 @@
 #!/usr/bin/env python3
 """Write a membership trace (cflint-fast-core cert/TRACE.md) as Lean data for TraceReplay.Check.
 
-    trace_to_lean.py PRESENTATION CLAIM TRACE MODULE_NAME > Data/NAME.lean
+    trace_to_lean.py PRESENTATION CLAIM TRACE MODULE_NAME [POLYMAPS] > Data/NAME.lean
+
+A trace with free columns (F nonempty) needs the polynomial maps (cert/polymaps/ID.json, cross-checked
+against the claim's polymaps-sha256). Only weight-1 maps (homomorphisms G -> Z) are supported: the
+certificate (HomCert, TraceReplay/HomExact.lean) uses the powers phi^K, K < n, of the maps and an integer
+matrix C with C * (phi^K(X_f)) = diag(D_f), computed here and checked by the kernel.
 
 PRESENTATION is a presentation JSON line, or a `.jsonl.gz` whose first line is used. The trace header,
 the claim and the presentation are cross-checked (sha256 of the presentation line, p, d, n, E, the
@@ -14,6 +19,8 @@ import gzip
 import hashlib
 import json
 import sys
+from fractions import Fraction
+from math import lcm
 
 
 def word(w):
@@ -22,6 +29,78 @@ def word(w):
     if len(w) % 2:
         sys.exit("a flat word of odd length")
     return "[" + ", ".join(f"({w[i]}, {w[i + 1]})" for i in range(0, len(w), 2)) + "]"
+
+
+def off(d, g):
+    return sum(d ** i for i in range(g))
+
+
+def letters_at(d, c):
+    """The word at position c (cert/common.h): degree g, then base-d digits, most significant first."""
+    g = 0
+    while off(d, g + 1) <= c:
+        g += 1
+    idx = c - off(d, g)
+    out = []
+    for _ in range(g):
+        out.append(idx % d)
+        idx //= d
+    return out[::-1]
+
+
+def hval(a, K, s, w):
+    if not w:
+        return s ** K
+    j = w[0]
+    aj = a[j] if j < len(a) else 0
+    return hval(a, K, s + aj, w[1:]) - hval(a, K, s, w[1:])
+
+
+def hom_cert(maps, F, d, n):
+    """Functionals (a, K) and rows (C_f, D_f) with sum_k C_f[k] * hval(a_k, K_k, 0, X_f') = D_f [f = f']."""
+    cands = [(a, K) for K in range(1, n) for a in maps]
+    rows, chosen = [], []          # row-reduced copies, to test independence
+    for a, K in cands:
+        v = [Fraction(hval(a, K, 0, letters_at(d, f))) for f in F]
+        r = v[:]
+        for piv, row in rows:
+            if r[piv]:
+                c = r[piv] / row[piv]
+                r = [x - c * y for x, y in zip(r, row)]
+        nz = [i for i, x in enumerate(r) if x]
+        if nz:
+            rows.append((nz[0], r))
+            chosen.append((a, K, v))
+        if len(chosen) == len(F):
+            break
+    if len(chosen) < len(F):
+        sys.exit(f"the powers of the maps have rank {len(chosen)} < |F| = {len(F)} on the free columns")
+    nf = len(F)
+    S = [c[2] for c in chosen]                       # S[k][f]
+    # Sinv with Sinv * S = I (S square, invertible): Gauss-Jordan on [S | I]
+    A = [S[i][:] + [Fraction(int(i == j)) for j in range(nf)] for i in range(nf)]
+    for col in range(nf):
+        piv = next(r for r in range(col, nf) if A[r][col])
+        A[col], A[piv] = A[piv], A[col]
+        pv = A[col][col]
+        A[col] = [x / pv for x in A[col]]
+        for r in range(nf):
+            if r != col and A[r][col]:
+                c = A[r][col]
+                A[r] = [x - c * y for x, y in zip(A[r], A[col])]
+    Sinv = [row[nf:] for row in A]                   # S * Sinv = I, so (Sinv^T)(S^T) = I
+    # we need C[f][k] with sum_k C[f][k] * S[k][f'] = D_f delta: rows of S^{-1} as a left inverse of S^T...
+    # sum_k C[f][k] S[k][f'] = (C S)[f][f'], so C = D * S^{-1} (left inverse of S): S^{-1} S = I too.
+    out = []
+    for f in range(nf):
+        row = Sinv[f]
+        den = lcm(*[x.denominator for x in row])
+        C = [int(x * den) for x in row]
+        for f2 in range(nf):
+            assert sum(C[k] * S[k][f2] for k in range(nf)) == (den if f == f2 else 0)
+        out.append((C, den))
+    funcs = [(a, K) for a, K, _ in chosen]
+    return funcs, out
 
 
 def terms(fs):
@@ -33,6 +112,7 @@ def terms(fs):
 
 def main():
     pres_path, claim_path, trace_path, name = sys.argv[1:5]
+    pm_path = sys.argv[5] if len(sys.argv) > 5 else None
     opener = gzip.open if pres_path.endswith(".gz") else open
     with opener(pres_path, "rt") as fh:
         pres_line = fh.readline().rstrip("\n")
@@ -85,11 +165,29 @@ def main():
     if F is None:
         sys.exit("no F line")
     tests = pres.get("tests", [])
+    # word tests only (lintests, indices >= len(tests), are not supported by TraceReplay)
+    members = [t for t in members if t < len(tests)]
     if not members or any(not 0 <= t < len(tests) or not tests[t][1] for t in members):
         sys.exit("a member is not a non-empty test of the presentation")
+    hom = None
+    if F:
+        if pm_path is None:
+            sys.exit("free columns: the polymaps file is needed")
+        pm_line = open(pm_path).readline().rstrip("\n")
+        if hashlib.sha256(pm_line.encode()).hexdigest() != claim.get("polymaps-sha256"):
+            sys.exit("polymaps sha256 differs from the claim's polymaps-sha256")
+        pm = json.loads(pm_line)
+        if pm.get("presentation-sha256") != hdr["presentation-sha256"]:
+            sys.exit("polymaps written for another presentation")
+        d = int(hdr["d"])
+        if any(m["w"] != 1 or len(m["lambda"]) != d for m in pm["maps"]):
+            sys.exit("only weight-1 polynomial maps are supported")
+        maps = [[int(x) for x in m["lambda"]] for m in pm["maps"]]
+        hom = (maps,) + hom_cert(maps, F, d, int(hdr["n"]))
     out = []
     w = out.append
-    w("module\n\npublic import GroupDimension.TraceReplay.Magnus\n\n@[expose] public section\n")
+    imp = "HomExact" if hom else "Magnus"
+    w(f"module\n\npublic import GroupDimension.TraceReplay.{imp}\n\n@[expose] public section\n")
     w(f"/-! Trace data: `{claim['id']}`, n = {hdr['n']}, E = {hdr['E']} (generated by `trace_to_lean.py`;")
     w(f"presentation sha256 `{hdr['presentation-sha256']}`). -/\n")
     w(f"namespace GroupDimension.TraceReplay.{name}\n")
@@ -121,14 +219,41 @@ def main():
     w("    (∀ w : FreeMonoid (Fin trace.d), w ≠ 1 →")
     w("      ((trace.p ^ (trace.E - 1) : ℕ) : ℤ) • MonoidAlgebra.single w 1 ∈\n        LT trace trace.n ⊔ Fspan trace.d trace.F) :=")
     w("  check_sound trace members check_ok\n")
+    if hom:
+        maps, funcs, crows = hom
+        fl = ", ".join(f"({a}, {K})" for a, K in funcs)
+        rl = ", ".join(f"({C}, {D})" for C, D in crows)
+        w("/-- The weight-1 polynomial maps (cert/polymaps): `a_j = φ(x_{j+1})`. -/")
+        w(f"def maps : List (List Int) := {maps}\n")
+        w("/-- The functionals `φ^K` and the integer left inverse on the free columns (`trace_to_lean.py`). -/")
+        w(f"def hcert : HomCert where\n  funcs := [{fl}]\n  rows := [{rl}]\n")
+        w("theorem hom_ok : checkHom trace hcert = true := by decide +kernel\n")
+        w("theorem maps_ok : hcert.funcs.all (fun κ => maps.any (fun a => a == κ.1)) = true := by decide\n")
     for t in members:
         w(f"/-- Test {t} ({claim['id']}), its word written out. -/")
         w(f"theorem certified_test{t} :")
         w(f"    mt {hdr['d']} {hdr['n']} {word(tests[t][1])} - 1 ∈ LT trace {hdr['n']} :=")
         w(f"  certified.1 {t} (by decide)\n")
+        sha = f"{hdr['presentation-sha256'][:4]}…{hdr['presentation-sha256'][-4:]}"
+        if hom:
+            w(f"/-- Test {t} ({claim['id']}) lies in `D_{hdr['n']}(G)` for every group `G` generated by `g 0, …, g {int(hdr['d']) - 1}`")
+            w(f"(generator `i` of a word is `g ⟨i − 1⟩`) in which the relators in `rels` hold (the subset the trace uses,")
+            w(f"transcribed from the presentation with sha256 `{sha}`), every map in `maps` is a homomorphism")
+            w("`G → ℤ` (`hφ`), and the test element has `p`-power order in `Δ/Δ^n` (`hord`)")
+            w("(`TraceReplay.check_mem_D_hom`). It says nothing about whether the word is `≠ 1`. -/")
+            w(f"theorem mem_D_test{t} {{G : Type*}} [Group G] (g : Fin trace.d → G)")
+            w("    (hrel : ∀ r ∈ trace.rels, gword g r.2 = 1) (hgen : Subgroup.closure (Set.range g) = ⊤)")
+            w("    (hφ : ∀ a ∈ maps, ∃ φ : G →* Multiplicative ℤ,")
+            w("      ∀ j : Fin trace.d, Multiplicative.toAdd (φ (g j)) = a.getD j.val 0)")
+            w(f"    (hord : ∃ m : ℕ, ((trace.p : ℤ) ^ m) • (MonoidAlgebra.of ℤ G (gword g {word(tests[t][1])}) - 1) ∈")
+            w(f"      GroupDimension.augIdeal G ^ {hdr['n']}) :")
+            w(f"    gword g {word(tests[t][1])} ∈ GroupDimension.D {hdr['n']} G :=")
+            w(f"  check_mem_D_hom trace members check_ok hcert hom_ok g hrel hgen")
+            w(f"    (homs_of_maps g maps hcert maps_ok hφ) {t} (by decide) hord\n")
+            continue
         w(f"/-- Test {t} ({claim['id']}) lies in `D_{hdr['n']}(G)` for every group `G` generated by `g 0, …, g {int(hdr['d']) - 1}`")
         w(f"(generator `i` of a word is `g ⟨i − 1⟩`) in which the relators in `rels` hold (the subset the trace uses,")
-        w(f"transcribed from the presentation with sha256 `{hdr['presentation-sha256'][:4]}…{hdr['presentation-sha256'][-4:]}`) and `x^{{{hdr['p']}^N}} = 1`")
+        w(f"transcribed from the presentation with sha256 `{sha}`) and `x^{{{hdr['p']}^N}} = 1`")
         w("(`TraceReplay.check_mem_D`). It says nothing about whether the word is `≠ 1`. -/")
         w(f"theorem mem_D_test{t} {{G : Type*}} [Group G] (g : Fin trace.d → G)")
         w("    (hrel : ∀ r ∈ trace.rels, gword g r.2 = 1) (hgen : Subgroup.closure (Set.range g) = ⊤)")
