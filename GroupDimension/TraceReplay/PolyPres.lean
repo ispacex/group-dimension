@@ -13,12 +13,17 @@ map of `G` of degree `≤ w` with the values `λ` on the monomials. Here that hy
 for a presented group `G = F/⟨⟨rels⟩⟩`, from identities in the truncated free algebra
 `A = ℤ⟨X⟩ / (degree ≥ w + 1)`:
 
-  `λ(u · (μ(r) − 1) · v) = 0` for every relator `r` and all monomials `u`, `v`  (`hvan`),
+  `λ(X_u · (μ(r) − 1) · X_v) = 0` for every relator `r` and all monomials `u`, `v`  (`Vanish`),
 
-where `μ : F → Aˣ`, `x_j ↦ 1 + X_j`, is the Magnus map. This is check 1 of §3.2(e), which
-`check_trace --polymaps` performs. Then `φ(g) = λ(μ(ĝ))` (`ĝ` any preimage) is well defined on `G`,
-`φ(ψ X_u) = λ(X_u)`, and `φ` vanishes on `Δ^{w+1}` because `μ(ĝ) − 1` has no constant term
-(`isBase_of_vanish`). No direction of §3.1 beyond this one is used.
+where `μ : F → Aˣ`, `x_j ↦ 1 + X_j`, is the Magnus map. Since `μ(r) − 1` has no constant term, only
+`|u| + |v| ≤ w − 1` matter (`vanish_of_short`); that finite set of identities is check 1 of §3.2(e),
+which `check_trace --polymaps` performs over the presentation's full relator list. **`Vanish` is not
+checked by the Lean kernel here**: it is a hypothesis of `check_mem_D_poly_pres`, discharged by the
+Rust check.
+
+Then `φ(g) = λ(μ(ĝ))` (`ĝ` any preimage; equal to the Rust tool's `λ(μ(ĝ) − 1)` since `λ(1) = 0`) is
+well defined on `G`, `φ(ψ X_u) = λ(X_u)`, and `φ` vanishes on `Δ^{w+1}` because `μ(ĝ) − 1` has no
+constant term (`isBase_of_vanish`).
 -/
 
 namespace GroupDimension.TraceReplay
@@ -103,7 +108,7 @@ theorem muA_sub_one_mem (k : ℕ) (x : FreeGroup (Fin d)) :
     rintro _ ⟨j, rfl⟩; exact hgen j
   exact (this ▸ Subgroup.mem_top x : x ∈ T)
 
-theorem prod_Pos_eq_zero (k : ℕ) (l : List (Ak d k)) (hl : ∀ a ∈ l, a ∈ Pos k) :
+theorem prod_Pos_mem (k : ℕ) (l : List (Ak d k)) (hl : ∀ a ∈ l, a ∈ Pos k) :
     ∃ y ∈ Ik d l.length, Ideal.Quotient.mk _ y = l.prod := by
   induction l with
   | nil => exact ⟨1, by rw [List.length_nil]; exact single_mem_Ik (by simp) _, by rw [map_one]; rfl⟩
@@ -183,6 +188,19 @@ def Vanish : Prop :=
     lamA m (Ideal.Quotient.mk _ (single u 1) * ((muA (m.1 + 1) r : Ak d (m.1 + 1)) - 1) * Ideal.Quotient.mk _ (single v 1)) = 0
 
 variable {rels m}
+
+/-- Only `|u| + |v| ≤ w − 1` need checking: for longer `u`, `v` the product lies in `I_{w+1}`. -/
+theorem vanish_of_short (h : ∀ r ∈ rels, ∀ u v : FreeMonoid (Fin d), u.length + v.length + 1 ≤ m.1 →
+      lamA m (Ideal.Quotient.mk _ (single u 1) * ((muA (m.1 + 1) r : Ak d (m.1 + 1)) - 1) *
+        Ideal.Quotient.mk _ (single v 1)) = 0) : Vanish rels m := by
+  intro r hr u v
+  by_cases hl : u.length + v.length + 1 ≤ m.1
+  · exact h r hr u v hl
+  · obtain ⟨y, hy, ey⟩ := muA_sub_one_mem (m.1 + 1) r
+    rw [← ey, ← map_mul, ← map_mul, lamA_mk]
+    refine lamR_Ik m (Ik_mono (k := m.1 + 1) (k' := u.length + 1 + v.length) (by omega) ?_)
+    exact mul_mem_Ik_add (mul_mem_Ik_add (single_mem_Ik (le_refl u.length) (1 : ℤ)) hy)
+      (single_mem_Ik (le_refl v.length) (1 : ℤ))
 
 theorem vanish_all (hvan : Vanish rels m)
     {r : FreeGroup (Fin d)} (hr : r ∈ rels) (a b : Ak d (m.1 + 1)) : lamA m (a * ((muA (m.1 + 1) r : Ak d (m.1 + 1)) - 1) * b) = 0 := by
@@ -276,7 +294,7 @@ theorem isBase_of_vanish (hvan : Vanish rels m) :
       obtain ⟨l, hl, rfl⟩ := hy
       obtain ⟨l', rfl⟩ := exists_lift l
       rw [lin_phiA_E, one_mul]
-      obtain ⟨z, hz, ez⟩ := prod_Pos_eq_zero (m.1 + 1) (l'.map fun x => (muA (m.1 + 1) x : Ak d (m.1 + 1)) - 1)
+      obtain ⟨z, hz, ez⟩ := prod_Pos_mem (m.1 + 1) (l'.map fun x => (muA (m.1 + 1) x : Ak d (m.1 + 1)) - 1)
         (fun b hb => by obtain ⟨x, -, rfl⟩ := List.mem_map.mp hb; exact muA_sub_one_mem _ x)
       rw [← ez, lamA_mk]
       refine lamR_Ik m ?_
@@ -303,9 +321,11 @@ theorem isBase_of_vanish (hvan : Vanish rels m) :
 end Pres
 
 /-- **Exact membership in a presented group, polynomial maps of any weight.** If `check` accepts the
-trace, `checkPoly` the certificate, every relator of the trace is one of `allRels`, and every base map
-passes check 1 against `allRels` (`hvan`), then in `G = ⟨x_1, …, x_d | allRels⟩` every word test
-claimed whose element has `p`-power order in `Δ/Δ^n` (`hord`) lies in `D_n(G)`. -/
+trace, `checkPoly` the certificate (so every base map has weight `< n`), every relator of the trace is
+one of `allRels`, and every base map satisfies `Vanish` against `allRels` (`hvan`), then in
+`G = ⟨x_1, …, x_d | allRels⟩` every word test claimed whose element has `p`-power order in `Δ/Δ^n`
+(`hord`) lies in `D_n(G)`. `hvan` is not kernel-checked: it is check 1 of `check_trace --polymaps`
+(`vanish_of_short` reduces it to the finitely many identities that check runs). -/
 theorem check_mem_D_poly_pres (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
     (P : PolyCert) (hP : checkPoly T P = true) (allRels : List (List (ℕ × ℤ)))
     (hsub : T.rels.all (fun r => allRels.any (fun r' => r' == r.2)) = true)

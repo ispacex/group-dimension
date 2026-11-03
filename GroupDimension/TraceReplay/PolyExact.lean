@@ -63,6 +63,7 @@ def colValP (d : Nat) [NeZero d] (maps : List (Nat × List Int)) (κ : List Nat)
 /-- The certificate check: every product uses valid indices and has weight `< n`, and
 `C · M = diag(D)` with `D_f ≠ 0`, `M_{κ,f} = ν_κ(ψ(X_f))`. -/
 def checkPoly (T : Trace) [NeZero T.d] (P : PolyCert) : Bool :=
+  P.maps.all (fun m => Nat.blt m.1 T.n) &&
   P.funcs.all (fun κ => κ.all (fun i => Nat.blt i P.maps.length) && Nat.blt (wt P.maps κ) T.n) &&
   (List.range T.F.length).all (fun i => decide ((P.rows.getD i ([], 0)).2 ≠ 0) &&
     (List.range T.F.length).all (fun j => decide (
@@ -71,6 +72,7 @@ def checkPoly (T : Trace) [NeZero T.d] (P : PolyCert) : Bool :=
       if i = j then (P.rows.getD i ([], 0)).2 else 0)))
 
 theorem checkPoly_spec (T : Trace) [NeZero T.d] (P : PolyCert) (h : checkPoly T P = true) :
+    (∀ m ∈ P.maps, m.1 < T.n) ∧
     (∀ κ ∈ P.funcs, (∀ i ∈ κ, i < P.maps.length) ∧ wt P.maps κ < T.n) ∧
     (∀ i < T.F.length, (P.rows.getD i ([], 0)).2 ≠ 0) ∧
     (∀ i < T.F.length, ∀ j < T.F.length,
@@ -79,8 +81,8 @@ theorem checkPoly_spec (T : Trace) [NeZero T.d] (P : PolyCert) (h : checkPoly T 
       if i = j then (P.rows.getD i ([], 0)).2 else 0) := by
   simp only [checkPoly, Bool.and_eq_true, List.all_eq_true, decide_eq_true_eq, List.mem_range,
     Nat.blt_eq] at h
-  obtain ⟨hK, hrows⟩ := h
-  refine ⟨hK, fun i hi => (hrows i hi).1, fun i hi j hj => ?_⟩
+  obtain ⟨⟨hM, hK⟩, hrows⟩ := h
+  refine ⟨hM, hK, fun i hi => (hrows i hi).1, fun i hi j hj => ?_⟩
   rw [← lsum_eq]; exact (hrows i hi).2 j hj
 
 section Sem
@@ -184,7 +186,7 @@ theorem check_mem_D_poly_lin (T : Trace) (members : List ℕ) [NeZero T.d] (hc :
     (t : ℕ) (ht : t ∈ members)
     (hord : ∃ m : ℕ, ((T.p : ℤ) ^ m) • linG g (testLin T t) ∈ augIdeal G ^ T.n) :
     linG g (testLin T t) ∈ augIdeal G ^ T.n := by
-  obtain ⟨hK, hDg, hCM⟩ := checkPoly_spec T P hP
+  obtain ⟨-, hK, hDg, hCM⟩ := checkPoly_spec T P hP
   choose! φ hφ using hmaps
   have hκ : ∀ k < P.funcs.length, (∀ i ∈ P.funcs.getD k [], i < P.maps.length) ∧
       wt P.maps (P.funcs.getD k []) < T.n := fun k hk => by
