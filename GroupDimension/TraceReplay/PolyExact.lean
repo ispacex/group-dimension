@@ -115,7 +115,10 @@ theorem lin_base {m : ℕ × List ℤ} {φ : G → ℤ} (h : IsBase g m φ) (u :
     · have hE := E_mem (u.map (gN g))
       rw [List.length_map] at hE
       have hb : (Nat.blt 0 u.length && Nat.ble u.length m.1) = false := by
-        rw [Bool.and_eq_false_iff, Nat.ble_eq]; right; simpa using hw
+        rw [Bool.and_eq_false_iff]; right
+        cases h : Nat.ble u.length m.1
+        · rfl
+        · exact absurd (Nat.le_of_ble_eq_true h) hw
       rw [hvan _ (Ideal.pow_le_pow_right (by omega) hE), hb]; rfl
 
 variable (φ : ℕ → G → ℤ)
@@ -128,8 +131,8 @@ theorem lin_prodFn_E (maps : List (ℕ × List ℤ)) (hφ : ∀ i < maps.length,
     lin (prodFn φ κ) (E (u.map (gN g))) = prodVal d maps κ u := by
   induction κ generalizing u with
   | nil =>
-    simp only [prodFn, List.map_nil, List.prod_nil, prodVal]
-    rw [lin_one_E]
+    have e : prodFn φ [] = fun _ => (1 : ℤ) := by funext x; simp [prodFn]
+    rw [e, prodVal, lin_one_E]
     cases u <;> simp
   | cons i κ ih =>
     have hi := hκ i List.mem_cons_self
@@ -146,7 +149,9 @@ theorem lin_prodFn_eq_zero (maps : List (ℕ × List ℤ))
     ∀ x ∈ augIdeal G ^ (wt maps κ + 1), lin (prodFn φ κ) x = 0 := by
   induction κ with
   | nil =>
-    simp only [prodFn, List.map_nil, List.prod_nil, wt, List.sum_nil]
+    have e : prodFn φ [] = fun _ => (1 : ℤ) := by funext x; simp [prodFn]
+    have ew : wt maps [] = 0 := rfl
+    rw [e, ew]
     exact lin_one_eq_zero
   | cons i κ ih =>
     have hi := hκ i List.mem_cons_self
