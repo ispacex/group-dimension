@@ -1575,3 +1575,9 @@ open GroupDimension
 #print axioms GroupDimension.TraceReplay.vanish_of_short
 #print axioms GroupDimension.TraceReplay.isBase_of_vanish
 #print axioms GroupDimension.TraceReplay.check_mem_D_poly_pres
+#print axioms GroupDimension.TraceReplay.vanish_of_check
+#print axioms GroupDimension.TraceReplay.vanish_of_checkB
+#print axioms GroupDimension.TraceReplay.checkVanishB_append
+#print axioms GroupDimension.TraceReplay.check_mem_D_poly_presN
+#print axioms GroupDimension.TraceReplay.check_mem_D_poly_lin_presN
+#print axioms GroupDimension.TraceReplay.checkVanish_append
