@@ -473,7 +473,7 @@ theorem mkK_powFactorB {k K : ℕ} (hk : k ≤ K) (hk1 : 1 ≤ k) (w : List (ℕ
   rw [mkK_powB hk (by omega), mkK_subOne, mkK_magnusW hk, map_zpow]
   apply bser_eq_zpow
   · abel
-  · obtain ⟨z, hz, ez⟩ := muA_sub_one_mem k (gword FreeGroup.of w)
+  · obtain ⟨z, hz, ez⟩ := muA_sub_one_mem (d := d) k (gword FreeGroup.of w)
     rw [← ez, ← map_pow, Ideal.Quotient.eq_zero_iff_mem]
     exact Ik_mono hk (pow_mem_Ik hz K)
 
