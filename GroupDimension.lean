@@ -48,5 +48,8 @@ public import GroupDimension.TraceReplay.PolyPres
 public import GroupDimension.TraceReplay.PolyVanishDefs
 public import GroupDimension.TraceReplay.PolyVanishBin
 public import GroupDimension.TraceReplay.PolyVanish
+public import GroupDimension.TraceReplay.PolyVanishFast
+public import GroupDimension.TraceReplay.PolyVanishFastSound
+public import GroupDimension.TraceReplay.PolyExactSplit
 
 @[expose] public section
