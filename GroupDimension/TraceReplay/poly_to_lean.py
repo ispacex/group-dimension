@@ -222,6 +222,9 @@ def mode_vanish(args):
         i = args.index("--chunk")
         chunk = int(args[i + 1])
         args = args[:i] + args[i + 2:]
+    split = "--split" in args          # one kernel check per piece of 10 (bounds the kernel's memory)
+    if split:
+        args = [a for a in args if a != "--split"]
     outdir, setname, pm_path = args[:3]
     pres_args = [a.split("=", 1) for a in args[3:]]
     pm_line = open(pm_path).readline().rstrip("\n")
@@ -295,8 +298,17 @@ def mode_vanish(args):
             w(",\n".join("  " + lean_rel(factors(r)) for r in part) + "]\n")
         w("def rels : List (List (List (Nat × Int) × Int)) :=")
         w("  " + " ++ ".join(f"rels{i}" for i in range(len(parts))) + "\n")
-        w("set_option maxRecDepth 100000 in")
-        w(f"theorem ok : checkVanish {d} {K} Maps.maps rels = true := by decide +kernel\n")
+        if split:
+            for pi_ in range(len(parts)):
+                w("set_option maxRecDepth 100000 in")
+                w(f"theorem ok{pi_} : checkVanish {d} {K} Maps.maps rels{pi_} = true := by decide +kernel\n")
+            pf = f"ok{len(parts) - 1}"
+            for pi_ in reversed(range(len(parts) - 1)):
+                pf = f"checkVanish_append ok{pi_} ({pf})"
+            w(f"theorem ok : checkVanish {d} {K} Maps.maps rels = true := {pf}\n")
+        else:
+            w("set_option maxRecDepth 100000 in")
+            w(f"theorem ok : checkVanish {d} {K} Maps.maps rels = true := by decide +kernel\n")
         w(f"end {base}.{mname}")
         emit(mname, out)
     nest = lambda xs: xs[0] if len(xs) == 1 else f"{xs[0]} ++ ({nest(xs[1:])})"  # noqa: E731
