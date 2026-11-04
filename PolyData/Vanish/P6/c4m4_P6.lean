@@ -57,7 +57,7 @@ def allRels : List (List (List (Nat × Int) × Int)) :=
 
 theorem encs_ok : encsOk maps Maps.encs = true := Maps.encs_ok
 
-/-- Check 1 for every map against every relator (`vanish_of_check`: each map satisfies `Vanish`). -/
+/-- Check 1 for every map against every relator (`vanish_of_checkE`: each map satisfies `Vanish`). -/
 theorem van_ok : checkVanishE 6 5 maps Maps.encs allRels = true := by
   rw [show maps = Maps.maps from rfl]
   exact checkVanishE_append C0.ok (checkVanishE_append C1.ok (checkVanishE_append C2.ok (checkVanishE_append C3.ok (checkVanishE_append C4.ok (checkVanishE_append C5.ok (checkVanishE_append C6.ok (checkVanishE_append C7.ok (checkVanishE_append C8.ok (checkVanishE_append C9.ok (checkVanishE_append C10.ok (checkVanishE_append C11.ok (checkVanishE_append C12.ok (checkVanishE_append C13.ok (checkVanishE_append C14.ok (checkVanishE_append C15.ok (checkVanishE_append C16.ok (checkVanishE_append C17.ok (checkVanishE_append C18.ok (checkVanishE_append C19.ok (checkVanishE_append C20.ok (checkVanishE_append C21.ok (checkVanishE_append C22.ok (checkVanishE_append C23.ok (checkVanishE_append C24.ok (checkVanishE_append C25.ok (checkVanishE_append C26.ok (checkVanishE_append C27.ok (checkVanishE_append C28.ok (checkVanishE_append C29.ok (checkVanishE_append C30.ok (checkVanishE_append C31.ok (checkVanishE_append C32.ok (C33.ok)))))))))))))))))))))))))))))))))

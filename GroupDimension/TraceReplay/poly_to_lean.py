@@ -2,7 +2,7 @@
 """Lean data for claims whose free columns need polynomial maps of weight >= 2 (MATH-314).
 
     poly_to_lean.py vanish OUTDIR SET POLYMAPS NAME=PRESENTATION ... [--chunk N] [--piece N] [--split]
-                       [--binom | --fast]
+                       [--binom] [--fast]   (--fast implies the binomial powers)
     poly_to_lean.py cert   PRESENTATION CLAIM TRACE POLYMAPS MODULE VANISH_FILE
 
 `vanish` writes modules under OUTDIR/SET, `cert` one module to stdout (module names `PolyData.<...>`).
@@ -233,20 +233,22 @@ def header(w, imports, doc):
 
 
 def mode_vanish(args):
-    """vanish OUTDIR SET POLYMAPS NAME=PRESENTATION ... [--chunk N]: one module per cell of relators (the
+    """vanish OUTDIR SET POLYMAPS NAME=PRESENTATION ... [--chunk N] [--piece N] [--split] [--binom] [--fast]: one module per cell of relators (the
     relators shared by exactly the same presentations), and one per presentation joining its cells."""
     chunk = 100
     if "--chunk" in args:
         i = args.index("--chunk")
         chunk = int(args[i + 1])
         args = args[:i] + args[i + 2:]
-    split = "--split" in args          # one kernel check per piece of 10 (bounds the kernel's memory)
+    split = "--split" in args          # one kernel check per piece (`--piece`, default 10; bounds the kernel's memory)
     binom = "--binom" in args          # powers by the binomial series (checkVanishB)
     fast = "--fast" in args            # and the maps packed into numbers (checkVanishE)
     piece = 10                         # relators per literal (and per kernel check with --split)
     if "--piece" in args:
         i = args.index("--piece")
-        piece = int(args[i + 1])
+        piece = int(args[i + 1]) if i + 1 < len(args) and args[i + 1].isdigit() else 0
+        if piece < 1:
+            sys.exit("--piece takes a positive number")
         args = args[:i] + args[i + 2:]
     args = [a for a in args if a not in ("--split", "--binom", "--fast")]
     CV = "checkVanishE" if fast else "checkVanishB" if binom else "checkVanish"
@@ -367,7 +369,8 @@ def mode_vanish(args):
             proof = f"{CV}_append {m[0]}.ok ({proof})"
         if fast:
             w("theorem encs_ok : encsOk maps Maps.encs = true := Maps.encs_ok\n")
-        w("/-- Check 1 for every map against every relator (`vanish_of_check`: each map satisfies `Vanish`). -/")
+        sound = {"checkVanish": "vanish_of_check", "checkVanishB": "vanish_of_checkB", "checkVanishE": "vanish_of_checkE"}[CV]
+        w(f"/-- Check 1 for every map against every relator (`{sound}`: each map satisfies `Vanish`). -/")
         w(f"theorem van_ok : {CV} {d} {K} maps{EA} allRels = true := by")
         w(f"  rw [show maps = Maps.maps from rfl]\n  exact {proof}\n")
         w(f"end {base}.{name}")

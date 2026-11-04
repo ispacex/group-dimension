@@ -8,7 +8,7 @@ public import GroupDimension.TraceReplay.PolyVanishFast
 /-!
 # Soundness of `checkVanishE` (MATH-314)
 
-`checkVanishE` (PolyVanishFast.lean) and `checkVanishB` have the same value once `encsOk` holds: the packed
+Once `encsOk` holds, `checkVanishE = true` (PolyVanishFast.lean) implies `checkVanishB = true`: the packed
 values read back as the list (`lookL_eq`), and the terms `checkMapL` drops add nothing to `vanValD`
 (`vanValL_filter`). So `vanish_of_checkE` is `vanish_of_checkB`.
 -/

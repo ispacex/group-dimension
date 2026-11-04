@@ -9,8 +9,9 @@ public import GroupDimension.TraceReplay.PolyVanishBin
 
 `checkMap` (PolyVanishDefs.lean) reads `λ` with `List.getD`, a walk along the list of values. For maps of
 weight 4 with `d = 6` that list has 1554 entries and check 1 does about 4·10⁷ steps per relator, more than
-the kernel can hold in memory for a handful of relators. `checkVanishE` is `checkVanishB` with two changes
-that leave the value unchanged (`vanish_of_checkE`, PolyVanishFastSound.lean):
+the kernel can hold in memory for a handful of relators. `checkVanishE` is `checkVanishB` with two changes;
+once `encsOk` holds, `checkVanishE = true` implies `checkVanishB = true` (`vanish_of_checkE`,
+PolyVanishFastSound.lean):
 
 * the values of each map are packed into one natural number `e`, `W` bits each with offset `B`, and read
   by a shift and a remainder (`lookL`), which the kernel does with GMP. The packing is checked against
