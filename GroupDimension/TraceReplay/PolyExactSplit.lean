@@ -41,9 +41,7 @@ theorem colMat_of_forall₂ {d : Nat} [NeZero d] {maps : List (Nat × List Int)}
     ∀ {funcs : List (List Nat)} {M : List (List Int)},
       List.Forall₂ (fun κ r => F.map (fun f => colValP d maps κ f) = r) funcs M → colMat d maps funcs F = M
   | _, _, .nil => rfl
-  | _, _, .cons h t => by
-    simp only [colMat, List.map_cons] at *
-    rw [h, colMat_of_forall₂ t]
+  | _, _, .cons h t => congrArg₂ List.cons h (colMat_of_forall₂ t)
 
 theorem allRange'_append {p : Nat → Bool} {s m k : Nat} (h1 : (List.range' s m).all p = true)
     (h2 : (List.range' (s + m) k).all p = true) : (List.range' s (m + k)).all p = true := by
