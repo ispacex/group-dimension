@@ -452,10 +452,14 @@ def write_poly_split(w, d, n, F, maps, funcs, block=4):
     for b, s0 in enumerate(starts):
         m = min(block, len(F) - s0)
         w(f"theorem rows{b} : (List.range' {s0} {m}).all (rowOkM F cert M) = true := by decide +kernel\n")
-    pf = "rows0"
+    prev, end = "rows0", min(block, len(F))    # joined one block at a time, each bound written out
     for b in range(1, len(starts)):
-        pf = f"allRange'_append ({pf}) rows{b}"
-    w(f"theorem hr : (List.range' 0 {len(F)}).all (rowOkM F cert M) = true := {pf}\n")
+        end2 = min(starts[b] + block, len(F))
+        w("set_option maxRecDepth 100000 in")
+        w(f"theorem upTo{b} : (List.range' 0 {end2}).all (rowOkM F cert M) = true :=")
+        w(f"  allRange'_append (s := 0) (m := {end}) (k := {end2 - end}) {prev} rows{b}\n")
+        prev, end = f"upTo{b}", end2
+    w(f"theorem hr : (List.range' 0 {len(F)}).all (rowOkM F cert M) = true := {prev}\n")
     w(f"theorem poly_ok : checkPolyF {d} {n} F cert = true :=")
     w(f"  checkPolyF_of_split hM hh (by rw [show F.length = {len(F)} from rfl]; exact hr)\n")
 

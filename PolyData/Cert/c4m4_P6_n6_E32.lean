@@ -241,7 +241,59 @@ theorem rows12 : (List.range' 48 4).all (rowOkM F cert M) = true := by decide +k
 
 theorem rows13 : (List.range' 52 4).all (rowOkM F cert M) = true := by decide +kernel
 
-theorem hr : (List.range' 0 56).all (rowOkM F cert M) = true := allRange'_append (allRange'_append (allRange'_append (allRange'_append (allRange'_append (allRange'_append (allRange'_append (allRange'_append (allRange'_append (allRange'_append (allRange'_append (allRange'_append (allRange'_append (rows0) rows1) rows2) rows3) rows4) rows5) rows6) rows7) rows8) rows9) rows10) rows11) rows12) rows13
+set_option maxRecDepth 100000 in
+theorem upTo1 : (List.range' 0 8).all (rowOkM F cert M) = true :=
+  allRange'_append (s := 0) (m := 4) (k := 4) rows0 rows1
+
+set_option maxRecDepth 100000 in
+theorem upTo2 : (List.range' 0 12).all (rowOkM F cert M) = true :=
+  allRange'_append (s := 0) (m := 8) (k := 4) upTo1 rows2
+
+set_option maxRecDepth 100000 in
+theorem upTo3 : (List.range' 0 16).all (rowOkM F cert M) = true :=
+  allRange'_append (s := 0) (m := 12) (k := 4) upTo2 rows3
+
+set_option maxRecDepth 100000 in
+theorem upTo4 : (List.range' 0 20).all (rowOkM F cert M) = true :=
+  allRange'_append (s := 0) (m := 16) (k := 4) upTo3 rows4
+
+set_option maxRecDepth 100000 in
+theorem upTo5 : (List.range' 0 24).all (rowOkM F cert M) = true :=
+  allRange'_append (s := 0) (m := 20) (k := 4) upTo4 rows5
+
+set_option maxRecDepth 100000 in
+theorem upTo6 : (List.range' 0 28).all (rowOkM F cert M) = true :=
+  allRange'_append (s := 0) (m := 24) (k := 4) upTo5 rows6
+
+set_option maxRecDepth 100000 in
+theorem upTo7 : (List.range' 0 32).all (rowOkM F cert M) = true :=
+  allRange'_append (s := 0) (m := 28) (k := 4) upTo6 rows7
+
+set_option maxRecDepth 100000 in
+theorem upTo8 : (List.range' 0 36).all (rowOkM F cert M) = true :=
+  allRange'_append (s := 0) (m := 32) (k := 4) upTo7 rows8
+
+set_option maxRecDepth 100000 in
+theorem upTo9 : (List.range' 0 40).all (rowOkM F cert M) = true :=
+  allRange'_append (s := 0) (m := 36) (k := 4) upTo8 rows9
+
+set_option maxRecDepth 100000 in
+theorem upTo10 : (List.range' 0 44).all (rowOkM F cert M) = true :=
+  allRange'_append (s := 0) (m := 40) (k := 4) upTo9 rows10
+
+set_option maxRecDepth 100000 in
+theorem upTo11 : (List.range' 0 48).all (rowOkM F cert M) = true :=
+  allRange'_append (s := 0) (m := 44) (k := 4) upTo10 rows11
+
+set_option maxRecDepth 100000 in
+theorem upTo12 : (List.range' 0 52).all (rowOkM F cert M) = true :=
+  allRange'_append (s := 0) (m := 48) (k := 4) upTo11 rows12
+
+set_option maxRecDepth 100000 in
+theorem upTo13 : (List.range' 0 56).all (rowOkM F cert M) = true :=
+  allRange'_append (s := 0) (m := 52) (k := 4) upTo12 rows13
+
+theorem hr : (List.range' 0 56).all (rowOkM F cert M) = true := upTo13
 
 theorem poly_ok : checkPolyF 6 6 F cert = true :=
   checkPolyF_of_split hM hh (by rw [show F.length = 56 from rfl]; exact hr)
