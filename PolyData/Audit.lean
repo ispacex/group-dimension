@@ -1,5 +1,7 @@
 module
 
+public import PolyData.Cert.c4m4_P6_n5_E32
+public import PolyData.Cert.c4m4_P6_n6_E32
 public import PolyData.Cert.G_n4_E30
 public import PolyData.Cert.G_n5_E30
 public import PolyData.Cert.G_n6_E30
@@ -32,7 +34,7 @@ public import PolyData.Cert.c66_Rk36_m14_0_n6_E32
 public import PolyData.Cert.c66_Rk45_m14_0_n6_E32
 public import PolyData.Cert.c66_Rk56_m14_0_n6_E32
 
-/-! Axioms of the kernel checks of the polynomial-map part of 31 of the 33 weight >= 2 claims (MATH-314; the two c4m4_P6 claims, maps of weight 4, are not here: one cell of their check 1 exceeds the 17 GB of a kimmy job). -/
+/-! Axioms of the kernel checks of the polynomial-map part of all 33 weight >= 2 claims (MATH-314). -/
 
 #print axioms PolyData.Cert.G_n4_E30.polymaps_ok
 #print axioms PolyData.Cert.G_n5_E30.polymaps_ok
@@ -65,3 +67,5 @@ public import PolyData.Cert.c66_Rk56_m14_0_n6_E32
 #print axioms PolyData.Cert.c66_Rk36_m14_0_n6_E32.polymaps_ok
 #print axioms PolyData.Cert.c66_Rk45_m14_0_n6_E32.polymaps_ok
 #print axioms PolyData.Cert.c66_Rk56_m14_0_n6_E32.polymaps_ok
+#print axioms PolyData.Cert.c4m4_P6_n5_E32.polymaps_ok
+#print axioms PolyData.Cert.c4m4_P6_n6_E32.polymaps_ok

@@ -170,6 +170,7 @@ theorem ok8 : checkVanishE 6 5 Maps.maps Maps.encs rels8 = true := by decide +ke
 set_option maxRecDepth 100000 in
 theorem ok9 : checkVanishE 6 5 Maps.maps Maps.encs rels9 = true := by decide +kernel
 
-theorem ok : checkVanishE 6 5 Maps.maps Maps.encs rels = true := checkVanishE_append ok0 (checkVanishE_append ok1 (checkVanishE_append ok2 (checkVanishE_append ok3 (checkVanishE_append ok4 (checkVanishE_append ok5 (checkVanishE_append ok6 (checkVanishE_append ok7 (checkVanishE_append ok8 (ok9)))))))))
+set_option maxRecDepth 100000 in
+theorem ok : checkVanishE 6 5 Maps.maps Maps.encs rels = true := checkVanishE_append (checkVanishE_append (checkVanishE_append (checkVanishE_append (checkVanishE_append (checkVanishE_append (checkVanishE_append (checkVanishE_append (checkVanishE_append (ok0) ok1) ok2) ok3) ok4) ok5) ok6) ok7) ok8) ok9
 
 end PolyData.Vanish.P6.C25

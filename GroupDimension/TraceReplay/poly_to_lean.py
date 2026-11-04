@@ -335,9 +335,10 @@ def mode_vanish(args):
             for pi_ in range(len(parts)):
                 w("set_option maxRecDepth 100000 in")
                 w(f"theorem ok{pi_} : {CV} {d} {K} Maps.maps{EA} rels{pi_} = true := by decide +kernel\n")
-            pf = f"ok{len(parts) - 1}"
-            for pi_ in reversed(range(len(parts) - 1)):
-                pf = f"{CV}_append ok{pi_} ({pf})"
+            pf = "ok0"                 # `rels0 ++ rels1 ++ ...` nests to the left, and so does the proof
+            for pi_ in range(1, len(parts)):
+                pf = f"{CV}_append ({pf}) ok{pi_}"
+            w("set_option maxRecDepth 100000 in")
             w(f"theorem ok : {CV} {d} {K} Maps.maps{EA} rels = true := {pf}\n")
         else:
             w("set_option maxRecDepth 100000 in")
