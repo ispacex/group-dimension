@@ -270,8 +270,14 @@ def mode_vanish(args):
                "asserted equal to the relator by the generator).")
         w(f"namespace {base}.{mname}\n\nopen GroupDimension.TraceReplay\n")
         w("set_option maxHeartbeats 0\n")
-        w("def rels : List (List (List (Nat × Int) × Int)) := [")
-        w(",\n".join("  " + lean_rel(factors(r)) for r in rels) + "]\n")
+        # small literals joined by `++`: elaborating one long list literal is quadratic in its length
+        piece = 10
+        parts = [rels[i:i + piece] for i in range(0, len(rels), piece)]
+        for pi_, part in enumerate(parts):
+            w(f"def rels{pi_} : List (List (List (Nat × Int) × Int)) := [")
+            w(",\n".join("  " + lean_rel(factors(r)) for r in part) + "]\n")
+        w("def rels : List (List (List (Nat × Int) × Int)) :=")
+        w("  " + " ++ ".join(f"rels{i}" for i in range(len(parts))) + "\n")
         w("set_option maxRecDepth 100000 in")
         w(f"theorem ok : checkVanish {d} {K} Maps.maps rels = true := by decide +kernel\n")
         w(f"end {base}.{mname}")

@@ -17,8 +17,11 @@ open GroupDimension.TraceReplay
 
 set_option maxHeartbeats 0
 
-def rels : List (List (List (Nat × Int) × Int)) := [
+def rels0 : List (List (List (Nat × Int) × Int)) := [
   [([(5, -1), (4, -1), (5, -1), (4, 1), (5, 1), (4, -1), (5, 1), (4, 1), (5, -1), (4, -1), (5, -1), (4, 1), (5, -1), (4, -1), (5, 1), (4, 1), (5, 2)], 1)]]
+
+def rels : List (List (List (Nat × Int) × Int)) :=
+  rels0
 
 set_option maxRecDepth 100000 in
 theorem ok : checkVanish 5 4 Maps.maps rels = true := by decide +kernel
