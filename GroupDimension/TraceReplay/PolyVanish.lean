@@ -438,6 +438,10 @@ end Sound
 theorem relElt_single {d : ℕ} [NeZero d] (w : List (ℕ × ℤ)) : relElt d [(w, 1)] = gword FreeGroup.of w := by
   simp [relElt]
 
+/-- A relator written out as a flat word (each factor `(w, k)` as `w^k`, `w⁻¹^|k|` for `k < 0`). -/
+def expandRel (r : List (List (Nat × Int) × Int)) : List (Nat × Int) :=
+  r.flatMap fun f => (List.replicate f.2.natAbs (bif decide (f.2 < 0) then invW f.1 else f.1)).flatten
+
 theorem gword_append {G : Type*} [Group G] {d : ℕ} [NeZero d] (g : Fin d → G) (a b : List (ℕ × ℤ)) :
     gword g (a ++ b) = gword g a * gword g b := by
   simp [gword, List.map_append, List.prod_append]
