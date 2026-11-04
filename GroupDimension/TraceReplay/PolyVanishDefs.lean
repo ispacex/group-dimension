@@ -116,6 +116,10 @@ def checkVanish (d K : Nat) (maps : List (Nat × List Int)) (rels : List (List (
     Bool :=
   rels.all fun r => checkVanishRel d K maps r
 
+/-- A relator written out as a flat word (each factor `(w, k)` as `w^k`, `w⁻¹^|k|` for `k < 0`). -/
+def expandRel (r : List (List (Nat × Int) × Int)) : List (Nat × Int) :=
+  r.flatMap fun f => (List.replicate f.2.natAbs (bif decide (f.2 < 0) then invW f.1 else f.1)).flatten
+
 /-- `checkVanish` over a concatenation. -/
 theorem checkVanish_append {d K : Nat} {maps : List (Nat × List Int)} {a b : List (List (List (Nat × Int) × Int))}
     (ha : checkVanish d K maps a = true) (hb : checkVanish d K maps b = true) :

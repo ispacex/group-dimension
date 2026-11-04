@@ -15,11 +15,12 @@ check the kernel can run (`checkVanish`), with its soundness proof (`vanish_of_c
 * `μ(r)` is computed exactly over `ℤ`, cut below degree `w + 1`, as a sparse vector of monomial
   positions (`VecZ`): `mulZ` multiplies two such vectors, `sVec` is `(1 + X_j)^e` (binomial
   coefficients, any `e ∈ ℤ`), and a relator is a list of factors `(word, k)` (a flat relator is
-  `[(w, 1)]`; nested `[word, k]` factors of the presentations come out as `(word, k)`), each a power
+  `[(w, 1)]`; nested `[word, k]` factors of the presentations come out as `(word, k)`, and the generator
+  writes long flat relators as runs `u^k`), each a power
   computed by repeated squaring (`powZ`), a negative power from the inverse word.
-* `λ(X_u v X_v)` is evaluated through `baseVal`, the same reading of `λ` as `IsBase` and
-  `check_mem_D_poly_lin` use, over all `|u| + |v| ≤ w − 1` (`words`); `vanish_of_short` covers
-  the rest.
+* `λ(X_U v X_V)` is evaluated at the position of `X_U X_c X_V` (`posMul`, `lamPos`; on terms with their
+  degrees precomputed, `vanValD`), the same reading of `λ` as `IsBase` (`lamR_e`), over all
+  `|U| + |V| ≤ w − 1`; `vanish_of_short` covers the rest.
 
 `check_mem_D_poly_presN` is then `check_mem_D_poly_pres` for a list of relators in this form, with
 `Vanish` replaced by `checkVanish` (decidable, so no hypothesis is left outside the kernel beyond the
@@ -437,8 +438,37 @@ end Sound
 theorem relElt_single {d : ℕ} [NeZero d] (w : List (ℕ × ℤ)) : relElt d [(w, 1)] = gword FreeGroup.of w := by
   simp [relElt]
 
+theorem gword_append {G : Type*} [Group G] {d : ℕ} [NeZero d] (g : Fin d → G) (a b : List (ℕ × ℤ)) :
+    gword g (a ++ b) = gword g a * gword g b := by
+  simp [gword, List.map_append, List.prod_append]
+
+theorem gword_flatten_replicate {G : Type*} [Group G] {d : ℕ} [NeZero d] (g : Fin d → G)
+    (w : List (ℕ × ℤ)) : ∀ n : ℕ, gword g (List.replicate n w).flatten = gword g w ^ n
+  | 0 => by simp [gword]
+  | n + 1 => by
+    rw [List.replicate_succ, List.flatten_cons, gword_append, gword_flatten_replicate g w n, pow_succ']
+
+/-- The flat word of a relator is the relator. -/
+theorem gword_expandRel {d : ℕ} [NeZero d] (r : List (List (ℕ × ℤ) × ℤ)) :
+    gword FreeGroup.of (expandRel r) = relElt d r := by
+  induction r with
+  | nil => simp [expandRel, relElt, gword]
+  | cons f r ih =>
+    have hc : expandRel (f :: r) = (List.replicate f.2.natAbs
+        (bif decide (f.2 < 0) then invW f.1 else f.1)).flatten ++ expandRel r := by
+      simp only [expandRel, List.flatMap_cons]
+    rw [hc, gword_append, ih, relElt_cons, gword_flatten_replicate]
+    congr 1
+    cases h : decide (f.2 < 0)
+    · have h' : 0 ≤ f.2 := by simpa using h
+      simp only [Bool.cond_false]
+      rw [← zpow_natCast, Int.natAbs_of_nonneg h']
+    · have h' : f.2 < 0 := by simpa using h
+      simp only [Bool.cond_true]
+      rw [gword_invW, inv_pow, ← zpow_natCast, Int.ofNat_natAbs_of_nonpos h'.le, zpow_neg, inv_inv]
+
 theorem rel_hold_of_sub (T : Trace) [NeZero T.d] (allRels : List (List (List (ℕ × ℤ) × ℤ)))
-    (hsub : T.rels.all (fun r => allRels.any (fun R => R == [(r.2, 1)])) = true) :
+    (hsub : T.rels.all (fun r => allRels.any (fun R => expandRel R == r.2)) = true) :
     ∀ r ∈ T.rels, gword (PresentedGroup.of (rels := relSetN T.d allRels)) r.2 = 1 := by
   simp only [List.all_eq_true, List.any_eq_true, beq_iff_eq] at hsub
   intro r hr
@@ -446,7 +476,7 @@ theorem rel_hold_of_sub (T : Trace) [NeZero T.d] (allRels : List (List (List (�
   have e : (PresentedGroup.of : Fin T.d → PresentedGroup (relSetN T.d allRels)) =
       PresentedGroup.mk _ ∘ FreeGroup.of := rfl
   rw [e, ← map_gword]
-  exact PresentedGroup.one_of_mem ⟨R, hR, by rw [hRr, relElt_single]⟩
+  exact PresentedGroup.one_of_mem ⟨R, hR, by rw [← hRr, gword_expandRel]⟩
 
 theorem maps_isBase (T : Trace) [NeZero T.d] (P : PolyCert) (allRels : List (List (List (ℕ × ℤ) × ℤ)))
     (K : ℕ) (hvan : checkVanish T.d K P.maps allRels = true) :
@@ -458,13 +488,14 @@ theorem maps_isBase (T : Trace) [NeZero T.d] (P : PolyCert) (allRels : List (Lis
   exact ⟨_, isBase_of_vanish (vanish_of_check hvan _ hm)⟩
 
 /-- **Exact membership in a presented group, every hypothesis but `hord` decidable.** `check`,
-`checkPoly`, `hsub` (each relator of the trace is a relator of the presentation) and `hvan` (check 1
+`checkPoly`, `hsub` (each relator of the trace, written out, is a relator of the presentation:
+`expandRel`, `gword_expandRel`) and `hvan` (check 1
 for every base map against all relators) are Boolean checks; then in
 `G = ⟨x_1, …, x_d | allRels⟩` every lintest claimed whose element has `p`-power order in `Δ/Δ^n`
 lies in `Δ^n`. -/
 theorem check_mem_D_poly_lin_presN (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
     (P : PolyCert) (hP : checkPoly T P = true) (allRels : List (List (List (ℕ × ℤ) × ℤ)))
-    (hsub : T.rels.all (fun r => allRels.any (fun R => R == [(r.2, 1)])) = true)
+    (hsub : T.rels.all (fun r => allRels.any (fun R => expandRel R == r.2)) = true)
     (K : ℕ) (hvan : checkVanish T.d K P.maps allRels = true)
     (t : ℕ) (ht : t ∈ members)
     (hord : ∃ m : ℕ, ((T.p : ℤ) ^ m) • linG (PresentedGroup.of (rels := relSetN T.d allRels)) (testLin T t) ∈
@@ -477,7 +508,7 @@ theorem check_mem_D_poly_lin_presN (T : Trace) (members : List ℕ) [NeZero T.d]
 /-- `check_mem_D_poly_lin_presN` for a word test: `w_t ∈ D_n(G)`. -/
 theorem check_mem_D_poly_presN (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
     (P : PolyCert) (hP : checkPoly T P = true) (allRels : List (List (List (ℕ × ℤ) × ℤ)))
-    (hsub : T.rels.all (fun r => allRels.any (fun R => R == [(r.2, 1)])) = true)
+    (hsub : T.rels.all (fun r => allRels.any (fun R => expandRel R == r.2)) = true)
     (K : ℕ) (hvan : checkVanish T.d K P.maps allRels = true)
     (t : ℕ) (ht : t ∈ members) (hw : T.tests.any (fun y => y.1 == t) = true)
     (hord : ∃ m : ℕ, ((T.p : ℤ) ^ m) •
