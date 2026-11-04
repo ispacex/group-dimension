@@ -1,6 +1,6 @@
 module
 
-public import GroupDimension.TraceReplay.PolyVanishDefs
+public import GroupDimension.TraceReplay.PolyVanishBin
 
 @[expose] public section
 

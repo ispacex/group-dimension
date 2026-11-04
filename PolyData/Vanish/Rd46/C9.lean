@@ -141,6 +141,6 @@ def rels : List (List (List (Nat × Int) × Int)) :=
   rels0 ++ rels1 ++ rels2 ++ rels3 ++ rels4 ++ rels5 ++ rels6 ++ rels7 ++ rels8 ++ rels9
 
 set_option maxRecDepth 100000 in
-theorem ok : checkVanish 6 3 Maps.maps rels = true := by decide +kernel
+theorem ok : checkVanishB 6 3 Maps.maps rels = true := by decide +kernel
 
 end PolyData.Vanish.Rd46.C9

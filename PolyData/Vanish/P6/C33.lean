@@ -87,23 +87,23 @@ def rels : List (List (List (Nat × Int) × Int)) :=
   rels0 ++ rels1 ++ rels2 ++ rels3 ++ rels4 ++ rels5
 
 set_option maxRecDepth 100000 in
-theorem ok0 : checkVanish 6 5 Maps.maps rels0 = true := by decide +kernel
+theorem ok0 : checkVanishB 6 5 Maps.maps rels0 = true := by decide +kernel
 
 set_option maxRecDepth 100000 in
-theorem ok1 : checkVanish 6 5 Maps.maps rels1 = true := by decide +kernel
+theorem ok1 : checkVanishB 6 5 Maps.maps rels1 = true := by decide +kernel
 
 set_option maxRecDepth 100000 in
-theorem ok2 : checkVanish 6 5 Maps.maps rels2 = true := by decide +kernel
+theorem ok2 : checkVanishB 6 5 Maps.maps rels2 = true := by decide +kernel
 
 set_option maxRecDepth 100000 in
-theorem ok3 : checkVanish 6 5 Maps.maps rels3 = true := by decide +kernel
+theorem ok3 : checkVanishB 6 5 Maps.maps rels3 = true := by decide +kernel
 
 set_option maxRecDepth 100000 in
-theorem ok4 : checkVanish 6 5 Maps.maps rels4 = true := by decide +kernel
+theorem ok4 : checkVanishB 6 5 Maps.maps rels4 = true := by decide +kernel
 
 set_option maxRecDepth 100000 in
-theorem ok5 : checkVanish 6 5 Maps.maps rels5 = true := by decide +kernel
+theorem ok5 : checkVanishB 6 5 Maps.maps rels5 = true := by decide +kernel
 
-theorem ok : checkVanish 6 5 Maps.maps rels = true := checkVanish_append ok0 (checkVanish_append ok1 (checkVanish_append ok2 (checkVanish_append ok3 (checkVanish_append ok4 (ok5)))))
+theorem ok : checkVanishB 6 5 Maps.maps rels = true := checkVanishB_append ok0 (checkVanishB_append ok1 (checkVanishB_append ok2 (checkVanishB_append ok3 (checkVanishB_append ok4 (ok5)))))
 
 end PolyData.Vanish.P6.C33

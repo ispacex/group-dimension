@@ -1,7 +1,7 @@
 module
 
 public import GroupDimension.TraceReplay.PolyPres
-public import GroupDimension.TraceReplay.PolyVanishDefs
+public import GroupDimension.TraceReplay.PolyVanishBin
 
 @[expose] public section
 
@@ -23,7 +23,7 @@ check the kernel can run (`checkVanish`), with its soundness proof (`vanish_of_c
   `|U| + |V| ≤ w − 1`; `vanish_of_short` covers the rest.
 
 `check_mem_D_poly_presN` is then `check_mem_D_poly_pres` for a list of relators in this form, with
-`Vanish` replaced by `checkVanish` (decidable, so no hypothesis is left outside the kernel beyond the
+`Vanish` given by `checkVanish` or `checkVanishB` (PolyVanishBin.lean: powers by the binomial series) (decidable, so no hypothesis is left outside the kernel beyond the
 trace's own and `hord`).
 -/
 
@@ -431,6 +431,78 @@ theorem vanish_of_check {K : ℕ} {maps : List (ℕ × List ℤ)} {rels : List (
   rw [mkK_subOne, mkK_magnusN hK] at this
   exact this
 
+/-! ### Powers by the binomial series (`checkVanishB`) -/
+
+theorem evalZ_scaleZ (c : ℤ) (v : VecZ) : evalZ d (scaleZ c v) = c • evalZ d v := by
+  induction v with
+  | nil => simp [scaleZ]
+  | cons t v ih =>
+    simp only [scaleZ, List.map_cons] at ih ⊢
+    rw [evalZ_cons, evalZ_cons, ih, smul_add, smul_smul]
+
+theorem mkK_powBAux {k K : ℕ} (hk : k ≤ K) (y : VecZ) (e : ℤ) : ∀ (f : ℕ) (acc ym : VecZ) (m : ℕ),
+    mkK d k (evalZ d ym) = mkK d k (evalZ d y) ^ m →
+    mkK d k (evalZ d (powBAux d K y e f acc ym m)) =
+      mkK d k (evalZ d acc) + ∑ i ∈ Finset.Ico m (m + f), Ring.choose e i • mkK d k (evalZ d y) ^ i
+  | 0, acc, ym, m, _ => by simp [powBAux]
+  | f + 1, acc, ym, m, hym => by
+    simp only [powBAux]
+    rw [mkK_powBAux hk y e f _ _ (m + 1) (by rw [mkK_mulZ hk, hym, pow_succ]),
+      Finset.sum_eq_sum_Ico_succ_bot (by omega : m < m + (f + 1)), show m + (f + 1) = m + 1 + f by omega,
+      ← add_assoc]
+    congr 1
+    cases h : (binom e m == 0)
+    · simp only [Bool.cond_false, evalZ_mergeZ, map_add, evalZ_scaleZ, map_zsmul, hym, binom_eq_choose]
+    · have h0 : binom e m = 0 := by simpa using h
+      simp only [Bool.cond_true]
+      rw [← binom_eq_choose, h0, zero_smul, add_zero]
+
+theorem mkK_powB {k K : ℕ} (hk : k ≤ K) (hK : 1 ≤ K) (y : VecZ) (e : ℤ) :
+    mkK d k (evalZ d (powB d K y e)) = bser (mkK d k (evalZ d y)) K e := by
+  rw [powB, mkK_powBAux hk y e (K - 1) _ _ 1 (by rw [pow_one]), evalZ_one, map_one, bser,
+    Finset.range_eq_Ico, Finset.sum_eq_sum_Ico_succ_bot (by omega : 0 < K), show 1 + (K - 1) = K by omega]
+  simp [Ring.choose_zero_right]
+
+theorem pow_mem_Ik {z : R d} (hz : z ∈ Ik d 1) : ∀ n : ℕ, z ^ n ∈ Ik d n
+  | 0 => by rw [pow_zero]; exact single_mem_Ik (by simp) _
+  | n + 1 => by rw [pow_succ]; exact mul_mem_Ik_add (pow_mem_Ik hz n) hz
+
+theorem mkK_powFactorB {k K : ℕ} (hk : k ≤ K) (hk1 : 1 ≤ k) (w : List (ℕ × ℤ)) (ex : ℤ) :
+    mkK d k (evalZ d (powB d K (subOne (magnusW d K w)) ex)) =
+      ((muA k (gword FreeGroup.of w ^ ex) : (Ak d k)ˣ) : Ak d k) := by
+  rw [mkK_powB hk (by omega), mkK_subOne, mkK_magnusW hk, map_zpow]
+  apply bser_eq_zpow
+  · abel
+  · obtain ⟨z, hz, ez⟩ := muA_sub_one_mem k (gword FreeGroup.of w)
+    rw [← ez, ← map_pow, Ideal.Quotient.eq_zero_iff_mem]
+    exact Ik_mono hk (pow_mem_Ik hz K)
+
+theorem mkK_magnusNB {k K : ℕ} (hk : k ≤ K) (hk1 : 1 ≤ k) (r : List (List (ℕ × ℤ) × ℤ)) :
+    mkK d k (evalZ d (magnusNB d K r)) = ((muA k (relElt d r) : (Ak d k)ˣ) : Ak d k) := by
+  suffices h : ∀ x, mkK d k (evalZ d (r.foldl (fun acc f => mulZ d K acc
+      (powB d K (subOne (magnusW d K f.1)) f.2)) x)) =
+      mkK d k (evalZ d x) * ((muA k (relElt d r) : (Ak d k)ˣ) : Ak d k) by
+    rw [magnusNB, h, evalZ_one, map_one, one_mul]
+  induction r with
+  | nil => intro x; simp [relElt]
+  | cons f r ih =>
+    intro x
+    rw [List.foldl_cons, ih, mkK_mulZ hk, mkK_powFactorB hk hk1, mul_assoc, ← Units.val_mul, ← map_mul,
+      relElt_cons]
+
+/-- **Soundness of `checkVanishB`.** -/
+theorem vanish_of_checkB {K : ℕ} {maps : List (ℕ × List ℤ)} {rels : List (List (List (ℕ × ℤ) × ℤ))}
+    (h : checkVanishB d K maps rels = true) : ∀ m ∈ maps, Vanish (relSetN d rels) m := by
+  intro m hm
+  apply vanish_of_short
+  rintro _ ⟨r, hr, rfl⟩ u w huw
+  have hr' := List.all_eq_true.1 h r hr
+  simp only [checkVanishRelB, List.all_eq_true, Bool.and_eq_true, Nat.ble_eq] at hr'
+  obtain ⟨hK, hc⟩ := hr' m hm
+  have := checkMap_sound hc u w huw
+  rw [mkK_subOne, mkK_magnusNB hK (by omega)] at this
+  exact this
+
 end Sound
 
 /-! ## Membership in a presented group, checked in full -/
@@ -483,37 +555,37 @@ theorem rel_hold_of_sub (T : Trace) [NeZero T.d] (allRels : List (List (List (�
   exact PresentedGroup.one_of_mem ⟨R, hR, by rw [← hRr, gword_expandRel]⟩
 
 theorem maps_isBase (T : Trace) [NeZero T.d] (P : PolyCert) (allRels : List (List (List (ℕ × ℤ) × ℤ)))
-    (K : ℕ) (hvan : checkVanish T.d K P.maps allRels = true) :
+    (hvan : ∀ m ∈ P.maps, Vanish (relSetN T.d allRels) m) :
     ∀ i < P.maps.length, ∃ φ : PresentedGroup (relSetN T.d allRels) → ℤ,
       IsBase (PresentedGroup.of (rels := relSetN T.d allRels)) (P.maps.getD i (0, [])) φ := by
   intro i hi
   have hm : P.maps.getD i (0, []) ∈ P.maps := by
     rw [List.getD_eq_getElem _ _ hi]; exact List.getElem_mem hi
-  exact ⟨_, isBase_of_vanish (vanish_of_check hvan _ hm)⟩
+  exact ⟨_, isBase_of_vanish (hvan _ hm)⟩
 
 /-- **Exact membership in a presented group, every hypothesis but `hord` decidable.** `check`,
-`checkPoly`, `hsub` (each relator of the trace, written out, is a relator of the presentation:
-`expandRel`, `gword_expandRel`) and `hvan` (check 1
-for every base map against all relators) are Boolean checks; then in
+`checkPoly` and `hsub` (each relator of the trace, written out, is a relator of the presentation:
+`expandRel`, `gword_expandRel`) are Boolean checks, and `hvan` (check 1 for every base map against all
+relators) follows from one (`vanish_of_check` or `vanish_of_checkB`); then in
 `G = ⟨x_1, …, x_d | allRels⟩` every lintest claimed whose element has `p`-power order in `Δ/Δ^n`
 lies in `Δ^n`. -/
 theorem check_mem_D_poly_lin_presN (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
     (P : PolyCert) (hP : checkPoly T P = true) (allRels : List (List (List (ℕ × ℤ) × ℤ)))
     (hsub : T.rels.all (fun r => allRels.any (fun R => expandRel R == r.2)) = true)
-    (K : ℕ) (hvan : checkVanish T.d K P.maps allRels = true)
+    (hvan : ∀ m ∈ P.maps, Vanish (relSetN T.d allRels) m)
     (t : ℕ) (ht : t ∈ members)
     (hord : ∃ m : ℕ, ((T.p : ℤ) ^ m) • linG (PresentedGroup.of (rels := relSetN T.d allRels)) (testLin T t) ∈
       augIdeal (PresentedGroup (relSetN T.d allRels)) ^ T.n) :
     linG (PresentedGroup.of (rels := relSetN T.d allRels)) (testLin T t) ∈
       augIdeal (PresentedGroup (relSetN T.d allRels)) ^ T.n :=
   check_mem_D_poly_lin T members hc P hP _ (rel_hold_of_sub T allRels hsub)
-    (PresentedGroup.closure_range_of _) (maps_isBase T P allRels K hvan) t ht hord
+    (PresentedGroup.closure_range_of _) (maps_isBase T P allRels hvan) t ht hord
 
 /-- `check_mem_D_poly_lin_presN` for a word test: `w_t ∈ D_n(G)`. -/
 theorem check_mem_D_poly_presN (T : Trace) (members : List ℕ) [NeZero T.d] (hc : check T members = true)
     (P : PolyCert) (hP : checkPoly T P = true) (allRels : List (List (List (ℕ × ℤ) × ℤ)))
     (hsub : T.rels.all (fun r => allRels.any (fun R => expandRel R == r.2)) = true)
-    (K : ℕ) (hvan : checkVanish T.d K P.maps allRels = true)
+    (hvan : ∀ m ∈ P.maps, Vanish (relSetN T.d allRels) m)
     (t : ℕ) (ht : t ∈ members) (hw : T.tests.any (fun y => y.1 == t) = true)
     (hord : ∃ m : ℕ, ((T.p : ℤ) ^ m) •
       (of ℤ (PresentedGroup (relSetN T.d allRels))
@@ -522,6 +594,6 @@ theorem check_mem_D_poly_presN (T : Trace) (members : List ℕ) [NeZero T.d] (hc
     gword (PresentedGroup.of (rels := relSetN T.d allRels)) (findWord t T.tests) ∈
       GroupDimension.D T.n (PresentedGroup (relSetN T.d allRels)) :=
   check_mem_D_poly T members hc P hP _ (rel_hold_of_sub T allRels hsub)
-    (PresentedGroup.closure_range_of _) (maps_isBase T P allRels K hvan) t ht hw hord
+    (PresentedGroup.closure_range_of _) (maps_isBase T P allRels hvan) t ht hw hord
 
 end GroupDimension.TraceReplay

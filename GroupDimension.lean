@@ -46,6 +46,7 @@ public import GroupDimension.TraceReplay.PolyProd
 public import GroupDimension.TraceReplay.PolyExact
 public import GroupDimension.TraceReplay.PolyPres
 public import GroupDimension.TraceReplay.PolyVanishDefs
+public import GroupDimension.TraceReplay.PolyVanishBin
 public import GroupDimension.TraceReplay.PolyVanish
 
 @[expose] public section
