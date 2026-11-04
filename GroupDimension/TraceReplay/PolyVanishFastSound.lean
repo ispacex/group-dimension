@@ -33,9 +33,9 @@ theorem lookL_eq {W B e : ℕ} {l : List ℤ} (h : encOkAux W B e 0 l = true) (p
   unfold lookL
   cases hb : Nat.blt p l.length
   · rw [← Bool.not_eq_true, Nat.blt_eq] at hb
-    rw [cond_false, List.getD_eq_default _ _ (by omega)]
+    rw [Bool.cond_false, List.getD_eq_default _ _ (by omega)]
   · rw [Nat.blt_eq] at hb
-    rw [cond_true, List.getD_eq_getElem _ _ hb, ← rawL_of_encOkAux 0 l h p hb, Nat.zero_add]
+    rw [Bool.cond_true, List.getD_eq_getElem _ _ hb, ← rawL_of_encOkAux 0 l h p hb, Nat.zero_add]
 
 theorem foldl_filter_of_skip {α β : Type*} (f : β → α → β) (q : α → Bool)
     (hq : ∀ s t, q t = false → f s t = s) : ∀ (l : List α) (s : β), (l.filter q).foldl f s = l.foldl f s
@@ -49,7 +49,7 @@ theorem foldl_filter_of_skip {α β : Type*} (f : β → α → β) (q : α → 
 theorem vanValL_filter (d w : ℕ) (look : ℕ → ℤ) (vd : List (ℕ × ℕ × ℤ)) (a u b vv : ℕ) :
     vanValL d w look (vd.filter fun t => Nat.ble (a + t.1 + b) w) a u b vv = vanValL d w look vd a u b vv := by
   unfold vanValL
-  exact foldl_filter_of_skip _ _ (fun s t ht => by simp only [ht, Bool.and_false, cond_false]) vd 0
+  exact foldl_filter_of_skip _ _ (fun s t ht => by simp only [ht, Bool.and_false, Bool.cond_false]) vd 0
 
 theorem vanValL_getD (d : ℕ) (m : ℕ × List ℤ) (vd : List (ℕ × ℕ × ℤ)) (a u b vv : ℕ) :
     vanValL d m.1 (fun p => m.2.getD p 0) vd a u b vv = vanValD d m vd a u b vv := rfl
