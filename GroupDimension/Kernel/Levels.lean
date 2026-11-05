@@ -26,21 +26,25 @@ that of `GroupDimension.Kernel.Magnus` (`A X n`, `mon`, `aA`, `muF`, `Jspan`) an
   `A_{k+1}` through any lift of `z` (`shR_eq`, `shL_eq`: it does not depend on the lift, because the
   top degree of a lift dies in the product, `mul_aA_eq_zero`). Then
   `J_{k+1} = span({μ(r) − 1} ∪ {z a_j : z ∈ J_k} ∪ {a_j z : z ∈ J_k})`.
-  With a generating set `B` of `J_k` (`lemmaN1_span`): `J_{k+1} = span({μ(r) − 1} ∪ B a ∪ a B)`.
+  With a set `B` spanning `J_k` over `ℤ` (`lemmaN1_span`; ideal generators are not enough): `J_{k+1} = span({μ(r) − 1} ∪ B a ∪ a B)`.
 * **The projection** (§6.13(b), "Candidates and the projection"), for any `ℤ`-linear `π` with
   `x − π x ∈ J`: `π(J) ⊆ J` (`map_le_of_proj`), `x ∈ J ⟺ π x ∈ π(J)` (`mem_iff_map_proj`), and, if `π`
   is idempotent, `range π / π(J) ≅ M / J` (`projQuotEquiv`; the paper's `A_k^+/J_k ≅ ℤ^{C_k}/π_k(J_k)`
-  with `range π` in place of `ℤ^{C_k}`).
+  with `range π` in place of `ℤ^{C_k}`; here `M = A_k` keeps the constant column, so the quotient is
+  `A_k/J_k`, i.e. `A_k^+/J_k` plus a summand `ℤ`).
 * **Lemma N2** (`lemmaN2`, and `mem_J_iff_N2` with the projection), in the abstract form below:
   `π(J_{k+1}) = span(π '' N2gens)`, `N2gens` = (i) the relators `μ(r) − 1`, (ii) `t a_j` and `a_j t` for
   `t ∈ T`, (iii) `a_j g_u` for `u = u' a_l` non-standard with `u' ∈ S` and `a_j u' ∉ S`.
 
-  The data of level `k` are those of the reduced Howell form of `J_k` in all columns, as the paper's
-  proof uses them (`HowellData`): the standard monomials `S` (with `1 ∈ S`: the empty word is not a
+  The data of level `k` are those of an echelon (over `ℤ`; Howell, modulo `2^E`) form `H` of `J_k`
+  in all columns, as the paper's proof uses them (`HowellData`; reducedness is not needed: `NF(u)` may
+  be the reduction of `u` by any such `H`, as in the non-canonical `--sparse` form): the standard monomials `S` (with `1 ∈ S`: the empty word is not a
   column), for every non-standard word `u` (`NS k S`: length `< k`, not in `S`) the unit row
   `g u = u − NF(u)` (`g u ∈ J_k`, `u − g u` on the columns after `u`), the torsion rows `T ⊆ J_k`;
   the rows generate `J_k` (`gen`), and the **Howell property** (`howell`): an element of `J_k` on the
-  columns after `u` is a combination of the `g x`, `x` after `u`, and of `T`. The columns are numbered
+  columns after `u` is a combination of the `g x`, `x` after `u`, and of `T` (all of `T` is allowed,
+  which is weaker than the usual property). `T` may be the torsion rows of `H` restricted to the
+  candidate columns, as in the code: only `T ⊆ J_k`, `gen` and `howell` are used. The columns are numbered
   by `col` (bounded on the words of length `< k`, compatible with `· a_l` on the right: true for the
   order "by degree, then the word, first letter most significant" of `stdmono.py`).
   The map `π` is any `ℤ`-linear map that obeys the two rewriting rules of `stdmono.py`
@@ -55,11 +59,13 @@ that of `GroupDimension.Kernel.Magnus` (`A X n`, `mon`, `aA`, `muF`, `Jspan`) an
 ## What is not formalized here
 
 * That the computed objects satisfy these hypotheses: that the rows of `stdmono.py`/`sparse_howell.c`
-  form a reduced Howell form (`HowellData`), that `S_k` is closed under prefixes and suffixes and
-  `S_k ⊆ C_k`, that the rewriting terminates, that its result `π_k` obeys the two rules and
+  form a Howell form with the properties of `HowellData`, that `S_k` is closed under prefixes and
+  suffixes and `S_k ⊆ C_k` (not used by `lemmaN2`), that the rewriting terminates, that its result `π_k` obeys the two rules and
   `x − π_k x ∈ J_k`, is idempotent and has range `ℤ^{C_k}` (here these are hypotheses on `π`); the
   truncation check of the Howell form (§3.4), `NF_k` and the tables `T_k[p]`.
-* Arithmetic modulo `2^E` (the paper's N1 also holds there; here everything is over `ℤ`).
+* Arithmetic modulo `2^E`: the paper's N1 also holds there, and the code computes everything modulo
+  `2^32`, so `HowellData` is not instantiated by the computed rows themselves; here everything is
+  over `ℤ`.
 -/
 
 namespace GroupDimension.Kernel.Levels
@@ -324,7 +330,7 @@ theorem later_mul_aA {k : ℕ} {col : FreeMonoid X → ℕ}
   | add a b _ _ ha hb => rw [add_mul]; exact add_mem ha hb
   | smul c a _ ha => rw [smul_mul_assoc]; exact Submodule.smul_mem _ c ha
 
-/-- The data of level `k`: a reduced Howell form of `J_k` in all columns, as the proof of N2 uses it.
+/-- The data of level `k`: an echelon (Howell) form of `J_k` in all columns, not necessarily reduced, as the proof of N2 uses it.
 `S`: the standard monomials; `g u = u − NF(u)` for the non-standard words `u`; `T`: the torsion rows
 (non-unit pivot); `col`: the column numbering. -/
 structure HowellData (k : ℕ) (S : Set (FreeMonoid X)) (g : FreeMonoid X → A X k)
