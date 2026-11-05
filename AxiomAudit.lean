@@ -1695,7 +1695,7 @@ open GroupDimension
 #print axioms GroupDimension.Kernel.Magnus.mem_D_iff_mod_p
 #print axioms GroupDimension.Kernel.Magnus.augQuot_isPGroup
 #print axioms GroupDimension.Kernel.Sieve.Itr_le
-#print axioms GroupDimension.Kernel.Sieve.trunc
+#print axioms GroupDimension.Kernel.Sieve.truncA
 #print axioms GroupDimension.Kernel.Sieve.trunc_mk
 #print axioms GroupDimension.Kernel.Sieve.trunc_mon
 #print axioms GroupDimension.Kernel.Sieve.trunc_surjective
@@ -1705,6 +1705,7 @@ open GroupDimension
 #print axioms GroupDimension.Kernel.Sieve.trunc_mem_Jideal
 #print axioms GroupDimension.Kernel.Sieve.map_trunc_Jideal
 #print axioms GroupDimension.Kernel.Sieve.mem_D_iff_trunc
+#print axioms GroupDimension.Kernel.Sieve.mem_D_iff_mem_map
 #print axioms GroupDimension.Kernel.Sieve.sub_one_mul_sub_one_mem
 #print axioms GroupDimension.Kernel.Sieve.mk_mul_sub_one
 #print axioms GroupDimension.Kernel.Sieve.mk_pow_sub_one
@@ -1715,7 +1716,6 @@ open GroupDimension
 #print axioms GroupDimension.Kernel.Sieve.sieveHomK_apply
 #print axioms GroupDimension.Kernel.Sieve.ker_sieveHomK
 #print axioms GroupDimension.Kernel.Sieve.map_ker_sieveHomK
-#print axioms GroupDimension.Kernel.Sieve.ofFn_prod_mem
 #print axioms GroupDimension.Kernel.Sieve.mk_ofFn_prod_sub_one
 #print axioms GroupDimension.Kernel.Sieve.quotEquiv_sub_one
 #print axioms GroupDimension.Kernel.Sieve.prod_mem_D_iff
