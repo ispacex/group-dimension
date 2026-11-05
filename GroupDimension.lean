@@ -54,5 +54,6 @@ public import GroupDimension.TraceReplay.PolyExactSplit
 public import GroupDimension.Kernel.Plateau
 public import GroupDimension.Kernel.Magnus
 public import GroupDimension.Kernel.Sieve
+public import GroupDimension.Kernel.Levels
 
 @[expose] public section
