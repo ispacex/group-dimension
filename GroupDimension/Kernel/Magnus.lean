@@ -69,9 +69,10 @@ public import GroupDimension.TraceReplay.Magnus
   exactness argument does not need them.
 * The equality of the `index_logp` fields (`log_p |A_n⁺/(J_n + p^E A_n⁺)| = log_p |Δ/(Δⁿ + p^E Δ)|`)
   and `rk A_n⁺ = M` independent of `|G|` are not stated.
-* (b′) (a right ideal suffices for Schreier generators) and §3.3–3.4 (where the relations come from,
-  all levels at once) are not formalized; nor is anything about the programs `magnus.py`,
-  `magnus_pres.py` or their Howell forms.
+* (b′) (a right ideal suffices for Schreier generators) and §3.3 (where the relations come from)
+  are not formalized; nor is anything about the programs `magnus.py`, `magnus_pres.py` or their
+  Howell forms. §3.4 (all levels at once) and §3.5 (the sieve) are in `Kernel/Sieve.lean`, at the
+  level of submodules and homomorphisms.
 -/
 
 namespace GroupDimension.Kernel.Magnus

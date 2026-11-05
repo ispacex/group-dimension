@@ -53,5 +53,6 @@ public import GroupDimension.TraceReplay.PolyVanishFastSound
 public import GroupDimension.TraceReplay.PolyExactSplit
 public import GroupDimension.Kernel.Plateau
 public import GroupDimension.Kernel.Magnus
+public import GroupDimension.Kernel.Sieve
 
 @[expose] public section
