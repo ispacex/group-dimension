@@ -118,11 +118,15 @@ theorem aA_mul_eq_zero {k : ℕ} {x : A X (k + 1)} (hx : tr k x = 0) (j : X) :
   rw [Nat.add_comm] at h
   exact mem_Itr.mpr h
 
+-- instance search through `A X (k + 1) →+* A X k` is slow
+set_option synthInstance.maxHeartbeats 400000 in
 theorem mul_aA_eq_of_tr_eq {k : ℕ} {x x' : A X (k + 1)} (h : tr k x = tr k x') (j : X) :
     x * aA (k + 1) j = x' * aA (k + 1) j := by
   rw [← sub_eq_zero, ← sub_mul]
   exact mul_aA_eq_zero (by rw [map_sub, h, sub_self]) j
 
+-- instance search through `A X (k + 1) →+* A X k` is slow
+set_option synthInstance.maxHeartbeats 400000 in
 theorem aA_mul_eq_of_tr_eq {k : ℕ} {x x' : A X (k + 1)} (h : tr k x = tr k x') (j : X) :
     aA (k + 1) j * x = aA (k + 1) j * x' := by
   rw [← sub_eq_zero, ← mul_sub]
@@ -135,6 +139,8 @@ def liftA (k : ℕ) (y : A X k) : A X (k + 1) :=
 theorem tr_liftA (k : ℕ) (y : A X k) : tr k (liftA k y) = y :=
   Function.surjInv_eq (trunc_surjective (X := X) (Nat.le_succ k)) y
 
+-- instance search through `A X (k + 1) →+* A X k` is slow
+set_option synthInstance.maxHeartbeats 400000 in
 /-- `z ↦ z a_j`, `A_k → A_{k+1}`: a lift of `z` times `a_j` (independent of the lift, `shR_eq`). -/
 def shR (k : ℕ) (j : X) : A X k →+ A X (k + 1) where
   toFun y := liftA k y * aA (k + 1) j
@@ -145,6 +151,8 @@ def shR (k : ℕ) (j : X) : A X k →+ A X (k + 1) where
     rw [← add_mul]
     exact mul_aA_eq_of_tr_eq (by rw [map_add, tr_liftA, tr_liftA, tr_liftA]) j
 
+-- instance search through `A X (k + 1) →+* A X k` is slow
+set_option synthInstance.maxHeartbeats 400000 in
 /-- `z ↦ a_j z`, `A_k → A_{k+1}` (independent of the lift, `shL_eq`). -/
 def shL (k : ℕ) (j : X) : A X k →+ A X (k + 1) where
   toFun y := aA (k + 1) j * liftA k y
