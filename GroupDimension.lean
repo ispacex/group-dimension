@@ -55,5 +55,6 @@ public import GroupDimension.Kernel.Plateau
 public import GroupDimension.Kernel.Magnus
 public import GroupDimension.Kernel.Sieve
 public import GroupDimension.Kernel.Levels
+public import GroupDimension.Kernel.ClassThree
 
 @[expose] public section

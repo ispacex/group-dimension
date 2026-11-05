@@ -11,7 +11,8 @@ Every declaration in this file is a `def … : Prop`. None of them is an `axiom`
 proved here. A theorem that uses one takes it as an explicit hypothesis (`FiniteReduction.lean`
 takes `PassiDFourSquare`, `GruenbergResidualTwo`, `DThreeEqGammaThree`; `MetabelianOdd.lean`
 takes `GuptaTaharaMetabelian`; `MinimalThree.lean` takes `PassiDFourSquare` and
-`GuptaTaharaMetabelian`); nothing is assumed globally. Tahara's description of `D₅`
+`GuptaTaharaMetabelian`; `Kernel/ClassThree.lean` takes `JenningsIsolator`,
+`DThreeEqGammaThree`, `PassiDFourSquare`, `GruenbergResidualTwo`); nothing is assumed globally. Tahara's description of `D₅`
 ([Tah81, Thm. 6.1]) is stated as `TaharaFiveOne` in `Tahara.lean`; unlike the statements here
 it is proved (`TaharaTheorem.lean`), and so are `DThreeEqGammaThree` (`dThreeEqGammaThree`,
 `DThree.lean`), `GruenbergResidualTwo` (`gruenbergResidualTwo`, `Gruenberg.lean`) and
@@ -44,6 +45,8 @@ References (bibliographic data marked † were not checked against the original)
   `p`-groups*, Nagoya Math. J. 100 (1985), 127–133.
 * [Gup91] N. Gupta, *A solution of the dimension subgroup problem*, J. Algebra 138 (1991),
   479–490.
+* [Jen55]† S. A. Jennings, *The group ring of a class of infinite nilpotent groups*, Canad. J.
+  Math. 7 (1955), 169–187.
 * [Tah81] K.-I. Tahara, *The augmentation quotients of group rings and the fifth dimension
   subgroups*, J. Algebra 71 (1981), 141–173.
 -/
@@ -117,5 +120,15 @@ Formulation only, not proved here. -/
 def GuptaTaharaMetabelian : Prop :=
   ∀ (p : ℕ), p.Prime → p ≠ 2 → ∀ (G : Type) [Group G] [Finite G], IsPGroup p G →
     derivedSeries G 2 = ⊥ → D (p + 2) G = (⊤ : Subgroup G).lowerCentralSeries (p + 1)
+
+/-- **Jennings** [Jen55]† (see [Pas79, Ch. IV], [MP09]†): the rational dimension subgroups are
+the isolators of the lower central series, `D_n(G; ℚ) = √γ_n(G)`. Since the integral `D_n(G)`
+lies in the rational one, some positive power of every `g ∈ D_n(G)` lies in `γ_n(G)`; this is
+the form stated here, for finitely generated nilpotent groups, as used in §6.8(a) of the fast-core
+paper (`Kernel/ClassThree.lean`).
+Formulation only, not proved here. -/
+def JenningsIsolator : Prop :=
+  ∀ (G : Type) [Group G], Group.FG G → Group.IsNilpotent G → ∀ n : ℕ, 1 ≤ n →
+    ∀ g ∈ D n G, ∃ m : ℕ, 0 < m ∧ g ^ m ∈ (⊤ : Subgroup G).lowerCentralSeries (n - 1)
 
 end GroupDimension
