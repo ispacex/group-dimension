@@ -330,7 +330,8 @@ theorem later_mul_aA {k : ℕ} {col : FreeMonoid X → ℕ}
   | add a b _ _ ha hb => rw [add_mul]; exact add_mem ha hb
   | smul c a _ ha => rw [smul_mul_assoc]; exact Submodule.smul_mem _ c ha
 
-/-- The data of level `k`: an echelon (Howell) form of `J_k` in all columns, not necessarily reduced, as the proof of N2 uses it.
+/-- The data of level `k`: an echelon (Howell) form of `J_k` in all columns, not necessarily
+reduced, as the proof of N2 uses it.
 `S`: the standard monomials; `g u = u − NF(u)` for the non-standard words `u`; `T`: the torsion rows
 (non-unit pivot); `col`: the column numbering. -/
 structure HowellData (k : ℕ) (S : Set (FreeMonoid X)) (g : FreeMonoid X → A X k)
