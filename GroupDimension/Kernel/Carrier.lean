@@ -8,7 +8,8 @@ public import GroupDimension.Kernel.Decomposition
 # The carrier identity: Lemma 13, Theorem 14, Lemma 15, Proposition 16
 (fast-core paper, §6.12; MATH-312)
 
-`cflint-fast-core`, `docs/analysis.md`, §6.12. Notation of §6.11: `d_l = [t, x_l] ∈ γ_k`, `X_i = x_i − 1`,
+`cflint-fast-core`, `docs/analysis.md`, §6.12, as stated before MR !52 (which adds the corrections
+listed below). Notation of §6.11: `d_l = [t, x_l] ∈ γ_k`, `X_i = x_i − 1`,
 `E_i = 2^{e_i}` with `P_i = x_i^{E_i} ∈ γ_k`; `[a, b] = a⁻¹b⁻¹ab` (`pc`).
 
 > **Lemma 13** (quadratic pairing). Let `k ∈ {3, 4}`, `G` of class `≤ k + 1`, `x^E = P = ∏_l d_l^{e_l}` with
@@ -62,7 +63,7 @@ Here (paper's indices `1, 2, 3` are `0, 1, 2` of `Fin 3` in Lemma 15) `D_k` repl
 * **Proposition 16** (`prop16`), for any group: `3 ≤ k ≤ 4`, `x₁^{2^{e₁}} = ∏_l d_l^{−a_l}`, `d_l ∈ D_k`,
   `x₂^{2^{e₂}} ∈ D_k`, (i) as the two conclusions `8E₂X₂² ∈ Δ^{k+2}` and `2^kE₂X₂² ∈ Δ^{2k−1}` of
   Lemma 13 for `x₂` (`s = 0` and `s = k − 3`), (ii) `2^{ν−1}X₁² ∈ Δ^{2k−2}` and, for `k = 4`,
-  `e₁ + 3 ≤ ν`, (iii) for every `l` pairing (`2^{k−3}E₂ ∣ a_l 2^{ν−e₁}`) or carrier
+  `e₁ + 3 ≤ ν` (a sufficient condition), with `e₁ ≤ ν` (`E₁ ∣ N`, implicit in the paper), (iii) for every `l` pairing (`2^{k−3}E₂ ∣ a_l 2^{ν−e₁}`) or carrier
   (`d_l^{−a_l 2^{ν−e₁}} = y^F` for some `y ∈ G`, `2^kE₂ ∣ F`): `2^ν X₂²X₁ ∈ Δ^{2k}`. The carrier need not
   be a generator. `prop16_ii_three`, `prop16_ii_four`: the paper's sufficient forms of (ii). The pieces:
   `carrier_mem` (a carried part), `pairing_part_mem` (a pairing part), `tail_mem` (the binomials of
@@ -76,8 +77,9 @@ Here (paper's indices `1, 2, 3` are `0, 1, 2` of `Fin 3` in Lemma 15) `D_k` repl
 * Proposition 16 (i) is used in its proof through both conclusions of Lemma 13 for `x₂`, `s = 0` and
   `s = k − 3`: for `k = 4` the second binomial term of a carried part needs `8E₂X₂² ∈ Δ⁶`, which
   `16E₂X₂² ∈ Δ⁷` does not give. With the corrected Lemma 13 both come together.
-* Proposition 16 (ii): for `k = 4` the binomial term `m = 4` of `x₁^N` needs `N ≥ 8E₁` beyond
-  `(N/2)X₁² ∈ Δ⁶`; the paper's concrete form (`N ≥ 16E₁`) has it.
+* Proposition 16 (ii): for `k = 4` the paper's proof does not bound the binomial term `m = 4` of `x₁^N`
+  (degree 6 < 8); `N ≥ 8E₁` suffices for it and is assumed here; the paper's concrete form
+  (`N ≥ 16E₁`) has it.
 
 ## Not formalized
 
@@ -377,7 +379,7 @@ theorem lemma13_one {x : G} {e k : ℕ} (hk3 : 3 ≤ k) (hk4 : k ≤ 4) (l : Lis
 /-- **Lemma 13** (§6.12(a)), corrected: for `s ≤ 1`, `2 + s ≤ k ≤ 4`, `x^{2^e} = ∏_l d_l^{e_l}` with
 `d_l ∈ D_k`, and for every `l` either `2^e ∣ 8e_l`, or `d_l^{8e_l} ∈ D_{k+1}` and
 `d_l^{2^{s+3}e_l} ∈ D_{k+1+s}`: `2^{s+3} 2^e X² ∈ Δ^{k+2+s}`. (For `s = 0` the two conditions of the
-second case coincide; for `s = 1` the paper states only the second.) -/
+second case coincide; for `s = 1` the paper before MR !52 stated only the second.) -/
 theorem lemma13 {x : G} {e k s : ℕ} (hs : s ≤ 1) (hsk : s + 2 ≤ k) (hk4 : k ≤ 4)
     (l : List (G × ℤ)) (hP : x ^ 2 ^ e = (l.map fun p => p.1 ^ p.2).prod)
     (hd : ∀ p ∈ l, p.1 ∈ D k G)
@@ -960,11 +962,11 @@ theorem theorem14_mod7 {t x1 x2 x3 x5 : G}
       (mm hW (rem5_mem x5 _) (by norm_num))
     · have e : ((1024 : ℕ) : ℤ) • (δ x2 * δ x2 * δ x5) =
           (1 : ℤ) • ((((16 : ℤ) * 2 ^ 6) • (δ x2 * δ x2)) * δ x5) := by
-        rw [smul_mul_assoc, smul_smul] <;> norm_num
+        rw [smul_mul_assoc, smul_smul]; norm_num
       rw [e]; exact zsmul_mem (mm hL1 (δ_mem_pow_one x5) (by norm_num)) _
     · have e : (((512 * 1023 : ℕ) : ℤ)) • (δ x2 * δ x2 * δ x5 ^ 2) =
           (1023 : ℤ) • ((((8 : ℤ) * 2 ^ 6) • (δ x2 * δ x2)) * δ x5 ^ 2) := by
-        rw [smul_mul_assoc, smul_smul] <;> norm_num
+        rw [smul_mul_assoc, smul_smul]; norm_num
       rw [e]; exact zsmul_mem (mm hL0 (δpow_mem x5 2) (by norm_num)) _
     · have e : (((2 ^ 10 * q3 : ℕ) : ℤ)) • (δ x2 * δ x2 * δ x5 ^ 3) =
           (q3 : ℤ) • ((((16 : ℤ) * 2 ^ 6) • (δ x2 * δ x2)) * δ x5 ^ 3) := by
@@ -997,7 +999,7 @@ theorem theorem14_mod7 {t x1 x2 x3 x5 : G}
     refine add_mem (add_mem (add_mem ?_ ?_) ?_) ?_
     · have e : ((64 * 127 : ℕ) : ℤ) • (δ x2 * δ x2 * δ x1 ^ 2) =
           (127 : ℤ) • (δ x2 * δ x2 * (((8 : ℤ) * 2 ^ 3) • (δ x1 * δ x1))) := by
-        rw [pow_two (δ x1), mul_smul_comm, smul_smul] <;> norm_num
+        rw [pow_two (δ x1), mul_smul_comm, smul_smul]; norm_num
       rw [e]; exact zsmul_mem (mm hW hX1 (by norm_num)) _
     · have e : ((2 ^ 7 * q3 : ℕ) : ℤ) • (δ x2 * δ x2 * δ x1 ^ 3) =
           ((2 : ℤ) * q3) • (δ x2 * δ x2 * (((8 : ℤ) * 2 ^ 3) • (δ x1 * δ x1)) * δ x1) := by
