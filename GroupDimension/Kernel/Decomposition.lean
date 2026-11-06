@@ -45,8 +45,8 @@ The paper's three generators are generalized to any number `d` of them, indexed 
 `j ≠ i` and `j > i` are taken in the order of `Fin d` (`g`, `v`, `w`); modulo `Δ^{2k}` the order does
 not matter. `pc a b = a⁻¹b⁻¹ab` is the paper's commutator (Mathlib's `⁅a, b⁆` is `aba⁻¹b⁻¹`). The
 infinite binomial series of `B_ij` is cut at `m < 2k` (`B`): the terms with `m ≥ 2k − 1` lie in
-`Δ^{2k}` anyway, so this does not change `B_ij` modulo `Δ^{2k}`. All hypotheses `∈ γ_k` are weakened
-to `∈ D_k` (`γ_k ⊆ D_k`, `gamma_le_D`).
+`Δ^{2k}` anyway, so this does not change `B_ij` modulo `Δ^{2k}`. In Lemmas 7, 8 and the pairing lemma
+the hypotheses `∈ γ_k` are weakened to `∈ D_k` (`γ_k ⊆ D_k`, `gamma_le_D`); Lemma 9 keeps them.
 
 ## What is proved
 
