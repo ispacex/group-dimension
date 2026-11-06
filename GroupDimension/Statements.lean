@@ -121,7 +121,7 @@ def GuptaTaharaMetabelian : Prop :=
   ∀ (p : ℕ), p.Prime → p ≠ 2 → ∀ (G : Type) [Group G] [Finite G], IsPGroup p G →
     derivedSeries G 2 = ⊥ → D (p + 2) G = (⊤ : Subgroup G).lowerCentralSeries (p + 1)
 
-/-- **Jennings** [Jen55]† (see [Pas79, Ch. IV], [MP09]†): the rational dimension subgroups are
+/-- **Jennings** [Jen55]† (see [Pas79, Ch. IV]†, [MP09]†): the rational dimension subgroups are
 the isolators of the lower central series, `D_n(G; ℚ) = √γ_n(G)`. Since the integral `D_n(G)`
 lies in the rational one, some positive power of every `g ∈ D_n(G)` lies in `γ_n(G)`; this is
 the form stated here, for finitely generated nilpotent groups, as used in §6.8(a) of the fast-core

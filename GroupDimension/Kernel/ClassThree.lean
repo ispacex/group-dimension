@@ -31,13 +31,16 @@ Indexing as in `Statements.lean`: `γ₃ = (⊤ : Subgroup G).lowerCentralSeries
   `thetaHom G n hn : γ₃(G) →* Multiplicative (ℤ[G]/Δⁿ)`, `g ↦ (g − 1) mod Δⁿ`, is a homomorphism,
   since `(g − 1)(h − 1) ∈ Δ³·Δ³ ⊆ Δ⁶ ⊆ Δⁿ` (`sub_one_mul_sub_one_mem_pow`); its values lie in
   `Δ³/Δⁿ` (`sub_one_mem_pow_three`); its kernel is `D_n ∩ γ₃` (`ker_thetaHom`,
-  `map_ker_thetaHom`), and, given `D₃ = γ₃` and `n ≥ 3`, it is `D_n` itself (`map_ker_thetaHom_eq`).
+  `map_ker_thetaHom`), and, for `n ≥ 3`, it is `D_n` itself (`map_ker_thetaHom_eq` given `D₃ = γ₃`,
+  `map_ker_thetaHom_eq'` without hypotheses).
 * **Lemma 1, `D_n(Q) ⊆ τ(γ₃ Q)`**, by the paper's proof: with `DThreeEqGammaThree` and Jennings'
   theorem in the form `JenningsIsolator` (`Statements.lean`, a hypothesis, not proved here), for
   `Q` finitely generated with `γ₄(Q) = 1` and `n ≥ 4`, every `g ∈ D_n(Q)` lies in `γ₃(Q)` and has
-  finite order (`mem_gammaThree_isOfFinOrder_of_mem_D`).
+  finite order (`mem_gammaThree_isOfFinOrder_of_mem_D`; without hypotheses and without finite
+  generation: `mem_gammaThree_isOfFinOrder_of_mem_D'`).
   **Without any hypothesis** and without finite generation, more is true: `g ∈ D_n(Q)`, `n ≥ 4`,
-  `γ₄(Q) = 1` give `g ∈ γ₃(Q)` and `g² = 1` (`mem_gammaThree_sq_eq_one_of_mem_D'`), by Passi's
+  `γ₄(Q) = 1` give `g ∈ γ₃(Q)` and `g² = 1` (`mem_gammaThree_sq_eq_one_of_mem_D` from the two
+  hypotheses below, `mem_gammaThree_sq_eq_one_of_mem_D'` without them), by Passi's
   `D₄² ⊆ γ₄` (`passiDFourSquare`) and `D₃ = γ₃` (`dThreeEqGammaThree`), both proved in this project.
 * **Lemma 1, the criterion.** As in the paper (hypotheses `DThreeEqGammaThree`,
   `JenningsIsolator`; `Q` f.g., `γ₄(Q) = 1`, every element of finite order of `γ₃(Q)` of
@@ -49,17 +52,20 @@ Indexing as in `Statements.lean`: `γ₃ = (⊤ : Subgroup G).lowerCentralSeries
 * **Corollary 2** (`D_eq_bot_of_inf_gammaFour_eq_bot`): if `D₅(G/γ₄(G)) = 1`, `r ≥ 5` and
   `D_r(G) ∩ γ₄(G) = 1`, then `D_r(G) = 1`. The hypothesis `γ₅(G) = 1` of the paper is not needed
   (the proof does not use it).
-* **Relation to MATH-41** (`exists_two_group_of_mem_D_five`, and `exists_two_group_of_mem_D_seven`
-  for the paper's `D₇`): with `PassiDFourSquare` and `GruenbergResidualTwo`, an element of
-  `D₅(G) ∖ γ₄(G)` of a finitely generated group `G` (of any class) gives a finite `2`-group `P` with
-  `γ₄(P) = 1` and `D₅(P) ≠ 1`; the primed versions use the proved `passiDFourSquare`,
+* **Relation to MATH-41**, with `PassiDFourSquare` and `GruenbergResidualTwo`, for a finitely
+  generated group `G` (of any class) and `x ∈ D₅(G) ∖ γ₄(G)`: the image `x̄` of `x` in
+  `Q = G/γ₄(G)` has `x̄² = 1`, and `x̄` survives in a finite `2`-quotient `Q/N` of class `≤ 3` as a
+  nontrivial element of `D₅(Q/N)` (`exists_two_quotient_of_mem_D_five`); in particular there is a
+  finite `2`-group `P` with `γ₄(P) = 1` and `D₅(P) ≠ 1` (`exists_two_group_of_mem_D_five`, and
+  `exists_two_group_of_mem_D_seven` for the paper's `D₇`); the primed versions use the proved
+  `passiDFourSquare`,
   `gruenbergResidualTwo`. The paper's "`x` has 2-power order" is Passi's `D₄² ⊆ γ₄`: the image of
   the element in `G/γ₄(G)` has order `2`.
 
 ## What is not formalized here
 
 * Jennings' theorem itself (`JenningsIsolator` is a hypothesis; the hypothesis-free versions avoid
-  it via Passi's theorem). Its link to Quillen's theorem behind the certificate of §6.4.
+  it via Passi's theorem), nor its link to Quillen's theorem behind the certificate of §6.4.
 * `θ` as a map into `Δ³/Δⁿ` (here into `ℤ[Q]/Δⁿ`, with `sub_one_mem_pow_three` for the values),
   and "injective on the elements of order 2 of `τ(γ₃)`" as a statement about a restricted map: the
   criterion is stated with "`g² = 1`, `θ g = 1` ⟹ `g = 1`".
@@ -152,6 +158,11 @@ theorem map_ker_thetaHom_eq (hD3 : DThreeEqGammaThree) (G : Type) [Group G] {n :
   rw [map_ker_thetaHom, inf_eq_left.mpr (D_le_gammaThree hD3 G hn3)]
 
 end Theta
+
+/-- `ker θ = D_n` (`3 ≤ n ≤ 6`), without hypotheses. -/
+theorem map_ker_thetaHom_eq' (G : Type) [Group G] {n : ℕ} (hn3 : 3 ≤ n) (hn : n ≤ 6) :
+    (thetaHom G n hn).ker.map ((⊤ : Subgroup G).lowerCentralSeries 2).subtype = D n G :=
+  map_ker_thetaHom_eq dThreeEqGammaThree G hn3 hn
 
 /-! ## `D_n(Q) ⊆ τ(γ₃ Q)` -/
 
@@ -270,26 +281,61 @@ theorem D_eq_bot_of_inf_gammaFour_eq_bot {G : Type*} [Group G]
 
 /-! ## Relation to MATH-41 -/
 
+/-- **Relation to MATH-41**, the paper's argument: given Passi's and Gruenberg's theorems, let
+`G` be finitely generated, `Q = G/γ₄(G)` and `x ∈ D₅(G) ∖ γ₄(G)`. Then the image `x̄` of `x` in `Q`
+has order `2` (Passi), and there is a normal `N ⊴ Q` with `Q/N` a finite `2`-group of class `≤ 3`
+in which `x̄` survives as a nontrivial element of `D₅(Q/N)` (Gruenberg). -/
+theorem exists_two_quotient_of_mem_D_five (hP : PassiDFourSquare) (hG : GruenbergResidualTwo)
+    (G : Type) [Group G] (hfg : Group.FG G) {x : G} (hx : x ∈ D 5 G)
+    (hx4 : x ∉ (⊤ : Subgroup G).lowerCentralSeries 3) :
+    (QuotientGroup.mk' ((⊤ : Subgroup G).lowerCentralSeries 3) x) ^ 2 = 1 ∧
+    ∃ (N : Subgroup (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 3)) (_ : N.Normal),
+      Finite (_ ⧸ N) ∧ IsPGroup 2 (_ ⧸ N) ∧
+      (⊤ : Subgroup (_ ⧸ N)).lowerCentralSeries 3 = ⊥ ∧
+      QuotientGroup.mk' N (QuotientGroup.mk' ((⊤ : Subgroup G).lowerCentralSeries 3) x) ∈
+        D 5 (_ ⧸ N) ∧
+      QuotientGroup.mk' N (QuotientGroup.mk' ((⊤ : Subgroup G).lowerCentralSeries 3) x) ≠ 1 := by
+  set Q := G ⧸ (⊤ : Subgroup G).lowerCentralSeries 3
+  have hQ : (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥ := lowerCentralSeries_quotient_eq_bot 3
+  set y : Q := QuotientGroup.mk' ((⊤ : Subgroup G).lowerCentralSeries 3) x with hy_def
+  have hy : y ∈ D 5 Q := map_mem_D _ hx
+  have hy1 : y ≠ 1 := by
+    rw [hy_def, QuotientGroup.mk'_apply, Ne, QuotientGroup.eq_one_iff]
+    exact hx4
+  have hy2 : y ^ 2 = 1 := by
+    have := hP Q y (D_antitone (by norm_num : 4 ≤ 5) hy)
+    rwa [hQ, Subgroup.mem_bot] at this
+  haveI := hfg
+  have hfgQ : Group.FG Q := Group.fg_of_surjective (QuotientGroup.mk'_surjective _)
+  obtain ⟨N, hN, hfin, h2, hyN⟩ := hG Q hfgQ
+    (Subgroup.nilpotent_iff_lowerCentralSeries.mpr ⟨3, hQ⟩) y
+    (fun m hm => by
+      obtain ⟨k, rfl⟩ := hm
+      rw [pow_succ, pow_mul, hy2, one_pow, one_mul]
+      exact hy1)
+  have h3 : (⊤ : Subgroup (Q ⧸ N)).lowerCentralSeries 3 = ⊥ := by
+    apply le_bot_iff.mp
+    calc (⊤ : Subgroup (Q ⧸ N)).lowerCentralSeries 3
+        ≤ ((⊤ : Subgroup Q).lowerCentralSeries 3).map (QuotientGroup.mk' N) :=
+          lowerCentralSeries_le_map_of_surjective _ (QuotientGroup.mk'_surjective N) 3
+      _ = ⊥ := by rw [hQ, Subgroup.map_bot]
+  refine ⟨hy2, N, hN, hfin, h2, h3, map_mem_D _ hy, ?_⟩
+  rw [QuotientGroup.mk'_apply, Ne, QuotientGroup.eq_one_iff]
+  exact hyN
+
 /-- **Relation to MATH-41**: given Passi's and Gruenberg's theorems, an element of
 `D₅(G) ∖ γ₄(G)` of a finitely generated group `G` gives a finite `2`-group `P` of class `≤ 3`
-with `D₅(P) ≠ 1`, a negative answer to MATH-41 (Kourovka 20.84 for finite `2`-groups). -/
+with `D₅(P) ≠ 1` (a quotient of `G/γ₄(G)`, by `exists_two_quotient_of_mem_D_five`): a negative
+answer to MATH-41 (Kourovka 20.84). -/
 theorem exists_two_group_of_mem_D_five (hP : PassiDFourSquare) (hG : GruenbergResidualTwo)
     (G : Type) [Group G] (hfg : Group.FG G) {x : G} (hx : x ∈ D 5 G)
     (hx4 : x ∉ (⊤ : Subgroup G).lowerCentralSeries 3) :
     ∃ (P : Type) (_ : Group P) (_ : Finite P), IsPGroup 2 P ∧
       (⊤ : Subgroup P).lowerCentralSeries 3 = ⊥ ∧ D 5 P ≠ ⊥ := by
-  by_contra hne
-  have hall : ∀ (P : Type) [Group P] [Finite P], IsPGroup 2 P →
-      (⊤ : Subgroup P).lowerCentralSeries 3 = ⊥ → D 5 P = ⊥ := by
-    intro P _ _ h2 h3
-    by_contra hD
-    exact hne ⟨P, inferInstance, inferInstance, h2, h3, hD⟩
-  haveI := hfg
-  have hfgQ : Group.FG (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 3) :=
-    Group.fg_of_surjective (QuotientGroup.mk'_surjective _)
-  have hQ := D_five_eq_bot_of_fg hP hG hall _ hfgQ
-    (lowerCentralSeries_quotient_eq_bot 3)
-  exact hx4 (D_le_of_D_quotient_eq_bot _ 5 hQ hx)
+  obtain ⟨-, N, _, hfin, h2, h3, hmem, hne⟩ := exists_two_quotient_of_mem_D_five hP hG G hfg hx hx4
+  refine ⟨_ ⧸ N, inferInstance, hfin, h2, h3, fun hD => hne ?_⟩
+  rw [hD, Subgroup.mem_bot] at hmem
+  exact hmem
 
 /-- **Relation to MATH-41**, the paper's form: an element of `D₇(G) ∖ γ₄(G)` (`G` finitely
 generated; the paper's `G` has class `4`, which is not needed) gives a finite `2`-group of class
@@ -300,6 +346,19 @@ theorem exists_two_group_of_mem_D_seven (hP : PassiDFourSquare) (hG : GruenbergR
     ∃ (P : Type) (_ : Group P) (_ : Finite P), IsPGroup 2 P ∧
       (⊤ : Subgroup P).lowerCentralSeries 3 = ⊥ ∧ D 5 P ≠ ⊥ :=
   exists_two_group_of_mem_D_five hP hG G hfg (D_antitone (by norm_num : 5 ≤ 7) hx) hx4
+
+/-- **Relation to MATH-41**, the paper's argument (`exists_two_quotient_of_mem_D_five`), without
+hypotheses. -/
+theorem exists_two_quotient_of_mem_D_five' (G : Type) [Group G] (hfg : Group.FG G) {x : G}
+    (hx : x ∈ D 5 G) (hx4 : x ∉ (⊤ : Subgroup G).lowerCentralSeries 3) :
+    (QuotientGroup.mk' ((⊤ : Subgroup G).lowerCentralSeries 3) x) ^ 2 = 1 ∧
+    ∃ (N : Subgroup (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 3)) (_ : N.Normal),
+      Finite (_ ⧸ N) ∧ IsPGroup 2 (_ ⧸ N) ∧
+      (⊤ : Subgroup (_ ⧸ N)).lowerCentralSeries 3 = ⊥ ∧
+      QuotientGroup.mk' N (QuotientGroup.mk' ((⊤ : Subgroup G).lowerCentralSeries 3) x) ∈
+        D 5 (_ ⧸ N) ∧
+      QuotientGroup.mk' N (QuotientGroup.mk' ((⊤ : Subgroup G).lowerCentralSeries 3) x) ≠ 1 :=
+  exists_two_quotient_of_mem_D_five passiDFourSquare gruenbergResidualTwo G hfg hx hx4
 
 /-- **Relation to MATH-41** (`D₅`), without hypotheses. -/
 theorem exists_two_group_of_mem_D_five' (G : Type) [Group G] (hfg : Group.FG G) {x : G}

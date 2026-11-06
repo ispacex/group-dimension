@@ -1771,6 +1771,7 @@ open GroupDimension
 #print axioms GroupDimension.Kernel.ClassThree.map_ker_thetaHom
 #print axioms GroupDimension.Kernel.ClassThree.D_le_gammaThree
 #print axioms GroupDimension.Kernel.ClassThree.map_ker_thetaHom_eq
+#print axioms GroupDimension.Kernel.ClassThree.map_ker_thetaHom_eq'
 #print axioms GroupDimension.Kernel.ClassThree.mem_gammaThree_isOfFinOrder_of_mem_D
 #print axioms GroupDimension.Kernel.ClassThree.mem_gammaThree_sq_eq_one_of_mem_D
 #print axioms GroupDimension.Kernel.ClassThree.mem_gammaThree_sq_eq_one_of_mem_D'
@@ -1780,7 +1781,9 @@ open GroupDimension
 #print axioms GroupDimension.Kernel.ClassThree.D_eq_bot_iff_theta_of_passi
 #print axioms GroupDimension.Kernel.ClassThree.D_eq_bot_iff_theta'
 #print axioms GroupDimension.Kernel.ClassThree.D_eq_bot_of_inf_gammaFour_eq_bot
+#print axioms GroupDimension.Kernel.ClassThree.exists_two_quotient_of_mem_D_five
 #print axioms GroupDimension.Kernel.ClassThree.exists_two_group_of_mem_D_five
 #print axioms GroupDimension.Kernel.ClassThree.exists_two_group_of_mem_D_seven
+#print axioms GroupDimension.Kernel.ClassThree.exists_two_quotient_of_mem_D_five'
 #print axioms GroupDimension.Kernel.ClassThree.exists_two_group_of_mem_D_five'
 #print axioms GroupDimension.Kernel.ClassThree.exists_two_group_of_mem_D_seven'
