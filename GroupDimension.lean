@@ -58,5 +58,6 @@ public import GroupDimension.Kernel.Levels
 public import GroupDimension.Kernel.ClassThree
 public import GroupDimension.Kernel.KFree
 public import GroupDimension.Kernel.Decomposition
+public import GroupDimension.Kernel.Carrier
 
 @[expose] public section
