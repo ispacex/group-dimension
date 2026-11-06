@@ -842,6 +842,8 @@ end Removing
 
 section Paper
 
+open scoped commutatorElement
+
 variable {M : Type*} [Group M]
 
 /-- In a group of class `≤ j + 1` (`γ_{j+2} = 1`), `γ_{j+1}` is central. -/
@@ -990,7 +992,7 @@ theorem cocyclic_isCyclic (hcomm : ∀ x y : B, x * y = y * x) [Finite B] : IsCy
   have hp := cocyclic_prime hb h
   have hpg := cocyclic_isPGroup hb h
   set p := orderOf b with hp_def
-  haveI : Fact p.Prime := ⟨hp⟩
+  have : Fact p.Prime := ⟨hp⟩
   obtain ⟨a, ha⟩ := Finite.exists_max (orderOf : B → ℕ)
   have hexp : ∀ x : B, x ^ orderOf a = 1 := by
     intro x
@@ -1087,7 +1089,7 @@ theorem reduction_cocyclic (C K : Subgroup M) (hCc : C ≤ Subgroup.center M) [G
       IsPGroup (orderOf ((⟨v, hvC⟩ : C) : C ⧸ K'.subgroupOf C)) (C ⧸ K'.subgroupOf C) ∧
       Finite (C ⧸ K'.subgroupOf C) ∧ IsCyclic (C ⧸ K'.subgroupOf C) := by
   obtain ⟨K', hKK', hK'C, hvK', hmax⟩ := exists_maximal_avoiding C K hKC hvK
-  haveI hK'n : K'.Normal := normal_of_le_center (hK'C.trans hCc)
+  have hK'n : K'.Normal := normal_of_le_center (hK'C.trans hCc)
   have hD : QuotientGroup.mk' K' v ∈ D n (M ⧸ K') :=
     map_mem_D (QuotientGroup.map K K' (MonoidHom.id M) (fun y hy => hKK' hy)) hv
   have hmax' : ∀ H : Subgroup M, K' ≤ H → H ≤ C → H ≠ K' → v ∈ H := by
@@ -1130,7 +1132,7 @@ theorem reduction_cocyclic (C K : Subgroup M) (hCc : C ≤ Subgroup.center M) [G
     have : c = ⟨v, hvC⟩ := Subtype.ext hcv
     rw [this] at hc
     exact hc
-  haveI hfin : Finite Q := cocyclic_finite hb hsub hcomm
+  have hfin : Finite Q := cocyclic_finite hb hsub hcomm
   refine ⟨K', hK'n, hKK', hK'C, hvK', hD, hmax', cocyclic_prime hb hsub,
     cocyclic_isPGroup hb hsub, hfin, cocyclic_isCyclic hb hsub hcomm⟩
 
@@ -1148,8 +1150,8 @@ theorem reduction_cocyclic_two (C K : Subgroup M) (hCc : C ≤ Subgroup.center M
         Function.Surjective φ ∧ φ.ker = K'.subgroupOf C := by
   obtain ⟨K', hK'n, hKK', hK'C, hvK', hD, hmax', hp, hpg, hfin, hcyc⟩ :=
     reduction_cocyclic C K hCc hKC hvC hvK hv
-  haveI := hK'n
-  haveI := hfin
+  have := hK'n
+  have := hfin
   set b : C ⧸ K'.subgroupOf C := ((⟨v, hvC⟩ : C) : C ⧸ K'.subgroupOf C) with hb_def
   obtain ⟨j, hj⟩ := hv2
   have hbj : b ^ 2 ^ j = 1 := by
@@ -1165,7 +1167,7 @@ theorem reduction_cocyclic_two (C K : Subgroup M) (hCc : C ≤ Subgroup.center M
       Subgroup.coe_pow] at hb2
     exact hb2
   rw [h2] at hpg
-  haveI : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
+  have : Fact (Nat.Prime 2) := ⟨Nat.prime_two⟩
   obtain ⟨m, hm⟩ := (IsPGroup.iff_card.mp hpg)
   obtain ⟨e⟩ : Nonempty (Multiplicative (ZMod (Nat.card (C ⧸ K'.subgroupOf C))) ≃*
       (C ⧸ K'.subgroupOf C)) := ⟨zmodCyclicMulEquiv hcyc⟩
