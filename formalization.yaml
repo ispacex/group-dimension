@@ -41,14 +41,21 @@ sources:
     location: "Theorems 6.6 and 6.8; Lemmas 5.2 (a)-(c) and 5.6; Proposition 5.7 (candidate form and D_5 form); Proposition 2.1 (1) ⇔ (3)"
     relationship: formalizes
     note: >-
-      The paper and this formalization were developed together; the paper marks each
-      statement [paper], [Lean] or [computer]. The version cited is the one of 2026-10-22,
-      submitted to arXiv (math.GR) that day; its arXiv identifier was not yet assigned when
-      this commit was made. The paper's formalization section describes this repository at
-      commit e58aa2b (tag lean-v4.29, Lean 4.29); since then the Lie-ring comparison theorem
-      lieDimensionQuestion5 has been removed (see related_formalizations) and the code was
-      ported to Lean 4.35; the paper's [Lean] markers otherwise apply unchanged. Departures
-      from the paper are listed under fidelity.
+      The paper and this formalization were developed together. The version cited is the one
+      of 2026-10-22, submitted to arXiv (math.GR) that day; its arXiv identifier was not yet
+      assigned when this commit was made. That version marks each statement [paper], [Lean]
+      or [computer], and its formalization section describes this repository at commit
+      e58aa2b (tag lean-v4.29, Lean 4.29). Later drafts replace the markers by conventional
+      wording: computer-assisted results are labelled so, and a result proved by hand that is
+      also formally verified says so at its proof, with the formal versions and their exact
+      hypotheses in the section on the formalization; that section now describes the Lean 4.35
+      port. The statement-by-statement status, with the declarations of this repository that
+      state or prove each labelled statement, is the blueprint at
+      https://ispacex.github.io/d5/blueprint.html (built from the paper and
+      site/blueprint.toml of ispacex/dimension-subrings, whose CI checks that every declaration
+      named exists here). Since e58aa2b the Lie-ring comparison theorem lieDimensionQuestion5
+      has been removed (see related_formalizations). Departures from the paper are listed
+      under fidelity.
     author_endorsement: participated
   - title: "S. A. Jennings, The structure of the group ring of a p-group over a modular field, Trans. Amer. Math. Soc. 50 (1941) 175-185"
     authors: ["S. A. Jennings"]
@@ -152,7 +159,7 @@ fidelity:
     parts (a)-(c); part (d) is formalized as isDescendant_of_minimal but not
     compared. (5) The D_5 form of Proposition 5.7 assumes
     the order-2^10 statement of Proposition 5.3 for class ≤ 3 (class exactly 3
-    is the paper's Proposition 5.3, [computer + paper]; class ≤ 2 follows from D_3 = γ_3, proved in the development). (6) In Lemma 5.6 the isomorphism Q/P_3(Q) ≅ Z/4 × (Z/2)^7 is given as a
+    is the paper's Proposition 5.3, computer-assisted; class ≤ 2 follows from D_3 = γ_3, proved in the development). (6) In Lemma 5.6 the isomorphism Q/P_3(Q) ≅ Z/4 × (Z/2)^7 is given as a
     surjective homomorphism with kernel P_3(Q). (7) In Theorem 6.8 "the cubes of G/γ_2 form
     a cyclic group" is stated as: for some t, every x^3 is congruent modulo γ_2 to a power
     of t^3.
