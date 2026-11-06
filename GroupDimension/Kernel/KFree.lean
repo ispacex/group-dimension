@@ -41,11 +41,12 @@ Everything is proved for an arbitrary group `M`, a subgroup `C` with `C ⊆ D_c(
 `C = γ_c(M)`: `lowerCentralSeries_le_D`), and `n ≤ 2c`; Propositions 4 and 6 need `K` normal, not
 central, and no finite generation. The paper's objects:
 
-* `psiHom C hC hn : C →* ℤ[M]/Δⁿ`, `k ↦ k − 1` — the map `ψ` of Lemmas 3(i) and 5(i).
+* `psiHom C hC hn : C →* ℤ[M]/Δⁿ`, `k ↦ k − 1` — the map `ψ` of Lemmas 3(i) and 5(i) (its values
+  lie in `Δ^c/Δⁿ`, since `C ⊆ D_c`).
 * `KA K = span_ℤ{(k − 1)g : k ∈ K, g ∈ M}` — the right ideal `(K − 1)A`.
 * `U C n = Δⁿ + span_ℤ{(k − 1)d : k ∈ C, d ∈ Δ}` — the paper's `U_n = J_n + Λ(A_c ⊗ R₊)`, written
-  intrinsically in `ℤ[M]` (the paper's `J_n`, `A_n` are its image under `ℤ[M]/Δⁿ ≅ A_n/J_n`,
-  `Kernel/Magnus.lean`). `U_eq_span_Rplus` shows that it equals the paper's
+  intrinsically in `ℤ[M]` (the paper's `U_n ⊆ A_n` is the image of `U C n` under
+  `ℤ[M]/Δⁿ ≅ A_n/J_n`, `Kernel/Magnus.lean`). `U_eq_span_Rplus` shows that it equals the paper's
   `Δⁿ + span{ψ(b_t)·m : b_t generators of C, m ∈ R₊}`.
 * `psiBar C hC hn : C →* ℤ[M]/U_n`, `k ↦ k − 1` — the map `ψ̄`.
 * `monom l = (x₁ − 1)⋯(x_l − 1)`, `Rplus X m` the monomials in the generators `X` of length
@@ -68,9 +69,9 @@ central, and no finite generation. The paper's objects:
   The converses: `D_inf_le_ker` (`D_n(M) ∩ C ⊆ ker ψ̄`) and `exists_ne_one_mem_ker` (every
   `v ∈ D_n(M/K) ∩ C`, `v ∉ K`, gives `1 ≠ vk⁻¹ ∈ ker ψ̄`, `k ∈ K`); the key step is
   `exists_sub_mem_U`. Also `U_eq_span_Rplus` (the paper's `U_n` from generators of `C` and `R₊`),
-  `ker_psiBar_mono` (`ker ψ̄_{n'} ⊆ ker ψ̄_n` for `n ≤ n'`), `ker_le_D` (`ker ψ̄ ⊆ D_{c+1}`),
-  `ker_psiBar_of_eq` (for `n = c + 1`, `U = Δ^{c+1}` and `ker ψ̄ = D_{c+1} ∩ C`: "for `n = 6`,
-  `U₆ = J₆`").
+  `ker_psiBar_mono` (`ker ψ̄_{n'} ⊆ ker ψ̄_n` for `n ≤ n' ≤ 2c`), `ker_le_D` (`ker ψ̄ ⊆ D_{c+1}`
+  for `c + 1 ≤ n`), `U_succ_eq` and `ker_psiBar_of_eq` (for `n = c + 1`, `U = Δ^{c+1}` and
+  `ker ψ̄ = D_{c+1} ∩ C`: "for `n = 6`, `U₆ = J₆`").
 * **Torsion of `ker ψ̄`**, with Jennings' theorem as the explicit hypothesis `JenningsIsolator`
   (`M` finitely generated of class `≤ c`, `c + 1 ≤ n`): `isOfFinOrder_of_mem_ker`; and the test on
   the elements of order 2: if every element of finite order of `C` has `2`-power order,
@@ -94,6 +95,9 @@ central, and no finite generation. The paper's objects:
 
 * Jennings' theorem itself (`JenningsIsolator` is a hypothesis of the torsion statements only;
   Propositions 4 and 6, Lemmas 3 and 5, the reduction and the removal of `∩ γ_c` do not use it).
+* In the reduction, `γ_c(M/K') = γ_c(M)/K'` is not stated: the paper's "the single element
+  `A^{2^{m-1}}` of order 2 of `γ₄(G_φ) = ⟨A⟩`" is formalized as "`v` is the unique element of
+  order 2 of `C/K'`" (`v ∉ K'`, `v² ∈ K'`, `C/K'` cyclic, every nontrivial subgroup contains `v`).
 * The identification of `U C n` with the paper's matrix `J_n + Λ(A_c ⊗ R₊)` in `A_n` beyond the
   statement in `ℤ[M]` (`U_eq_span_Rplus`; the transfer to `A_n/J_n` is `Kernel/Magnus.lean`'s
   `quotEquiv`, not restated here), and "injective modulo `2^{32}` is exact" (a relation in `U_n` is one
@@ -738,7 +742,11 @@ theorem ker_le_D (hC : C ≤ D c M) (hn : n ≤ 2 * c) (hcn : c + 1 ≤ n) {z : 
     (hz : z ∈ (psiBar C hC hn).ker) : (z : M) ∈ D (c + 1) M :=
   U_le hC hcn ((mem_ker_psiBar hC hn z).mp hz)
 
-/-- For `n = c + 1` the paper's `R₊` is empty and `U_{c+1} = Δ^{c+1}`: `ker ψ̄ = D_{c+1} ∩ C`
+/-- For `n = c + 1` the paper's `R₊` is empty: `U_{c+1} = Δ^{c+1}` ("`U₆ = J₆`"). -/
+theorem U_succ_eq (hC : C ≤ D c M) : U C (c + 1) = (augIdeal M ^ (c + 1)).restrictScalars ℤ :=
+  le_antisymm (fun _ h => mem_rs.mpr (U_le hC le_rfl h)) (fun _ h => mem_U_of_mem_pow (mem_rs.mp h))
+
+/-- For `n = c + 1`: `ker ψ̄ = D_{c+1} ∩ C`
 ("for `n = 6`, `U₆ = J₆`: the test is just `D₆(M) ∩ γ₅`"). -/
 theorem ker_psiBar_of_eq (hC : C ≤ D c M) (hn : n ≤ 2 * c) (hcn : n = c + 1) :
     (psiBar C hC hn).ker = (D n M).subgroupOf C := by

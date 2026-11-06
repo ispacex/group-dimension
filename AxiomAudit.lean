@@ -1843,6 +1843,7 @@ open GroupDimension
 #print axioms GroupDimension.Kernel.KFree.ker_psiBar_mono
 #print axioms GroupDimension.Kernel.KFree.U_le
 #print axioms GroupDimension.Kernel.KFree.ker_le_D
+#print axioms GroupDimension.Kernel.KFree.U_succ_eq
 #print axioms GroupDimension.Kernel.KFree.ker_psiBar_of_eq
 #print axioms GroupDimension.Kernel.KFree.eq_one_of_pow_two_pow_eq_one
 #print axioms GroupDimension.Kernel.KFree.isOfFinOrder_of_mem_ker
