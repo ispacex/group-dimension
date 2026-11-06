@@ -252,7 +252,7 @@ theorem D_five_eq_bot_of_class_two (hD3 : DThreeEqGammaThree) (Q : Type) [Group 
 
 /-- **Proposition 2.1 with class exactly `3`**, given also `D₃ = γ₃` to exclude class `≤ 2`.
 The paper's word "metabelian" is dropped by Remark 2.2 (class `≤ 3` implies metabelian), which
-is not formalized. -/
+is formalized as `metabelian_of_class_three` (`Descendants.lean`). -/
 theorem dimensionQuestion5_iff_class_three (hD3 : DThreeEqGammaThree) (hP : PassiDFourSquare)
     (hG : GruenbergResidualTwo) :
     DimensionQuestion5 ↔
