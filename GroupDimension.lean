@@ -56,5 +56,6 @@ public import GroupDimension.Kernel.Magnus
 public import GroupDimension.Kernel.Sieve
 public import GroupDimension.Kernel.Levels
 public import GroupDimension.Kernel.ClassThree
+public import GroupDimension.Kernel.KFree
 
 @[expose] public section
