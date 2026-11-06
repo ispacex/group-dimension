@@ -305,7 +305,7 @@ theorem exists_two_quotient_of_mem_D_five (hP : PassiDFourSquare) (hG : Gruenber
   have hy2 : y ^ 2 = 1 := by
     have := hP Q y (D_antitone (by norm_num : 4 ≤ 5) hy)
     rwa [hQ, Subgroup.mem_bot] at this
-  haveI := hfg
+  have := hfg
   have hfgQ : Group.FG Q := Group.fg_of_surjective (QuotientGroup.mk'_surjective _)
   obtain ⟨N, hN, hfin, h2, hyN⟩ := hG Q hfgQ
     (Subgroup.nilpotent_iff_lowerCentralSeries.mpr ⟨3, hQ⟩) y
