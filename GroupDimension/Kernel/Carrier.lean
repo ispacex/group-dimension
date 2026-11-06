@@ -937,8 +937,9 @@ theorem theorem14_mod7 {t x1 x2 x3 x5 : G}
       rcases hp with rfl | rfl <;> (left; norm_num)
   -- the carried part in `Δ⁷`
   have hcar : δ x2 * δ x2 * δ (x5 ^ 1024) ∈ augIdeal G ^ 7 := by
-    obtain ⟨q3, hq3⟩ := two_pow_dvd_choose (a := 10) (F := 1024) (m := 2) (by norm_num) (by decide)
-    obtain ⟨q4, hq4⟩ := choose_four_dvd (a := 10) (F := 1024) (by norm_num) (by norm_num)
+    obtain ⟨q3, hq3⟩ : 2 ^ 10 ∣ Nat.choose 1024 3 :=
+      two_pow_dvd_choose (m := 2) (by norm_num) (by decide)
+    obtain ⟨q4, hq4⟩ : 2 ^ 8 ∣ Nat.choose 1024 4 := choose_four_dvd (a := 10) (by norm_num) (by norm_num)
     have hc2 : Nat.choose 1024 2 = 512 * 1023 := by
       have := two_mul_choose_two_nat 1024; omega
     have key : δ x2 * δ x2 * δ (x5 ^ 1024) =
@@ -950,23 +951,28 @@ theorem theorem14_mod7 {t x1 x2 x3 x5 : G}
         δ x2 * δ x2 * rem5 x5 1024 := by
       rw [δ_pow_eq5 x5]; simp only [mul_add, mul_smul_comm]
     rw [key]
+    generalize Nat.choose 1024 2 = c2 at hc2 ⊢
+    generalize Nat.choose 1024 3 = c3 at hq3 ⊢
+    generalize Nat.choose 1024 4 = c4 at hq4 ⊢
+    generalize Nat.choose 1024 5 = c5
+    subst hc2 hq3 hq4
     refine add_mem (add_mem (add_mem (add_mem (add_mem ?_ ?_) ?_) ?_) ?_)
       (mm hW (rem5_mem x5 _) (by norm_num))
     · have e : ((1024 : ℕ) : ℤ) • (δ x2 * δ x2 * δ x5) =
           (1 : ℤ) • ((((16 : ℤ) * 2 ^ 6) • (δ x2 * δ x2)) * δ x5) := by
-        rw [smul_mul_assoc, smul_smul]; congr 1; norm_num
+        rw [smul_mul_assoc, smul_smul] <;> norm_num
       rw [e]; exact zsmul_mem (mm hL1 (δ_mem_pow_one x5) (by norm_num)) _
-    · have e : (((1024 : ℕ).choose 2 : ℕ) : ℤ) • (δ x2 * δ x2 * δ x5 ^ 2) =
+    · have e : (((512 * 1023 : ℕ) : ℤ)) • (δ x2 * δ x2 * δ x5 ^ 2) =
           (1023 : ℤ) • ((((8 : ℤ) * 2 ^ 6) • (δ x2 * δ x2)) * δ x5 ^ 2) := by
-        rw [smul_mul_assoc, smul_smul, hc2]; congr 1; norm_num
+        rw [smul_mul_assoc, smul_smul] <;> norm_num
       rw [e]; exact zsmul_mem (mm hL0 (δpow_mem x5 2) (by norm_num)) _
-    · have e : (((1024 : ℕ).choose 3 : ℕ) : ℤ) • (δ x2 * δ x2 * δ x5 ^ 3) =
+    · have e : (((2 ^ 10 * q3 : ℕ) : ℤ)) • (δ x2 * δ x2 * δ x5 ^ 3) =
           (q3 : ℤ) • ((((16 : ℤ) * 2 ^ 6) • (δ x2 * δ x2)) * δ x5 ^ 3) := by
-        rw [smul_mul_assoc, smul_smul, hq3]; congr 1; push_cast; ring
+        rw [smul_mul_assoc, smul_smul]; congr 1; push_cast; ring
       rw [e]; exact zsmul_mem (mm hL1 (δpow_mem x5 3) (by norm_num)) _
-    · have e : (((1024 : ℕ).choose 4 : ℕ) : ℤ) • (δ x2 * δ x2 * δ x5 ^ 4) =
+    · have e : (((2 ^ 8 * q4 : ℕ) : ℤ)) • (δ x2 * δ x2 * δ x5 ^ 4) =
           (q4 : ℤ) • ((((2 : ℤ) ^ 2 * 2 ^ 6) • δ x2) * δ x2 * δ x5 ^ 4) := by
-        rw [smul_mul_assoc, smul_mul_assoc, smul_smul, hq4]; congr 1; push_cast; ring
+        rw [smul_mul_assoc, smul_mul_assoc, smul_smul]; congr 1; push_cast; ring
       rw [e]
       exact zsmul_mem (mm (mm (n := 4) (pw_le (m := 3) (by norm_num) hx2D (by norm_num) le_rfl)
         (δ_mem_pow_one x2) (by norm_num)) (δpow_mem x5 4) (by norm_num)) _
@@ -976,33 +982,39 @@ theorem theorem14_mod7 {t x1 x2 x3 x5 : G}
       (Nat.choose 128 3 : ℤ) • (δ x2 * δ x2 * δ x1 ^ 3) +
       (Nat.choose 128 4 : ℤ) • (δ x2 * δ x2 * δ x1 ^ 4) +
       (Nat.choose 128 5 : ℤ) • (δ x2 * δ x2 * δ x1 ^ 5) ∈ augIdeal G ^ 7 := by
-    obtain ⟨q3, hq3⟩ := two_pow_dvd_choose (a := 7) (F := 128) (m := 2) (by norm_num) (by decide)
-    obtain ⟨q4, hq4⟩ := choose_four_dvd (a := 7) (F := 128) (by norm_num) (by norm_num)
-    obtain ⟨q5, hq5⟩ := two_pow_dvd_choose (a := 7) (F := 128) (m := 4) (by norm_num) (by decide)
+    obtain ⟨q3, hq3⟩ : 2 ^ 7 ∣ Nat.choose 128 3 :=
+      two_pow_dvd_choose (m := 2) (by norm_num) (by decide)
+    obtain ⟨q4, hq4⟩ : 2 ^ 5 ∣ Nat.choose 128 4 := choose_four_dvd (a := 7) (by norm_num) (by norm_num)
+    obtain ⟨q5, hq5⟩ : 2 ^ 7 ∣ Nat.choose 128 5 :=
+      two_pow_dvd_choose (m := 4) (by norm_num) (by decide)
     have hc2 : Nat.choose 128 2 = 64 * 127 := by
       have := two_mul_choose_two_nat 128; omega
+    generalize Nat.choose 128 2 = c2 at hc2 ⊢
+    generalize Nat.choose 128 3 = c3 at hq3 ⊢
+    generalize Nat.choose 128 4 = c4 at hq4 ⊢
+    generalize Nat.choose 128 5 = c5 at hq5 ⊢
+    subst hc2 hq3 hq4 hq5
     refine add_mem (add_mem (add_mem ?_ ?_) ?_) ?_
-    · have e : ((Nat.choose 128 2 : ℕ) : ℤ) • (δ x2 * δ x2 * δ x1 ^ 2) =
+    · have e : ((64 * 127 : ℕ) : ℤ) • (δ x2 * δ x2 * δ x1 ^ 2) =
           (127 : ℤ) • (δ x2 * δ x2 * (((8 : ℤ) * 2 ^ 3) • (δ x1 * δ x1))) := by
-        rw [pow_two (δ x1), mul_smul_comm, smul_smul, hc2]; congr 1; norm_num
+        rw [pow_two (δ x1), mul_smul_comm, smul_smul] <;> norm_num
       rw [e]; exact zsmul_mem (mm hW hX1 (by norm_num)) _
-    · have e : ((Nat.choose 128 3 : ℕ) : ℤ) • (δ x2 * δ x2 * δ x1 ^ 3) =
+    · have e : ((2 ^ 7 * q3 : ℕ) : ℤ) • (δ x2 * δ x2 * δ x1 ^ 3) =
           ((2 : ℤ) * q3) • (δ x2 * δ x2 * (((8 : ℤ) * 2 ^ 3) • (δ x1 * δ x1)) * δ x1) := by
-        rw [pow_three' (δ x1), mul_smul_comm, smul_mul_assoc, smul_smul, mul_assoc (δ x2 * δ x2),
-          hq3]
+        rw [pow_three' (δ x1), mul_smul_comm, smul_mul_assoc, smul_smul, mul_assoc (δ x2 * δ x2)]
         congr 1; push_cast; ring
       rw [e]
       exact zsmul_mem (mm (mm (n := 7) hW hX1 (by norm_num)) (δ_mem_pow_one x1) (by norm_num)) _
-    · have e : ((Nat.choose 128 4 : ℕ) : ℤ) • (δ x2 * δ x2 * δ x1 ^ 4) =
+    · have e : ((2 ^ 5 * q4 : ℕ) : ℤ) • (δ x2 * δ x2 * δ x1 ^ 4) =
           (q4 : ℤ) • (δ x2 * δ x2 * ((((2 : ℤ) ^ 2 * 2 ^ 3) • δ x1) * δ x1 ^ 3)) := by
-        rw [pow_succ' (δ x1) 3, smul_mul_assoc, mul_smul_comm, smul_smul, hq4]
+        rw [pow_succ' (δ x1) 3, smul_mul_assoc, mul_smul_comm, smul_smul]
         congr 1; push_cast; ring
       rw [e]
       exact zsmul_mem (mm hW (mm (n := 6) (pw_le (m := 3) (by norm_num) hx1D (by norm_num) le_rfl)
         (δpow_mem x1 3) (by norm_num)) (by norm_num)) _
-    · have e : ((Nat.choose 128 5 : ℕ) : ℤ) • (δ x2 * δ x2 * δ x1 ^ 5) =
+    · have e : ((2 ^ 7 * q5 : ℕ) : ℤ) • (δ x2 * δ x2 * δ x1 ^ 5) =
           ((2 : ℤ) ^ 4 * q5) • (δ x2 * δ x2 * ((((2 : ℤ) ^ 0 * 2 ^ 3) • δ x1) * δ x1 ^ 4)) := by
-        rw [pow_succ' (δ x1) 4, smul_mul_assoc, mul_smul_comm, smul_smul, hq5]
+        rw [pow_succ' (δ x1) 4, smul_mul_assoc, mul_smul_comm, smul_smul]
         congr 1; push_cast; ring
       rw [e]
       exact zsmul_mem (mm hW (mm (n := 6) (pw_le (m := 2) (by norm_num) hx1D (by norm_num)
