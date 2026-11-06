@@ -42,8 +42,10 @@ Indexing as in `Statements.lean`: `γ₃ = (⊤ : Subgroup G).lowerCentralSeries
 * **Lemma 1, the criterion.** As in the paper (hypotheses `DThreeEqGammaThree`,
   `JenningsIsolator`; `Q` f.g., `γ₄(Q) = 1`, every element of finite order of `γ₃(Q)` of
   `2`-power order, `4 ≤ n ≤ 6`): `D_n(Q) = 1` iff `θ` has no nontrivial `g` with `g² = 1` in its
-  kernel (`D_eq_bot_iff_theta`). Without hypotheses, for every `Q` with `γ₄(Q) = 1` and
-  `4 ≤ n ≤ 6`, with no condition on the torsion of `γ₃` (`D_eq_bot_iff_theta'`).
+  kernel (`D_eq_bot_iff_theta`). Given `D₃ = γ₃` and Passi's theorem
+  (`D_eq_bot_iff_theta_of_passi`), and so without hypotheses (`D_eq_bot_iff_theta'`): the same for
+  every `Q` with `γ₄(Q) = 1` and `4 ≤ n ≤ 6`, with no finite generation and no condition on the
+  torsion of `γ₃`.
 * **Corollary 2** (`D_eq_bot_of_inf_gammaFour_eq_bot`): if `D₅(G/γ₄(G)) = 1`, `r ≥ 5` and
   `D_r(G) ∩ γ₄(G) = 1`, then `D_r(G) = 1`. The hypothesis `γ₅(G) = 1` of the paper is not needed
   (the proof does not use it).
