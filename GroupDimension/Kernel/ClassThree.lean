@@ -58,8 +58,7 @@ Indexing as in `Statements.lean`: `γ₃ = (⊤ : Subgroup G).lowerCentralSeries
   nontrivial element of `D₅(Q/N)` (`exists_two_quotient_of_mem_D_five`); in particular there is a
   finite `2`-group `P` with `γ₄(P) = 1` and `D₅(P) ≠ 1` (`exists_two_group_of_mem_D_five`, and
   `exists_two_group_of_mem_D_seven` for the paper's `D₇`); the primed versions use the proved
-  `passiDFourSquare`,
-  `gruenbergResidualTwo`. The paper's "`x` has 2-power order" is Passi's `D₄² ⊆ γ₄`: the image of
+  `passiDFourSquare`, `gruenbergResidualTwo`. The paper's "`x` has 2-power order" is Passi's `D₄² ⊆ γ₄`: the image of
   the element in `G/γ₄(G)` has order `2`.
 
 ## What is not formalized here
