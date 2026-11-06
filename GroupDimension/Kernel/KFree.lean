@@ -110,6 +110,7 @@ namespace GroupDimension.Kernel.KFree
 noncomputable section
 
 open MonoidAlgebra
+open scoped commutatorElement
 
 variable {M : Type*} [Group M]
 
@@ -316,8 +317,8 @@ theorem mem_KA_of_mem_ker (K : Subgroup M) [hK : K.Normal] {x : MonoidAlgebra �
     | single g c =>
       rw [mapDomainRingHom_apply, mapDomain_single, mapDomain_single]
       have ht : g * (s (QuotientGroup.mk' K g))⁻¹ ∈ K := by
-        have h1 := hs (QuotientGroup.mk' K g)
-        rw [QuotientGroup.mk'_apply, QuotientGroup.mk'_apply, QuotientGroup.eq] at h1
+        have h1 : (s (QuotientGroup.mk' K g))⁻¹ * g ∈ K :=
+          QuotientGroup.eq.mp (hs (QuotientGroup.mk' K g))
         have := hK.conj_mem _ h1 (s (QuotientGroup.mk' K g))
         rwa [mul_inv_cancel_left] at this
       have e : (single g c : MonoidAlgebra ℤ M) - single (s (QuotientGroup.mk' K g)) c =
@@ -358,7 +359,7 @@ theorem exists_lift_augIdeal_pow (hf : Function.Surjective f) : ∀ k : ℕ, ∀
     ∃ y ∈ augIdeal M ^ k, mapDomainRingHom ℤ f y = z
   | 0, z, _ => by
     obtain ⟨y, hy⟩ := mapDomain_surjective f hf z
-    exact ⟨y, by rw [pow_zero, Ideal.one_eq_top]; exact Submodule.mem_top, hy⟩
+    exact ⟨y, by rw [Submodule.pow_zero, Ideal.one_eq_top]; exact Submodule.mem_top, hy⟩
   | k + 1, z, hz => by
     rw [Submodule.pow_succ] at hz
     refine Submodule.mul_induction_on hz (fun a ha b hb => ?_) (fun a b ha hb => ?_)
@@ -470,10 +471,10 @@ theorem monom_append (l l' : List M) : monom (l ++ l') = monom l * monom l' := b
 
 theorem monom_mem_pow (l : List M) : monom l ∈ augIdeal M ^ l.length := by
   induction l with
-  | nil => rw [List.length_nil, pow_zero, Ideal.one_eq_top]; exact Submodule.mem_top
+  | nil => rw [List.length_nil, Submodule.pow_zero, Ideal.one_eq_top]; exact Submodule.mem_top
   | cons x l ih =>
     rw [monom_cons, List.length_cons, add_comm]
-    exact mul_mem_augIdeal_pow (by rw [pow_one]; exact of_sub_one_mem_augIdeal x) ih
+    exact mul_mem_augIdeal_pow (by rw [Submodule.pow_one]; exact of_sub_one_mem_augIdeal x) ih
 
 /-- The monomials `(x_{j₁} − 1)⋯(x_{j_l} − 1)` in elements of `X`, of length `1 ≤ l < m`. The paper's
 `R₊` (for `U_n`) is `Rplus X (n − c)`; its `R` (Lemmas 3(ii), 5(ii)) is `insert 1 (Rplus X (n − c))`. -/
@@ -484,7 +485,7 @@ theorem mem_augIdeal_of_mem_Rplus {X : Set M} {m : ℕ} {y : MonoidAlgebra ℤ M
     (hy : y ∈ Rplus X m) : y ∈ augIdeal M := by
   obtain ⟨l, -, h1, -, rfl⟩ := hy
   have := Ideal.pow_le_pow_right h1 (monom_mem_pow l)
-  rwa [pow_one] at this
+  rwa [Submodule.pow_one] at this
 
 /-- If `w = −u + (−u) w` and `u ∈ P`, `P` closed under multiplication, then
 `w ∈ P + (−u)^{j+1} w` for every `j`. -/
@@ -550,7 +551,7 @@ theorem sub_one_mem_span_Rplus {X : Set M} (hX : Subgroup.closure X = ⊤) (m : 
       rw [neg_mul, ← sub_eq_add_neg]; exact inv_sub_one_eq x
     rcases Nat.eq_zero_or_pos m with rfl | hm
     · exact Submodule.mem_sup_right
-        (mem_rs.mpr (by rw [pow_zero, Ideal.one_eq_top]; exact Submodule.mem_top))
+        (mem_rs.mpr (by rw [Submodule.pow_zero, Ideal.one_eq_top]; exact Submodule.mem_top))
     obtain ⟨j, rfl⟩ : ∃ j, m = j + 1 := ⟨m - 1, by omega⟩
     obtain ⟨s, hs, hsw⟩ := exists_eq_add_pow_mul hmul hx hw j
     rw [hsw]
@@ -578,8 +579,10 @@ theorem top_le_span_R {X : Set M} (hX : Subgroup.closure X = ⊤) (m : ℕ)
       Submodule.span ℤ (insert 1 (Rplus X m)) ⊔ (augIdeal M ^ m).restrictScalars ℤ := by
     rw [Submodule.span_le]
     rintro _ ⟨g, rfl⟩
-    exact (sup_le_sup_right (Submodule.span_mono (Set.subset_insert _ _)) _)
-      (sub_one_mem_span_Rplus hX m g)
+    obtain ⟨y, hy, z, hz, hyz⟩ := Submodule.mem_sup.mp (sub_one_mem_span_Rplus hX m g)
+    rw [← hyz]
+    exact add_mem (Submodule.mem_sup_left (Submodule.span_mono (Set.subset_insert _ _) hy))
+      (Submodule.mem_sup_right hz)
   rw [e]
   exact add_mem (hsub (sub_aug_mem_span a)) (Submodule.mem_sup_left (Submodule.smul_mem _ _
     (Submodule.subset_span (Set.mem_insert _ _))))
@@ -727,7 +730,7 @@ theorem U_le (hC : C ≤ D c M) (hcn : c + 1 ≤ n) {x : MonoidAlgebra ℤ M} (h
     refine sup_le (fun y hy => mem_rs.mpr (Ideal.pow_le_pow_right hcn (mem_rs.mp hy)))
       (Submodule.span_le.mpr ?_)
     rintro _ ⟨k, hk, d, hd, rfl⟩
-    exact mem_rs.mpr (mul_mem_augIdeal_pow (hC hk) (by rwa [pow_one]))
+    exact mem_rs.mpr (mul_mem_augIdeal_pow (hC hk) (by rwa [Submodule.pow_one]))
   exact mem_rs.mp (hle hx)
 
 /-- `ker ψ̄ ⊆ D_{c+1}(M)` for `c + 1 ≤ n`. -/
@@ -916,7 +919,7 @@ include hb h
 finite order. -/
 theorem cocyclic_isOfFinOrder (a : B) : IsOfFinOrder a := by
   by_cases ha : a = 1
-  · rw [ha]; exact isOfFinOrder_one
+  · rw [ha]; exact isOfFinOrder_iff_pow_eq_one.mpr ⟨1, one_pos, one_pow 1⟩
   by_contra hfin
   have hinj := injective_zpow_iff_not_isOfFinOrder.mpr hfin
   obtain ⟨j, hj⟩ := Subgroup.mem_zpowers_iff.mp (h _ (Subgroup.zpowers_ne_bot.mpr ha))
@@ -978,7 +981,7 @@ theorem mem_zpowers_of_pow_prime {p : ℕ} (hp : p.Prime) {z : B} (hb : b ≠ 1)
 
 /-- … if `B` is abelian and finitely generated, it is finite. -/
 theorem cocyclic_finite (hcomm : ∀ x y : B, x * y = y * x) [hfg : Group.FG B] : Finite B := by
-  letI inst : CommGroup B := { (inferInstance : Group B) with mul_comm := hcomm }
+  let inst : CommGroup B := { (inferInstance : Group B) with mul_comm := hcomm }
   have hfg' : @Group.FG B inst.toGroup := by exact hfg
   exact CommGroup.finite_of_fg_isMulTorsion B (fun a => by exact cocyclic_isOfFinOrder hb h a)
 
@@ -1039,7 +1042,7 @@ theorem cocyclic_isCyclic (hcomm : ∀ x y : B, x * y = y * x) [Finite B] : IsCy
         exact (mul_dvd_mul_iff_right (pow_ne_zero _ (by exact_mod_cast hp.ne_zero))).mp h2
       obtain ⟨j', rfl⟩ := hpj
       have hz : (x * (a ^ j')⁻¹) ^ p = 1 := by
-        rw [(hcomm x (a ^ j')⁻¹ : Commute _ _).mul_pow, inv_pow, ← zpow_natCast (a ^ j') p,
+        rw [Commute.mul_pow (hcomm x (a ^ j')⁻¹) p, inv_pow, ← zpow_natCast (a ^ j') p,
           ← zpow_mul, mul_comm j' (p : ℤ), hj, mul_inv_cancel]
       have hzb : x * (a ^ j')⁻¹ ∈ Subgroup.zpowers b := by
         by_cases hz1 : x * (a ^ j')⁻¹ = 1
@@ -1106,13 +1109,14 @@ theorem reduction_cocyclic (C K : Subgroup M) (hCc : C ≤ Subgroup.center M) [G
     intro H' hH'
     obtain ⟨q, hqH, hq1⟩ : ∃ q ∈ H', q ≠ 1 := by
       by_contra hcon
-      push_neg at hcon
+      push Not at hcon
       exact hH' ((Subgroup.eq_bot_iff_forall H').mpr hcon)
     set L : Subgroup M := (H'.comap (QuotientGroup.mk' (K'.subgroupOf C))).map C.subtype
     have hK'L : K' ≤ L := by
       intro k hk
       refine ⟨⟨k, hK'C hk⟩, ?_, rfl⟩
-      rw [Subgroup.mem_comap, QuotientGroup.mk'_apply,
+      show QuotientGroup.mk' (K'.subgroupOf C) ⟨k, hK'C hk⟩ ∈ H'
+      rw [QuotientGroup.mk'_apply,
         (QuotientGroup.eq_one_iff _).mpr (Subgroup.mem_subgroupOf.mpr hk)]
       exact one_mem _
     have hLC : L ≤ C := Subgroup.map_subtype_le _

@@ -71,7 +71,7 @@ Indexing as in `Statements.lean`: `γ₃ = (⊤ : Subgroup G).lowerCentralSeries
 * Everything computational in §6.8(a): the 80 groups `Q`, the presentations from the records, `nq`,
   `scripts/c4_q3.py`, the Howell forms of `howell_gpu.py`, the table of results and the statement that
   `G_φ/γ₄ = M/γ₄(M) = Γ/γ₄(Γ)Γ''` depends only on `Γ`.
-* Part (b) of §6.8 (Lemma 3, Proposition 4).
+* Part (b) of §6.8 (Lemma 3, Proposition 4): `Kernel/KFree.lean`.
 -/
 
 namespace GroupDimension.Kernel.ClassThree

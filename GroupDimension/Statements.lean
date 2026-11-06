@@ -12,7 +12,8 @@ proved here. A theorem that uses one takes it as an explicit hypothesis (`Finite
 takes `PassiDFourSquare`, `GruenbergResidualTwo`, `DThreeEqGammaThree`; `MetabelianOdd.lean`
 takes `GuptaTaharaMetabelian`; `MinimalThree.lean` takes `PassiDFourSquare` and
 `GuptaTaharaMetabelian`; `Kernel/ClassThree.lean` takes `JenningsIsolator`,
-`DThreeEqGammaThree`, `PassiDFourSquare`, `GruenbergResidualTwo`); nothing is assumed globally. Tahara's description of `D₅`
+`DThreeEqGammaThree`, `PassiDFourSquare`, `GruenbergResidualTwo`; `Kernel/KFree.lean` takes
+`JenningsIsolator`); nothing is assumed globally. Tahara's description of `D₅`
 ([Tah81, Thm. 6.1]) is stated as `TaharaFiveOne` in `Tahara.lean`; unlike the statements here
 it is proved (`TaharaTheorem.lean`), and so are `DThreeEqGammaThree` (`dThreeEqGammaThree`,
 `DThree.lean`), `GruenbergResidualTwo` (`gruenbergResidualTwo`, `Gruenberg.lean`) and
@@ -125,7 +126,8 @@ def GuptaTaharaMetabelian : Prop :=
 the isolators of the lower central series, `D_n(G; ℚ) = √γ_n(G)`. Since the integral `D_n(G)`
 lies in the rational one, some positive power of every `g ∈ D_n(G)` lies in `γ_n(G)`; this is
 the form stated here, for finitely generated nilpotent groups, as used in §6.8(a) of the fast-core
-paper (`Kernel/ClassThree.lean`).
+paper (`Kernel/ClassThree.lean`) and for the torsion of `ker ψ̄` in §6.8(b), §6.10
+(`Kernel/KFree.lean`).
 Formulation only, not proved here. -/
 def JenningsIsolator : Prop :=
   ∀ (G : Type) [Group G], Group.FG G → Group.IsNilpotent G → ∀ n : ℕ, 1 ≤ n →
