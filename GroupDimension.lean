@@ -22,6 +22,7 @@ public import GroupDimension.DThreeCorollaries
 public import GroupDimension.Tahara
 public import GroupDimension.ExpThree
 public import GroupDimension.ExpThreePlus
+public import GroupDimension.ExpThreeGen
 public import GroupDimension.TaharaTheorem
 public import GroupDimension.Candidate
 public import GroupDimension.Jennings.Theorem

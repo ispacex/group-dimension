@@ -1,6 +1,7 @@
 module
 
 public import GroupDimension.ExpThreePlus
+public import GroupDimension.ExpThreeGen
 public import GroupDimension.TaharaProof.Decode12
 
 @[expose] public section
@@ -22,8 +23,8 @@ of `D₅` for finite groups of class `≤ 4` [Tah81, Thm. 6.1]. The proof (`Taha
   `S g` lies in `R₅*`, the coordinates of the combination of the relations give the conditions
   (A)–(F) for `τ = (u, v, v', w, w', w'')`, and the `A₃ ⊕ A₄` part gives `g = gen τ`.
 
-With it, Theorems 6.6 and 6.8 of the paper (`ExpThree.lean`, `ExpThreePlus.lean`, where
-`TaharaFiveOne` is a hypothesis) hold unconditionally.
+With it, Theorems 6.6, 6.8 and 6.9 of the paper (`ExpThree.lean`, `ExpThreePlus.lean`,
+`ExpThreeGen.lean`, where `TaharaFiveOne` is a hypothesis) hold unconditionally.
 -/
 
 namespace GroupDimension
@@ -73,5 +74,37 @@ theorem D_five_eq_bot_of_class_four_cubes_cyclic {Q : Type} [Group Q] [Finite Q]
     (t : Q) (ht : ∀ x : Q, ∃ n : ℕ, (t ^ (3 * n))⁻¹ * x ^ 3 ∈ (⊤ : Subgroup Q).lowerCentralSeries 1) :
     D 5 Q = ⊥ :=
   ExpThree.D_five_eq_bot_of_class_four_cyclic taharaFiveOne h5 h3grp t ht
+
+/-- **Theorem 6.9 of the paper** (unconditional; MATH-443): if `G/γ₂(G)` is a finite `3`-group and
+`γ₂(G)/γ₃(G)` has exponent dividing `3` (`a³ ∈ γ₃(G)` for every `a ∈ γ₂(G)`), then
+`D₅(G) = γ₅(G)`. There is no restriction on the invariants of `G/γ₂(G)`; Theorems 6.6 and 6.8 follow from
+it (`ExpThree.D_five_eq_gamma_five_of_exp_three_of_exp_L1`,
+`ExpThree.D_five_eq_gamma_five_cyclic_of_exp_L1`); they are also proved directly
+(`D_five_eq_gamma_five_of_exp_three`, `D_five_eq_gamma_five_of_cubes_cyclic`). -/
+theorem D_five_eq_gamma_five_of_exp_L1_three (G : Type) [Group G]
+    (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
+    (h3grp : ∀ x : G, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
+    (h2 : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, a ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 2) :
+    D 5 G = (⊤ : Subgroup G).lowerCentralSeries 4 :=
+  ExpThree.D_five_eq_gamma_five_exp_L1 taharaFiveOne G hfin h3grp h2
+
+open scoped commutatorElement in
+/-- Theorem 6.9 with the hypothesis in the form `[x³, y] ∈ γ₃(G)` for all `x, y`
+(`ExpThree.cube_L1_of_comm_cube`). -/
+theorem D_five_eq_gamma_five_of_comm_cube (G : Type) [Group G]
+    (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
+    (h3grp : ∀ x : G, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
+    (h : ∀ x y : G, ⁅x ^ 3, y⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2) :
+    D 5 G = (⊤ : Subgroup G).lowerCentralSeries 4 :=
+  D_five_eq_gamma_five_of_exp_L1_three G hfin h3grp (ExpThree.cube_L1_of_comm_cube h)
+
+/-- Theorem 6.9, the finite form: a finite group of class `≤ 4` with `G/γ₂` a `3`-group and
+`γ₂/γ₃` of exponent dividing `3` has `D₅ = 1`. -/
+theorem D_five_eq_bot_of_class_four_exp_L1_three {Q : Type} [Group Q] [Finite Q]
+    (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥)
+    (h3grp : ∀ x : Q, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup Q).lowerCentralSeries 1)
+    (h2 : ∀ a ∈ (⊤ : Subgroup Q).lowerCentralSeries 1, a ^ 3 ∈ (⊤ : Subgroup Q).lowerCentralSeries 2) :
+    D 5 Q = ⊥ :=
+  ExpThree.D_five_eq_bot_of_class_four_exp_L1 taharaFiveOne h5 h3grp h2
 
 end GroupDimension

@@ -23,8 +23,9 @@ central series. Kourovka Problem 20.84 asks whether `D₅(G) ⊆ γ₄(G)` for e
 `γ₃ = (⊤ : Subgroup G).lowerCentralSeries 2`, `γ₄ = (⊤ : Subgroup G).lowerCentralSeries 3`, `γ₅ = (⊤ : Subgroup G).lowerCentralSeries 4`.
 
 **What is proved.** Every statement below is unconditional except one.
-* Theorems 6.6 and 6.8 of the paper (`D₅ = γ₅` when `G/γ₂` is a finite group of exponent 3,
-  or a finite 3-group whose cubes form a cyclic group); the inclusion `D₅(G) ⊆ M₅(G)`
+* Theorems 6.6, 6.8 and 6.9 of the paper (`D₅ = γ₅` when `G/γ₂` is a finite group of exponent 3,
+  or a finite 3-group whose cubes form a cyclic group, or more generally a finite 3-group with
+  `γ₂/γ₃` of exponent at most 3); the inclusion `D₅(G) ⊆ M₅(G)`
   (Jennings' "hard" inclusion in the case needed); Lemma 5.6 and the Lean part of
   Proposition 5.7 (statements about *candidates*).
 * The reduction of Problem 20.84 to finite 2-groups of class 3 (Proposition 2.1) and the
@@ -134,6 +135,17 @@ theorem D_five_eq_gamma_five_of_cubes_cyclic (G : Type) [Group G]
     (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
     (h3grp : ∀ x : G, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (t : G)
     (ht : ∀ x : G, ∃ n : ℕ, (t ^ (3 * n))⁻¹ * x ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
+    DSet 5 G = ((⊤ : Subgroup G).lowerCentralSeries 4 : Set G) := by
+  sorry
+
+/-- **Paper, Theorem 6.9.** If `G/γ₂(G)` is a finite 3-group and `γ₂(G)/γ₃(G)` has exponent
+dividing 3 (`a³ ∈ γ₃(G)` for every `a ∈ γ₂(G)`; equivalently `[x³, y] ∈ γ₃(G)` for all `x, y`),
+then `D₅(G) = γ₅(G)`. No restriction on the invariants of `G/γ₂(G)`; Theorems 6.6 and 6.8 are
+special cases. No hypotheses beyond these. -/
+theorem D_five_eq_gamma_five_of_exp_L1_three (G : Type) [Group G]
+    (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
+    (h3grp : ∀ x : G, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
+    (h2 : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, a ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 2) :
     DSet 5 G = ((⊤ : Subgroup G).lowerCentralSeries 4 : Set G) := by
   sorry
 
