@@ -11,7 +11,7 @@ the repository root, licence `LICENSE` (MIT). The Lean project is the repository
   development's definitions (`DSet_eq : DSet n G = D n G`, `isCandidate_iff`, ...). It then
   proves each theorem from the development. After editing the Challenge, run
   `python3 palomar/make_solution.py`.
-* `comparator.json` names the ten compared theorems. The permitted axioms are `propext`,
+* `comparator.json` names the eleven compared theorems. The permitted axioms are `propext`,
   `Quot.sound` and `Classical.choice`.
 * `formalization.yaml` holds the metadata: sources, the automation and review account, fidelity
   notes and alignment.
@@ -26,7 +26,8 @@ the repository root, licence `LICENSE` (MIT). The Lean project is the repository
 | Version | Registered | Commit | Compared theorems |
 |---|---|---|---|
 | [1](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=1) | 2026-10-23 | `533dc1c` | nine (without Theorem 6.9; Prop 2.1, Lemma 5.2 and the `D₅` form of Prop 5.7 with `D₃ = γ₃` as an additional hypothesis, Prop 2.1 also with Passi's and Gruenberg's theorems) |
-| [2](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=2) | 2026-11-07 | `508a336` | the ten listed below |
+| [2](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=2) | 2026-11-07 | `508a336` | ten (without Theorem 6.10) |
+| 3 | not yet submitted | — | the eleven listed below (adds Theorem 6.10) |
 
 Later commits are not registered until a new version is submitted.
 
@@ -42,6 +43,7 @@ Indexing: Mathlib's `(⊤ : Subgroup G).lowerCentralSeries k` is `γ_{k+1}(G)`.
 | Thm 6.6 | `G/γ₂` finite of exponent 3 ⇒ `D₅(G) = γ₅(G)` | `D_five_eq_gamma_five_of_exp_three` |
 | Thm 6.8 | `G/γ₂` a finite 3-group whose cubes form a cyclic group ⇒ `D₅(G) = γ₅(G)` | `D_five_eq_gamma_five_of_cubes_cyclic` |
 | Thm 6.9 | `G/γ₂` a finite 3-group and `γ₂/γ₃` of exponent ≤ 3 (`a³ ∈ γ₃` for `a ∈ γ₂`), any invariants of `G/γ₂` ⇒ `D₅(G) = γ₅(G)` | `D_five_eq_gamma_five_of_exp_L1_three` |
+| Thm 6.10 | `G/γ₂` a finite 3-group, `γ₄³ ⊆ γ₅` (`c³ ∈ γ₅` for `c ∈ γ₄`) and `γ₂⁹ ⊆ γ₄` (`a⁹ ∈ γ₄` for `a ∈ γ₂`) ⇒ `D₅(G) = γ₅(G)`; contains Thm 6.9 | `D_five_eq_gamma_five_of_g4_cube_g2_nine` |
 | Jennings, case used in §5 | finite 2-group of class ≤ 3 ⇒ `D₅(G) ⊆ M₅(G) = ∏_{i2^j≥5} γ_i^{2^j}` | `D_five_le_jennings` |
 | Lemma 5.6 | no candidate of order `2^11` with `Q/P₃ ≅ ℤ/4 × (ℤ/2)^7` | `not_isCandidate_of_quotient_z4` |
 | Prop 5.7, part | every candidate has `\|P₂(Q)\| ≥ 16` | `false_of_card_expCentral_two_le` |
@@ -75,9 +77,13 @@ are proved in the development (`dThreeEqGammaThree`, `passiDFourSquare`,
   of Prop 5.7 took `D₃ = γ₃` (and Prop 2.1 also Passi's and Gruenberg's theorems) as explicit
   hypotheses. These are now proved in the development, and the compared statements no longer
   take them.
-* The paper's computer results (Props 5.1, 5.3, 5.10, Thms 5.4, 6.15) are not submitted.
-  Remark 2.2, Lemma 5.2 (d), Proposition 5.8, Lemma 5.9, Lemmas 6.1 and 6.2 (with Gupta–Tahara
-  as an explicit hypothesis), Lemma 6.3, Proposition 6.5, Lemma 6.10, Theorem 6.11 (for central
-  extensions by a subgroup of exponent `p`), Theorem 6.13 (for a given normal form), the Lie
-  algebra of Appendix A and the inclusion part of Tahara's Theorem 6.1 are formalized in the
-  development but are not compared statements.
+* The paper's computer results (Props 5.1, 5.3, 5.10, Thms 5.4, 6.16) are not submitted.
+  Remark 2.2, Lemma 5.2 (d), Proposition 5.8, Lemma 5.9, Lemma 6.1 (with Gupta–Tahara as an
+  explicit hypothesis, and for `p = 3` without it), Lemma 6.2, Lemma 6.3, Proposition 6.5,
+  Lemma 6.11, Theorem 6.12 (for central extensions by a subgroup of exponent `p`), Theorem 6.14
+  (for a given normal form), Theorem D.1 (`D₅ = γ₅` for `p` odd when `[γ₂, γ₂] ⊆ γ₅`; Gupta–Tahara at `p = 3`), the Lie algebra of
+  Appendix A and the inclusion part of Tahara's Theorem 6.1 are formalized in the development
+  but are not compared statements.
+* Numbering: the paper's numbers are those of the current draft, in which Theorems 6.9 and 6.10
+  were added on 2026-11-07, so the later statements of Section 6 moved (the former Lemma 6.9
+  is now Lemma 6.11, Theorems 6.10, 6.12, 6.14 are now 6.12, 6.14, 6.16).

@@ -29,9 +29,10 @@ central series. Kourovka Problem 20.84 asks whether `D₅(G) ⊆ γ₄(G)` for e
 `γ₃ = (⊤ : Subgroup G).lowerCentralSeries 2`, `γ₄ = (⊤ : Subgroup G).lowerCentralSeries 3`, `γ₅ = (⊤ : Subgroup G).lowerCentralSeries 4`.
 
 **What is proved.** Every statement below is unconditional except one.
-* Theorems 6.6, 6.8 and 6.9 of the paper (`D₅ = γ₅` when `G/γ₂` is a finite group of exponent 3,
-  or a finite 3-group whose cubes form a cyclic group, or more generally a finite 3-group with
-  `γ₂/γ₃` of exponent at most 3); the inclusion `D₅(G) ⊆ M₅(G)`
+* Theorems 6.6, 6.8, 6.9 and 6.10 of the paper (`D₅ = γ₅` when `G/γ₂` is a finite group of
+  exponent 3, or a finite 3-group whose cubes form a cyclic group, or more generally a finite
+  3-group with `γ₂/γ₃` of exponent at most 3, or still more generally a finite 3-group with
+  `γ₄³ ⊆ γ₅` and `γ₂⁹ ⊆ γ₄`); the inclusion `D₅(G) ⊆ M₅(G)`
   (Jennings' "hard" inclusion in the case needed); Lemma 5.6 and the Lean part of
   Proposition 5.7 (statements about *candidates*).
 * The reduction of Problem 20.84 to finite 2-groups of class 3 (Proposition 2.1) and the
@@ -203,6 +204,18 @@ theorem D_five_eq_gamma_five_of_exp_L1_three (G : Type) [Group G]
     (h2 : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, a ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 2) :
     DSet 5 G = ((⊤ : Subgroup G).lowerCentralSeries 4 : Set G) := by
   rw [DSet_eq, GroupDimension.D_five_eq_gamma_five_of_exp_L1_three G hfin h3grp h2]
+
+/-- **Paper, Theorem 6.10.** If `G/γ₂(G)` is a finite 3-group, `γ₄(G)³ ⊆ γ₅(G)` (`c³ ∈ γ₅(G)`
+for every `c ∈ γ₄(G)`) and `γ₂(G)⁹ ⊆ γ₄(G)` (`a⁹ ∈ γ₄(G)` for every `a ∈ γ₂(G)`), then
+`D₅(G) = γ₅(G)`. Here `γ₂/γ₃` and `γ₃/γ₄` may have exponent 9; Theorem 6.9 is the special case
+in which `γ₂/γ₃` has exponent at most 3. No hypotheses beyond these. -/
+theorem D_five_eq_gamma_five_of_g4_cube_g2_nine (G : Type) [Group G]
+    (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
+    (h3grp : ∀ x : G, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
+    (h4 : ∀ c ∈ (⊤ : Subgroup G).lowerCentralSeries 3, c ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 4)
+    (h9 : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, a ^ 9 ∈ (⊤ : Subgroup G).lowerCentralSeries 3) :
+    DSet 5 G = ((⊤ : Subgroup G).lowerCentralSeries 4 : Set G) := by
+  rw [DSet_eq, GroupDimension.D_five_eq_gamma_five_of_g4_cube_g2_nine G hfin h3grp h4 h9]
 
 /-- **Jennings' inclusion, in the case used by the paper.** For a finite 2-group of class
 `≤ 3`, `D₅(G) ⊆ M₅(G) = ∏_{i 2^j ≥ 5} γ_i(G)^{2^j}`. (This is the "hard" inclusion of Jennings'
