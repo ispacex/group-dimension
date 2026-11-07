@@ -231,7 +231,7 @@ theorem D_five_eq_gamma_five_of_metabelian (p : ℕ) (hp : p.Prime) (hp2 : p ≠
     (hmet : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1,
       ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 1, ⁅a, b⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 4) :
     DSet 5 G = ((⊤ : Subgroup G).lowerCentralSeries 4 : Set G) := by
-  haveI := Fact.mk hp
+  have : Fact p.Prime := ⟨hp⟩
   rw [DSet_eq, GroupDimension.GuptaTahara.D_five_eq_gamma_five_of_metabelian hp2 G hfin hpg hmet]
 
 /-- **Gupta–Tahara at `p = 3`** ([GT85, Thm. 3.2(c)] for `n = p + 2 = 5`; paper, Theorem D.1,
