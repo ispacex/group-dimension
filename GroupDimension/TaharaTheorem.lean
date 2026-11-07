@@ -25,7 +25,7 @@ of `D₅` for finite groups of class `≤ 4` [Tah81, Thm. 6.1]. The proof (`Taha
   `S g` lies in `R₅*`, the coordinates of the combination of the relations give the conditions
   (A)–(F) for `τ = (u, v, v', w, w', w'')`, and the `A₃ ⊕ A₄` part gives `g = gen τ`.
 
-With it, Theorems 6.6, 6.8, 6.9 of the paper, Theorem 6.10 of the lab notebook and Theorem B
+With it, Theorems 6.6, 6.8, 6.9, 6.10 and 6.11 (Theorem B) of the paper
 (`ExpThree.lean`, `ExpThreePlus.lean`, `ExpThreeGen.lean`, `ExpNine.lean`, `G4Cube.lean`, where
 `TaharaFiveOne` is a hypothesis) hold unconditionally. Theorem 6.10 is derived here from Theorem B
 (`γ₄³ ⊆ γ₅` alone); its direct proof `ExpThree.D_five_eq_gamma_five_g4_cube_g2_nine` is kept.
@@ -81,7 +81,7 @@ theorem D_five_eq_bot_of_class_four_cubes_cyclic {Q : Type} [Group Q] [Finite Q]
     D 5 Q = ⊥ :=
   ExpThree.D_five_eq_bot_of_class_four_cyclic taharaFiveOne h5 h3grp t ht
 
-/-- **Theorem B** (`thm:g4cube`, unconditional; MATH-444): if `G/γ₂(G)` is a finite `3`-group and
+/-- **Theorem 6.11 of the paper** (`thm:g4cube`, Theorem B of MATH-444, unconditional): if `G/γ₂(G)` is a finite `3`-group and
 `γ₄(G)³ ⊆ γ₅(G)`, then `D₅(G) = γ₅(G)`. It contains Theorems 6.10
 (`D_five_eq_gamma_five_of_g4_cube_g2_nine`) and 6.9 (`D_five_eq_gamma_five_of_exp_L1_three`). -/
 theorem D_five_eq_gamma_five_of_g4_cube (G : Type) [Group G]
@@ -100,7 +100,7 @@ theorem D_five_eq_bot_of_class_four_g4_cube {Q : Type} [Group Q] [Finite Q]
     D 5 Q = ⊥ :=
   ExpThree.D_five_eq_bot_of_class_four_g4_cube taharaFiveOne h5 h3grp h4
 
-/-- **Theorem 6.10 of the lab notebook** (`thm:exp3h9`, unconditional; MATH-444): if `G/γ₂(G)` is a
+/-- **Theorem 6.10 of the paper** (`thm:exp3h9`, unconditional; MATH-444): if `G/γ₂(G)` is a
 finite `3`-group, `γ₄(G)³ ⊆ γ₅(G)` and `γ₂(G)⁹ ⊆ γ₄(G)`, then `D₅(G) = γ₅(G)`. It contains
 Theorem 6.9 (`D_five_eq_gamma_five_of_exp_L1_three`). Derived from Theorem B
 (`D_five_eq_gamma_five_of_g4_cube`); the direct proof is

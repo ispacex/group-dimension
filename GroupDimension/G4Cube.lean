@@ -5,7 +5,7 @@ public import GroupDimension.ExpNine
 @[expose] public section
 
 /-!
-# `D₅ = γ₅` when `γ₄³ ⊆ γ₅` (Theorem B, MATH-444 step 2)
+# `D₅ = γ₅` when `γ₄³ ⊆ γ₅` (Theorem 6.11 of the paper, `thm:g4cube`; Theorem B of MATH-444)
 
 **Theorem B** (`D_five_eq_gamma_five_g4_cube`): if `G/γ₂(G)` is a finite `3`-group and
 `γ₄(G)³ ⊆ γ₅(G)`, then `D₅(G) = γ₅(G)`. The finite form (`D_five_eq_bot_of_class_four_g4_cube`): a
