@@ -135,8 +135,8 @@ $\Phi\colon\mathbb Z[G]\to T$ с первой координатой $\varepsilo
 $\Phi(g-1)=(0,\bar g)$. Это та же идея, что у авторов в `DegreeTwo.lean` (квадратично-нулевое
 представление).
 
-`#print axioms` для всех 2123 доказанных объявлений (`AxiomAudit.lean`: 2112 из разработки и
-11 сравниваемых теорем Palomar из `Solution.lean`) — только `propext`,
+`#print axioms` для всех 2125 доказанных объявлений (`AxiomAudit.lean`: 2112 из разработки и
+13 сравниваемых теорем Palomar из `Solution.lean`) — только `propext`,
 `Classical.choice`, `Quot.sound`. Ни `sorry`, ни `axiom` нет ни в разработке, ни в `Solution.lean`;
 `Challenge.lean` формулирует подаваемые результаты с `sorry` намеренно.
 
@@ -243,14 +243,14 @@ lake env lean AxiomAudit.lean
 
 Файлы `Challenge.lean`, `Solution.lean`, `comparator.json` и `formalization.yaml` — подача в
 [реестр Palomar](https://palomar-registry.org) машинно проверенных результатов. `Challenge.lean`
-формулирует одиннадцать результатов только средствами Mathlib (с `sorry`); `Solution.lean` (порождается
+формулирует тринадцать результатов только средствами Mathlib (с `sorry`); `Solution.lean` (порождается
 из него скриптом `palomar/make_solution.py`) дословно повторяет определения и доказывает каждое
 утверждение из разработки; Comparator проверяет, что они совпадают и что используются только
 `propext`, `Classical.choice`, `Quot.sound`. Workflow `.github/workflows/palomar-preflight.yml`
 запускает собственную проверку Palomar на каждом существенном push. Зарегистрировано как
 [PALOMAR-2026-10-23-000007](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007),
 версия 2 (07.11.2026, коммит `508a336`, десять теорем; в версии 1 от 23.10.2026 их было девять);
-теорема 6.10 добавлена к сравниваемым позже и ещё не зарегистрирована. Что подано, с единственной
+теоремы 6.10 и D.1 (с теоремой Гупты–Тахары при $p=3$) добавлены к сравниваемым позже и ещё не зарегистрированы. Что подано, с единственной
 оставшейся гипотезой (предложение 5.3, результат вычисления), описано в [`palomar/README.md`](palomar/README.md).
 
 ## Литература

@@ -32,7 +32,9 @@ central series. Kourovka Problem 20.84 asks whether `D₅(G) ⊆ γ₄(G)` for e
 * Theorems 6.6, 6.8, 6.9 and 6.10 of the paper (`D₅ = γ₅` when `G/γ₂` is a finite group of
   exponent 3, or a finite 3-group whose cubes form a cyclic group, or more generally a finite
   3-group with `γ₂/γ₃` of exponent at most 3, or still more generally a finite 3-group with
-  `γ₄³ ⊆ γ₅` and `γ₂⁹ ⊆ γ₄`); the inclusion `D₅(G) ⊆ M₅(G)`
+  `γ₄³ ⊆ γ₅` and `γ₂⁹ ⊆ γ₄`); Theorem D.1 of the paper (`D₅ = γ₅` when `G/γ₂` is a finite
+  `p`-group, `p` odd, and `[γ₂, γ₂] ⊆ γ₅`; in particular Gupta–Tahara's theorem at `p = 3`:
+  `D₅ = γ₅` for finite metabelian 3-groups); the inclusion `D₅(G) ⊆ M₅(G)`
   (Jennings' "hard" inclusion in the case needed); Lemma 5.6 and the Lean part of
   Proposition 5.7 (statements about *candidates*).
 * The reduction of Problem 20.84 to finite 2-groups of class 3 (Proposition 2.1) and the
@@ -216,6 +218,29 @@ theorem D_five_eq_gamma_five_of_g4_cube_g2_nine (G : Type) [Group G]
     (h9 : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, a ^ 9 ∈ (⊤ : Subgroup G).lowerCentralSeries 3) :
     DSet 5 G = ((⊤ : Subgroup G).lowerCentralSeries 4 : Set G) := by
   rw [DSet_eq, GroupDimension.D_five_eq_gamma_five_of_g4_cube_g2_nine G hfin h3grp h4 h9]
+
+open scoped commutatorElement in
+/-- **Paper, Theorem D.1.** Let `p` be an odd prime. If `G/γ₂(G)` is a finite `p`-group and
+`[γ₂(G), γ₂(G)] ⊆ γ₅(G)` (`[a, b] ∈ γ₅(G)` for all `a, b ∈ γ₂(G)`; e.g. `G` metabelian), then
+`D₅(G) = γ₅(G)`. No restriction on the exponent of `γ₂/γ₃` or on the invariants of `G/γ₂`.
+For `p = 3` this is the case `n = p + 2 = 5` of Gupta–Tahara [GT85, Thm. 3.2(c)]. No hypotheses
+beyond these. -/
+theorem D_five_eq_gamma_five_of_metabelian (p : ℕ) (hp : p.Prime) (hp2 : p ≠ 2) (G : Type)
+    [Group G] (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
+    (hpg : IsPGroup p (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
+    (hmet : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1,
+      ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 1, ⁅a, b⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 4) :
+    DSet 5 G = ((⊤ : Subgroup G).lowerCentralSeries 4 : Set G) := by
+  haveI := Fact.mk hp
+  rw [DSet_eq, GroupDimension.GuptaTahara.D_five_eq_gamma_five_of_metabelian hp2 G hfin hpg hmet]
+
+/-- **Gupta–Tahara at `p = 3`** ([GT85, Thm. 3.2(c)] for `n = p + 2 = 5`; paper, Theorem D.1,
+"in particular"): every finite metabelian 3-group `G` (`G'' = derivedSeries G 2 = 1`) has
+`D₅(G) = γ₅(G)`. -/
+theorem D_five_eq_gamma_five_of_metabelian_three (G : Type) [Group G] [Finite G]
+    (hG : IsPGroup 3 G) (hd : derivedSeries G 2 = ⊥) :
+    DSet 5 G = ((⊤ : Subgroup G).lowerCentralSeries 4 : Set G) := by
+  rw [DSet_eq, GroupDimension.guptaTaharaMetabelian_three G hG hd]
 
 /-- **Jennings' inclusion, in the case used by the paper.** For a finite 2-group of class
 `≤ 3`, `D₅(G) ⊆ M₅(G) = ∏_{i 2^j ≥ 5} γ_i(G)^{2^j}`. (This is the "hard" inclusion of Jennings'

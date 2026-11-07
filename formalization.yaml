@@ -14,7 +14,9 @@ project:
     3-group whose cubes form a cyclic group, and still more generally whenever G/γ_2(G) is a
     finite 3-group and γ_2(G)/γ_3(G) has exponent at most 3, and still more generally whenever
     G/γ_2(G) is a finite 3-group, γ_4(G)^3 ⊆ γ_5(G) and γ_2(G)^9 ⊆ γ_4(G) (paper, Theorems
-    6.6, 6.8, 6.9 and 6.10; the inclusion part
+    6.6, 6.8, 6.9 and 6.10), and whenever G/γ_2(G) is a finite p-group, p odd, and
+    [γ_2(G), γ_2(G)] ⊆ γ_5(G), in particular for finite metabelian 3-groups, which is
+    Gupta–Tahara's theorem at p = 3 (paper, Theorem D.1; the inclusion part
     of Tahara's 1981 description of D_5 is formalized for this); D_5(G) lies in the Jennings
     product M_5(G) for finite 2-groups of class at most 3; and, for "candidates" (the
     paper's minimal-counterexample shape among finite 2-groups of class 3), there is no
@@ -41,7 +43,7 @@ sources:
     authors: ["Stanislav Vorobev"]
     type: paper
     id: "https://ispacex.github.io/d5/paper/d5.pdf"
-    location: "Theorems 6.6, 6.8, 6.9 and 6.10; Lemmas 5.2 (a)-(c) and 5.6; Proposition 5.7 (candidate form and D_5 form); Proposition 2.1 (1) ⇔ (3)"
+    location: "Theorems 6.6, 6.8, 6.9, 6.10 and D.1; Lemmas 5.2 (a)-(c) and 5.6; Proposition 5.7 (candidate form and D_5 form); Proposition 2.1 (1) ⇔ (3)"
     relationship: formalizes
     note: >-
       The paper and this formalization were developed together. The version cited is the one
@@ -50,8 +52,8 @@ sources:
       or [computer], and its formalization section describes this repository at commit
       e58aa2b (tag lean-v4.29, Lean 4.29). The theorem and section numbers cited in this file are those of the current draft
       (ispacex/mikh, 2026-11-07 or later, where Theorems 6.9 and 6.10 were added and the later
-      statements of Section 6 were renumbered); the version of 2026-10-22 has neither Theorem 6.9
-      nor Theorem 6.10. Drafts from
+      statements of Section 6 were renumbered); the version of 2026-10-22 has none of Theorem 6.9,
+      Theorem 6.10 and Appendix D (Theorem D.1, also added on 2026-11-07). Drafts from
       2026-10-25 on replace the markers by
       conventional wording: computer-assisted results are labelled so, and a result proved by hand that is
       also formally verified says so at its proof, with the formal versions and their exact
@@ -79,8 +81,19 @@ sources:
     relationship: other
     note: >-
       The inclusion part of Tahara's Theorem 6.1 is formalized in the development
-      (taharaFiveOne) and is the main ingredient of the proofs of Theorems 6.6, 6.8, 6.9 and 6.10. It is
+      (taharaFiveOne) and is the main ingredient of the proofs of Theorems 6.6, 6.8, 6.9, 6.10 and D.1. It is
       not itself a compared statement.
+  - title: "N. Gupta, K.-I. Tahara, Dimension and lower central subgroups of metabelian p-groups, Nagoya Math. J. 100 (1985) 127-133"
+    authors: ["Narain Gupta", "Ken-Ichi Tahara"]
+    type: paper
+    id: "doi:10.1017/S0027763000000258"
+    location: "Theorem 3.2(c), the case p = 3 (D_5 = γ_5 for metabelian 3-groups)"
+    relationship: formalizes
+    note: >-
+      GroupDimension.Palomar.D_five_eq_gamma_five_of_metabelian_three is Theorem 3.2(c) of
+      Gupta–Tahara for p = 3 and finite metabelian 3-groups. The proof is not theirs (free group
+      ring and Fox derivatives) but the paper's Theorem D.1, through the inclusion part of
+      Tahara's Theorem 6.1. For p ≥ 5 Theorem 3.2(c) (D_{p+2} = γ_{p+2}) is not formalized.
   - title: "Kourovka notebook, Problem 20.84 (E. I. Khukhro, V. D. Mazurov, eds., Unsolved problems in group theory, arXiv:1401.0300)"
     type: other
     relationship: background
@@ -113,7 +126,7 @@ status:
     is); the paper's computer results (Propositions 5.1, 5.3, 5.10, Theorems 5.4, 6.16), of
     which Proposition 5.3 enters D_five_eq_bot_of_rank as an explicit hypothesis; the classical
     result Gupta–Tahara's D_{p+2} = γ_{p+2} for metabelian p-groups, p odd [GT85, Thm.
-    3.2(c)], for p ≥ 5 (at p = 3 it is the paper's Theorem D.1, formalized in the development),
+    3.2(c)], for p ≥ 5 (at p = 3 it is the paper's Theorem D.1, compared here),
     which enters Lemma 6.1 for general odd p as an explicit hypothesis (Lemma 6.2, a p = 3
     statement, and Lemma 6.1 at p = 3 are formalized without it); Lemma C.1 (that nonterminal means a nontrivial nucleus). Formalized in
     the development but not compared here: Remark 2.2, Lemma 5.2 (d), Proposition 5.8, Lemma 5.9, Lemma 6.1
@@ -124,8 +137,7 @@ status:
     enter through it, N2 as a hypothesis of the sufficiency; nonterminal taken as in Lemma C.1: a
     central extension by a subgroup of order p with γ_4 ≠ 1; for the sufficiency and the
     equivalence P is in Type), the Lie algebra of Appendix A (Remark 6.4(2), over any field),
-    the inclusion part of Tahara's Theorem 6.1, and Theorem D.1 (D_5 = γ_5 when G/γ_2(G) is a
-    finite p-group, p odd, and [γ_2, γ_2] ⊆ γ_5; Gupta–Tahara at p = 3).
+    and the inclusion part of Tahara's Theorem 6.1.
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: ["propext", "Classical.choice", "Quot.sound"]
@@ -178,7 +190,10 @@ fidelity:
     and every x^(3^k) lies in γ_2(G) for some k. (9) In Theorem 6.10 the paper's γ_4(G)^3 ⊆ γ_5(G)
     and γ_2(G)^9 ⊆ γ_4(G) are stated elementwise: c^3 ∈ γ_5(G) for every c ∈ γ_4(G), and
     a^9 ∈ γ_4(G) for every a ∈ γ_2(G) (equivalent, since γ_5(G) and γ_4(G) are subgroups);
-    "G/γ_2(G) is a finite 3-group" as in (8).
+    "G/γ_2(G) is a finite 3-group" as in (8). (10) In Theorem D.1 "[γ_2(G), γ_2(G)] ⊆ γ_5(G)"
+    is stated elementwise ([a, b] ∈ γ_5(G) for a, b ∈ γ_2(G)) and "p an odd prime" as p.Prime
+    and p ≠ 2; its "in particular" (Gupta–Tahara at p = 3) is compared separately, for finite
+    G with IsPGroup 3 G and derivedSeries G 2 = ⊥.
 
 review:
   status: "agent-reviewed"
@@ -209,6 +224,14 @@ alignment:
       status: "proved"
     - source: "Theorem 6.10"
       lean: "GroupDimension.Palomar.D_five_eq_gamma_five_of_g4_cube_g2_nine"
+      module: "Challenge"
+      status: "proved"
+    - source: "Theorem D.1"
+      lean: "GroupDimension.Palomar.D_five_eq_gamma_five_of_metabelian"
+      module: "Challenge"
+      status: "proved"
+    - source: "Theorem D.1, in particular; Gupta–Tahara [GT85, Thm. 3.2(c)] at p = 3"
+      lean: "GroupDimension.Palomar.D_five_eq_gamma_five_of_metabelian_three"
       module: "Challenge"
       status: "proved"
     - source: "Jennings' inclusion D_5 ⊆ M_5 (finite 2-groups of class ≤ 3)"
