@@ -2,6 +2,7 @@ module
 
 public import GroupDimension.ExpThreePlus
 public import GroupDimension.ExpThreeGen
+public import GroupDimension.ExpNine
 public import GroupDimension.TaharaProof.Decode12
 
 @[expose] public section
@@ -23,8 +24,10 @@ of `D₅` for finite groups of class `≤ 4` [Tah81, Thm. 6.1]. The proof (`Taha
   `S g` lies in `R₅*`, the coordinates of the combination of the relations give the conditions
   (A)–(F) for `τ = (u, v, v', w, w', w'')`, and the `A₃ ⊕ A₄` part gives `g = gen τ`.
 
-With it, Theorems 6.6, 6.8 and 6.9 of the paper (`ExpThree.lean`, `ExpThreePlus.lean`,
-`ExpThreeGen.lean`, where `TaharaFiveOne` is a hypothesis) hold unconditionally.
+With it, Theorems 6.6, 6.8, 6.9 of the paper and Theorem 6.10 of the lab notebook (`ExpThree.lean`, `ExpThreePlus.lean`,
+`ExpThreeGen.lean`, `ExpNine.lean`, where `TaharaFiveOne` is a hypothesis) hold unconditionally.
+Theorem 6.9 is derived here from Theorem 6.10 (its hypothesis gives `γ₄³ ⊆ γ₅` and
+`γ₂⁹ ⊆ γ₄`); its direct proof `ExpThree.D_five_eq_gamma_five_exp_L1` is kept.
 -/
 
 namespace GroupDimension
@@ -75,18 +78,51 @@ theorem D_five_eq_bot_of_class_four_cubes_cyclic {Q : Type} [Group Q] [Finite Q]
     D 5 Q = ⊥ :=
   ExpThree.D_five_eq_bot_of_class_four_cyclic taharaFiveOne h5 h3grp t ht
 
+/-- **Theorem 6.10 of the lab notebook** (`thm:exp3h9`, unconditional; MATH-444): if `G/γ₂(G)` is a
+finite `3`-group, `γ₄(G)³ ⊆ γ₅(G)` and `γ₂(G)⁹ ⊆ γ₄(G)`, then `D₅(G) = γ₅(G)`. It contains
+Theorem 6.9 (`D_five_eq_gamma_five_of_exp_L1_three`). -/
+theorem D_five_eq_gamma_five_of_g4_cube_g2_nine (G : Type) [Group G]
+    (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
+    (h3grp : ∀ x : G, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
+    (h4 : ∀ c ∈ (⊤ : Subgroup G).lowerCentralSeries 3, c ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 4)
+    (h9 : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, a ^ 9 ∈ (⊤ : Subgroup G).lowerCentralSeries 3) :
+    D 5 G = (⊤ : Subgroup G).lowerCentralSeries 4 :=
+  ExpThree.D_five_eq_gamma_five_g4_cube_g2_nine taharaFiveOne G hfin h3grp h4 h9
+
+/-- Theorem 6.10, the finite form: a finite group of class `≤ 4` with `G/γ₂` a `3`-group,
+`c³ = 1` for `c ∈ γ₄` and `a⁹ ∈ γ₄` for `a ∈ γ₂` has `D₅ = 1`. -/
+theorem D_five_eq_bot_of_class_four_g4_cube_g2_nine {Q : Type} [Group Q] [Finite Q]
+    (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥)
+    (h3grp : ∀ x : Q, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup Q).lowerCentralSeries 1)
+    (h4 : ∀ c ∈ (⊤ : Subgroup Q).lowerCentralSeries 3, c ^ 3 = 1)
+    (h9 : ∀ a ∈ (⊤ : Subgroup Q).lowerCentralSeries 1, a ^ 9 ∈ (⊤ : Subgroup Q).lowerCentralSeries 3) :
+    D 5 Q = ⊥ :=
+  ExpThree.D_five_eq_bot_of_class_four_g4_cube_g2_nine taharaFiveOne h5 h3grp h4 h9
+
+/-- `γ₂/γ₃` of exponent dividing `3` gives the second hypothesis of Theorem 6.10, `γ₂⁹ ⊆ γ₄`
+(the first, `γ₄³ ⊆ γ₅`, is `ExpThree.cube_succ (ExpThree.cube_L2 h2)`). -/
+theorem nine_L1_of_exp_L1 {G : Type*} [Group G]
+    (h2 : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, a ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 2) :
+    ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, a ^ 9 ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by
+  intro a ha
+  rw [show a ^ 9 = (a ^ 3) ^ 3 by rw [← pow_mul]]
+  exact ExpThree.cube_L2 h2 _ (h2 a ha)
+
 /-- **Theorem 6.9 of the paper** (unconditional; MATH-443): if `G/γ₂(G)` is a finite `3`-group and
 `γ₂(G)/γ₃(G)` has exponent dividing `3` (`a³ ∈ γ₃(G)` for every `a ∈ γ₂(G)`), then
 `D₅(G) = γ₅(G)`. There is no restriction on the invariants of `G/γ₂(G)`; Theorems 6.6 and 6.8 follow from
 it (`ExpThree.D_five_eq_gamma_five_of_exp_three_of_exp_L1`,
 `ExpThree.D_five_eq_gamma_five_cyclic_of_exp_L1`); they are also proved directly
-(`D_five_eq_gamma_five_of_exp_three`, `D_five_eq_gamma_five_of_cubes_cyclic`). -/
+(`D_five_eq_gamma_five_of_exp_three`, `D_five_eq_gamma_five_of_cubes_cyclic`). Derived from
+Theorem 6.10 (`D_five_eq_gamma_five_of_g4_cube_g2_nine`; MATH-444); the direct proof is
+`ExpThree.D_five_eq_gamma_five_exp_L1`. -/
 theorem D_five_eq_gamma_five_of_exp_L1_three (G : Type) [Group G]
     (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
     (h3grp : ∀ x : G, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
     (h2 : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, a ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 2) :
     D 5 G = (⊤ : Subgroup G).lowerCentralSeries 4 :=
-  ExpThree.D_five_eq_gamma_five_exp_L1 taharaFiveOne G hfin h3grp h2
+  D_five_eq_gamma_five_of_g4_cube_g2_nine G hfin h3grp
+    (fun c hc => ExpThree.cube_succ (ExpThree.cube_L2 h2) c hc) (nine_L1_of_exp_L1 h2)
 
 open scoped commutatorElement in
 /-- Theorem 6.9 with the hypothesis in the form `[x³, y] ∈ γ₃(G)` for all `x, y`
@@ -99,12 +135,12 @@ theorem D_five_eq_gamma_five_of_comm_cube (G : Type) [Group G]
   D_five_eq_gamma_five_of_exp_L1_three G hfin h3grp (ExpThree.cube_L1_of_comm_cube h)
 
 /-- Theorem 6.9, the finite form: a finite group of class `≤ 4` with `G/γ₂` a `3`-group and
-`γ₂/γ₃` of exponent dividing `3` has `D₅ = 1`. -/
+`γ₂/γ₃` of exponent dividing `3` has `D₅ = 1` (derived from Theorem 6.10). -/
 theorem D_five_eq_bot_of_class_four_exp_L1_three {Q : Type} [Group Q] [Finite Q]
     (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥)
     (h3grp : ∀ x : Q, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup Q).lowerCentralSeries 1)
     (h2 : ∀ a ∈ (⊤ : Subgroup Q).lowerCentralSeries 1, a ^ 3 ∈ (⊤ : Subgroup Q).lowerCentralSeries 2) :
     D 5 Q = ⊥ :=
-  ExpThree.D_five_eq_bot_of_class_four_exp_L1 taharaFiveOne h5 h3grp h2
+  D_five_eq_bot_of_class_four_g4_cube_g2_nine h5 h3grp (ExpThree.cube_L3 h5 h2) (nine_L1_of_exp_L1 h2)
 
 end GroupDimension
