@@ -57,7 +57,10 @@ noncomputable def em (g : G) : E G :=
 
 theorem em_of {g : G} (h : g ∈ L1 G) :
     em g = Additive.ofMul (Abelianization.of (⟨g, h⟩ : L1 G)) := by
-  unfold em; rw [dif_pos h]
+  unfold em
+  split_ifs with h'
+  · rfl
+  · exact absurd h h'
 
 theorem em_mul {a b : G} (ha : a ∈ L1 G) (hb : b ∈ L1 G) : em (a * b) = em a + em b := by
   have e : (⟨a * b, mul_mem ha hb⟩ : L1 G) = ⟨a, ha⟩ * ⟨b, hb⟩ := rfl
@@ -341,7 +344,7 @@ omit hmet h5 hodd in
 theorem dq {i j : Fin T.s} (hij : i ≤ j) : (T.d i : ℤ) * T.q i j = T.d j := by
   simp only [Data.q]; exact_mod_cast Nat.mul_div_cancel' (hT.basis₁.dvd i j hij)
 
-omit hmet h5 hodd in
+omit hmet h5 hT hodd in
 theorem d_dvd_ch2 {i : Fin T.s} (hodd' : Odd (T.d i)) : (T.d i : ℤ) ∣ T.ch i 2 := by
   simp only [Data.ch]; rw [choose_two_of_odd hodd']; push_cast; exact dvd_mul_right _ _
 
@@ -354,7 +357,7 @@ theorem L3 {g j : Fin T.s} (hgj : g ≤ j) (z : G) :
     (T.d j : ℤ) • Tm z (em (tc (T.x₁ g) (T.x₁ j))) = 0 :=
   smul_Tm_tc_eq_zero hmet h5 (hodd j) (pow_d_mem_of_le hT hgj) (Y_mem hT j) z
 
-omit hodd in
+omit hmet hodd in
 /-- `[Y_g, x_h] = d c + C(d,2) t_g c + C(d,3) t_g² c`. -/
 theorem TY (g h : Fin T.s) : Tm (T.x₁ h) (em (T.x₁ g ^ T.d g)) =
     (T.d g : ℤ) • em (tc (T.x₁ g) (T.x₁ h)) +
@@ -365,18 +368,20 @@ theorem TY (g h : Fin T.s) : Tm (T.x₁ h) (em (T.x₁ g ^ T.d g)) =
 /-- `[Y_g, x_h, x_k] = d(g) [x_g, x_h, x_k]`. -/
 theorem TTY (g h k : Fin T.s) : Tm (T.x₁ k) (Tm (T.x₁ h) (em (T.x₁ g ^ T.d g))) =
     (T.d g : ℤ) • Tm (T.x₁ k) (em (tc (T.x₁ g) (T.x₁ h))) := by
-  rw [TY hmet h5 hT]
+  rw [TY h5 hT]
   simp only [map_add, map_zsmul]
   have e1 : Tm (T.x₁ k) (Tm (T.x₁ g) (Tm (T.x₁ g) (em (tc (T.x₁ g) (T.x₁ h))))) = 0 := by
     rw [Tm_comm hmet _ (T.x₁ g), Tm_comm hmet _ (T.x₁ g)]; exact Tm3 h5 _ _ _ _
   have e2 : ((T.d g).choose 2 : ℤ) • Tm (T.x₁ k) (Tm (T.x₁ g) (em (tc (T.x₁ g) (T.x₁ h)))) = 0 := by
     rw [Tm_comm hmet _ (T.x₁ g)]
-    exact smul_eq_zero_of_dvd (d_dvd_ch2 hT (hodd g)) (L2 hmet h5 hT hodd g _)
+    exact smul_eq_zero_of_dvd (d_dvd_ch2 (hodd g)) (L2 hmet h5 hT hodd g _)
   rw [e1, e2, smul_zero, add_zero, add_zero]
 
+omit hmet h5 hodd in
 theorem TY_self (i : Fin T.s) : Tm (T.x₁ i) (em (T.x₁ i ^ T.d i)) = 0 := by
   rw [Tm_em (Y_mem hT i), tc_eq_one_iff.mpr ((Commute.refl _).pow_left _), em_one]
 
+omit hmet h5 in
 /-- (A₃), (A₄): `d(b) ∣ w_{abc} d(a)` for `a < b ≤ c`. -/
 theorem w_div {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) {a b c : Fin T.s} (hab : a < b)
     (hbc : b ≤ c) : ∃ r : ℤ, τ.w a b c * T.d a = T.d b * r := by
@@ -385,7 +390,7 @@ theorem w_div {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) {a b c : Fin T.s} (h
     have hq := dq hT hbc
     exact ⟨-τ.w' a b c - τ.w'' a b c * T.q b c, by rw [← hq] at h; linear_combination h⟩
   · have h := hτ.A₃ a b hab
-    obtain ⟨m, hm⟩ := d_dvd_ch2 hT (hodd b)
+    obtain ⟨m, hm⟩ := d_dvd_ch2 (hodd b)
     exact ⟨τ.u a b * m - τ.w' a b b, by rw [hm] at h; linear_combination h⟩
 
 /-- `w_{ijk} [Y_i, x_j, x_k] = 0` for `i ≤ j ≤ k`. -/
@@ -393,11 +398,12 @@ theorem w_term {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) {i j k : Fin T.s} (
     (hjk : j ≤ k) (k' : Fin T.s) :
     τ.w i j k • Tm (T.x₁ k') (Tm (T.x₁ j) (em (T.x₁ i ^ T.d i))) = 0 := by
   rcases lt_or_eq_of_le hij with hlt | rfl
-  · obtain ⟨r, hr⟩ := w_div hmet h5 hT hodd hτ hlt hjk
-    rw [TTY hmet h5 hT hodd, smul_smul, hr, mul_comm, mul_smul, L3 hmet h5 hT hodd hlt.le,
+  · obtain ⟨r, hr⟩ := w_div hT hodd hτ hlt hjk
+    rw [TTY h5 hT hodd, smul_smul, hr, mul_comm, mul_smul, L3 hmet h5 hT hodd hlt.le,
       smul_zero]
-  · rw [TY_self hmet h5 hT hodd, map_zero, smul_zero]
+  · rw [TY_self hT, map_zero, smul_zero]
 
+omit h5 hodd in
 theorem genB_eq (τ : Coeffs T.s T.t) : T.genB τ = 1 := by
   have : ∀ l k, tc (T.x₂ l) (T.x₂ k) = 1 := fun l k =>
     tc_eq_one_L1 hmet (hT.basis₂.mem l) (hT.basis₂.mem k)
@@ -425,27 +431,27 @@ theorem swap {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) {i j : Fin T.s} (hij 
   set c := em (tc (T.x₁ i) (T.x₁ j)) with hc
   have hc' : em (tc (T.x₁ j) (T.x₁ i)) = -c := by
     rw [← tc_inv, em_inv (tc_mem_L1 _ _)]
-  have hA := TY hmet h5 hT i j
-  have hB := TY hmet h5 hT j i
+  have hA := TY h5 hT i j
+  have hB := TY h5 hT j i
   rw [hc'] at hB
   simp only [map_neg, smul_neg] at hB
   -- vanishing pieces
   have z1 : ((T.d i).choose 2 : ℤ) • Tm (T.x₁ i) c = 0 :=
-    smul_eq_zero_of_dvd (d_dvd_ch2 hT (hodd i)) (L2 hmet h5 hT hodd i _)
+    smul_eq_zero_of_dvd (d_dvd_ch2 (hodd i)) (L2 hmet h5 hT hodd i _)
   have z2 : ((T.d j).choose 2 : ℤ) • Tm (T.x₁ j) c = 0 :=
-    smul_eq_zero_of_dvd (d_dvd_ch2 hT (hodd j)) (L2 hmet h5 hT hodd j _)
+    smul_eq_zero_of_dvd (d_dvd_ch2 (hodd j)) (L2 hmet h5 hT hodd j _)
   have hC1 : (T.d i : ℤ) ∣ τ.u i j * T.q i j * ((T.d i).choose 3 : ℤ) := by
     have h := Int.modEq_zero_iff_dvd.mp (hτ.C₁ i j hij)
     simp only [Data.ch] at h
     have h2 : (T.d i : ℤ) ∣ τ.w i i j * ((T.d i).choose 2 : ℤ) :=
-      dvd_mul_of_dvd_right (by simpa [Data.ch] using d_dvd_ch2 hT (hodd i)) _
+      dvd_mul_of_dvd_right (by simpa [Data.ch] using d_dvd_ch2 (hodd i)) _
     simpa using dvd_sub h h2
   have hC3 : (T.d i : ℤ) ∣ τ.u i j * ((T.d j).choose 3 : ℤ) := by
     have h := Int.modEq_zero_iff_dvd.mp (hτ.C₃ i j hij)
     simp only [Data.ch] at h
     have hdj : (T.d i : ℤ) ∣ ((T.d j).choose 2 : ℤ) :=
       dvd_trans (Int.natCast_dvd_natCast.mpr (hT.basis₁.dvd i j hij.le))
-        (by simpa [Data.ch] using d_dvd_ch2 hT (hodd j))
+        (by simpa [Data.ch] using d_dvd_ch2 (hodd j))
     have h2 : (T.d i : ℤ) ∣ τ.w' i j j * ((T.d j).choose 2 : ℤ) := dvd_mul_of_dvd_right hdj _
     have h3 := dvd_sub h2 h
     have e : τ.w' i j j * ((T.d j).choose 2 : ℤ) -
@@ -454,7 +460,7 @@ theorem swap {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) {i j : Fin T.s} (hij 
     rwa [e] at h3
   have hdTT : (T.d i : ℤ) • Tm (T.x₁ j) (Tm (T.x₁ j) c) = 0 := by
     have h := congrArg (fun v => Tm (T.x₁ j) (Tm (T.x₁ j) v)) hA
-    simp only [Tm3 h5, map_add, map_zsmul, map_zero, smul_zero, add_zero] at h
+    simp only [Tm3 h5, map_add, map_zsmul, smul_zero, add_zero] at h
     exact h.symm
   have z3 : (τ.u i j * T.q i j * ((T.d i).choose 3 : ℤ)) • Tm (T.x₁ i) (Tm (T.x₁ i) c) = 0 :=
     smul_eq_zero_of_dvd hC1 (L2 hmet h5 hT hodd i _)
@@ -476,6 +482,7 @@ theorem swap {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) {i j : Fin T.s} (hij 
   rw [key, z1, z2, z3, z4, hq, sub_self, mul_zero, zero_smul]
   simp
 
+omit hmet h5 hodd in
 /-- `em` of the `u`-part. -/
 theorem em_genA (τ : Coeffs T.s T.t) : em (T.genA τ) = ∑ i, ∑ j,
     if i < j then (τ.u i j * T.q i j) • Tm (T.x₁ j) (em (T.x₁ i ^ T.d i)) else 0 := by
@@ -503,46 +510,46 @@ theorem genA_mem (τ : Coeffs T.s T.t) : T.genA τ ∈ L1 G :=
       · exact zpow_mem (tcL (Y_mem hT i) _) _
       · exact one_mem _
 
+omit hmet hT hodd in
 /-- `[g, x] = [h, x]` when `h⁻¹ g ∈ γ₄`. -/
-theorem Tm_em_eq_of_mem {g h : G} (hg : g ∈ L1 G) (hh : h ∈ L1 G)
+theorem Tm_em_eq_of_mem {g h : G} (hh : h ∈ L1 G)
     (hr : h⁻¹ * g ∈ (⊤ : Subgroup G).lowerCentralSeries 3) (x : G) :
     Tm x (em g) = Tm x (em h) := by
   have e : g = h * (h⁻¹ * g) := by group
   have hr1 : h⁻¹ * g ∈ L1 G := lcs_mem_of_le (by norm_num) hr
   rw [e, em_mul hh hr1, map_add, Tm_lcs3 hr h5, add_zero]
 
-omit hodd in
+omit hmet h5 hodd in
 theorem x2_mem (k : Fin T.t) : T.x₂ k ∈ L1 G := hT.basis₂.mem k
 
-omit hodd in
+omit hmet h5 hodd in
 theorem x3_mem (l : Fin T.u) : T.x₃ l ∈ L1 G := lcs_mem_of_le (by norm_num) (hT.basis₃.mem l)
 
 /-- `[Y_h, x] = ∑_k b_{hk} [x_{2k}, x] + ∑_l c_{hl} [x_{3l}, x]`. -/
 theorem KY (h : Fin T.s) (x : G) : Tm x (em (T.x₁ h ^ T.d h)) =
     ∑ k, T.b h k • Tm x (em (T.x₂ k)) + ∑ l, T.c h l • Tm x (em (T.x₃ l)) := by
   have hP : oprod T.x₂ (T.b h) * oprod T.x₃ (T.c h) ∈ L1 G :=
-    mul_mem (oprod_mem (x2_mem hmet h5 hT) _) (oprod_mem (x3_mem hmet h5 hT) _)
-  rw [Tm_em_eq_of_mem hmet h5 hT hodd (Y_mem hT h) hP (hT.hb h),
-    em_mul (oprod_mem (x2_mem hmet h5 hT) _) (oprod_mem (x3_mem hmet h5 hT) _),
-    em_oprod (x2_mem hmet h5 hT), em_oprod (x3_mem hmet h5 hT)]
+    mul_mem (oprod_mem (x2_mem hT) _) (oprod_mem (x3_mem hT) _)
+  rw [Tm_em_eq_of_mem h5 hP (hT.hb h),
+    em_mul (oprod_mem (x2_mem hT) _) (oprod_mem (x3_mem hT) _),
+    em_oprod (x2_mem hT), em_oprod (x3_mem hT)]
   simp only [map_add, map_sum, map_zsmul]
 
 /-- `e(k) [x_{2k}, x] = ∑_l d_{kl} [x_{3l}, x]`. -/
 theorem KE (k : Fin T.t) (x : G) : (T.e k : ℤ) • Tm x (em (T.x₂ k)) =
     ∑ l, T.dd k l • Tm x (em (T.x₃ l)) := by
-  rw [← map_zsmul, ← em_pow (x2_mem hmet h5 hT k),
-    Tm_em_eq_of_mem hmet h5 hT hodd (pow_mem (x2_mem hmet h5 hT k) _)
-      (oprod_mem (x3_mem hmet h5 hT) _) (hT.hdd k),
-    em_oprod (x3_mem hmet h5 hT)]
+  rw [← map_zsmul, ← em_pow (x2_mem hT k),
+    Tm_em_eq_of_mem h5 (oprod_mem (x3_mem hT) _) (hT.hdd k),
+    em_oprod (x3_mem hT)]
   simp only [map_sum, map_zsmul]
 
 /-- `[Y_g, x_h, x] = ∑_l α^{(gh)}_l [x_{3l}, x]` for `g ≤ h`. -/
 theorem KA {g h : Fin T.s} (hgh : g ≤ h) (x : G) :
     Tm x (Tm (T.x₁ h) (em (T.x₁ g ^ T.d g))) = ∑ l, T.α g h l • Tm x (em (T.x₃ l)) := by
   rw [Tm_em (Y_mem hT g),
-    Tm_em_eq_of_mem hmet h5 hT hodd (tcL (Y_mem hT g) _) (oprod_mem (x3_mem hmet h5 hT) _)
+    Tm_em_eq_of_mem h5 (oprod_mem (x3_mem hT) _)
       (hT.hα g h hgh),
-    em_oprod (x3_mem hmet h5 hT)]
+    em_oprod (x3_mem hT)]
   simp only [map_sum, map_zsmul]
 
 omit hmet h5 hT hodd in
@@ -586,7 +593,7 @@ theorem row {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) (i : Fin T.s) :
   have hZ1 : ∑ h, (if h < i then (τ.u h i * T.q h i) • ∑ l, T.α h i l • X l else 0) = 0 := by
     refine Finset.sum_eq_zero fun h _ => ?_
     split_ifs with hhi
-    · rw [← KA' h i hhi.le, TTY hmet h5 hT hodd, smul_smul,
+    · rw [← KA' h i hhi.le, TTY h5 hT hodd, smul_smul,
         show τ.u h i * T.q h i * (T.d h : ℤ) = τ.u h i * ((T.d h : ℤ) * T.q h i) by ring,
         dq hT hhi.le, mul_smul, L2 hmet h5 hT hodd i, smul_zero]
     · rfl
@@ -605,7 +612,7 @@ theorem row {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) (i : Fin T.s) :
   have hZ4 : ∑ g, ∑ h, (if i < g ∧ g ≤ h then τ.w' i g h • ∑ l, T.α g h l • X l else 0) = 0 := by
     refine Finset.sum_eq_zero fun g _ => Finset.sum_eq_zero fun h _ => ?_
     split_ifs with hc
-    · rw [← KA' g h hc.2, Tm_comm hmet, TTY hmet h5 hT hodd,
+    · rw [← KA' g h hc.2, Tm_comm hmet, TTY h5 hT hodd,
         show tc (T.x₁ g) (T.x₁ i) = (tc (T.x₁ i) (T.x₁ g))⁻¹ from (tc_inv _ _).symm,
         em_inv (tc_mem_L1 _ _), map_neg, smul_neg, L3 hmet h5 hT hodd hc.1.le, neg_zero,
         smul_zero]
@@ -623,7 +630,7 @@ theorem row {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) (i : Fin T.s) :
       (Int.modEq_zero_iff_dvd.mp (hτ.E i l)) ?_
     have hf : (T.f l : ℤ) • X l = 0 := by
       show (T.f l : ℤ) • Tm (T.x₁ i) (em (T.x₃ l)) = 0
-      rw [← map_zsmul, ← em_pow (x3_mem hmet h5 hT l)]
+      rw [← map_zsmul, ← em_pow (x3_mem hT l)]
       exact Tm_lcs3 (hT.basis₃.pow_mem l) h5 _
     rw [Nat.gcd_eq_gcd_ab, add_smul, mul_comm (T.d i : ℤ), mul_smul, mul_comm (T.f l : ℤ), mul_smul,
       hdX l, hf, smul_zero, smul_zero, add_zero]
@@ -688,7 +695,7 @@ theorem row {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) (i : Fin T.s) :
 `2 genA = 0`). -/
 theorem gen_sq {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) : T.gen τ ^ 2 = 1 := by
   classical
-  rw [Data.gen, genB_eq hmet h5 hT hodd, genC_eq hmet h5 hT hodd hτ, mul_one, mul_one]
+  rw [Data.gen, genB_eq hmet hT, genC_eq hmet h5 hT hodd hτ, mul_one, mul_one]
   set K : Fin T.s → Fin T.s → E G := fun h i => Tm (T.x₁ i) (em (T.x₁ h ^ T.d h)) with hK
   have hX := Finset.sum_congr rfl fun i (_ : i ∈ Finset.univ) => row hmet h5 hT hodd hτ i
   have hY : (∑ i, ∑ h, (if h < i then τ.u h i * T.q h i else 0) • K h i) =
@@ -701,7 +708,7 @@ theorem gen_sq {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) : T.gen τ ^ 2 = 1 
     · exact swap hmet h5 hT hodd hτ hhi
     · simp
   have hg : em (T.genA τ) = ∑ i, ∑ h, (if h < i then τ.u h i * T.q h i else 0) • K h i := by
-    rw [em_genA hmet h5 hT hodd, Finset.sum_comm]
+    rw [em_genA hT, Finset.sum_comm]
     refine Finset.sum_congr rfl fun i _ => Finset.sum_congr rfl fun j _ => ?_
     split_ifs <;> simp [hK]
   have h2 : (2 : ℤ) • em (T.genA τ) = 0 := by
@@ -756,7 +763,7 @@ theorem D_five_eq_gamma_five_of_metabelian {p : ℕ} [hp : Fact p.Prime] (hp2 : 
       ⁅a, b⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 4) :
     D 5 G = (⊤ : Subgroup G).lowerCentralSeries 4 := by
   refine le_antisymm (D_le_of_D_quotient_eq_bot _ 5 ?_) (gamma_le_D G 5 (by norm_num))
-  haveI : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 4) := finite_quotient_lcs hfin 3
+  have : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 4) := finite_quotient_lcs hfin 3
   set N := (⊤ : Subgroup G).lowerCentralSeries 4
   have hmetQ : ∀ a ∈ L1 (G ⧸ N), ∀ b ∈ L1 (G ⧸ N), a * b = b * a := by
     intro a ha b hb
