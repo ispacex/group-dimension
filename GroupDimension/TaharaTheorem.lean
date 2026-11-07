@@ -86,9 +86,9 @@ theorem D_five_eq_gamma_five_of_exp_L1_three (G : Type) [Group G]
     D 5 G = (⊤ : Subgroup G).lowerCentralSeries 4 :=
   ExpThree.D_five_eq_gamma_five_exp_L1 taharaFiveOne G hfin h3grp h2
 
+open scoped commutatorElement in
 /-- Theorem 6.9 with the hypothesis in the form `[x³, y] ∈ γ₃(G)` for all `x, y`
 (`ExpThree.cube_L1_of_comm_cube`). -/
-open scoped commutatorElement in
 theorem D_five_eq_gamma_five_of_comm_cube (G : Type) [Group G]
     (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
     (h3grp : ∀ x : G, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
