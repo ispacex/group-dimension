@@ -29,6 +29,7 @@ public import GroupDimension.Jennings.Theorem
 public import GroupDimension.MinimalCounterexample
 public import GroupDimension.MetabelianOdd
 public import GroupDimension.MinimalThree
+public import GroupDimension.GuptaTaharaThree
 public import GroupDimension.Nonterminal
 public import GroupDimension.IterExt
 public import GroupDimension.NonterminalSufficient

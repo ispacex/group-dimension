@@ -91,7 +91,8 @@ theorem D_four_le_of_isPGroup_three' {Q : Type} [Group Q] [Finite Q] (hQ : IsPGr
     D 4 Q ≤ (⊤ : Subgroup Q).lowerCentralSeries 3 :=
   D_four_le_of_isPGroup_three passiDFourSquare hQ
 
-/-- **Lemma 6.2** (minimal counterexample, `p = 3`), with Gupta–Tahara as the only hypothesis. -/
+/-- **Lemma 6.2** (minimal counterexample, `p = 3`), with Gupta–Tahara as the only hypothesis
+(without it: `minimal_three_three`, `GuptaTaharaThree.lean`). -/
 theorem minimal_three' (hGT : GuptaTaharaMetabelian) {Q : Type} [Group Q] [Finite Q]
     (hQ : IsPGroup 3 Q)
     (hmin : ∀ (R : Type) [Group R] [Finite R], IsPGroup 3 R → Nat.card R < Nat.card Q →

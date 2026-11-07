@@ -117,7 +117,7 @@ metabelian `p`-group `G`, `D_{p+2}(G) = γ_{p+2}(G)`. Stated for finite `p`-grou
 case, which loses nothing (a finitely generated metabelian `p`-group is finite); "metabelian"
 is `G'' = 1` (`derivedSeries G 2 = ⊥`). For `p` odd, `Dₙ = γₙ` holds for finitely generated
 metabelian `p`-groups and every `n` [Gup91]; that is not used.
-Formulation only, not proved here. -/
+Formulation only; proved at `p = 3`: `guptaTaharaMetabelian_three` (`GuptaTaharaThree.lean`). -/
 def GuptaTaharaMetabelian : Prop :=
   ∀ (p : ℕ), p.Prime → p ≠ 2 → ∀ (G : Type) [Group G] [Finite G], IsPGroup p G →
     derivedSeries G 2 = ⊥ → D (p + 2) G = (⊤ : Subgroup G).lowerCentralSeries (p + 1)
