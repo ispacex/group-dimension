@@ -23,10 +23,10 @@ central series. Kourovka Problem 20.84 asks whether `D₅(G) ⊆ γ₄(G)` for e
 `γ₃ = (⊤ : Subgroup G).lowerCentralSeries 2`, `γ₄ = (⊤ : Subgroup G).lowerCentralSeries 3`, `γ₅ = (⊤ : Subgroup G).lowerCentralSeries 4`.
 
 **What is proved.** Every statement below is unconditional except one.
-* Theorems 6.6, 6.8, 6.9 and 6.10 of the paper (`D₅ = γ₅` when `G/γ₂` is a finite group of
-  exponent 3, or a finite 3-group whose cubes form a cyclic group, or more generally a finite
+* Theorems 6.6, 6.8, 6.9, 6.10 and 6.11 of the paper (`D₅ = γ₅` when `G/γ₂` is a finite group
+  of exponent 3, or a finite 3-group whose cubes form a cyclic group, or more generally a finite
   3-group with `γ₂/γ₃` of exponent at most 3, or still more generally a finite 3-group with
-  `γ₄³ ⊆ γ₅` and `γ₂⁹ ⊆ γ₄`); Theorem D.1 of the paper (`D₅ = γ₅` when `G/γ₂` is a finite
+  `γ₄³ ⊆ γ₅` and `γ₂⁹ ⊆ γ₄`, and most generally a finite 3-group with `γ₄³ ⊆ γ₅`); Theorem D.1 of the paper (`D₅ = γ₅` when `G/γ₂` is a finite
   `p`-group, `p` odd, and `[γ₂, γ₂] ⊆ γ₅`; in particular Gupta–Tahara's theorem at `p = 3`:
   `D₅ = γ₅` for finite metabelian 3-groups); the inclusion `D₅(G) ⊆ M₅(G)`
   (Jennings' "hard" inclusion in the case needed); Lemma 5.6 and the Lean part of
@@ -161,6 +161,17 @@ theorem D_five_eq_gamma_five_of_g4_cube_g2_nine (G : Type) [Group G]
     (h3grp : ∀ x : G, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
     (h4 : ∀ c ∈ (⊤ : Subgroup G).lowerCentralSeries 3, c ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 4)
     (h9 : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, a ^ 9 ∈ (⊤ : Subgroup G).lowerCentralSeries 3) :
+    DSet 5 G = ((⊤ : Subgroup G).lowerCentralSeries 4 : Set G) := by
+  sorry
+
+/-- **Paper, Theorem 6.11.** If `G/γ₂(G)` is a finite 3-group and `γ₄(G)³ ⊆ γ₅(G)`
+(`c³ ∈ γ₅(G)` for every `c ∈ γ₄(G)`), then `D₅(G) = γ₅(G)`. There is no condition on
+`γ₂/γ₃`, `γ₃/γ₄` or the invariants of `G/γ₂`; Theorems 6.9 and 6.10 are special cases. No
+hypotheses beyond these. -/
+theorem D_five_eq_gamma_five_of_g4_cube (G : Type) [Group G]
+    (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
+    (h3grp : ∀ x : G, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
+    (h4 : ∀ c ∈ (⊤ : Subgroup G).lowerCentralSeries 3, c ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 4) :
     DSet 5 G = ((⊤ : Subgroup G).lowerCentralSeries 4 : Set G) := by
   sorry
 
