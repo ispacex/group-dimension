@@ -24,7 +24,7 @@ This needs that conjugation to be an automorphism of stage `k`. That holds if th
 which, with `T = 1 + D`, is the Jacobi identity `D_k b_ji = D_i b_jk - D_j b_ik` (`hJ`).
 No consistency of a presentation has to be checked: each step is a semidirect product.
 
-This is used in `NonterminalSufficient.lean` for the sufficiency part of Theorem 6.14.
+This is used in `NonterminalSufficient.lean` for the sufficiency part of Theorem 6.17.
 -/
 
 namespace GroupDimension.IterExt
