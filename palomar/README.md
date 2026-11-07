@@ -78,8 +78,8 @@ are proved in the development (`dThreeEqGammaThree`, `passiDFourSquare`,
   hypotheses. These are now proved in the development, and the compared statements no longer
   take them.
 * The paper's computer results (Props 5.1, 5.3, 5.10, Thms 5.4, 6.16) are not submitted.
-  Remark 2.2, Lemma 5.2 (d), Proposition 5.8, Lemma 5.9, Lemmas 6.1 and 6.2 (with Gupta–Tahara
-  as an explicit hypothesis, and for `p = 3` without it), Lemma 6.3, Proposition 6.5,
+  Remark 2.2, Lemma 5.2 (d), Proposition 5.8, Lemma 5.9, Lemma 6.1 (with Gupta–Tahara as an
+  explicit hypothesis, and for `p = 3` without it), Lemma 6.2, Lemma 6.3, Proposition 6.5,
   Lemma 6.11, Theorem 6.12 (for central extensions by a subgroup of exponent `p`), Theorem 6.14
   (for a given normal form), Theorem D.1 (`D₅ = γ₅` for `p` odd when `[γ₂, γ₂] ⊆ γ₅`; Gupta–Tahara at `p = 3`), the Lie algebra of
   Appendix A and the inclusion part of Tahara's Theorem 6.1 are formalized in the development
