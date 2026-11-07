@@ -1412,7 +1412,6 @@ theorem socle_basis {A : Type*} [AddCommGroup A] {n : ℕ} (y : Fin n → A) (ht
       have hlt : ∀ i, ht i < Mx := fun i => by
         have := Finset.single_le_sum (f := fun j => ht j + 1) (fun j _ => Nat.zero_le _)
           (Finset.mem_univ i)
-        simp only at this
         omega
       have claim : ∀ t, ∀ i, Mx - t ≤ ht i → (3 : ℤ) ∣ a i := by
         intro t
@@ -1627,14 +1626,14 @@ theorem D_five_eq_bot_of_class_four_exp_L1 (hT : TaharaFiveOne) {Q : Type} [Grou
     intro i
     rw [he i]
     exact Nat.findGreatest_spec (P := fun j => ((eqv.symm (π i) : W) : Additive (Layer Q 0)) ∈ H j)
-      (Nat.zero_le N) ⟨_, by simp⟩
+      (Nat.zero_le N) ⟨((eqv.symm (π i) : W) : Additive (Layer Q 0)), by simp⟩
   have hE2 : ∀ j (v : W), v ∈ Wf j → ∀ i, e.repr v i ≠ 0 → j ≤ ht i := by
     intro j v hv i hi
     have hsub := hBj j hv
     rw [hset] at hsub
     have hmem : eqv.symm (π i) ∈ {β : B | (β : W) ∈ Wf j} := by
       apply (b0.mem_span_image.mp hsub)
-      rw [Finsupp.mem_support_iff, ← hrepr]
+      rw [Finset.mem_coe, Finsupp.mem_support_iff, ← hrepr]
       exact hi
     have hHj := (hWf j _).mp hmem
     by_cases hjN : j ≤ N
@@ -1642,7 +1641,7 @@ theorem D_five_eq_bot_of_class_four_exp_L1 (hT : TaharaFiveOne) {Q : Type} [Grou
     · exfalso
       obtain ⟨a, ha⟩ := hHj
       have h0 : ((eqv.symm (π i) : B) : W) = 0 := Subtype.ext (by
-        rw [← ha, show j = (j - N) + N by omega, pow_add, mul_comm, mul_smul, hN, smul_zero]; rfl)
+        rw [← ha, show j = (j - N) + N by omega, pow_add, mul_comm, mul_smul, hN]; try rfl)
       exact b0.ne_zero (eqv.symm (π i)) (by rw [hb0]; exact h0)
   have hE3 : ∀ v : W, v ∈ LinearMap.ker P → ∀ i, e.repr v i ≠ 0 → P (e i) = 0 := by
     intro v hv i hi
@@ -1650,7 +1649,7 @@ theorem D_five_eq_bot_of_class_four_exp_L1 (hT : TaharaFiveOne) {Q : Type} [Grou
     rw [hset] at hsub
     have hmem : eqv.symm (π i) ∈ {β : B | (β : W) ∈ LinearMap.ker P} := by
       apply (b0.mem_span_image.mp hsub)
-      rw [Finsupp.mem_support_iff, ← hrepr]
+      rw [Finset.mem_coe, Finsupp.mem_support_iff, ← hrepr]
       exact hi
     rw [he i]
     exact hmem
@@ -1732,7 +1731,9 @@ theorem D_five_eq_bot_of_class_four_exp_L1 (hT : TaharaFiveOne) {Q : Type} [Grou
   let eJ : J ≃ Fin (Fintype.card J) := Fintype.equivFin J
   let f : Module.Basis (Fin (Fintype.card J)) (ZMod 3) (Additive (Layer Q 1)) := f0.reindex eJ
   have hf : ∀ k, f k = (eJ.symm k : Additive (Layer Q 1)) := fun k => by
-    simp only [f, Module.Basis.reindex_apply, f0, Module.Basis.coe_extend]
+    show (f0.reindex eJ) k = _
+    rw [Module.Basis.reindex_apply]
+    exact Module.Basis.extend_apply_self hgs _
   have hmemJ : ∀ i (h : act i), P (e i) ∈ J := fun i h =>
     Module.Basis.subset_extend hgs ⟨⟨i, h⟩, rfl⟩
   let σ : Fin (Fintype.card B) → Option (Fin (Fintype.card J)) := fun i =>
