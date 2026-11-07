@@ -26,6 +26,11 @@ The proof follows the wiki page of MATH-444, step 2 (MATH page 891, §2–§4):
   `∑_r [R_r, Y_r] + 2 V`; the latter vanishes by condition (F), the former term by term
   (conditions (C) and (B) modulo `3` and the basis adapted to the kernel of the cube map,
   `SetupB.delta_pow_eq_one`); the `w`-part is trivial as in Theorem 6.10.
+
+The route differs slightly from `(⋆)` of the wiki page: the `w`-part is shown trivial directly
+(`genC_eq`, conditions (D) modulo `3`), and condition (E) is used modulo `3` inside the row identity
+(`Erow`), so the terms `T₂`–`T₅` of `(⋆)` never appear; only `T₁` (`delta_pow_eq_one`) and the
+`v`-part (`Vpart`, which also uses (F₁)) are evaluated.
 -/
 
 namespace GroupDimension
@@ -192,7 +197,7 @@ theorem delta_mem {x y : G} {m : ℕ} (hx : x ^ (3 ^ (m + 1)) ∈ (⊤ : Subgrou
   · exact tc_mem (i := 2) (j := 0) (by omega) (tc_mem (by omega) hc1 (mem_lcs_zero x)) (mem_lcs_zero x)
   · exact tc_mem (i := 2) (j := 0) (by omega) (tc_mem (by omega) hc1' (mem_lcs_zero y)) (mem_lcs_zero y)
 
-/-- `Δ = 1` when `9 ∣ n` and the two `γ₂ × γ₂` pairings vanish. -/
+/-- `Δ = 1` when `9 ∣ n` and `[[x, y], xⁿ] = [[y, x], yⁿ] = 1`. -/
 theorem delta_one {x y : G} {m : ℕ}
     (h1 : tc (tc x y) (x ^ (3 ^ (m + 1 + 1))) = 1) (h2 : tc (tc y x) (y ^ (3 ^ (m + 1 + 1))) = 1) :
     tc (x ^ (3 ^ (m + 1 + 1))) y * tc (y ^ (3 ^ (m + 1 + 1))) x = 1 := by
@@ -232,7 +237,7 @@ theorem addMapG_ofFn {M : Type*} [AddCommGroup M] {S : Subgroup G} {A : G → M}
 
 /-! ## The computation -/
 
-/-- The situation of the proof of Theorem B: class `≤ 4`, `γ₄³ = 1`, `γ₃/γ₄` a `3`-group, the
+/-- The situation of the proof of Theorem B: class `≤ 4`, `γ₄³ = 1`, `γ₃` a `3`-group, the
 orders of the first layer powers `3^{m+1}`, those of the second and third layers divisible by `3`.
 `act i` says that `x_i` is *active*; an inactive `x_i` has `x_i^{d(i)} ∈ γ₂³γ₃`, and the
 coefficients of combinations of the classes `x_h^{d(h)}` modulo `3 L₂` are seen at the active
@@ -909,7 +914,8 @@ theorem Vpart {N : Type*} [AddCommGroup N] {A : G → N}
       smul_smul]
   rw [← hAP, hP1, addMapG_one hA]
 
-/-- **`2 g(τ) = 0`** for every map `A` additive on `γ₃` (wiki page 891, `(⋆)` and §4). -/
+/-- **`2 g(τ) = 0`** for every map `A` additive on `γ₃` (wiki page 891, `(⋆)` and §4, in the
+variant of the module docstring). -/
 theorem two_smul_gen {N : Type*} [AddCommGroup N] {A : G → N}
     (hA : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 2, ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 2,
       A (a * b) = A a + A b) :
