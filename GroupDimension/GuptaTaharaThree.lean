@@ -285,7 +285,7 @@ theorem smul_eq_zero_of_dvd {d a : ℤ} {v : E G} (h : d ∣ a) (hv : d • v = 
 theorem smul_Tm_eq_zero {x : G} {n : ℕ} (hn : Odd n) (hx : x ^ n ∈ L1 G) (v : E G) :
     (n : ℤ) • Tm x v = 0 := by
   have key : ∀ a ∈ L1 G, (n : ℤ) • Tm x (em a) + ((n.choose 2 : ℕ) : ℤ) • Tm x (Tm x (em a)) = 0 :=
-    fun a ha => by rw [← em_tc_pow_right hmet h5 ha, tc_eq_one_L1 hmet ha hx, em_one]
+    fun a ha => by rw [← em_tc_pow_right h5 ha, tc_eq_one_L1 hmet ha hx, em_one]
   obtain ⟨a, ha, rfl⟩ := em_surj v
   have k2 := key _ (tcL ha x)
   rw [← Tm_em ha, Tm3 h5 x x x, smul_zero, add_zero] at k2
@@ -301,7 +301,7 @@ theorem smul_Tm_tc_eq_zero {x y : G} {n : ℕ} (hn : Odd n) (hx : x ^ n ∈ L1 G
   have hd2 : (n : ℤ) ∣ ((n.choose 2 : ℕ) : ℤ) := by
     rw [choose_two_of_odd hn]; push_cast; exact dvd_mul_right _ _
   have hX := Tm_comm hmet z y (em (x ^ n))
-  rw [Tm_em hx, Tm_em hx, em_tc_pow_left hmet h5, em_tc_pow_left hmet h5] at hX
+  rw [Tm_em hx, Tm_em hx, em_tc_pow_left h5, em_tc_pow_left h5] at hX
   simp only [map_add, map_zsmul] at hX
   have e1 : Tm z (Tm x (Tm x (em (tc x y)))) = 0 := by
     rw [Tm_comm hmet z x, Tm_comm hmet z x, ← Tm_comm hmet x x]; exact Tm3 h5 x x z _
@@ -360,7 +360,7 @@ theorem TY (g h : Fin T.s) : Tm (T.x₁ h) (em (T.x₁ g ^ T.d g)) =
     (T.d g : ℤ) • em (tc (T.x₁ g) (T.x₁ h)) +
       ((T.d g).choose 2 : ℤ) • Tm (T.x₁ g) (em (tc (T.x₁ g) (T.x₁ h))) +
       ((T.d g).choose 3 : ℤ) • Tm (T.x₁ g) (Tm (T.x₁ g) (em (tc (T.x₁ g) (T.x₁ h)))) := by
-  rw [Tm_em (Y_mem hT g), em_tc_pow_left hmet h5]
+  rw [Tm_em (Y_mem hT g), em_tc_pow_left h5]
 
 /-- `[Y_g, x_h, x_k] = d(g) [x_g, x_h, x_k]`. -/
 theorem TTY (g h k : Fin T.s) : Tm (T.x₁ k) (Tm (T.x₁ h) (em (T.x₁ g ^ T.d g))) =
@@ -444,7 +444,7 @@ theorem swap {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) {i j : Fin T.s} (hij 
     have h := Int.modEq_zero_iff_dvd.mp (hτ.C₃ i j hij)
     simp only [Data.ch] at h
     have hdj : (T.d i : ℤ) ∣ ((T.d j).choose 2 : ℤ) :=
-      dvd_trans (by exact_mod_cast hT.basis₁.dvd i j hij.le)
+      dvd_trans (Int.natCast_dvd_natCast.mpr (hT.basis₁.dvd i j hij.le))
         (by simpa [Data.ch] using d_dvd_ch2 hT (hodd j))
     have h2 : (T.d i : ℤ) ∣ τ.w' i j j * ((T.d j).choose 2 : ℤ) := dvd_mul_of_dvd_right hdj _
     have h3 := dvd_sub h2 h
@@ -454,10 +454,7 @@ theorem swap {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) {i j : Fin T.s} (hij 
     rwa [e] at h3
   have hdTT : (T.d i : ℤ) • Tm (T.x₁ j) (Tm (T.x₁ j) c) = 0 := by
     have h := congrArg (fun v => Tm (T.x₁ j) (Tm (T.x₁ j) v)) hA
-    simp only [Tm3 h5, map_add, map_zsmul] at h
-    have e1 : Tm (T.x₁ j) (Tm (T.x₁ j) (Tm (T.x₁ i) c)) = 0 := Tm3 h5 _ _ _ _
-    have e2 : Tm (T.x₁ j) (Tm (T.x₁ j) (Tm (T.x₁ i) (Tm (T.x₁ i) c))) = 0 := Tm3 h5 _ _ _ _
-    rw [e1, e2, smul_zero, smul_zero, add_zero, add_zero] at h
+    simp only [Tm3 h5, map_add, map_zsmul, map_zero, smul_zero, add_zero] at h
     exact h.symm
   have z3 : (τ.u i j * T.q i j * ((T.d i).choose 3 : ℤ)) • Tm (T.x₁ i) (Tm (T.x₁ i) c) = 0 :=
     smul_eq_zero_of_dvd hC1 (L2 hmet h5 hT hodd i _)
