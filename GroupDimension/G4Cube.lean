@@ -1,0 +1,690 @@
+module
+
+public import GroupDimension.ExpNine
+
+@[expose] public section
+
+/-!
+# `D₅ = γ₅` when `γ₄³ ⊆ γ₅` (Theorem B, MATH-444 step 2)
+
+**Theorem B** (`D_five_eq_gamma_five_g4_cube`): if `G/γ₂(G)` is a finite `3`-group and
+`γ₄(G)³ ⊆ γ₅(G)`, then `D₅(G) = γ₅(G)`. The finite form (`D_five_eq_bot_of_class_four_g4_cube`): a
+finite group `Q` of class `≤ 4` with `Q/γ₂` a `3`-group and `c³ = 1` for `c ∈ γ₄` has `D₅(Q) = 1`.
+It contains Theorem 6.10 (`ExpNine.lean`, which needs `γ₂⁹ ⊆ γ₄` in addition) and Theorem 6.9.
+As there, Tahara's Theorem 6.1 (`TaharaFiveOne`) is an explicit hypothesis, discharged in
+`TaharaTheorem.lean`.
+
+The proof follows the wiki page of MATH-444, step 2 (MATH page 891, §2–§4):
+
+* the expansion `[xⁿ, y] = cⁿ [c, x]^{n choose 2} [c, x, x]^{n choose 3}` in class `≤ 4`
+  (`tc_pow_formula`) and the "defect of antisymmetry"
+  `Δ = [xⁿ, y][yⁿ, x]` for `n = 3^{m+1}` (`delta_formula`), which lies in `γ₄`;
+* the row identity (`SetupB.rowB`): conditions (B) and (E) of a row `r` (any order `d(r)`), paired
+  with `x_r`, give `∑_k v_{rk} d(r) [x_{2k}, x_r] + ∑_h crow_{rh} [x_h^{d(h)}, x_r] = 0` exactly in
+  the abelian group `γ₃` (for any map additive on `γ₃`);
+* summing the row identities over all rows, `2 g(τ)` becomes `∑_{i<h} u_{ih} Δ_{ih}` plus
+  `∑_r [R_r, Y_r] + 2 V`; the latter vanishes by condition (F), the former term by term
+  (conditions (C) and (B) modulo `3` and the basis adapted to the kernel of the cube map,
+  `SetupB.delta_pow_eq_one`); the `w`-part is trivial as in Theorem 6.10.
+-/
+
+namespace GroupDimension
+
+namespace ExpThree
+
+open Subgroup Tahara ClassFour
+open scoped commutatorElement
+
+variable {G : Type*} [Group G]
+
+/-! ## Identities in class `≤ 4` -/
+
+section Expansion
+
+variable (h5 : (⊤ : Subgroup G).lowerCentralSeries 4 = ⊥)
+include h5
+
+/-- (K2): `[xⁿ, y] = cⁿ fⁿᶜ² gⁿᶜ³` with `c = [x, y]`, `f = [c, x]`, `g = [f, x]`. -/
+theorem tc_pow_formula (x y : G) (n : ℕ) :
+    tc (x ^ n) y = tc x y ^ n * tc (tc x y) x ^ (n.choose 2) *
+      tc (tc (tc x y) x) x ^ (n.choose 3) := by
+  obtain ⟨c, hc⟩ : ∃ c, c = tc x y := ⟨_, rfl⟩
+  obtain ⟨f, hf⟩ : ∃ f, f = tc c x := ⟨_, rfl⟩
+  obtain ⟨g, hg⟩ : ∃ g, g = tc f x := ⟨_, rfl⟩
+  rw [← hc, ← hf, ← hg]
+  have hc1 : c ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+    hc ▸ tc_mem (by omega) (mem_lcs_zero x) (mem_lcs_zero y)
+  have hf2 : f ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
+    hf ▸ tc_mem (by omega) hc1 (mem_lcs_zero x)
+  have hg3 : g ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
+    hg ▸ tc_mem (by omega) hf2 (mem_lcs_zero x)
+  have hgz : ∀ z : G, Commute z g := fun z => central_L3 h5 hg3 z
+  have hcf : Commute c f :=
+    commutatorElement_eq_one_iff_mul_comm.mp (comm_eq_one h5 (by norm_num) hc1 hf2)
+  have hc' : x⁻¹ * c * x = c * f := by rw [hf, tc]; group
+  have hf' : x⁻¹ * f * x = f * g := by rw [hg, tc]; group
+  have hg' : x⁻¹ * g * x = g := by
+    rw [mul_assoc, ← (hgz x).eq, ← mul_assoc, inv_mul_cancel, one_mul]
+  have hconj : ∀ (b : G) (k : ℕ), x⁻¹ * b ^ k * x = (x⁻¹ * b * x) ^ k := fun b k => by
+    simpa using (conj_pow (a := x⁻¹) (b := b) (i := k)).symm
+  have hm : ∀ p q : G, x⁻¹ * (p * q) * x = (x⁻¹ * p * x) * (x⁻¹ * q * x) := fun p q => by group
+  induction n with
+  | zero => simp [tc]
+  | succ n ih =>
+    have e : tc (x ^ (n + 1)) y = x⁻¹ * tc (x ^ n) y * x * tc x y := by
+      rw [pow_succ]; exact tc_mul_left _ _ _
+    have e2 : (n + 1).choose 2 = n + n.choose 2 := by
+      rw [show (2 : ℕ) = 1 + 1 from rfl, Nat.choose_succ_succ', Nat.choose_one_right]
+    have e3 : (n + 1).choose 3 = n.choose 2 + n.choose 3 := by
+      rw [show (3 : ℕ) = 2 + 1 from rfl, Nat.choose_succ_succ']
+    rw [e, ih, ← hc, hm, hm, hconj, hconj, hconj, hc', hf', hg', hcf.mul_pow, (hgz f).mul_pow,
+      e2, e3, pow_succ, pow_add, pow_add]
+    have hG : Commute (g ^ n.choose 2 * g ^ n.choose 3) c :=
+      ((hgz c).symm.pow_left _).mul_left ((hgz c).symm.pow_left _)
+    have hF : Commute (f ^ n * f ^ n.choose 2) c :=
+      (hcf.symm.pow_left _).mul_left (hcf.symm.pow_left _)
+    calc c ^ n * f ^ n * (f ^ n.choose 2 * g ^ n.choose 2) * g ^ n.choose 3 * c
+        = c ^ n * (f ^ n * f ^ n.choose 2) * ((g ^ n.choose 2 * g ^ n.choose 3) * c) := by group
+      _ = c ^ n * ((f ^ n * f ^ n.choose 2) * c) * (g ^ n.choose 2 * g ^ n.choose 3) := by
+          rw [hG.eq]; group
+      _ = c ^ n * (c * (f ^ n * f ^ n.choose 2)) * (g ^ n.choose 2 * g ^ n.choose 3) := by
+          rw [hF.eq]
+      _ = c ^ n * c * (f ^ n * f ^ n.choose 2) * (g ^ n.choose 2 * g ^ n.choose 3) := by group
+
+/-- `[aⁿ, x] = [a, x]ⁿ` for `a ∈ γ₂`. -/
+theorem tc_pow_left_L1 {a : G} (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (x : G) (n : ℕ) :
+    tc (a ^ n) x = tc a x ^ n := by
+  induction n with
+  | zero => simp [tc]
+  | succ n ih => rw [pow_succ, tc_mul_left_L1 h5 (pow_mem ha n) ha, ih, pow_succ]
+
+/-- `[c, aⁿ] = [c, a]ⁿ` for `c, a ∈ γ₂`. -/
+theorem tc_pow_right_L1 {c a : G} (hc : c ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
+    (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (n : ℕ) : tc c (a ^ n) = tc c a ^ n := by
+  induction n with
+  | zero => simp [tc]
+  | succ n ih =>
+    have hz : tc c (a ^ n) ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
+      tc_mem (by omega) hc (pow_mem ha n)
+    rw [pow_succ, tc_mul_right, mul_assoc a⁻¹, ← central_L3 h5 hz a, ← mul_assoc, inv_mul_cancel,
+      one_mul, ih, pow_succ']
+
+variable (h4 : ∀ c ∈ (⊤ : Subgroup G).lowerCentralSeries 3, c ^ 3 = 1)
+include h4
+
+/-- `[Y, x^{3^m}] = [Y, x]^{3^m}` for `Y ∈ γ₂` when `γ₄³ = 1` (I4, iterated). -/
+theorem tc_pow3_right {Y : G} (hY : Y ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (x : G) (m : ℕ) :
+    tc Y (x ^ (3 ^ m)) = tc Y x ^ (3 ^ m) := by
+  induction m with
+  | zero => simp
+  | succ m ih => rw [pow_succ, pow_mul, tc_pow_three_rightA h5 h4 hY, ih, ← pow_mul]
+
+omit h5 h4 in
+theorem choose2_eq (m : ℕ) : (3 ^ (m + 1)).choose 2 = 3 ^ (m + 1) * ((3 ^ (m + 1) - 1) / 2) := by
+  rw [Nat.choose_two_right]
+  have hodd : Odd (3 ^ (m + 1)) := Odd.pow (by decide)
+  have h2 : 2 ∣ 3 ^ (m + 1) - 1 := by
+    obtain ⟨k, hk⟩ := hodd
+    rw [hk]; omega
+  exact Nat.mul_div_assoc _ h2
+
+omit h5 h4 in
+theorem three_dvd_choose3 (m : ℕ) : 3 ∣ (3 ^ (m + 1 + 1)).choose 3 := by
+  have h := Nat.descFactorial_eq_factorial_mul_choose (3 ^ (m + 1 + 1)) 3
+  have hd : (3 ^ (m + 1 + 1)).descFactorial 3 =
+      (3 ^ (m + 1 + 1) - 2) * ((3 ^ (m + 1 + 1) - 1) * ((3 ^ (m + 1 + 1) - 0) * 1)) := by
+    simp only [Nat.descFactorial_succ, Nat.descFactorial_zero]
+  have h9 : 9 ∣ (3 ^ (m + 1 + 1)).descFactorial 3 := by
+    rw [hd]
+    refine Dvd.dvd.mul_left (Dvd.dvd.mul_left (Dvd.dvd.mul_right ?_ _) _) _
+    rw [Nat.sub_zero]
+    exact ⟨3 ^ m, by ring⟩
+  rw [h] at h9
+  have : (3 : ℕ).factorial = 6 := rfl
+  rw [this] at h9
+  omega
+
+/-- The defect of antisymmetry `Δ = [xⁿ, y][yⁿ, x]` for `n = 3^{m+1}`. -/
+theorem delta_formula (x y : G) (m : ℕ) :
+    tc (x ^ (3 ^ (m + 1))) y * tc (y ^ (3 ^ (m + 1))) x =
+      tc (tc x y) (x ^ (3 ^ (m + 1))) ^ ((3 ^ (m + 1) - 1) / 2) *
+        tc (tc (tc x y) x) x ^ ((3 ^ (m + 1)).choose 3) *
+      (tc (tc y x) (y ^ (3 ^ (m + 1))) ^ ((3 ^ (m + 1) - 1) / 2) *
+        tc (tc (tc y x) y) y ^ ((3 ^ (m + 1)).choose 3)) := by
+  have hc1 : tc x y ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+    tc_mem (by omega) (mem_lcs_zero x) (mem_lcs_zero y)
+  have hc1' : tc y x ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+    tc_mem (by omega) (mem_lcs_zero y) (mem_lcs_zero x)
+  rw [tc_pow_formula h5 x y, tc_pow_formula h5 y x, choose2_eq, pow_mul, pow_mul,
+    ← tc_pow3_right h5 h4 hc1, ← tc_pow3_right h5 h4 hc1']
+  -- `[y, x] = [x, y]⁻¹`, and the `γ₃`-part commutes with `γ₂`
+  have hinv : tc y x = (tc x y)⁻¹ := (tc_inv x y).symm
+  have key : ∀ (c F₁ G₁ F₂ G₂ : G) (n : ℕ), Commute (F₁ * G₁) (c⁻¹ ^ n) →
+      c ^ n * F₁ * G₁ * (c⁻¹ ^ n * F₂ * G₂) = F₁ * G₁ * (F₂ * G₂) := by
+    intro c F₁ G₁ F₂ G₂ n h
+    calc c ^ n * F₁ * G₁ * (c⁻¹ ^ n * F₂ * G₂) = c ^ n * ((F₁ * G₁) * c⁻¹ ^ n) * (F₂ * G₂) := by
+          group
+      _ = c ^ n * (c⁻¹ ^ n * (F₁ * G₁)) * (F₂ * G₂) := by rw [h.eq]
+      _ = F₁ * G₁ * (F₂ * G₂) := by rw [inv_pow]; group
+  have hX2 : tc (tc x y) (x ^ (3 ^ (m + 1))) ^ ((3 ^ (m + 1) - 1) / 2) *
+      tc (tc (tc x y) x) x ^ ((3 ^ (m + 1)).choose 3) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := by
+    refine mul_mem (pow_mem ?_ _) (pow_mem ?_ _)
+    · exact tc_mem (i := 1) (j := 0) (by omega) hc1 (mem_lcs_zero _)
+    · exact lcs_mem_of_le (by norm_num) (tc_mem (i := 2) (j := 0) (by omega)
+        (tc_mem (by omega) hc1 (mem_lcs_zero x)) (mem_lcs_zero x))
+  have hcomm := commutatorElement_eq_one_iff_mul_comm.mp
+      (comm_eq_one h5 (by norm_num) hX2 (pow_mem (inv_mem hc1) (3 ^ (m + 1))))
+  rw [hinv]
+  exact key _ _ _ _ _ _ hcomm
+
+/-- `Δ ∈ γ₄` when `xⁿ, yⁿ ∈ γ₂`. -/
+theorem delta_mem {x y : G} {m : ℕ} (hx : x ^ (3 ^ (m + 1)) ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
+    (hy : y ^ (3 ^ (m + 1)) ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
+    tc (x ^ (3 ^ (m + 1))) y * tc (y ^ (3 ^ (m + 1))) x ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by
+  have hc1 : tc x y ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+    tc_mem (by omega) (mem_lcs_zero x) (mem_lcs_zero y)
+  have hc1' : tc y x ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+    tc_mem (by omega) (mem_lcs_zero y) (mem_lcs_zero x)
+  rw [delta_formula h5 h4]
+  refine mul_mem (mul_mem (pow_mem (tc_mem (by omega) hc1 hx) _) (pow_mem ?_ _))
+    (mul_mem (pow_mem (tc_mem (by omega) hc1' hy) _) (pow_mem ?_ _))
+  · exact tc_mem (i := 2) (j := 0) (by omega) (tc_mem (by omega) hc1 (mem_lcs_zero x)) (mem_lcs_zero x)
+  · exact tc_mem (i := 2) (j := 0) (by omega) (tc_mem (by omega) hc1' (mem_lcs_zero y)) (mem_lcs_zero y)
+
+/-- `Δ = 1` when `9 ∣ n` and the two `γ₂ × γ₂` pairings vanish. -/
+theorem delta_one {x y : G} {m : ℕ}
+    (h1 : tc (tc x y) (x ^ (3 ^ (m + 1 + 1))) = 1) (h2 : tc (tc y x) (y ^ (3 ^ (m + 1 + 1))) = 1) :
+    tc (x ^ (3 ^ (m + 1 + 1))) y * tc (y ^ (3 ^ (m + 1 + 1))) x = 1 := by
+  have hc1 : tc x y ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+    tc_mem (by omega) (mem_lcs_zero x) (mem_lcs_zero y)
+  have hc1' : tc y x ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+    tc_mem (by omega) (mem_lcs_zero y) (mem_lcs_zero x)
+  rw [delta_formula h5 h4 x y (m + 1), h1, h2]
+  simp only [one_pow, one_mul]
+  obtain ⟨k, hk⟩ := three_dvd_choose3 m
+  have g1 := h4 _ (tc_mem (i := 2) (j := 0) (by omega) (tc_mem (by omega) hc1 (mem_lcs_zero x))
+    (mem_lcs_zero x))
+  have g2 := h4 _ (tc_mem (i := 2) (j := 0) (by omega) (tc_mem (by omega) hc1' (mem_lcs_zero y))
+    (mem_lcs_zero y))
+  rw [hk, pow_mul, pow_mul, g1, g2]
+  simp
+
+end Expansion
+
+/-! ## Maps with values in an abelian group: products -/
+
+theorem addMapG_ofFn {M : Type*} [AddCommGroup M] {S : Subgroup G} {A : G → M}
+    (hA : ∀ a ∈ S, ∀ b ∈ S, A (a * b) = A a + A b) {n : ℕ} (f : Fin n → G)
+    (hf : ∀ i, f i ∈ S) : A (List.ofFn f).prod = ∑ i, A (f i) := by
+  have : ∀ l : List G, (∀ y ∈ l, y ∈ S) → A l.prod = (l.map A).sum := by
+    intro l
+    induction l with
+    | nil => intro _; simp [addMapG_one hA]
+    | cons y l ih =>
+      intro hl
+      rw [List.prod_cons, hA _ (hl y List.mem_cons_self) _
+        (list_prod_mem fun z hz => hl z (List.mem_cons_of_mem _ hz)),
+        ih fun z hz => hl z (List.mem_cons_of_mem _ hz), List.map_cons, List.sum_cons]
+  rw [this _ (fun y hy => by obtain ⟨i, rfl⟩ := List.mem_ofFn.mp hy; exact hf i), List.map_ofFn,
+    List.sum_ofFn]
+  rfl
+
+/-! ## The computation -/
+
+/-- The situation of the proof of Theorem B: class `≤ 4`, `γ₄³ = 1`, `γ₃/γ₄` a `3`-group, the
+orders of the first layer powers `3^{m+1}`, those of the second and third layers divisible by `3`.
+`act i` says that `x_i` is *active*; an inactive `x_i` has `x_i^{d(i)} ∈ γ₂³γ₃`, and the
+coefficients of combinations of the classes `x_h^{d(h)}` modulo `3 L₂` are seen at the active
+indices (`hind`). -/
+structure SetupB (T : Data G) (act : Fin T.s → Prop) : Prop where
+  h5 : (⊤ : Subgroup G).lowerCentralSeries 4 = ⊥
+  h4 : ∀ c ∈ (⊤ : Subgroup G).lowerCentralSeries 3, c ^ 3 = 1
+  htor : ∀ c ∈ (⊤ : Subgroup G).lowerCentralSeries 2, ∃ m : ℕ, c ^ (3 ^ m) = 1
+  valid : T.Valid
+  hd : ∀ i, ∃ m : ℕ, T.d i = 3 ^ (m + 1)
+  he : ∀ k, 3 ∣ T.e k
+  hf : ∀ l, 3 ∣ T.f l
+  hK : ∀ i, ¬ act i → ∃ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1,
+    ∃ c ∈ (⊤ : Subgroup G).lowerCentralSeries 2, T.x₁ i ^ T.d i = a ^ 3 * c
+  hind : ∀ cf : Fin T.s → ℤ, (∀ k, (3 : ℤ) ∣ ∑ h, cf h * T.b h k) → ∀ h, act h → (3 : ℤ) ∣ cf h
+
+namespace SetupB
+
+variable {T : Data G} {act : Fin T.s → Prop} (S : SetupB T act)
+include S
+
+theorem three_dvd_d (i : Fin T.s) : 3 ∣ T.d i := by
+  obtain ⟨m, hm⟩ := S.hd i
+  rw [hm, pow_succ]; exact dvd_mul_left 3 _
+
+theorem d_dvd {i j : Fin T.s} (h : i ≤ j) : T.d i ∣ T.d j := S.valid.basis₁.dvd i j h
+
+theorem gcd_e3 (i : Fin T.s) (k : Fin T.t) : 3 ∣ Nat.gcd (T.d i) (T.e k) :=
+  Nat.dvd_gcd (S.three_dvd_d i) (S.he k)
+
+theorem gcd_f3 (i : Fin T.s) (l : Fin T.u) : 3 ∣ Nat.gcd (T.d i) (T.f l) :=
+  Nat.dvd_gcd (S.three_dvd_d i) (S.hf l)
+
+theorem ch2_dvd (i : Fin T.s) : (3 : ℤ) ∣ T.ch i 2 := by
+  obtain ⟨r, hr⟩ := S.three_dvd_d i
+  have h2 : (T.d i).choose 2 * 2 = T.d i * (T.d i - 1) := by
+    rw [Nat.choose_two_right, Nat.div_mul_cancel (Nat.even_mul_pred_self (T.d i)).two_dvd]
+  have h3 : 3 ∣ (T.d i).choose 2 * 2 := by rw [h2, hr, mul_assoc]; exact dvd_mul_right 3 _
+  have : 3 ∣ (T.d i).choose 2 := (Nat.Coprime.dvd_of_dvd_mul_right (by norm_num) h3)
+  unfold Data.ch
+  exact_mod_cast this
+
+theorem x2mem (k : Fin T.t) : T.x₂ k ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := S.valid.basis₂.mem k
+
+theorem x3mem (l : Fin T.u) : T.x₃ l ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := S.valid.basis₃.mem l
+
+theorem Y1 (i : Fin T.s) : T.x₁ i ^ T.d i ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := by
+  have h := S.valid.hb i
+  have hP : oprod T.x₂ (T.b i) * oprod T.x₃ (T.c i) ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+    mul_mem (oprod_mem S.x2mem _) (oprod_mem (fun l => lcs_mem_of_le (by norm_num) (S.x3mem l)) _)
+  rw [← mul_inv_cancel_left (oprod T.x₂ (T.b i) * oprod T.x₃ (T.c i)) (T.x₁ i ^ T.d i)]
+  exact mul_mem hP (lcs_mem_of_le (by norm_num) h)
+
+theorem x2e (k : Fin T.t) : T.x₂ k ^ T.e k ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := by
+  have h := S.valid.hdd k
+  rw [← mul_inv_cancel_left (oprod T.x₃ (T.dd k)) (T.x₂ k ^ T.e k)]
+  exact mul_mem (oprod_mem S.x3mem _) (lcs_mem_of_le (by norm_num) h)
+
+/-- `d(i) q(i, j) = d(j)` for `i ≤ j`. -/
+theorem d_mul_q {i j : Fin T.s} (hij : i ≤ j) : T.d i * (T.d j / T.d i) = T.d j :=
+  Nat.mul_div_cancel' (S.d_dvd hij)
+
+/-- `3 ∣ d(j)/d(i)` when `i ≤ j` and `d(i) ≠ d(j)`. -/
+theorem three_dvd_q {i j : Fin T.s} (hij : i ≤ j) (hne : T.d i ≠ T.d j) : 3 ∣ T.d j / T.d i := by
+  obtain ⟨a, ha⟩ := S.hd i
+  obtain ⟨b, hb⟩ := S.hd j
+  have hdv := S.d_dvd hij
+  rw [ha, hb] at hdv hne ⊢
+  have hab : a + 1 ≤ b + 1 := (Nat.pow_dvd_pow_iff_le_right (by norm_num)).mp hdv
+  have hlt : a + 1 < b + 1 := lt_of_le_of_ne hab (fun h => hne (by rw [h]))
+  rw [Nat.pow_div hab (by norm_num)]
+  exact dvd_pow_self 3 (by omega)
+
+/-- For an inactive `i`, `[[x_i^{d(i)}, x], z] = 1`. -/
+theorem tcK {i : Fin T.s} (hi : ¬ act i) (x z : G) : tc (tc (T.x₁ i ^ T.d i) x) z = 1 := by
+  obtain ⟨a, ha, c, hc, he⟩ := S.hK i hi
+  have h1 : tc a x ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := tc_mem (by omega) ha (mem_lcs_zero x)
+  have h2 : tc c x ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := tc_mem (by omega) hc (mem_lcs_zero x)
+  rw [he, tc_mul_left_L1 S.h5 (pow_mem ha 3) (lcs_mem_of_le (by norm_num) hc),
+    tc_pow_three_left S.h5 ha,
+    tc_mul_left_L1 S.h5 (lcs_mem_of_le (by norm_num) (pow_mem h1 3)) (lcs_mem_of_le (by norm_num) h2),
+    tc_L3 S.h5 h2, mul_one, tc_pow_three_left S.h5 (lcs_mem_of_le (by norm_num) h1)]
+  exact S.h4 _ (tc_mem (by omega) h1 (mem_lcs_zero z))
+
+/-- For an inactive `h`, `[c, x_h^{d(h)}] = 1` for `c ∈ γ₂`. -/
+theorem tcK_right {h : Fin T.s} (hh : ¬ act h) {c : G} (hc : c ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
+    tc c (T.x₁ h ^ T.d h) = 1 := by
+  obtain ⟨a, ha, e, he, hY⟩ := S.hK h hh
+  have hce : tc c e = 1 := by
+    rw [← tc_inv, tc_L2_L1 S.h5 he hc, inv_one]
+  rw [hY, tc_mul_right, hce, one_mul, tc_pow_right_L1 S.h5 hc ha, S.h4 _ (tc_mem (by omega) hc ha)]
+  group
+
+/-- For an inactive `g`, the constants `α^{(gh)}` vanish modulo `3`. -/
+theorem α3 {g : Fin T.s} (hg : ¬ act g) {h : Fin T.s} (hgh : g ≤ h) (l : Fin T.u) :
+    (3 : ℤ) ∣ T.α g h l := by
+  obtain ⟨a, ha, c, hc, he⟩ := S.hK g hg
+  have hm := S.valid.hα g h hgh
+  have h1 : tc a (T.x₁ h) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
+    tc_mem (by omega) ha (mem_lcs_zero _)
+  have h2 : tc c (T.x₁ h) ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
+    tc_mem (by omega) hc (mem_lcs_zero _)
+  have e1 : tc (T.x₁ g ^ T.d g) (T.x₁ h) = tc a (T.x₁ h) ^ 3 * tc c (T.x₁ h) := by
+    rw [he, tc_mul_left_L1 S.h5 (pow_mem ha 3) (lcs_mem_of_le (by norm_num) hc),
+      tc_pow_three_left S.h5 ha]
+  have hY : tc (T.x₁ g ^ T.d g) (T.x₁ h) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
+    tc_mem (by omega) (S.Y1 g) (mem_lcs_zero _)
+  obtain ⟨a', ha'⟩ := S.valid.basis₃.span _ h1
+  have hX : cl G 2 (oprod T.x₃ (T.α g h)) = (3 : ℤ) • cl G 2 (oprod T.x₃ a') := by
+    rw [(cl_eq_cl (oprod_mem S.x3mem _) hY).mpr hm, e1,
+      cl_mul (pow_mem h1 3) (lcs_mem_of_le (by norm_num) h2),
+      (cl_eq_zero_iff (lcs_mem_of_le (by norm_num) h2)).mpr h2, add_zero,
+      (cl_eq_cl (oprod_mem S.x3mem _) h1).mpr ha', cl_pow3 h1]
+  have hP : oprod T.x₃ (fun l => T.α g h l - 3 * a' l) ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by
+    rw [← cl_eq_zero_iff (oprod_mem S.x3mem _), cl_oprod S.x3mem]
+    rw [cl_oprod S.x3mem, cl_oprod S.x3mem, Finset.smul_sum] at hX
+    simp only [sub_smul, Finset.sum_sub_distrib, hX, mul_smul, sub_self]
+  have hd : (T.f l : ℤ) ∣ T.α g h l - 3 * a' l := (S.valid.basis₃.indep _).mp hP l
+  have h3 : (3 : ℤ) ∣ (T.f l : ℤ) := by exact_mod_cast S.hf l
+  have := dvd_add (h3.trans hd) (dvd_mul_right 3 (a' l))
+  rwa [sub_add_cancel] at this
+
+variable {τ : Coeffs T.s T.t} (hτ : T.Admissible τ)
+include hτ
+
+/-- Condition (C₁): `3 ∣ u_{ij}` when `d(i) = d(j)`. -/
+theorem u3_eq {i j : Fin T.s} (hij : i < j) (hd : T.d i = T.d j) : (3 : ℤ) ∣ τ.u i j := by
+  have h0 := hτ.C₁ i j hij
+  have hq : T.q i j = 1 := by
+    have e : T.d j / T.d i = 1 := by
+      rw [← hd]; exact Nat.div_self (lt_trans Nat.zero_lt_one (S.valid.basis₁.one_lt i))
+    simp [Data.q, e]
+  rw [hq] at h0
+  have h := Int.ModEq.dvd h0
+  unfold Data.ch at h
+  rw [zero_sub, dvd_neg, mul_one] at h
+  obtain ⟨m, hm⟩ := S.hd i
+  have hone := S.valid.basis₁.one_lt i
+  generalize T.d i = d at h hm hone
+  obtain ⟨e, he⟩ : ∃ e : ℕ, d = 3 * e := ⟨3 ^ m, by rw [hm, pow_succ, mul_comm]⟩
+  have he0 : 0 < e := by omega
+  have hde : (d : ℤ) = 3 * e := by exact_mod_cast he
+  -- `C(d,2) = d (d-1)/2`, `2 C(d,3) = e (3e-1)(3e-2)`
+  have c2 : (d.choose 2 : ℤ) = (d : ℤ) * (((d - 1) / 2 : ℕ) : ℤ) := by
+    rw [hm, choose2_eq]; push_cast; ring
+  have c3 : ((d.choose 3 : ℕ) : ℤ) * 2 = (e : ℤ) * (3 * e - 1) * (3 * e - 2) := by
+    have hdf := Nat.descFactorial_eq_factorial_mul_choose d 3
+    have hd' : d.descFactorial 3 = (d - 2) * ((d - 1) * ((d - 0) * 1)) := by
+      simp only [Nat.descFactorial_succ, Nat.descFactorial_zero]
+    rw [hd', Nat.sub_zero] at hdf
+    have h6 : (3 : ℕ).factorial = 6 := rfl
+    rw [h6] at hdf
+    have hd1 : 1 ≤ d := by omega
+    have hd2 : 2 ≤ d := by omega
+    have hz : ((d - 2 : ℕ) : ℤ) * (((d - 1 : ℕ) : ℤ) * ((d : ℤ) * 1)) = 6 * (d.choose 3 : ℤ) := by
+      exact_mod_cast hdf
+    push_cast [Nat.cast_sub hd1, Nat.cast_sub hd2] at hz
+    rw [hde] at hz
+    linarith
+  -- `d ∣ u C(d,3)`, so `3e ∣ 2 u C(d,3) = e u (3e-1)(3e-2)`
+  have h1 : (d : ℤ) ∣ τ.u i j * ((d.choose 3 : ℕ) : ℤ) := by
+    have hw : (d : ℤ) ∣ τ.w i i j * (d.choose 2 : ℤ) := by
+      rw [c2]; exact Dvd.intro_left _ (by ring)
+    have := dvd_sub h hw
+    rwa [add_sub_cancel_right] at this
+  have h2 : (e : ℤ) * 3 ∣ e * (τ.u i j * ((3 * e - 1) * (3 * e - 2))) := by
+    have := h1.mul_right 2
+    rw [mul_assoc, c3, hde] at this
+    have e1 : (3 * (e : ℤ)) = e * 3 := by ring
+    have e2 : τ.u i j * ((e : ℤ) * (3 * e - 1) * (3 * e - 2)) =
+        e * (τ.u i j * ((3 * e - 1) * (3 * e - 2))) := by ring
+    rwa [e1, e2] at this
+  have h3 : (3 : ℤ) ∣ τ.u i j * ((3 * e - 1) * (3 * e - 2)) :=
+    (mul_dvd_mul_iff_left (by exact_mod_cast he0.ne')).mp h2
+  have e2 : τ.u i j * ((3 * e - 1) * (3 * e - 2)) =
+      3 * (τ.u i j * (3 * e * e - 3 * e)) + 2 * τ.u i j := by ring
+  rw [e2] at h3
+  generalize τ.u i j * (3 * e * e - 3 * e) = Z at h3
+  omega
+
+/-- `3 ∣ u_{hi} q_{hi}` for `h < i`. -/
+theorem uq3 {h i : Fin T.s} (hhi : h < i) : (3 : ℤ) ∣ τ.u h i * T.q h i := by
+  by_cases hd : T.d h = T.d i
+  · exact (S.u3_eq hτ hhi hd).mul_right _
+  · refine Dvd.dvd.mul_left ?_ _
+    simp only [Data.q]
+    exact_mod_cast S.three_dvd_q hhi.le hd
+
+/-- (c2): `3 ∣ crow_{rh}` for an active `h`; condition (B) modulo `3`. -/
+theorem crow_act (r : Fin T.s) {h : Fin T.s} (hh : act h) : (3 : ℤ) ∣ crow T τ r h := by
+  refine S.hind (fun y => crow T τ r y) (fun k => ?_) h hh
+  have hB := hτ.B r k
+  have ec : ∑ y, crow T τ r y * T.b y k = (∑ y, if r < y then τ.u r y * T.b y k else 0) -
+      ∑ y, if y < r then τ.u y r * T.q y r * T.b y k else 0 := by
+    rw [← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl fun y _ => ?_
+    simp only [crow]
+    split_ifs <;> ring
+  rw [ec]
+  have hd : (3 : ℤ) ∣ τ.v r k * T.d r := (by exact_mod_cast S.three_dvd_d r : (3 : ℤ) ∣ T.d r).mul_left _
+  have he : (3 : ℤ) ∣ τ.v' r k * T.e k := (by exact_mod_cast S.he k : (3 : ℤ) ∣ T.e k).mul_left _
+  generalize (∑ y, if r < y then τ.u r y * T.b y k else 0) = X at hB ⊢
+  generalize (∑ y, if y < r then τ.u y r * T.q y r * T.b y k else 0) = Y at hB ⊢
+  generalize τ.v r k * T.d r = P at hB hd
+  generalize τ.v' r k * T.e k = Q at hB he
+  omega
+
+/-- Condition (D₁) modulo `3`, at an active index. -/
+theorem D1_cf (a : Fin T.s) {x : Fin T.s} (hx : act x) :
+    (3 : ℤ) ∣ (if x ≤ a then τ.w x a a else 0) + (if a < x then τ.w'' a a x else 0) := by
+  refine S.hind (fun y => (if y ≤ a then τ.w y a a else 0) + (if a < y then τ.w'' a a y else 0))
+    (fun kk => ?_) x hx
+  have hD := dvd3_mod (hτ.D₁ a kk) (S.gcd_e3 a kk)
+  have hc : (3 : ℤ) ∣ τ.v a kk * T.ch a 2 := (S.ch2_dvd a).mul_left _
+  have e : (∑ y, ((if y ≤ a then τ.w y a a else 0) + (if a < y then τ.w'' a a y else 0)) *
+      T.b y kk) = (∑ y, if y ≤ a then τ.w y a a * T.b y kk else 0) +
+      ∑ y, if a < y then τ.w'' a a y * T.b y kk else 0 := by
+    rw [← Finset.sum_add_distrib]
+    exact Finset.sum_congr rfl fun y _ => by split_ifs <;> ring
+  rw [e]
+  generalize τ.v a kk * T.ch a 2 = Z at hD hc
+  generalize (∑ y, if y ≤ a then τ.w y a a * T.b y kk else 0) = A at hD ⊢
+  generalize (∑ y, if a < y then τ.w'' a a y * T.b y kk else 0) = B at hD ⊢
+  omega
+
+/-- Condition (D₂) modulo `3`, at an active index. -/
+theorem D2_cf {a c : Fin T.s} (hac : a < c) {x : Fin T.s} (hx : act x) :
+    (3 : ℤ) ∣ (if x ≤ a then τ.w x a c else 0) + (if a < x ∧ x ≤ c then τ.w' a x c else 0) +
+      (if c < x then τ.w'' a c x else 0) := by
+  refine S.hind (fun y => (if y ≤ a then τ.w y a c else 0) +
+    (if a < y ∧ y ≤ c then τ.w' a y c else 0) + (if c < y then τ.w'' a c y else 0))
+    (fun kk => ?_) x hx
+  have hD := dvd3_mod (hτ.D₂ a c kk hac) (S.gcd_e3 a kk)
+  have e : (∑ y, ((if y ≤ a then τ.w y a c else 0) + (if a < y ∧ y ≤ c then τ.w' a y c else 0) +
+      (if c < y then τ.w'' a c y else 0)) * T.b y kk) =
+      (∑ y, if y ≤ a then τ.w y a c * T.b y kk else 0) +
+      (∑ y, if a < y ∧ y ≤ c then τ.w' a y c * T.b y kk else 0) +
+      (∑ y, if c < y then τ.w'' a c y * T.b y kk else 0) := by
+    rw [← Finset.sum_add_distrib, ← Finset.sum_add_distrib]
+    exact Finset.sum_congr rfl fun y _ => by split_ifs <;> ring
+  rw [e]
+  exact hD
+
+/-- (c3): `3 ∣ w_{hjk}` for an active `h`. -/
+theorem w3 {h : Fin T.s} (hact : act h) {j k : Fin T.s} (hhj : h ≤ j) (hjk : j ≤ k) :
+    (3 : ℤ) ∣ τ.w h j k := by
+  rcases eq_or_lt_of_le hjk with rfl | hjk'
+  · simpa [hhj, not_lt.mpr hhj] using S.D1_cf hτ j hact
+  · simpa [hhj, not_lt.mpr hhj, not_lt.mpr (hhj.trans hjk'.le)] using S.D2_cf hτ hjk' hact
+
+/-- (c3): `3 ∣ w'_{igh}` for an active `g`. -/
+theorem w'3 {g : Fin T.s} (hact : act g) {i h : Fin T.s} (hig : i < g) (hgh : g ≤ h) :
+    (3 : ℤ) ∣ τ.w' i g h := by
+  simpa [not_le.mpr hig, hig, hgh, not_lt.mpr hgh] using S.D2_cf hτ (hig.trans_le hgh) hact
+
+/-- Condition (E) in any row `r`, modulo `3`: `∑_k v'_{rk} d_{kl} ≡ ∑_h crow_{rh} c_{hl}`. -/
+theorem Erow (r : Fin T.s) (l : Fin T.u) :
+    (3 : ℤ) ∣ (∑ k, τ.v' r k * T.dd k l) - ∑ h, crow T τ r h * T.c h l := by
+  have h' := dvd3_mod (hτ.E r l) (S.gcd_f3 r l)
+  have s1 : (3 : ℤ) ∣ ∑ h, if h < r then τ.u h r * T.q h r * T.α h r l else 0 :=
+    dvd_sum_ite _ _ fun h hh => (S.uq3 hτ hh).mul_right _
+  have s5 : (3 : ℤ) ∣ ∑ g, ∑ h, if g ≤ r ∧ r ≤ h then τ.w g r h * T.α g h l else 0 := by
+    refine Finset.dvd_sum fun g _ => dvd_sum_ite _ _ fun h hh => ?_
+    by_cases hg : act g
+    · exact (S.w3 hτ hg hh.1 hh.2).mul_right _
+    · exact (S.α3 hg (hh.1.trans hh.2) l).mul_left _
+  have s6 : (3 : ℤ) ∣ ∑ g, ∑ h, if g ≤ h ∧ h ≤ r then τ.w g h r * T.α g h l else 0 := by
+    refine Finset.dvd_sum fun g _ => dvd_sum_ite _ _ fun h hh => ?_
+    by_cases hg : act g
+    · exact (S.w3 hτ hg hh.1 hh.2).mul_right _
+    · exact (S.α3 hg hh.1 l).mul_left _
+  have s7 : (3 : ℤ) ∣ ∑ g, ∑ h, if r < g ∧ g ≤ h then τ.w' r g h * T.α g h l else 0 := by
+    refine Finset.dvd_sum fun g _ => dvd_sum_ite _ _ fun h hh => ?_
+    by_cases hg : act g
+    · exact (S.w'3 hτ hg hh.1 hh.2).mul_right _
+    · exact (S.α3 hg hh.2 l).mul_left _
+  have ec : ∑ h, crow T τ r h * T.c h l = (∑ h, if r < h then τ.u r h * T.c h l else 0) -
+      ∑ h, if h < r then τ.u h r * T.q h r * T.c h l else 0 := by
+    rw [← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl fun h _ => ?_
+    simp only [crow]
+    split_ifs <;> ring
+  rw [ec]
+  generalize (∑ k, τ.v' r k * T.dd k l) = A at h' ⊢
+  generalize (∑ h, if h < r then τ.u h r * T.q h r * T.α h r l else 0) = B1 at h' s1
+  generalize (∑ h, if r < h then τ.u r h * T.c h l else 0) = B2 at h' ⊢
+  generalize (∑ h, if h < r then τ.u h r * T.q h r * T.c h l else 0) = B3 at h' ⊢
+  generalize (∑ g, ∑ h, if g ≤ r ∧ r ≤ h then τ.w g r h * T.α g h l else 0) = B5 at h' s5
+  generalize (∑ g, ∑ h, if g ≤ h ∧ h ≤ r then τ.w g h r * T.α g h l else 0) = B6 at h' s6
+  generalize (∑ g, ∑ h, if r < g ∧ g ≤ h then τ.w' r g h * T.α g h l else 0) = B7 at h' s7
+  omega
+
+/-- Condition (B) in row `r`: `v'_{rk} e(k) = -∑_h crow_{rh} b_{hk} - v_{rk} d(r)`. -/
+theorem Brow (r : Fin T.s) (k : Fin T.t) :
+    τ.v' r k * (T.e k : ℤ) = -(∑ h, crow T τ r h * T.b h k) - τ.v r k * (T.d r : ℤ) := by
+  have h := hτ.B r k
+  have ec : ∑ h, crow T τ r h * T.b h k = (∑ h, if r < h then τ.u r h * T.b h k else 0) -
+      ∑ h, if h < r then τ.u h r * T.q h r * T.b h k else 0 := by
+    rw [← Finset.sum_sub_distrib]
+    refine Finset.sum_congr rfl fun h _ => ?_
+    simp only [crow]
+    split_ifs <;> ring
+  rw [ec]
+  linarith
+
+/-- **The row identity** (wiki page 891, Lemma 1): for every row `r` and every map `A` additive
+on `γ₃`, `∑_k v_{rk} d(r) A[x_{2k}, x_r] + ∑_h crow_{rh} A[x_h^{d(h)}, x_r] = 0`. -/
+theorem rowB (r : Fin T.s) {N : Type*} [AddCommGroup N] {A : G → N}
+    (hA : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 2, ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 2,
+      A (a * b) = A a + A b) :
+    ∑ k, (τ.v r k * (T.d r : ℤ)) • A (tc (T.x₂ k) (T.x₁ r)) +
+      ∑ h, crow T τ r h • A (tc (T.x₁ h ^ T.d h) (T.x₁ r)) = 0 := by
+  classical
+  -- the map `Φ = A [·, x_r]`, additive on `γ₂`, zero on `γ₄`
+  let Φ : G → N := fun g => A (tc g (T.x₁ r))
+  have hΦadd : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1,
+      ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 1, Φ (a * b) = Φ a + Φ b := by
+    intro a ha b hb
+    simp only [Φ]
+    rw [tc_mul_left_L1 S.h5 ha hb, hA _ (tc_mem (by omega) ha (mem_lcs_zero _)) _
+      (tc_mem (by omega) hb (mem_lcs_zero _))]
+  have hΦ3 : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 3, Φ a = 0 := by
+    intro a ha
+    simp only [Φ]
+    rw [tc_L3 S.h5 ha]; exact addMapG_one hA
+  have hΦrem : ∀ {y : G} {a : Fin T.u → ℤ}, (oprod T.x₃ a)⁻¹ * y ∈ (⊤ : Subgroup G).lowerCentralSeries 3 →
+      y ∈ (⊤ : Subgroup G).lowerCentralSeries 1 → Φ y = ∑ l, a l • Φ (T.x₃ l) := by
+    intro y a hy hy1
+    have ho : oprod T.x₃ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+      oprod_mem (fun l => lcs_mem_of_le (by norm_num) (S.x3mem l)) _
+    rw [← mul_inv_cancel_left (oprod T.x₃ a) y, hΦadd _ ho _ (lcs_mem_of_le (by norm_num) hy),
+      hΦ3 _ hy, add_zero, addMapG_oprod hΦadd (fun l => lcs_mem_of_le (by norm_num) (S.x3mem l))]
+  -- `3 Φ(x_{3l}) = 0`
+  have h3l : ∀ l, (3 : ℤ) • Φ (T.x₃ l) = 0 := by
+    intro l
+    have hz : tc (T.x₃ l) (T.x₁ r) ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
+      tc_mem (by omega) (S.x3mem l) (mem_lcs_zero _)
+    have := addMapG_pow hA (lcs_mem_of_le (by norm_num) hz) 3
+    rw [S.h4 _ hz, addMapG_one hA] at this
+    simpa [Φ] using this.symm
+  -- `Φ(x_h^{d(h)}) = ∑_k b_{hk} Φ(x_{2k}) + Φ(ȳ_h)`
+  have hY : ∀ h, ∑ k, T.b h k • Φ (T.x₂ k) = Φ (T.x₁ h ^ T.d h) - Φ (oprod T.x₃ (T.c h)) := by
+    intro h
+    have hv := S.valid.hb h
+    have hb1 : oprod T.x₂ (T.b h) ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := oprod_mem S.x2mem _
+    have hc1 : oprod T.x₃ (T.c h) ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+      oprod_mem (fun l => lcs_mem_of_le (by norm_num) (S.x3mem l)) _
+    have hn1 := lcs_mem_of_le (show 1 ≤ 3 by norm_num) hv
+    rw [← addMapG_oprod (A := Φ) hΦadd S.x2mem (T.b h), ← mul_inv_cancel_left
+      (oprod T.x₂ (T.b h) * oprod T.x₃ (T.c h)) (T.x₁ h ^ T.d h),
+      hΦadd _ (mul_mem hb1 hc1) _ hn1, hΦ3 _ hv, add_zero, hΦadd _ hb1 _ hc1]
+    abel
+  -- the element `A_r = ∏_k (x_{2k}^{e(k)})^{v'_{rk}}` of `γ₃`
+  have hA3 : oprod (fun k => T.x₂ k ^ T.e k) (τ.v' r) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
+    oprod_mem S.x2e _
+  have hM : Φ (oprod (fun k => T.x₂ k ^ T.e k) (τ.v' r)) +
+      ∑ k, (τ.v r k * (T.d r : ℤ)) • Φ (T.x₂ k) + ∑ h, crow T τ r h • Φ (T.x₁ h ^ T.d h) =
+      ∑ h, crow T τ r h • Φ (oprod T.x₃ (T.c h)) := by
+    have hAk : Φ (oprod (fun k => T.x₂ k ^ T.e k) (τ.v' r)) =
+        ∑ k, (τ.v' r k * (T.e k : ℤ)) • Φ (T.x₂ k) := by
+      rw [addMapG_oprod hΦadd (fun k => lcs_mem_of_le (by norm_num) (S.x2e k))]
+      exact Finset.sum_congr rfl fun k _ => by rw [addMapG_pow hΦadd (S.x2mem k), smul_smul]
+    have hsum : ∑ k, (τ.v' r k * (T.e k : ℤ)) • Φ (T.x₂ k) +
+        ∑ k, (τ.v r k * (T.d r : ℤ)) • Φ (T.x₂ k) =
+        -∑ h, crow T τ r h • ∑ k, T.b h k • Φ (T.x₂ k) := by
+      calc _ = ∑ k, (τ.v' r k * (T.e k : ℤ) + τ.v r k * (T.d r : ℤ)) • Φ (T.x₂ k) := by
+            rw [← Finset.sum_add_distrib]
+            exact Finset.sum_congr rfl fun k _ => (add_smul _ _ _).symm
+        _ = ∑ k, (-(∑ h, crow T τ r h * T.b h k)) • Φ (T.x₂ k) :=
+            Finset.sum_congr rfl fun k _ => by rw [S.Brow hτ r k]; congr 1; ring
+        _ = -∑ h, crow T τ r h • ∑ k, T.b h k • Φ (T.x₂ k) := by
+            simp only [neg_smul, Finset.sum_smul, Finset.sum_neg_distrib, Finset.smul_sum,
+              smul_smul]
+            rw [Finset.sum_comm]
+    rw [hAk, hsum]
+    simp_rw [hY, smul_sub, Finset.sum_sub_distrib]
+    abel
+  -- (E) modulo `3`: `Φ(A_r) = ∑_h crow_{rh} Φ(ȳ_h)`
+  have hE : Φ (oprod (fun k => T.x₂ k ^ T.e k) (τ.v' r)) =
+      ∑ h, crow T τ r h • Φ (oprod T.x₃ (T.c h)) := by
+    have hAk : Φ (oprod (fun k => T.x₂ k ^ T.e k) (τ.v' r)) =
+        ∑ l, (∑ k, τ.v' r k * T.dd k l) • Φ (T.x₃ l) := by
+      have hd' : ∀ k, Φ (T.x₂ k ^ T.e k) = ∑ l, T.dd k l • Φ (T.x₃ l) := fun k =>
+        hΦrem (S.valid.hdd k) (lcs_mem_of_le (by norm_num) (S.x2e k))
+      rw [addMapG_oprod hΦadd (fun k => lcs_mem_of_le (by norm_num) (S.x2e k))]
+      simp_rw [hd', Finset.smul_sum, smul_smul, Finset.sum_smul]
+      exact Finset.sum_comm
+    have hc : ∀ h, Φ (oprod T.x₃ (T.c h)) = ∑ l, T.c h l • Φ (T.x₃ l) := fun h =>
+      hΦrem (by rw [inv_mul_cancel]; exact one_mem _)
+        (oprod_mem (fun l => lcs_mem_of_le (by norm_num) (S.x3mem l)) _)
+    simp_rw [hc, Finset.smul_sum, smul_smul]
+    rw [Finset.sum_comm, hAk]
+    refine Finset.sum_congr rfl fun l _ => ?_
+    rw [← Finset.sum_smul]
+    obtain ⟨q, hq⟩ := S.Erow hτ r l
+    have e : (∑ k, τ.v' r k * T.dd k l) = (∑ h, crow T τ r h * T.c h l) + 3 * q := by
+      rw [← hq]; ring
+    rw [e, add_smul, show ((3 : ℤ) * q) • Φ (T.x₃ l) = q • ((3 : ℤ) • Φ (T.x₃ l)) by
+      rw [smul_smul, mul_comm], h3l, smul_zero, add_zero]
+  rw [hE] at hM
+  have : ∑ k, (τ.v r k * (T.d r : ℤ)) • Φ (T.x₂ k) + ∑ h, crow T τ r h • Φ (T.x₁ h ^ T.d h) = 0 := by
+    have := hM
+    rw [add_assoc] at this
+    exact (add_eq_left.mp this)
+  exact this
+
+/-- The defect `Δ_{ij}^{u_{ij}} = 1` for `i < j`: if `d(i) = d(j)` or `x_j` is active, `3 ∣ u_{ij}`
+and `Δ ∈ γ₄`; otherwise `Δ = 1` (the pairings with `x_i^{d(j)} = (x_i^{d(i)})^q`, `3 ∣ q`, and
+with the inactive `x_j^{d(j)}` vanish). -/
+theorem delta_pow_eq_one {i j : Fin T.s} (hij : i < j) :
+    (tc (T.x₁ i ^ T.d j) (T.x₁ j) * tc (T.x₁ j ^ T.d j) (T.x₁ i)) ^ τ.u i j = 1 := by
+  obtain ⟨m, hm⟩ := S.hd j
+  have hxi : T.x₁ i ^ T.d j ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := by
+    rw [← S.d_mul_q hij.le, pow_mul]; exact pow_mem (S.Y1 i) _
+  have hxj : T.x₁ j ^ T.d j ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := S.Y1 j
+  have hmem : tc (T.x₁ i ^ T.d j) (T.x₁ j) * tc (T.x₁ j ^ T.d j) (T.x₁ i) ∈
+      (⊤ : Subgroup G).lowerCentralSeries 3 := by
+    rw [hm] at hxi hxj ⊢; exact delta_mem S.h5 S.h4 hxi hxj
+  by_cases h3 : (3 : ℤ) ∣ τ.u i j
+  · obtain ⟨k, hk⟩ := h3
+    rw [hk, zpow_mul, zpow_ofNat, S.h4 _ hmem, one_zpow]
+  · have hne : T.d i ≠ T.d j := fun hd => h3 (S.u3_eq hτ hij hd)
+    have hj : ¬ act j := by
+      intro hj
+      apply h3
+      have := S.crow_act hτ i hj
+      simpa [crow, hij, not_lt.mpr hij.le] using this
+    -- `m ≥ 1`
+    obtain ⟨a, ha⟩ := S.hd i
+    have hm1 : 1 ≤ m := by
+      have hdv := S.d_dvd hij.le
+      rw [ha, hm] at hdv hne
+      have hab : a + 1 ≤ m + 1 := (Nat.pow_dvd_pow_iff_le_right (by norm_num)).mp hdv
+      have : a + 1 ≠ m + 1 := fun h => hne (by rw [h])
+      omega
+    obtain ⟨m', rfl⟩ : ∃ m', m = m' + 1 := ⟨m - 1, by omega⟩
+    rw [hm] at hmem
+    have hc1 : tc (T.x₁ i) (T.x₁ j) ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+      tc_mem (by omega) (mem_lcs_zero _) (mem_lcs_zero _)
+    have hc1' : tc (T.x₁ j) (T.x₁ i) ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+      tc_mem (by omega) (mem_lcs_zero _) (mem_lcs_zero _)
+    have h1 : tc (tc (T.x₁ i) (T.x₁ j)) (T.x₁ i ^ (3 ^ (m' + 1 + 1))) = 1 := by
+      obtain ⟨q, hq⟩ := S.three_dvd_q hij.le hne
+      have e : T.x₁ i ^ (3 ^ (m' + 1 + 1)) = ((T.x₁ i ^ T.d i) ^ 3) ^ q := by
+        rw [← pow_mul, ← pow_mul, ← hq, S.d_mul_q hij.le, hm]
+      rw [e, tc_pow_right_L1 S.h5 hc1 (pow_mem (S.Y1 i) 3), tc_pow_right_L1 S.h5 hc1 (S.Y1 i),
+        S.h4 _ (tc_mem (by omega) hc1 (S.Y1 i)), one_pow]
+    have h2 : tc (tc (T.x₁ j) (T.x₁ i)) (T.x₁ j ^ (3 ^ (m' + 1 + 1))) = 1 := by
+      rw [← hm]; exact S.tcK_right hj hc1'
+    rw [hm, delta_one S.h5 S.h4 h1 h2, one_zpow]
+
+end SetupB
+
+end ExpThree
+
+end GroupDimension
