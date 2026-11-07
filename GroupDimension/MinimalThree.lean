@@ -19,7 +19,9 @@ Two classical results enter as explicit hypotheses: Passi's `D₄² ⊆ γ₄` (
 which for a `3`-group gives `D₄ = γ₄` (`D_four_le_of_isPGroup_three`), and Gupta–Tahara
 (`GuptaTaharaMetabelian`), through Lemma 6.1 (`MetabelianOdd.lean`). Passi's theorem is proved
 (`passiDFourSquare`, `Passi.lean`); `minimal_three'` (`DThreeCorollaries.lean`) has Gupta–Tahara
-as the only hypothesis. Here `M₅(Q)` is
+as the only hypothesis. Both hypotheses are discharged at `p = 3` in `GuptaTaharaThree.lean`
+(`minimal_three_three`, `minimal_three_of_quotients_three`); the forms `minimal_three_of`,
+`minimal_three_of_quotients_of` take Lemma 6.1 for `Q` (`D₅(Q) ⊆ Q''`) as the hypothesis. Here `M₅(Q)` is
 `Q ∩ (1 + Δ_{𝔽₃}(Q)^5)`.
 
 The form with hypotheses on quotients by central subgroups of order `3`, as in Lemma 5.2, is
@@ -277,7 +279,6 @@ theorem minimal_three_of_quotients_of (hP : PassiDFourSquare) (hQ : IsPGroup 3 Q
     rw [hc1, hPceq, le_bot_iff] at this
     exact hzne this
 
-
 /-- **Lemma 6.2**, with hypotheses on the quotients: let `Q` be a finite `3`-group of class `≤ 4`
 such that `D₅(Q/N) = 1` for every central subgroup `N` of order `3`. If `D₅(Q) ≠ 1`, then
 `γ₄(Q) ≠ 1`, `Q'' ≠ 1`, `d(Q) ≥ 3`, `Z(Q)` is cyclic, `D₅(Q) = Ω₁(Z(Q)) = ⟨z⟩` with `z` of
@@ -340,7 +341,6 @@ theorem minimal_three_of (hP : PassiDFourSquare) (hQ : IsPGroup 3 Q)
       omega
     rw [hmin (Q ⧸ N) (hQ.to_quotient N) hlt, ← lcs_map_mk N 4, h5, Subgroup.map_bot]
   exact ⟨h5, minimal_three_of_quotients_of hP hQ h5 hq (hGQ h5) hD⟩
-
 
 /-- **Lemma 6.2** (minimal counterexample, `p = 3`): let `Q` be a finite `3`-group with
 `D₅(Q) ≠ γ₅(Q)` such that `D₅(R) = γ₅(R)` for every finite `3`-group `R` of smaller order. Then

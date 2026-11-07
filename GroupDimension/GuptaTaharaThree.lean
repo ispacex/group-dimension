@@ -30,7 +30,8 @@ commute (`Tm_comm`) and any three of them kill `E` (`Tm3`).
 
 **Tahara's generator** (§3): `genB = 1` (`[γ₂, γ₂] = 1`); `genC = 1` by (A₃), (A₄); in `genA`,
 (C₁), (C₃) pair `u_{ij} q_{ij} [Y_i, x_j]` with `-u_{ij} [Y_j, x_i]` (`swap`), so
-`2 genA = -∑_i [Z_i, x_i]`, and the row `i` of (B) and (E) gives `[Z_i, x_i] = 0` (`row`).
+`2 genA = -∑_i [Z_i, x_i]`, and the row `i` of (B) and (E) gives `[Z_i, x_i] = 0` (`row`; the code
+does not form `Z_i`: it proves `∑_{h>i} u_{ih} [Y_h, x_i] = ∑_{h<i} u_{hi} q_{hi} [Y_h, x_i]`).
 -/
 
 namespace GroupDimension
@@ -577,7 +578,8 @@ theorem rearr1 {s u : ℕ} (P : Fin s → Prop) [DecidablePred P] (w : Fin s →
   simp only [e, Finset.sum_smul]
   exact Finset.sum_comm
 
-/-- **The row `i`**: (B) and (E) give `∑_{h>i} u_{ih} [Y_h, x_i] = ∑_{h<i} u_{hi} q_{hi} [Y_h, x_i]`. -/
+/-- **The row `i`**: (B) and (E) give
+`∑_{h>i} u_{ih} [Y_h, x_i] = ∑_{h<i} u_{hi} q_{hi} [Y_h, x_i]`. -/
 theorem row {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) (i : Fin T.s) :
     ∑ h, (if i < h then τ.u i h else 0) • Tm (T.x₁ i) (em (T.x₁ h ^ T.d h)) =
       ∑ h, (if h < i then τ.u h i * T.q h i else 0) • Tm (T.x₁ i) (em (T.x₁ h ^ T.d h)) := by
@@ -745,7 +747,8 @@ theorem eq_one_of_sq_eq_one {p : ℕ} [hp : Fact p.Prime] (hp2 : p ≠ 2) (hG : 
 /-- **`D₅ = 1` for a finite metabelian `p`-group of class `≤ 4`, `p` odd** (via `taharaFiveOne`). -/
 theorem D_five_eq_bot_of_metabelian {p : ℕ} [hp : Fact p.Prime] (hp2 : p ≠ 2) {Q : Type}
     [Group Q] [Finite Q] (hQ : IsPGroup p Q) (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥)
-    (hmet : ∀ a ∈ L1 Q, ∀ b ∈ L1 Q, a * b = b * a) : D 5 Q = ⊥ := by
+    (hmet : ∀ a ∈ (⊤ : Subgroup Q).lowerCentralSeries 1,
+      ∀ b ∈ (⊤ : Subgroup Q).lowerCentralSeries 1, a * b = b * a) : D 5 Q = ⊥ := by
   obtain ⟨T, hT⟩ := Passi.exists_valid_data hQ
   have hodd : ∀ i, Odd (T.d i) := fun i => by
     obtain ⟨m, hm⟩ := (TaharaProof.IsLayerBasis.layerNF hT.basis₁).exists_pow hQ i
@@ -761,8 +764,8 @@ for `p = 3` Gupta–Tahara [GT85, Thm. 3.2(c)]). -/
 theorem D_five_eq_gamma_five_of_metabelian {p : ℕ} [hp : Fact p.Prime] (hp2 : p ≠ 2) (G : Type)
     [Group G] (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
     (hpg : IsPGroup p (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
-    (hmet : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 1,
-      ⁅a, b⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 4) :
+    (hmet : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1,
+      ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 1, ⁅a, b⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 4) :
     D 5 G = (⊤ : Subgroup G).lowerCentralSeries 4 := by
   refine le_antisymm (D_le_of_D_quotient_eq_bot _ 5 ?_) (gamma_le_D G 5 (by norm_num))
   have : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 4) := finite_quotient_lcs hfin 3
@@ -772,7 +775,8 @@ theorem D_five_eq_gamma_five_of_metabelian {p : ℕ} [hp : Fact p.Prime] (hp2 : 
     rw [L1, ← lcs_map_mk] at ha hb
     obtain ⟨a', ha', rfl⟩ := Subgroup.mem_map.mp ha
     obtain ⟨b', hb', rfl⟩ := Subgroup.mem_map.mp hb
-    have h1 : QuotientGroup.mk' N ⁅a', b'⁆ = 1 := (QuotientGroup.eq_one_iff _).mpr (hmet a' ha' b' hb')
+    have h1 : QuotientGroup.mk' N ⁅a', b'⁆ = 1 :=
+      (QuotientGroup.eq_one_iff _).mpr (hmet a' ha' b' hb')
     rw [map_commutatorElement, commutatorElement_eq_one_iff_mul_comm] at h1
     exact h1
   -- `G/γ₅` is a `p`-group
