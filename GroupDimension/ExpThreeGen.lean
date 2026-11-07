@@ -987,7 +987,7 @@ theorem gen_eq_one : T.gen τ = 1 := by
               · rw [if_pos hlt, if_pos ⟨hPi, hPj, hiff.mpr hlt⟩, hV i j kj hσj, hγβ i j kj hσj]
               · rw [if_neg hlt, if_neg (fun h => hlt (hiff.mp h.2.2))]
             · have hPj : ¬ P' j := fun h => hj3 h.2
-              rw [if_neg (fun h => hPj h.2.1)]
+              rw [if_neg (show ¬ (P' i ∧ P' j ∧ rσ j i) from fun h => hPj h.2.1)]
               split_ifs
               · rw [hγβ i j kj hσj, hβbig i j hj3, mul_zero]
               · rfl
@@ -1129,7 +1129,7 @@ theorem gen_eq_one : T.gen τ = 1 := by
       have e : ∑ h, (if P' h ∧ h < j then (τ.u h j : ZMod 3) * ε h j else 0) =
           ∑ h, (nrow T τ j h : ZMod 3) * C (T.x₁ h ^ T.d h) := by
         refine Finset.sum_congr rfl fun h _ => ?_
-        rcases hσh : σ h with _ | kh
+        by_cases hσh : σ h = none
         · have hP : ¬ P' h := fun hp => hp.1 hσh
           rw [if_neg (fun hc => hP hc.1), hC0 _ (S.hK h hσh), mul_zero]
         · by_cases hh3 : T.d h = 3
@@ -1139,7 +1139,7 @@ theorem gen_eq_one : T.gen τ = 1 := by
               · subst heq; omega
               · have := S.d_dvd hgt.le
                 rw [hj9, hh3] at this; norm_num at this
-            have hP : P' h ∧ h < j := ⟨⟨by simp [hσh], hh3⟩, hhj⟩
+            have hP : P' h ∧ h < j := ⟨⟨hσh, hh3⟩, hhj⟩
             rw [if_pos hP]
             have hn : nrow T τ j h = τ.u h j := by
               have hq : T.q h j = 3 := by simp [Data.q, hh3, hj9]
@@ -1249,6 +1249,642 @@ theorem gen_eq_one : T.gen τ = 1 := by
   rwa [S.h5, mem_bot] at key
 
 end SetupGen
+
+
+/-! ## A basis adapted to a flag and a subspace -/
+
+section FlagBasis
+
+variable {K V : Type*} [Field K] [AddCommGroup V] [Module K V]
+
+/-- For a descending chain of subspaces `W 0 ⊇ W 1 ⊇ ⋯` with `W N = 0` and a subspace `Ker`
+there is a linearly independent set `B ⊆ W 0` such that every `W j` is spanned by `B ∩ W j` and
+`W 0 ∩ Ker` by `B ∩ Ker` (wiki 886, §3.2, the lemma). -/
+theorem exists_flag_ker_basis (W : ℕ → Submodule K V) (hW : Antitone W) {N : ℕ} (hN : W N = ⊥)
+    (Ker : Submodule K V) :
+    ∃ B : Set V, LinearIndepOn K id B ∧ B ⊆ W 0 ∧
+      (∀ j, W j ≤ Submodule.span K (B ∩ W j)) ∧ W 0 ⊓ Ker ≤ Submodule.span K (B ∩ Ker) := by
+  have key : ∀ m, m ≤ N → ∃ B : Set V, LinearIndepOn K id B ∧ B ⊆ W (N - m) ∧
+      (∀ j, N - m ≤ j → W j ≤ Submodule.span K (B ∩ W j)) ∧
+      W (N - m) ⊓ Ker ≤ Submodule.span K (B ∩ Ker) := by
+    intro m
+    induction m with
+    | zero =>
+      intro _
+      refine ⟨∅, linearIndepOn_empty K id, Set.empty_subset _, fun j hj => ?_, ?_⟩
+      · rw [Nat.sub_zero] at hj
+        exact ((hW hj).trans hN.le).trans bot_le
+      · rw [Nat.sub_zero, hN, bot_inf_eq]; exact bot_le
+    | succ m ih =>
+      intro hm
+      obtain ⟨B, hB, hBW, hBj, hBK⟩ := ih (by omega)
+      have hj0 : N - m = N - (m + 1) + 1 := by omega
+      rw [hj0] at hBW hBj hBK
+      -- extend `B` inside `B ∪ (W j₀ ⊓ Ker)`
+      obtain ⟨b, hbt, hBb, htb, hb⟩ := exists_linearIndepOn_id_extension hB
+        (Set.subset_union_left (t := ((W (N - (m + 1)) ⊓ Ker : Submodule K V) : Set V)))
+      have hbW : b ⊆ W (N - (m + 1)) := fun x hx => by
+        rcases hbt hx with h | h
+        · exact hW (Nat.le_succ _) (hBW h)
+        · exact (Submodule.mem_inf.mp h).1
+      have hbK : W (N - (m + 1)) ⊓ Ker ≤ Submodule.span K (b ∩ Ker) := by
+        intro v hv
+        have hvb : v ∈ Submodule.span K b := htb (Set.mem_union_right _ hv)
+        have hbs : b ⊆ B ∪ (b ∩ Ker) := fun x hx => by
+          by_cases hxB : x ∈ B
+          · exact Or.inl hxB
+          · rcases hbt hx with h | h
+            · exact absurd h hxB
+            · exact Or.inr ⟨hx, (Submodule.mem_inf.mp h).2⟩
+        have hv' : v ∈ Submodule.span K B ⊔ Submodule.span K (b ∩ Ker) := by
+          rw [← Submodule.span_union]; exact Submodule.span_mono hbs hvb
+        obtain ⟨y, hy, z, hz, rfl⟩ := Submodule.mem_sup.mp hv'
+        have hzK : z ∈ Ker := (Submodule.span_le.mpr (fun x hx => hx.2)) hz
+        have hyW : y ∈ W (N - (m + 1) + 1) := (Submodule.span_le.mpr hBW) hy
+        have hyK : y ∈ Ker := by
+          have e : y = (y + z) - z := by abel
+          rw [e]; exact sub_mem (Submodule.mem_inf.mp hv).2 hzK
+        have hy' := hBK (Submodule.mem_inf.mpr ⟨hyW, hyK⟩)
+        exact add_mem (Submodule.span_mono (Set.inter_subset_inter_left _ hBb) hy') hz
+      -- extend `b` to a basis of `W j₀`
+      obtain ⟨B', hB't, hbB', htB', hB'⟩ := exists_linearIndepOn_id_extension hb hbW
+      refine ⟨B', hB', hB't, fun j hj => ?_, ?_⟩
+      · rcases eq_or_lt_of_le hj with h | h
+        · subst h
+          intro v hv
+          have := htB' hv
+          rwa [Set.inter_eq_left.mpr hB't]
+        · exact (hBj j (by omega)).trans
+            (Submodule.span_mono (Set.inter_subset_inter_left _ (hBb.trans hbB')))
+      · exact hbK.trans (Submodule.span_mono (Set.inter_subset_inter_left _ hbB'))
+  obtain ⟨B, hB, hBW, hBj, hBK⟩ := key N le_rfl
+  rw [Nat.sub_self] at hBW hBK
+  exact ⟨B, hB, hBW, fun j => hBj j (by omega), hBK⟩
+
+end FlagBasis
+
+/-! ## Uniqueness bases from the socle -/
+
+/-- A family `y_i` in an abelian group with `3^{h_i+1} y_i = 0`, whose socle vectors
+`3^{h_i} y_i` are independent modulo `3` and adapted to the heights (every element of order `3`
+in `3^j A` is a combination of the `3^{h_i} y_i` with `h_i ≥ j`), in a group of exponent a power
+of `3`, is a basis: `∑ a_i y_i = 0 ↔ 3^{h_i+1} ∣ a_i`, and every element is such a sum. -/
+theorem socle_basis {A : Type*} [AddCommGroup A] {n : ℕ} (y : Fin n → A) (ht : Fin n → ℕ)
+    (hord : ∀ i, ((3 : ℤ) ^ (ht i + 1)) • y i = 0)
+    (hind : ∀ c : Fin n → ℤ, ∑ i, c i • ((3 : ℤ) ^ ht i • y i) = 0 → ∀ i, (3 : ℤ) ∣ c i)
+    (hflag : ∀ (j : ℕ) (v : A), (3 : ℤ) • v = 0 → (∃ a : A, ((3 : ℤ) ^ j) • a = v) →
+      ∃ c : Fin n → ℤ, v = ∑ i, c i • ((3 : ℤ) ^ ht i • y i) ∧ ∀ i, ht i < j → c i = 0)
+    (hexp : ∀ v : A, ∃ k : ℕ, ((3 : ℤ) ^ k) • v = 0) :
+    (∀ a : Fin n → ℤ, ∑ i, a i • y i = 0 ↔ ∀ i, (3 : ℤ) ^ (ht i + 1) ∣ a i) ∧
+      ∀ v : A, ∃ a : Fin n → ℤ, v = ∑ i, a i • y i := by
+  have hz0 : ∀ i (r : ℤ), ((3 : ℤ) ^ (ht i + 1) * r) • y i = 0 := fun i r => by
+    rw [mul_comm, mul_smul, hord, smul_zero]
+  -- independence, by induction on the power of `3` that makes all coefficients divisible
+  have hind' : ∀ m : ℕ, ∀ a : Fin n → ℤ, ∑ i, a i • y i = 0 →
+      (∀ i, (3 : ℤ) ^ (ht i + 1) ∣ 3 ^ m * a i) → ∀ i, (3 : ℤ) ^ (ht i + 1) ∣ a i := by
+    intro m
+    induction m with
+    | zero => intro a _ h i; simpa using h i
+    | succ m ih =>
+      intro a ha h
+      apply ih a ha
+      choose k hk using h
+      have hk' : ∀ i, 3 ^ m * a i = 3 ^ ht i * k i := fun i => by
+        have h3 : (3 : ℤ) * (3 ^ m * a i) = 3 * (3 ^ ht i * k i) := by
+          linear_combination hk i
+        exact mul_left_cancel₀ (by norm_num) h3
+      have hsum : ∑ i, k i • ((3 : ℤ) ^ ht i • y i) = 0 := by
+        have e : ∑ i, k i • ((3 : ℤ) ^ ht i • y i) = (3 : ℤ) ^ m • ∑ i, a i • y i := by
+          rw [Finset.smul_sum]
+          refine Finset.sum_congr rfl fun i _ => ?_
+          rw [smul_smul, smul_smul, mul_comm (k i), ← hk' i]
+        rw [e, ha, smul_zero]
+      intro i
+      obtain ⟨r, hr⟩ := hind k hsum i
+      exact ⟨r, by rw [hk' i, hr]; ring⟩
+  refine ⟨fun a => ⟨fun ha i => ?_, fun ha => ?_⟩, fun v => ?_⟩
+  · refine hind' (∑ j, (ht j + 1)) a ha (fun j => Dvd.dvd.mul_right (pow_dvd_pow 3 ?_) _) i
+    exact Finset.single_le_sum (f := fun j => ht j + 1) (fun j _ => Nat.zero_le _)
+      (Finset.mem_univ j)
+  · refine Finset.sum_eq_zero fun i _ => ?_
+    obtain ⟨r, hr⟩ := ha i
+    rw [hr, hz0]
+  -- spanning: one step of the induction on the order
+  have step : ∀ (a : Fin n → ℤ) (v : A), (3 : ℤ) • v = ∑ i, a i • y i → ∀ H : ℕ,
+      (∀ j, H < ht j → (3 : ℤ) ∣ a j) → ∀ i, ht i = H → (3 : ℤ) ∣ a i := by
+    intro a v ha H hup
+    choose! a' ha' using hup
+    obtain ⟨u, hu_def⟩ : ∃ u : A, u = ∑ i, (if ht i = H then a i else 0) • ((3 : ℤ) ^ ht i • y i) :=
+      ⟨_, rfl⟩
+    have hu3 : (3 : ℤ) • u = 0 := by
+      rw [hu_def, Finset.smul_sum]
+      refine Finset.sum_eq_zero fun i _ => ?_
+      rw [smul_comm, smul_smul (3 : ℤ), ← pow_succ', hord, smul_zero]
+    have hu : u = (3 : ℤ) ^ (H + 1) • (v - ∑ i, (if H < ht i then a' i else 0) • y i) := by
+      rw [hu_def, smul_sub, pow_succ, mul_smul, ha, Finset.smul_sum, Finset.smul_sum,
+        ← Finset.sum_sub_distrib]
+      refine Finset.sum_congr rfl fun i _ => ?_
+      rw [smul_smul, smul_smul, smul_smul, ← sub_smul]
+      rcases lt_trichotomy (ht i) H with hlt | heq | hgt
+      · rw [if_neg (ne_of_lt hlt), if_neg (not_lt.mpr hlt.le), zero_mul, zero_smul, mul_zero,
+          sub_zero, show (3 : ℤ) ^ H * a i = 3 ^ (ht i + 1) * (3 ^ (H - (ht i + 1)) * a i) by
+            rw [← mul_assoc, ← pow_add]; congr 2; omega, hz0]
+      · rw [if_pos heq, if_neg (by omega), heq]
+        congr 1; ring
+      · rw [if_neg (ne_of_gt hgt), if_pos hgt, ha' i hgt]
+        congr 1; ring
+    obtain ⟨c, hc, hc0⟩ := hflag (H + 1) u hu3 ⟨_, hu.symm⟩
+    have hz : ∑ i, ((if ht i = H then a i else 0) - c i) • ((3 : ℤ) ^ ht i • y i) = 0 := by
+      simp only [sub_smul, Finset.sum_sub_distrib]
+      rw [← hu_def, ← hc, sub_self]
+    intro i hi
+    have := hind _ hz i
+    rw [if_pos hi, hc0 i (by omega), sub_zero] at this
+    exact this
+  have hspan : ∀ k : ℕ, ∀ v : A, (3 : ℤ) ^ k • v = 0 → ∃ a : Fin n → ℤ, v = ∑ i, a i • y i := by
+    intro k
+    induction k with
+    | zero => intro v hv; exact ⟨0, by simpa using hv⟩
+    | succ k ih =>
+      intro v hv
+      obtain ⟨a, ha⟩ := ih ((3 : ℤ) • v) (by rw [smul_smul, ← pow_succ]; exact hv)
+      let Mx := ∑ i, (ht i + 1)
+      have hlt : ∀ i, ht i < Mx := fun i => by
+        have := Finset.single_le_sum (f := fun j => ht j + 1) (fun j _ => Nat.zero_le _)
+          (Finset.mem_univ i)
+        simp only at this
+        omega
+      have claim : ∀ t, ∀ i, Mx - t ≤ ht i → (3 : ℤ) ∣ a i := by
+        intro t
+        induction t with
+        | zero => intro i hi; have := hlt i; omega
+        | succ t ih' =>
+          intro i hi
+          by_cases h : Mx - t ≤ ht i
+          · exact ih' i h
+          · exact step a v ha (ht i) (fun j hj => ih' j (by omega)) i rfl
+      have hdiv : ∀ i, (3 : ℤ) ∣ a i := fun i => claim Mx i (by omega)
+      choose a' ha' using hdiv
+      have hw : (3 : ℤ) • (v - ∑ i, a' i • y i) = 0 := by
+        rw [smul_sub, ha, Finset.smul_sum, sub_eq_zero]
+        refine Finset.sum_congr rfl fun i _ => ?_
+        rw [smul_smul, ← ha']
+      obtain ⟨c, hc, -⟩ := hflag 0 _ hw ⟨_, by rw [pow_zero, one_smul]⟩
+      refine ⟨fun i => a' i + c i * 3 ^ ht i, ?_⟩
+      calc v = (v - ∑ i, a' i • y i) + ∑ i, a' i • y i := (sub_add_cancel _ _).symm
+        _ = ∑ i, c i • ((3 : ℤ) ^ ht i • y i) + ∑ i, a' i • y i := by rw [← hc]
+        _ = _ := by
+          rw [← Finset.sum_add_distrib]
+          refine Finset.sum_congr rfl fun i _ => ?_
+          rw [add_smul, smul_smul, add_comm]
+  obtain ⟨k, hk⟩ := hexp v
+  exact hspan k v hk
+
+/-- The lift of a socle basis as in `socle_basis` is a uniqueness basis of `G/γ₂`. -/
+theorem isLayerBasis_zero_of_socle {n : ℕ} (x : Fin n → G) (ht : Fin n → ℕ) (hmono : Monotone ht)
+    (hb : (∀ a : Fin n → ℤ, ∑ i, a i • cl G 0 (x i) = 0 ↔ ∀ i, (3 : ℤ) ^ (ht i + 1) ∣ a i) ∧
+      ∀ v, ∃ a : Fin n → ℤ, v = ∑ i, a i • cl G 0 (x i)) :
+    IsLayerBasis 0 x (fun i => 3 ^ (ht i + 1)) := by
+  refine ⟨fun i => mem_lcs_zero _, fun i => Nat.one_lt_pow (by omega) (by norm_num),
+    fun i j hij => Nat.pow_dvd_pow 3 (by have := hmono hij; omega), fun a => ?_, fun g _ => ?_⟩
+  · rw [← cl_eq_zero_iff (oprod_mem (fun i => mem_lcs_zero (x i)) a),
+      cl_oprod (fun i => mem_lcs_zero (x i)), hb.1]
+    exact ⟨fun h i => by exact_mod_cast h i, fun h i => by exact_mod_cast h i⟩
+  · obtain ⟨a, ha⟩ := hb.2 (cl G 0 g)
+    refine ⟨a, ?_⟩
+    rw [← cl_eq_cl (oprod_mem (fun i => mem_lcs_zero (x i)) a) (mem_lcs_zero g),
+      cl_oprod (fun i => mem_lcs_zero (x i)), ← ha]
+
+section Coords'
+
+variable {V : Type*} [AddCommGroup V] (W : AddSubgroup V) [Module (ZMod 3) W] {n : ℕ}
+  (e : Module.Basis (Fin n) (ZMod 3) W)
+
+theorem basis_coords' (v : V) (hv : v ∈ W) :
+    v = ∑ i, ((e.repr ⟨v, hv⟩ i).val : ℤ) • (e i : V) := by
+  have hzs : ∀ (r : ZMod 3) (u : W), r • u = ((r.val : ℕ) : ℤ) • u := fun r u => by
+    rw [← Int.cast_smul_eq_zsmul (ZMod 3), Int.cast_natCast, ZMod.natCast_zmod_val]
+  have hr := e.sum_repr ⟨v, hv⟩
+  simp only [hzs] at hr
+  have h1 := congrArg W.subtype hr
+  rw [map_sum] at h1
+  simp only [map_zsmul, AddSubgroup.coe_subtype] at h1
+  exact h1.symm
+
+theorem basis_indep' (c : Fin n → ℤ) (h0 : ∑ i, c i • (e i : V) = 0) : ∀ i, (3 : ℤ) ∣ c i := by
+  have hzs : ∀ (r : ℤ) (u : W), ((r : ZMod 3)) • u = r • u :=
+    fun r u => Int.cast_smul_eq_zsmul (ZMod 3) r u
+  have h0W : ∑ i, c i • e i = 0 := by
+    apply W.subtype_injective
+    rw [map_sum, map_zero]
+    simp only [map_zsmul, AddSubgroup.coe_subtype]
+    exact h0
+  have hli := Fintype.linearIndependent_iff.mp e.linearIndependent (fun i => (c i : ZMod 3))
+    (by simp only [hzs]; exact h0W)
+  intro i
+  exact_mod_cast (ZMod.intCast_zmod_eq_zero_iff_dvd _ 3).mp (hli i)
+
+end Coords'
+
+/-! ## The theorem for finite groups of class `≤ 4` -/
+
+/-- **`D₅ = 1` when `γ₂/γ₃` has exponent `3`, finite case, modulo Tahara.** Let `Q` be finite of
+class `≤ 4` such that `Q/γ₂(Q)` is a `3`-group and `γ₂/γ₃` has exponent dividing `3`. Then
+`D₅(Q) = 1`. -/
+theorem D_five_eq_bot_of_class_four_exp_L1 (hT : TaharaFiveOne) {Q : Type} [Group Q] [Finite Q]
+    (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥)
+    (h3grp : ∀ x : Q, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup Q).lowerCentralSeries 1)
+    (h2 : ∀ a ∈ (⊤ : Subgroup Q).lowerCentralSeries 1, a ^ 3 ∈ (⊤ : Subgroup Q).lowerCentralSeries 2) :
+    D 5 Q = ⊥ := by
+  classical
+  have h3 : ∀ a ∈ (⊤ : Subgroup Q).lowerCentralSeries 2, a ^ 3 ∈ (⊤ : Subgroup Q).lowerCentralSeries 3 :=
+    cube_succ h2
+  have hcl_pow : ∀ (g : Q) (k : ℕ),
+      (k • cl Q 0 g = 0 ↔ g ^ k ∈ (⊤ : Subgroup Q).lowerCentralSeries 1) := by
+    intro g k
+    rw [← natCast_zsmul, ← cl_zpow (mem_lcs_zero g), zpow_natCast, cl_eq_zero_iff (mem_lcs_zero _)]
+  have hcl_npow : ∀ (g : Q) (k : ℕ), cl Q 0 (g ^ k) = k • cl Q 0 g := by
+    intro g k
+    rw [← zpow_natCast, cl_zpow (mem_lcs_zero g), natCast_zsmul]
+  letI : Module (ZMod 3) (Additive (Layer Q 1)) := AddCommGroup.zmodModule (three_smul_cl h2)
+  letI : Module (ZMod 3) (Additive (Layer Q 2)) := AddCommGroup.zmodModule (three_smul_cl h3)
+  -- `Q/γ₂` has exponent a power of `3`
+  have hexp : ∀ v : Additive (Layer Q 0), ∃ k : ℕ, ((3 : ℤ) ^ k) • v = 0 := by
+    intro v
+    obtain ⟨g, -, rfl⟩ := cl_surj (G := Q) 0 v
+    obtain ⟨k, hk⟩ := h3grp g
+    refine ⟨k, ?_⟩
+    rw [show ((3 : ℤ) ^ k) = ((3 ^ k : ℕ) : ℤ) by push_cast; rfl, natCast_zsmul]
+    exact (hcl_pow g _).mpr hk
+  obtain ⟨N, hN⟩ : ∃ N : ℕ, ∀ v : Additive (Layer Q 0), ((3 : ℤ) ^ N) • v = 0 := by
+    letI := Fintype.ofFinite (Additive (Layer Q 0))
+    choose kf hkf using hexp
+    refine ⟨Finset.univ.sup kf, fun v => ?_⟩
+    have hle : kf v ≤ Finset.univ.sup kf := Finset.le_sup (Finset.mem_univ v)
+    rw [show Finset.univ.sup kf = (Finset.univ.sup kf - kf v) + kf v by omega, pow_add, mul_smul,
+      hkf, smul_zero]
+  -- the `3`-torsion `W` of `Q/γ₂`, an `𝔽₃`-space
+  obtain ⟨W, hWmem⟩ : ∃ W : AddSubgroup (Additive (Layer Q 0)),
+      ∀ v, v ∈ W ↔ (3 : ℕ) • v = 0 :=
+    ⟨{ carrier := {v | (3 : ℕ) • v = 0}
+       add_mem' := fun {u v} hu hv => by
+         simp only [Set.mem_setOf_eq] at *; rw [smul_add, hu, hv, add_zero]
+       zero_mem' := by simp
+       neg_mem' := fun {u} hu => by
+         simp only [Set.mem_setOf_eq] at *; rw [smul_neg, hu, neg_zero] }, fun v => Iff.rfl⟩
+  have hW3 : ∀ v : W, (3 : ℕ) • v = 0 := fun v => Subtype.ext (by
+    rw [AddSubgroup.coe_nsmul, AddSubgroup.coe_zero]; exact (hWmem _).mp v.2)
+  letI : Module (ZMod 3) W := AddCommGroup.zmodModule hW3
+  -- the cube map `W → γ₂/γ₃`
+  choose L0 hL0 using fun v : Additive (Layer Q 0) => cl_surj (G := Q) 0 v
+  choose L1 hL1 using fun v : Additive (Layer Q 1) => cl_surj (G := Q) 1 v
+  choose L2 hL2 using fun v : Additive (Layer Q 2) => cl_surj (G := Q) 2 v
+  have hmemW : ∀ x : Q, (3 : ℕ) • cl Q 0 x = 0 → x ^ 3 ∈ (⊤ : Subgroup Q).lowerCentralSeries 1 :=
+    fun x h => (hcl_pow x 3).mp h
+  let p : W → Additive (Layer Q 1) := fun v => cl Q 1 ((L0 v) ^ 3)
+  have hp : ∀ (x : Q) (v : W), (v : Additive (Layer Q 0)) = cl Q 0 x → p v = cl Q 1 (x ^ 3) := by
+    intro x v hv
+    have hy : cl Q 0 (L0 v) = v := (hL0 v).2
+    have hyx : (L0 v)⁻¹ * x ∈ (⊤ : Subgroup Q).lowerCentralSeries 1 :=
+      (cl_eq_cl (mem_lcs_zero _) (mem_lcs_zero _)).mp (hy.trans hv)
+    have hy3 : (L0 v) ^ 3 ∈ (⊤ : Subgroup Q).lowerCentralSeries 1 :=
+      hmemW _ (by rw [hy]; exact (hWmem _).mp v.2)
+    have hx3 : x ^ 3 ∈ (⊤ : Subgroup Q).lowerCentralSeries 1 :=
+      hmemW x (by rw [← hv]; exact (hWmem _).mp v.2)
+    show cl Q 1 ((L0 v) ^ 3) = cl Q 1 (x ^ 3)
+    rw [cl_eq_cl hy3 hx3]
+    have hn := cube_mul_mod h2 (L0 v) ((L0 v)⁻¹ * x)
+    rw [mul_inv_cancel_left] at hn
+    have e : ((L0 v) ^ 3)⁻¹ * x ^ 3 =
+        ((L0 v)⁻¹ * x) ^ 3 * (((L0 v) ^ 3 * ((L0 v)⁻¹ * x) ^ 3)⁻¹ * x ^ 3) := by group
+    rw [e]; exact mul_mem (h2 _ hyx) hn
+  have hpadd : ∀ u v : W, p (u + v) = p u + p v := by
+    intro u v
+    have hu3 := hmemW (L0 u) (by rw [(hL0 u).2]; exact (hWmem _).mp u.2)
+    have hv3 := hmemW (L0 v) (by rw [(hL0 v).2]; exact (hWmem _).mp v.2)
+    rw [hp (L0 u * L0 v) (u + v) (by
+      rw [cl_mul (mem_lcs_zero _) (mem_lcs_zero _), (hL0 u).2, (hL0 v).2]; rfl)]
+    have hn := cube_mul_mod h2 (L0 u) (L0 v)
+    have huv3 : (L0 u * L0 v) ^ 3 ∈ (⊤ : Subgroup Q).lowerCentralSeries 1 := by
+      rw [← mul_inv_cancel_left ((L0 u) ^ 3 * (L0 v) ^ 3) ((L0 u * L0 v) ^ 3)]
+      exact mul_mem (mul_mem hu3 hv3) (lcs_mem_of_le (by norm_num) hn)
+    show cl Q 1 ((L0 u * L0 v) ^ 3) = cl Q 1 ((L0 u) ^ 3) + cl Q 1 ((L0 v) ^ 3)
+    rw [← cl_mul hu3 hv3, eq_comm, cl_eq_cl (mul_mem hu3 hv3) huv3]
+    exact hn
+  let P : W →ₗ[ZMod 3] Additive (Layer Q 1) := (AddMonoidHom.mk' p hpadd).toZModLinearMap 3
+  have hPv : ∀ v, P v = p v := fun v => rfl
+  -- the height filtration of `W`
+  let H : ℕ → AddSubgroup (Additive (Layer Q 0)) := fun j =>
+    { carrier := {v | ∃ a, ((3 : ℤ) ^ j) • a = v}
+      add_mem' := by rintro _ _ ⟨a, rfl⟩ ⟨b, rfl⟩; exact ⟨a + b, smul_add _ _ _⟩
+      zero_mem' := ⟨0, smul_zero _⟩
+      neg_mem' := by rintro _ ⟨a, rfl⟩; exact ⟨-a, smul_neg _ _⟩ }
+  let Wf : ℕ → Submodule (ZMod 3) W := fun j =>
+    AddSubgroup.toZModSubmodule 3 ((H j).comap W.subtype)
+  have hWf : ∀ j (w : W), w ∈ Wf j ↔ ∃ a, ((3 : ℤ) ^ j) • a = (w : Additive (Layer Q 0)) :=
+    fun _ _ => Iff.rfl
+  have hWanti : Antitone Wf := by
+    intro j j' hjj w hw
+    obtain ⟨a, ha⟩ := (hWf j' w).mp hw
+    refine (hWf j w).mpr ⟨(3 : ℤ) ^ (j' - j) • a, ?_⟩
+    rw [smul_smul, ← pow_add, show j + (j' - j) = j' by omega, ha]
+  have hWN : Wf N = ⊥ := by
+    rw [eq_bot_iff]
+    intro w hw
+    obtain ⟨a, ha⟩ := (hWf N w).mp hw
+    rw [Submodule.mem_bot]
+    exact Subtype.ext (by rw [← ha, hN]; rfl)
+  obtain ⟨B, hB, -, hBj, hBK⟩ := exists_flag_ker_basis Wf hWanti hWN (LinearMap.ker P)
+  have hWf0 : ∀ w : W, w ∈ Wf 0 := fun w => (hWf 0 w).mpr ⟨w, by simp⟩
+  have hsp : ⊤ ≤ Submodule.span (ZMod 3) (Set.range ((↑) : B → W)) := by
+    rw [Subtype.range_coe]
+    intro w _
+    exact Submodule.span_mono Set.inter_subset_left (hBj 0 (hWf0 w))
+  let b0 : Module.Basis B (ZMod 3) W :=
+    Module.Basis.mk (v := ((↑) : B → W)) hB.linearIndependent hsp
+  have hb0 : ∀ β : B, b0 β = β := fun β => by simp [b0]
+  have hset : ∀ S : Set W, B ∩ S = b0 '' {β : B | (β : W) ∈ S} := by
+    intro S
+    ext w
+    constructor
+    · rintro ⟨hwB, hwS⟩; exact ⟨⟨w, hwB⟩, hwS, hb0 _⟩
+    · rintro ⟨β, hβ, rfl⟩; rw [hb0]; exact ⟨β.2, hβ⟩
+  haveI : Finite B := Module.Finite.finite_basis b0
+  letI := Fintype.ofFinite B
+  -- the basis, sorted by height
+  let eqv : B ≃ Fin (Fintype.card B) := Fintype.equivFin B
+  let htw : W → ℕ := fun w => Nat.findGreatest (fun j => (w : Additive (Layer Q 0)) ∈ H j) N
+  let ht0 : Fin (Fintype.card B) → ℕ := fun i => htw (eqv.symm i)
+  let π := Tuple.sort ht0
+  let e : Module.Basis (Fin (Fintype.card B)) (ZMod 3) W := b0.reindex (eqv.trans π.symm)
+  let ht : Fin (Fintype.card B) → ℕ := fun i => ht0 (π i)
+  have hmono : Monotone ht := Tuple.monotone_sort ht0
+  have he : ∀ i, e i = (eqv.symm (π i) : W) := fun i => by
+    simp only [e, Module.Basis.reindex_apply, Equiv.symm_trans_apply, Equiv.symm_symm, hb0]
+  have hrepr : ∀ (v : W) i, e.repr v i = b0.repr v (eqv.symm (π i)) := fun v i => by
+    simp only [e, Module.Basis.repr_reindex_apply, Equiv.symm_trans_apply, Equiv.symm_symm]
+  have hE1 : ∀ i, ∃ a : Additive (Layer Q 0), ((3 : ℤ) ^ ht i) • a = (e i : Additive (Layer Q 0)) := by
+    intro i
+    rw [he i]
+    exact Nat.findGreatest_spec (P := fun j => ((eqv.symm (π i) : W) : Additive (Layer Q 0)) ∈ H j)
+      (Nat.zero_le N) ⟨_, by simp⟩
+  have hE2 : ∀ j (v : W), v ∈ Wf j → ∀ i, e.repr v i ≠ 0 → j ≤ ht i := by
+    intro j v hv i hi
+    have hsub := hBj j hv
+    rw [hset] at hsub
+    have hmem : eqv.symm (π i) ∈ {β : B | (β : W) ∈ Wf j} := by
+      apply (b0.mem_span_image.mp hsub)
+      rw [Finsupp.mem_support_iff, ← hrepr]
+      exact hi
+    have hHj := (hWf j _).mp hmem
+    by_cases hjN : j ≤ N
+    · exact Nat.le_findGreatest hjN hHj
+    · exfalso
+      obtain ⟨a, ha⟩ := hHj
+      have h0 : ((eqv.symm (π i) : B) : W) = 0 := Subtype.ext (by
+        rw [← ha, show j = (j - N) + N by omega, pow_add, mul_comm, mul_smul, hN, smul_zero]; rfl)
+      exact b0.ne_zero (eqv.symm (π i)) (by rw [hb0]; exact h0)
+  have hE3 : ∀ v : W, v ∈ LinearMap.ker P → ∀ i, e.repr v i ≠ 0 → P (e i) = 0 := by
+    intro v hv i hi
+    have hsub := hBK (Submodule.mem_inf.mpr ⟨hWf0 v, hv⟩)
+    rw [hset] at hsub
+    have hmem : eqv.symm (π i) ∈ {β : B | (β : W) ∈ LinearMap.ker P} := by
+      apply (b0.mem_span_image.mp hsub)
+      rw [Finsupp.mem_support_iff, ← hrepr]
+      exact hi
+    rw [he i]
+    exact hmem
+  -- the first layer
+  choose a0 ha0 using hE1
+  obtain ⟨x1, hx1⟩ : ∃ x1 : Fin (Fintype.card B) → Q, ∀ i, cl Q 0 (x1 i) = a0 i :=
+    ⟨fun i => L0 (a0 i), fun i => (hL0 _).2⟩
+  have hz : ∀ i, (3 : ℤ) ^ ht i • cl Q 0 (x1 i) = (e i : Additive (Layer Q 0)) := fun i => by
+    rw [hx1]; exact ha0 i
+  have hecl : ∀ i, ((e i : W) : Additive (Layer Q 0)) = cl Q 0 (x1 i ^ (3 ^ ht i)) := by
+    intro i
+    rw [hcl_npow, ← hz i, ← natCast_zsmul, Nat.cast_pow, Nat.cast_ofNat]
+  have hord : ∀ i, ((3 : ℤ) ^ (ht i + 1)) • cl Q 0 (x1 i) = 0 := by
+    intro i
+    rw [pow_succ', mul_smul, hz i]
+    have := (hWmem _).mp (e i).2
+    rw [← natCast_zsmul] at this
+    exact_mod_cast this
+  have hdpow : ∀ i, x1 i ^ (3 ^ (ht i + 1)) = (x1 i ^ (3 ^ ht i)) ^ 3 := fun i => by
+    rw [← pow_mul, pow_succ]
+  have hx1d : ∀ i, x1 i ^ (3 ^ (ht i + 1)) ∈ (⊤ : Subgroup Q).lowerCentralSeries 1 := by
+    intro i
+    rw [hdpow]
+    exact hmemW _ (by rw [← hecl]; exact (hWmem _).mp (e i).2)
+  have hpe : ∀ i, P (e i) = cl Q 1 (x1 i ^ (3 ^ (ht i + 1))) := by
+    intro i
+    rw [hPv, hdpow]
+    exact hp _ _ (hecl i)
+  have hind : ∀ c : Fin (Fintype.card B) → ℤ,
+      ∑ i, c i • ((3 : ℤ) ^ ht i • cl Q 0 (x1 i)) = 0 → ∀ i, (3 : ℤ) ∣ c i := by
+    intro c hc
+    exact basis_indep' W e c (by simpa only [hz] using hc)
+  have hflag : ∀ (j : ℕ) (v : Additive (Layer Q 0)), (3 : ℤ) • v = 0 →
+      (∃ a, ((3 : ℤ) ^ j) • a = v) →
+      ∃ c : Fin (Fintype.card B) → ℤ, v = ∑ i, c i • ((3 : ℤ) ^ ht i • cl Q 0 (x1 i)) ∧
+        ∀ i, ht i < j → c i = 0 := by
+    intro j v hv3 hvj
+    have hvW : v ∈ W := (hWmem v).mpr (by
+      rw [show (3 : ℤ) = ((3 : ℕ) : ℤ) by norm_num, natCast_zsmul] at hv3; exact hv3)
+    refine ⟨fun i => ((e.repr ⟨v, hvW⟩ i).val : ℤ),
+      (basis_coords' W e v hvW).trans (Finset.sum_congr rfl fun i _ => by rw [hz i]), fun i hi => ?_⟩
+    by_contra hne
+    have hne' : e.repr ⟨v, hvW⟩ i ≠ 0 := fun h0 => hne (by simp [h0])
+    have := hE2 j ⟨v, hvW⟩ ((hWf j _).mpr hvj) i hne'
+    omega
+  have B1 : IsLayerBasis 0 x1 (fun i => 3 ^ (ht i + 1)) :=
+    isLayerBasis_zero_of_socle x1 ht hmono
+      (socle_basis (fun i => cl Q 0 (x1 i)) ht hord hind hflag hexp)
+  -- the active indices and the second layer
+  let act : Fin (Fintype.card B) → Prop := fun i => P (e i) ≠ 0
+  let g : {i // act i} → Additive (Layer Q 1) := fun i => P (e i)
+  have hg : LinearIndependent (ZMod 3) g := by
+    rw [Fintype.linearIndependent_iff]
+    intro c hc i0
+    let c' : Fin (Fintype.card B) → ZMod 3 := fun i => if h : act i then c ⟨i, h⟩ else 0
+    have h1 : ∑ j : {i // act i}, c j • g j = ∑ j : {i // act i}, c' j • P (e j) :=
+      Finset.sum_congr rfl fun j _ => by simp only [c', dif_pos j.2, g]
+    have h2 : ∑ j : {i // act i}, c' j • P (e j) = ∑ i, c' i • P (e i) := by
+      rw [← Finset.sum_subtype (Finset.univ.filter act) (fun x => by simp)
+        (fun i => c' i • P (e i)), Finset.sum_filter]
+      refine Finset.sum_congr rfl fun i _ => ?_
+      by_cases h : act i
+      · rw [if_pos h]
+      · rw [if_neg h]; simp [c', h]
+    let v : W := ∑ i, c' i • e i
+    have hv : v ∈ LinearMap.ker P := by
+      rw [LinearMap.mem_ker]
+      simp only [v, map_sum, map_smul]
+      rw [← h2, ← h1, hc]
+    by_contra hne
+    have hrep : e.repr v i0 = c i0 := by
+      simp only [v, e.repr_sum_self, c', dif_pos i0.2]
+    exact i0.2 (hE3 v hv i0 (by rw [hrep]; exact hne))
+  have hgs := hg.linearIndepOn_id
+  let J := hgs.extend (Set.subset_univ (Set.range g))
+  let f0 : Module.Basis J (ZMod 3) (Additive (Layer Q 1)) := Module.Basis.extend hgs
+  haveI : Finite J := Module.Finite.finite_basis f0
+  letI := Fintype.ofFinite J
+  let eJ : J ≃ Fin (Fintype.card J) := Fintype.equivFin J
+  let f : Module.Basis (Fin (Fintype.card J)) (ZMod 3) (Additive (Layer Q 1)) := f0.reindex eJ
+  have hf : ∀ k, f k = (eJ.symm k : Additive (Layer Q 1)) := fun k => by
+    simp only [f, Module.Basis.reindex_apply, f0, Module.Basis.coe_extend]
+  have hmemJ : ∀ i (h : act i), P (e i) ∈ J := fun i h =>
+    Module.Basis.subset_extend hgs ⟨⟨i, h⟩, rfl⟩
+  let σ : Fin (Fintype.card B) → Option (Fin (Fintype.card J)) := fun i =>
+    if h : act i then some (eJ ⟨P (e i), hmemJ i h⟩) else none
+  have hinj : ∀ i j k, σ i = some k → σ j = some k → i = j := by
+    intro i j k hi hj
+    simp only [σ] at hi hj
+    split_ifs at hi hj with h1 h2
+    · rw [← hj, Option.some_inj, EmbeddingLike.apply_eq_iff_eq, Subtype.mk.injEq] at hi
+      have := hg.injective (a₁ := ⟨i, h1⟩) (a₂ := ⟨j, h2⟩) hi
+      exact congrArg Subtype.val this
+  have hact : ∀ i k, σ i = some k → P (e i) = f k := by
+    intro i k hi
+    simp only [σ] at hi
+    split_ifs at hi with h1
+    rw [Option.some_inj] at hi
+    rw [hf, ← hi, Equiv.symm_apply_apply]
+  have hinact : ∀ i, σ i = none → P (e i) = 0 := by
+    intro i hi
+    simp only [σ] at hi
+    split_ifs at hi with h1
+    exact not_not.mp h1
+  let x2 : Fin (Fintype.card J) → Q := fun k =>
+    if h : ∃ i, σ i = some k then x1 h.choose ^ (3 ^ (ht h.choose + 1)) else L1 (f k)
+  have hx2 : ∀ k, x2 k ∈ (⊤ : Subgroup Q).lowerCentralSeries 1 ∧ cl Q 1 (x2 k) = f k := by
+    intro k
+    by_cases h : ∃ i, σ i = some k
+    · simp only [x2, dif_pos h]
+      exact ⟨hx1d _, by rw [← hpe, hact _ _ h.choose_spec]⟩
+    · simp only [x2, dif_neg h]; exact hL1 (f k)
+  have hY : ∀ i k, σ i = some k → x2 k = x1 i ^ (3 ^ (ht i + 1)) := by
+    intro i k hik
+    have h : ∃ i, σ i = some k := ⟨i, hik⟩
+    simp only [x2, dif_pos h]
+    rw [hinj _ _ _ h.choose_spec hik]
+  have hK : ∀ i, σ i = none → x1 i ^ (3 ^ (ht i + 1)) ∈ (⊤ : Subgroup Q).lowerCentralSeries 2 := by
+    intro i hi
+    rw [← cl_eq_zero_iff (hx1d i), ← hpe, hinact i hi]
+  have B2 := (isLayerBasis_of_basis (fun k => (hx2 k).1) f (fun k => (hx2 k).2.symm)).1
+  let e3 := Module.finBasis (ZMod 3) (Additive (Layer Q 2))
+  let x3 : Fin (Module.finrank (ZMod 3) (Additive (Layer Q 2))) → Q := fun l => L2 (e3 l)
+  obtain ⟨B3, nf3⟩ := isLayerBasis_of_basis (fun l => (hL2 (e3 l)).1) e3
+    (fun l => (hL2 (e3 l)).2.symm)
+  -- the structure constants
+  let c : Fin (Fintype.card B) → Fin _ → ℤ := fun i =>
+    if h : σ i = none then Classical.choose (nf3 _ (hK i h)) else 0
+  let dd : Fin (Fintype.card J) → Fin _ → ℤ := fun k => Classical.choose (nf3 _ (h2 _ (hx2 k).1))
+  have hαm : ∀ g h, tc (x1 g ^ (3 ^ (ht g + 1))) (x1 h) ∈ (⊤ : Subgroup Q).lowerCentralSeries 2 :=
+    fun g h => tc_mem (i := 1) (j := 0) (by omega) (hx1d g) (mem_lcs_zero (x1 h))
+  let α : Fin (Fintype.card B) → Fin (Fintype.card B) → Fin _ → ℤ := fun g h =>
+    Classical.choose (nf3 _ (hαm g h))
+  let T : Tahara.Data Q :=
+    { s := Fintype.card B, t := Fintype.card J, u := _, x₁ := x1,
+      d := fun i => 3 ^ (ht i + 1), x₂ := x2, e := fun _ => 3, x₃ := x3,
+      f := fun _ => 3, b := fun i k => if σ i = some k then 1 else 0, c := c, dd := dd, α := α }
+  have hvalid : T.Valid := by
+    refine ⟨B1, B2, B3, ?_, ?_, ?_, ?_, ?_, ?_, ?_⟩
+    · intro i k
+      change 0 ≤ (if σ i = some k then (1 : ℤ) else 0) ∧
+        (if σ i = some k then (1 : ℤ) else 0) < ((3 : ℕ) : ℤ)
+      split_ifs <;> norm_num
+    · intro i l
+      change 0 ≤ c i l ∧ c i l < ((3 : ℕ) : ℤ)
+      simp only [c]
+      split_ifs with h
+      · have := (Classical.choose_spec (nf3 _ (hK i h))).1 l; exact_mod_cast this
+      · norm_num
+    · intro k l
+      have := (Classical.choose_spec (nf3 _ (h2 _ (hx2 k).1))).1 l; exact_mod_cast this
+    · intro g h l _
+      have := (Classical.choose_spec (nf3 _ (hαm g h))).1 l
+      exact_mod_cast this
+    · intro i
+      show (oprod x2 (fun k => if σ i = some k then 1 else 0) * oprod x3 (c i))⁻¹ *
+        x1 i ^ (3 ^ (ht i + 1)) ∈ _
+      by_cases h : σ i = none
+      · have hb0' : (fun k => if σ i = some k then (1 : ℤ) else 0) = 0 := by
+          funext k; simp [h]
+        simp only [c, dif_pos h, hb0', oprod_zero, one_mul]
+        exact (Classical.choose_spec (nf3 _ (hK i h))).2
+      · obtain ⟨ki, hki⟩ := Option.ne_none_iff_exists'.mp h
+        have hb1 : (fun k => if σ i = some k then (1 : ℤ) else 0) =
+            fun k => if k = ki then 1 else 0 := by
+          funext k
+          rw [hki]
+          by_cases hk : k = ki
+          · simp [hk]
+          · simp [hk, Ne.symm hk]
+        simp only [c, dif_neg h, hb1, oprod_single, hY i ki hki, oprod_zero, mul_one,
+          inv_mul_cancel]
+        exact one_mem _
+    · intro k
+      exact (Classical.choose_spec (nf3 _ (h2 _ (hx2 k).1))).2
+    · intro g h _
+      exact (Classical.choose_spec (nf3 _ (hαm g h))).2
+  have hd : ∀ i, T.d i = 3 ∨ T.d i = 9 ∨ 27 ∣ T.d i := by
+    intro i
+    show 3 ^ (ht i + 1) = 3 ∨ 3 ^ (ht i + 1) = 9 ∨ 27 ∣ 3 ^ (ht i + 1)
+    rcases Nat.lt_or_ge (ht i) 2 with h | h
+    · interval_cases (ht i) <;> simp
+    · right; right
+      exact ⟨3 ^ (ht i - 2), by rw [show (27 : ℕ) = 3 ^ 3 by norm_num, ← pow_add]; congr 1; omega⟩
+  have S : SetupGen T σ :=
+    ⟨h5, h2, hvalid, hd, fun _ => rfl, fun _ => rfl, hinj, fun _ _ => rfl, hY, hK⟩
+  have hle := hT Q h5 T hvalid
+  rw [eq_bot_iff]
+  refine hle.trans ((Subgroup.closure_le _).mpr ?_)
+  rintro y ⟨τ, hτ, rfl⟩
+  rw [SetLike.mem_coe, S.gen_eq_one hτ]
+  exact one_mem _
+
+/-- **`D₅ = γ₅` when `γ₂/γ₃` has exponent `3`, modulo Tahara's Theorem 6.1** (wiki 886,
+MATH-443). Let `G/γ₂(G)` be a finite `3`-group and let `γ₂(G)/γ₃(G)` have exponent dividing `3`
+(`a³ ∈ γ₃` for `a ∈ γ₂`; equivalently `[x³, y] ∈ γ₃` for all `x, y`). Then `D₅(G) = γ₅(G)`; the
+invariants of `G/γ₂(G)` are arbitrary. -/
+theorem D_five_eq_gamma_five_exp_L1 (hT : TaharaFiveOne) (G : Type) [Group G]
+    (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
+    (h3grp : ∀ x : G, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
+    (h2 : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, a ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 2) :
+    D 5 G = (⊤ : Subgroup G).lowerCentralSeries 4 := by
+  refine le_antisymm (D_le_of_D_quotient_eq_bot _ 5 ?_) (gamma_le_D G 5 (by norm_num))
+  haveI : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 4) := finite_quotient_lcs hfin 3
+  let π := QuotientGroup.mk' ((⊤ : Subgroup G).lowerCentralSeries 4)
+  have hmap : ∀ (k : ℕ) (y : G), y ∈ (⊤ : Subgroup G).lowerCentralSeries k →
+      π y ∈ (⊤ : Subgroup (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 4)).lowerCentralSeries k :=
+    fun k y hy => by rw [← lcs_map_mk]; exact Subgroup.mem_map_of_mem _ hy
+  refine D_five_eq_bot_of_class_four_exp_L1 hT (lowerCentralSeries_quotient_eq_bot 4)
+    (fun x => ?_) (fun a ha => ?_)
+  · obtain ⟨x, rfl⟩ := QuotientGroup.mk'_surjective ((⊤ : Subgroup G).lowerCentralSeries 4) x
+    obtain ⟨k, hk⟩ := h3grp x
+    exact ⟨k, by rw [← map_pow]; exact hmap 1 _ hk⟩
+  · rw [← lcs_map_mk] at ha
+    obtain ⟨y, hy, rfl⟩ := Subgroup.mem_map.mp ha
+    rw [← map_pow]
+    exact hmap 2 _ (h2 y hy)
+
+/-- Theorem 6.6 (`D_five_eq_gamma_five`) as a special case: `G/γ₂` of exponent `3` gives `h2`. -/
+theorem D_five_eq_gamma_five_of_exp_three_of_exp_L1 (hT : TaharaFiveOne) (G : Type) [Group G]
+    (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
+    (h1 : ∀ x : G, x ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
+    D 5 G = (⊤ : Subgroup G).lowerCentralSeries 4 :=
+  D_five_eq_gamma_five_exp_L1 hT G hfin (fun x => ⟨1, by simpa using h1 x⟩)
+    (cube_succ (k := 0) (fun a _ => h1 a))
+
+/-- Theorem 6.8 (`D_five_eq_gamma_five_cyclic`) as a special case: cyclic cubes give `h2`
+(`cube_L1_of_cubes`). -/
+theorem D_five_eq_gamma_five_cyclic_of_exp_L1 (hT : TaharaFiveOne) (G : Type) [Group G]
+    (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
+    (h3grp : ∀ x : G, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (t : G)
+    (ht : ∀ x : G, ∃ n : ℕ, (t ^ (3 * n))⁻¹ * x ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
+    D 5 G = (⊤ : Subgroup G).lowerCentralSeries 4 :=
+  D_five_eq_gamma_five_exp_L1 hT G hfin h3grp (cube_L1_of_cubes t ht)
 
 end ExpThree
 
