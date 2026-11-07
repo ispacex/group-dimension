@@ -21,6 +21,10 @@ public import GroupDimension.Statements
 (`sub_one_mem_augIdealP_pow_of_mem_D`). `d(Q) ≥ 3` for `Q'' ≠ 1` is `card_ge_of_not_metabelian`
 (Proposition 6.5, via the cyclic case of Lemma 6.3).
 
+For `p = 3` the hypothesis is proved (`guptaTaharaMetabelian_three`), and the hypothesis-free
+versions are `D_le_derivedSeries_two_three`, `mem_of_mem_D_add_two_three`,
+`rank_ge_three_of_D_five_ne_bot_three` (`GuptaTaharaThree.lean`).
+
 Here `M_n` is `Q ∩ (1 + Δ_{𝔽_p}(Q)^n)`; that it equals `∏_{i p^j ≥ n} γ_i^{p^j}` (Jennings) is
 formalized only in the inclusion needed for `p = 2`, `n = 5` (`Jennings/`).
 -/
