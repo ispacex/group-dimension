@@ -81,7 +81,7 @@ are proved in the development (`dThreeEqGammaThree`, `passiDFourSquare`,
   Remark 2.2, Lemma 5.2 (d), Proposition 5.8, Lemma 5.9, Lemmas 6.1 and 6.2 (with Gupta–Tahara
   as an explicit hypothesis, and for `p = 3` without it), Lemma 6.3, Proposition 6.5,
   Lemma 6.11, Theorem 6.12 (for central extensions by a subgroup of exponent `p`), Theorem 6.14
-  (for a given normal form), Theorem D.1 (Gupta–Tahara at `p = 3`), the Lie algebra of
+  (for a given normal form), Theorem D.1 (`D₅ = γ₅` for `p` odd when `[γ₂, γ₂] ⊆ γ₅`; Gupta–Tahara at `p = 3`), the Lie algebra of
   Appendix A and the inclusion part of Tahara's Theorem 6.1 are formalized in the development
   but are not compared statements.
 * Numbering: the paper's numbers are those of the current draft, in which Theorems 6.9 and 6.10

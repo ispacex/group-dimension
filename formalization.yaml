@@ -114,8 +114,8 @@ status:
     which Proposition 5.3 enters D_five_eq_bot_of_rank as an explicit hypothesis; the classical
     result Gupta–Tahara's D_{p+2} = γ_{p+2} for metabelian p-groups, p odd [GT85, Thm.
     3.2(c)], for p ≥ 5 (at p = 3 it is the paper's Theorem D.1, formalized in the development),
-    which enters the general-p forms of Lemmas 6.1 and 6.2 of the development as an explicit
-    hypothesis; Lemma C.1 (that nonterminal means a nontrivial nucleus). Formalized in
+    which enters Lemma 6.1 for general odd p as an explicit hypothesis (Lemma 6.2, a p = 3
+    statement, and Lemma 6.1 at p = 3 are formalized without it); Lemma C.1 (that nonterminal means a nontrivial nucleus). Formalized in
     the development but not compared here: Remark 2.2, Lemma 5.2 (d), Proposition 5.8, Lemma 5.9, Lemmas 6.1 and 6.2
     (with Gupta–Tahara as an explicit hypothesis, and for p = 3 without it), Lemma
     6.3, Proposition 6.5, Lemma 6.11 (for quotients E/U of any group E), Theorem 6.12 (for
