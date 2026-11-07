@@ -59,8 +59,7 @@ theorem em_of {g : G} (h : g ∈ L1 G) :
     em g = Additive.ofMul (Abelianization.of (⟨g, h⟩ : L1 G)) := by
   unfold em
   split_ifs with h'
-  · rfl
-  · exact absurd h h'
+  rfl
 
 theorem em_mul {a b : G} (ha : a ∈ L1 G) (hb : b ∈ L1 G) : em (a * b) = em a + em b := by
   have e : (⟨a * b, mul_mem ha hb⟩ : L1 G) = ⟨a, ha⟩ * ⟨b, hb⟩ := rfl
@@ -399,7 +398,7 @@ theorem w_term {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) {i j k : Fin T.s} (
     τ.w i j k • Tm (T.x₁ k') (Tm (T.x₁ j) (em (T.x₁ i ^ T.d i))) = 0 := by
   rcases lt_or_eq_of_le hij with hlt | rfl
   · obtain ⟨r, hr⟩ := w_div hT hodd hτ hlt hjk
-    rw [TTY h5 hT hodd, smul_smul, hr, mul_comm, mul_smul, L3 hmet h5 hT hodd hlt.le,
+    rw [TTY hmet h5 hT hodd, smul_smul, hr, mul_comm, mul_smul, L3 hmet h5 hT hodd hlt.le,
       smul_zero]
   · rw [TY_self hT, map_zero, smul_zero]
 
@@ -525,6 +524,7 @@ theorem x2_mem (k : Fin T.t) : T.x₂ k ∈ L1 G := hT.basis₂.mem k
 omit hmet h5 hodd in
 theorem x3_mem (l : Fin T.u) : T.x₃ l ∈ L1 G := lcs_mem_of_le (by norm_num) (hT.basis₃.mem l)
 
+omit hmet hodd in
 /-- `[Y_h, x] = ∑_k b_{hk} [x_{2k}, x] + ∑_l c_{hl} [x_{3l}, x]`. -/
 theorem KY (h : Fin T.s) (x : G) : Tm x (em (T.x₁ h ^ T.d h)) =
     ∑ k, T.b h k • Tm x (em (T.x₂ k)) + ∑ l, T.c h l • Tm x (em (T.x₃ l)) := by
@@ -535,6 +535,7 @@ theorem KY (h : Fin T.s) (x : G) : Tm x (em (T.x₁ h ^ T.d h)) =
     em_oprod (x2_mem hT), em_oprod (x3_mem hT)]
   simp only [map_add, map_sum, map_zsmul]
 
+omit hmet hodd in
 /-- `e(k) [x_{2k}, x] = ∑_l d_{kl} [x_{3l}, x]`. -/
 theorem KE (k : Fin T.t) (x : G) : (T.e k : ℤ) • Tm x (em (T.x₂ k)) =
     ∑ l, T.dd k l • Tm x (em (T.x₃ l)) := by
@@ -543,6 +544,7 @@ theorem KE (k : Fin T.t) (x : G) : (T.e k : ℤ) • Tm x (em (T.x₂ k)) =
     em_oprod (x3_mem hT)]
   simp only [map_sum, map_zsmul]
 
+omit hmet hodd in
 /-- `[Y_g, x_h, x] = ∑_l α^{(gh)}_l [x_{3l}, x]` for `g ≤ h`. -/
 theorem KA {g h : Fin T.s} (hgh : g ≤ h) (x : G) :
     Tm x (Tm (T.x₁ h) (em (T.x₁ g ^ T.d g))) = ∑ l, T.α g h l • Tm x (em (T.x₃ l)) := by
@@ -585,15 +587,15 @@ theorem row {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) (i : Fin T.s) :
   have hdX : ∀ l, (T.d i : ℤ) • X l = 0 := fun l => L2 hmet h5 hT hodd i _
   have hdX2 : ∀ k, (T.d i : ℤ) • X2 k = 0 := fun k => L2 hmet h5 hT hodd i _
   have KY' : ∀ h, Tm (T.x₁ i) (em (T.x₁ h ^ T.d h)) =
-      ∑ k, T.b h k • X2 k + ∑ l, T.c h l • X l := fun h => KY hmet h5 hT hodd h _
-  have KE' : ∀ k, (T.e k : ℤ) • X2 k = ∑ l, T.dd k l • X l := fun k => KE hmet h5 hT hodd k _
+      ∑ k, T.b h k • X2 k + ∑ l, T.c h l • X l := fun h => KY h5 hT h _
+  have KE' : ∀ k, (T.e k : ℤ) • X2 k = ∑ l, T.dd k l • X l := fun k => KE h5 hT k _
   have KA' : ∀ g h, g ≤ h → Tm (T.x₁ i) (Tm (T.x₁ h) (em (T.x₁ g ^ T.d g))) =
-      ∑ l, T.α g h l • X l := fun g h hgh => KA hmet h5 hT hodd hgh _
+      ∑ l, T.α g h l • X l := fun g h hgh => KA h5 hT hgh _
   -- the vanishing of the `α`-terms
   have hZ1 : ∑ h, (if h < i then (τ.u h i * T.q h i) • ∑ l, T.α h i l • X l else 0) = 0 := by
     refine Finset.sum_eq_zero fun h _ => ?_
     split_ifs with hhi
-    · rw [← KA' h i hhi.le, TTY h5 hT hodd, smul_smul,
+    · rw [← KA' h i hhi.le, TTY hmet h5 hT hodd, smul_smul,
         show τ.u h i * T.q h i * (T.d h : ℤ) = τ.u h i * ((T.d h : ℤ) * T.q h i) by ring,
         dq hT hhi.le, mul_smul, L2 hmet h5 hT hodd i, smul_zero]
     · rfl
@@ -612,7 +614,7 @@ theorem row {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) (i : Fin T.s) :
   have hZ4 : ∑ g, ∑ h, (if i < g ∧ g ≤ h then τ.w' i g h • ∑ l, T.α g h l • X l else 0) = 0 := by
     refine Finset.sum_eq_zero fun g _ => Finset.sum_eq_zero fun h _ => ?_
     split_ifs with hc
-    · rw [← KA' g h hc.2, Tm_comm hmet, TTY h5 hT hodd,
+    · rw [← KA' g h hc.2, Tm_comm hmet, TTY hmet h5 hT hodd,
         show tc (T.x₁ g) (T.x₁ i) = (tc (T.x₁ i) (T.x₁ g))⁻¹ from (tc_inv _ _).symm,
         em_inv (tc_mem_L1 _ _), map_neg, smul_neg, L3 hmet h5 hT hodd hc.1.le, neg_zero,
         smul_zero]
