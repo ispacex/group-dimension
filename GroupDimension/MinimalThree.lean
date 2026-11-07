@@ -183,15 +183,16 @@ theorem D_four_le_of_isPGroup_three (hP : PassiDFourSquare) (hQ : IsPGroup 3 Q) 
   rw [hg']
   exact pow_mem (hP Q g hg) _
 
-/-- **Lemma 6.2**, with hypotheses on the quotients: let `Q` be a finite `3`-group of class `≤ 4`
+/-- **Lemma 6.2**, with hypotheses on the quotients and with `D₅(Q) ⊆ Q''` (Lemma 6.1) as a
+hypothesis on `Q` itself: let `Q` be a finite `3`-group of class `≤ 4`
 such that `D₅(Q/N) = 1` for every central subgroup `N` of order `3`. If `D₅(Q) ≠ 1`, then
 `γ₄(Q) ≠ 1`, `Q'' ≠ 1`, `d(Q) ≥ 3`, `Z(Q)` is cyclic, `D₅(Q) = Ω₁(Z(Q)) = ⟨z⟩` with `z` of
 order `3` in `Q'' ∩ M₅(Q)`, and for the `3`-class `c ≥ 4`: `P_c(Q) = ⟨z⟩`,
 `P_c(Q/⟨z⟩) = 1 ≠ P_{c-1}(Q/⟨z⟩)`. -/
-theorem minimal_three_of_quotients (hP : PassiDFourSquare) (hGT : GuptaTaharaMetabelian)
-    (hQ : IsPGroup 3 Q) (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥)
+theorem minimal_three_of_quotients_of (hP : PassiDFourSquare) (hQ : IsPGroup 3 Q)
+    (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥)
     (hmin : ∀ N : Subgroup Q, ∀ _ : N.Normal, N ≤ center Q → Nat.card N = 3 → D 5 (Q ⧸ N) = ⊥)
-    (hD : D 5 Q ≠ ⊥) :
+    (hGQ : D 5 Q ≤ derivedSeries Q 2) (hD : D 5 Q ≠ ⊥) :
     (⊤ : Subgroup Q).lowerCentralSeries 3 ≠ ⊥ ∧ derivedSeries Q 2 ≠ ⊥ ∧ 3 ≤ Group.rank Q ∧
       IsCyclic (center Q) ∧
       ∃ z ∈ center Q, orderOf z = 3 ∧ D 5 Q = zpowers z ∧
@@ -203,7 +204,8 @@ theorem minimal_three_of_quotients (hP : PassiDFourSquare) (hGT : GuptaTaharaMet
   have hD5γ4 : D 5 Q ≤ (⊤ : Subgroup Q).lowerCentralSeries 3 :=
     (D_antitone (by norm_num : 4 ≤ 5)).trans (D_four_le_of_isPGroup_three hP hQ)
   have hγ4 : (⊤ : Subgroup Q).lowerCentralSeries 3 ≠ ⊥ := fun h => hD (le_bot_iff.mp (h ▸ hD5γ4))
-  obtain ⟨hm, hrank⟩ := rank_ge_three_of_D_five_ne_bot hGT hQ h5 hD
+  have hm : derivedSeries Q 2 ≠ ⊥ := fun h => hD (le_bot_iff.mp (h ▸ hGQ))
+  have hrank := (card_ge_of_not_metabelian (by norm_num) hQ h5 hm).1
   -- `D₅` lies in every central subgroup of order `3`
   have hle : ∀ N : Subgroup Q, N ≤ center Q → Nat.card N = 3 → D 5 Q ≤ N := fun N hN h3 => by
     haveI := normal_of_le_center hN
@@ -211,7 +213,8 @@ theorem minimal_three_of_quotients (hP : PassiDFourSquare) (hGT : GuptaTaharaMet
   obtain ⟨z, hzZ, hz3, hDz, hcyc, hΩ⟩ := eq_zpowers_of_le_central_prime hQ hD hle
   have hzD : z ∈ D 5 Q := hDz ▸ mem_zpowers z
   have hz1 : z ≠ 1 := fun h => by rw [h, orderOf_one] at hz3; omega
-  obtain ⟨hzm, hzM⟩ := mem_of_mem_D_add_two (p := 3) hGT (by norm_num) hQ h5 hzD
+  have hzm : z ∈ derivedSeries Q 2 := hGQ hzD
+  have hzM := sub_one_mem_augIdealP_pow_of_mem_D (p := 3) hzD
   -- the `3`-class
   have hzP4 : z ∈ expCentral 3 Q 4 := lowerCentralSeries_le_expCentral 3 (hD5γ4 hzD)
   obtain ⟨c0, hc0⟩ := expCentral_eventually_bot (p := 3) hQ
@@ -274,13 +277,36 @@ theorem minimal_three_of_quotients (hP : PassiDFourSquare) (hGT : GuptaTaharaMet
     rw [hc1, hPceq, le_bot_iff] at this
     exact hzne this
 
-/-- **Lemma 6.2** (minimal counterexample, `p = 3`): let `Q` be a finite `3`-group with
+
+/-- **Lemma 6.2**, with hypotheses on the quotients: let `Q` be a finite `3`-group of class `≤ 4`
+such that `D₅(Q/N) = 1` for every central subgroup `N` of order `3`. If `D₅(Q) ≠ 1`, then
+`γ₄(Q) ≠ 1`, `Q'' ≠ 1`, `d(Q) ≥ 3`, `Z(Q)` is cyclic, `D₅(Q) = Ω₁(Z(Q)) = ⟨z⟩` with `z` of
+order `3` in `Q'' ∩ M₅(Q)`, and for the `3`-class `c ≥ 4`: `P_c(Q) = ⟨z⟩`,
+`P_c(Q/⟨z⟩) = 1 ≠ P_{c-1}(Q/⟨z⟩)`. -/
+theorem minimal_three_of_quotients (hP : PassiDFourSquare) (hGT : GuptaTaharaMetabelian)
+    (hQ : IsPGroup 3 Q) (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥)
+    (hmin : ∀ N : Subgroup Q, ∀ _ : N.Normal, N ≤ center Q → Nat.card N = 3 → D 5 (Q ⧸ N) = ⊥)
+    (hD : D 5 Q ≠ ⊥) :
+    (⊤ : Subgroup Q).lowerCentralSeries 3 ≠ ⊥ ∧ derivedSeries Q 2 ≠ ⊥ ∧ 3 ≤ Group.rank Q ∧
+      IsCyclic (center Q) ∧
+      ∃ z ∈ center Q, orderOf z = 3 ∧ D 5 Q = zpowers z ∧
+        (∀ x ∈ center Q, x ^ 3 = 1 → x ∈ zpowers z) ∧
+        z ∈ derivedSeries Q 2 ∧ of (ZMod 3) Q z - 1 ∈ Jennings.augIdealP 3 Q ^ 5 ∧
+        ∃ _ : (zpowers z).Normal, ∃ c ≥ 4, expCentral 3 Q (c + 1) = ⊥ ∧
+          expCentral 3 Q c = zpowers z ∧ expCentral 3 (Q ⧸ zpowers z) c = ⊥ ∧
+          expCentral 3 (Q ⧸ zpowers z) (c - 1) ≠ ⊥ :=
+  minimal_three_of_quotients_of hP hQ h5 hmin
+    (D_le_derivedSeries_two (p := 3) hGT (by norm_num) hQ h5) hD
+
+/-- **Lemma 6.2** (minimal counterexample, `p = 3`), with Lemma 6.1 for `Q` as a hypothesis:
+let `Q` be a finite `3`-group with
 `D₅(Q) ≠ γ₅(Q)` such that `D₅(R) = γ₅(R)` for every finite `3`-group `R` of smaller order. Then
 `Q` has class `4`, `Q'' ≠ 1`, `d(Q) ≥ 3`, `Z(Q)` is cyclic, `D₅(Q) = Ω₁(Z(Q)) = ⟨z⟩` with `z` of
 order `3` in `Q'' ∩ M₅(Q)`, and for the `3`-class `c ≥ 4`: `P_c(Q) = ⟨z⟩` and
 `P_c(Q/⟨z⟩) = 1 ≠ P_{c-1}(Q/⟨z⟩)`, i.e. `Q` is an immediate descendant of step size `1` of
 `Q/⟨z⟩`. -/
-theorem minimal_three (hP : PassiDFourSquare) (hGT : GuptaTaharaMetabelian) (hQ : IsPGroup 3 Q)
+theorem minimal_three_of (hP : PassiDFourSquare) (hQ : IsPGroup 3 Q)
+    (hGQ : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥ → D 5 Q ≤ derivedSeries Q 2)
     (hmin : ∀ (R : Type) [Group R] [Finite R], IsPGroup 3 R → Nat.card R < Nat.card Q →
       D 5 R = (⊤ : Subgroup R).lowerCentralSeries 4)
     (hD : D 5 Q ≠ (⊤ : Subgroup Q).lowerCentralSeries 4) :
@@ -313,6 +339,27 @@ theorem minimal_three (hP : PassiDFourSquare) (hGT : GuptaTaharaMetabelian) (hQ 
       have h2 : 0 < Nat.card (Q ⧸ N) := Nat.card_pos
       omega
     rw [hmin (Q ⧸ N) (hQ.to_quotient N) hlt, ← lcs_map_mk N 4, h5, Subgroup.map_bot]
-  exact ⟨h5, minimal_three_of_quotients hP hGT hQ h5 hq hD⟩
+  exact ⟨h5, minimal_three_of_quotients_of hP hQ h5 hq (hGQ h5) hD⟩
+
+
+/-- **Lemma 6.2** (minimal counterexample, `p = 3`): let `Q` be a finite `3`-group with
+`D₅(Q) ≠ γ₅(Q)` such that `D₅(R) = γ₅(R)` for every finite `3`-group `R` of smaller order. Then
+`Q` has class `4`, `Q'' ≠ 1`, `d(Q) ≥ 3`, `Z(Q)` is cyclic, `D₅(Q) = Ω₁(Z(Q)) = ⟨z⟩` with `z` of
+order `3` in `Q'' ∩ M₅(Q)`, and for the `3`-class `c ≥ 4`: `P_c(Q) = ⟨z⟩` and
+`P_c(Q/⟨z⟩) = 1 ≠ P_{c-1}(Q/⟨z⟩)`, i.e. `Q` is an immediate descendant of step size `1` of
+`Q/⟨z⟩`. -/
+theorem minimal_three (hP : PassiDFourSquare) (hGT : GuptaTaharaMetabelian) (hQ : IsPGroup 3 Q)
+    (hmin : ∀ (R : Type) [Group R] [Finite R], IsPGroup 3 R → Nat.card R < Nat.card Q →
+      D 5 R = (⊤ : Subgroup R).lowerCentralSeries 4)
+    (hD : D 5 Q ≠ (⊤ : Subgroup Q).lowerCentralSeries 4) :
+    (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥ ∧ (⊤ : Subgroup Q).lowerCentralSeries 3 ≠ ⊥ ∧
+      derivedSeries Q 2 ≠ ⊥ ∧ 3 ≤ Group.rank Q ∧ IsCyclic (center Q) ∧
+      ∃ z ∈ center Q, orderOf z = 3 ∧ D 5 Q = zpowers z ∧
+        (∀ x ∈ center Q, x ^ 3 = 1 → x ∈ zpowers z) ∧
+        z ∈ derivedSeries Q 2 ∧ of (ZMod 3) Q z - 1 ∈ Jennings.augIdealP 3 Q ^ 5 ∧
+        ∃ _ : (zpowers z).Normal, ∃ c ≥ 4, expCentral 3 Q (c + 1) = ⊥ ∧
+          expCentral 3 Q c = zpowers z ∧ expCentral 3 (Q ⧸ zpowers z) c = ⊥ ∧
+          expCentral 3 (Q ⧸ zpowers z) (c - 1) ≠ ⊥ :=
+  minimal_three_of hP hQ (fun h5 => D_le_derivedSeries_two (p := 3) hGT (by norm_num) hQ h5) hmin hD
 
 end GroupDimension
