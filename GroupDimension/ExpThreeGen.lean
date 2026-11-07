@@ -22,9 +22,9 @@ the review in comment 7634):
   the cube map `Ω₁ → γ₂/γ₃` (`exists_flag_ker_basis`); lifting it gives a uniqueness basis
   (`socle_basis`, `isLayerBasis_zero_of_socle`). The indices split into the *active* ones
   (`z_i ∉ K`, then `x_i^{d(i)}` is a basis vector of `γ₂/γ₃`) and the others (`x_i^{d(i)} ∈ γ₃`);
-* the computation (`SetupGen.gen_eq_one`): for `d(i) ≥ 9` the active `x_i^{d(i)}` commute with
-  `γ₂`; the pairing of the active indices of order `3` gives `−∑ u_{ij}[x_i⁹, x_j]` over the
-  inactive `j` of order `9`, and the row `j` of condition (E), together with the row `j` of (B),
+* the computation (`SetupGen.gen_eq_one`): for `9 ∣ d(i)` the `x_i^{d(i)}` commute with `γ₂`;
+  the full pairing `∑_{i,j} M_{ij} β_{ij}` over the active indices of order `3` (twice the
+  page's `½`-pairing) is `−∑ u_{ij}[x_i⁹, x_j]` over the inactive `j` of order `9`, and the row `j` of condition (E), together with the row `j` of (B),
   kills this sum for each such `j`.
 
 Theorems 6.6 and 6.8 (`D_five_eq_gamma_five`, `D_five_eq_gamma_five_cyclic`) are special cases:

@@ -133,8 +133,8 @@ $\Phi\colon\mathbb Z[G]\to T$ с первой координатой $\varepsilo
 $\Phi(g-1)=(0,\bar g)$. Это та же идея, что у авторов в `DegreeTwo.lean` (квадратично-нулевое
 представление).
 
-`#print axioms` для всех 1518 доказанных объявлений (`AxiomAudit.lean`: 1509 из разработки и
-9 сравниваемых теорем Palomar из `Solution.lean`) — только `propext`,
+`#print axioms` для всех 2025 доказанных объявлений (`AxiomAudit.lean`: 2015 из разработки и
+10 сравниваемых теорем Palomar из `Solution.lean`) — только `propext`,
 `Classical.choice`, `Quot.sound`. Ни `sorry`, ни `axiom` нет ни в разработке, ни в `Solution.lean`;
 `Challenge.lean` формулирует подаваемые результаты с `sorry` намеренно.
 
@@ -241,7 +241,7 @@ lake env lean AxiomAudit.lean
 
 Файлы `Challenge.lean`, `Solution.lean`, `comparator.json` и `formalization.yaml` — подача в
 [реестр Palomar](https://palomar-registry.org) машинно проверенных результатов. `Challenge.lean`
-формулирует девять результатов только средствами Mathlib (с `sorry`); `Solution.lean` (порождается
+формулирует десять результатов только средствами Mathlib (с `sorry`); `Solution.lean` (порождается
 из него скриптом `palomar/make_solution.py`) дословно повторяет определения и доказывает каждое
 утверждение из разработки; Comparator проверяет, что они совпадают и что используются только
 `propext`, `Classical.choice`, `Quot.sound`. Workflow `.github/workflows/palomar-preflight.yml`

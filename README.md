@@ -132,8 +132,8 @@ $D_2 = \gamma_2$ is proved via the trivial square-zero extension $T=\mathbb Z\op
 first coordinate is $\varepsilon$, so $\Phi(\Delta^2)=0$ and $\Phi(g-1)=(0,\bar g)$. This is the
 same idea as the authors' `DegreeTwo.lean` (a square-zero representation).
 
-`#print axioms` for all 1518 proved declarations (`AxiomAudit.lean`: 1509 of the development and the
-9 compared Palomar theorems of `Solution.lean`) — only `propext`,
+`#print axioms` for all 2025 proved declarations (`AxiomAudit.lean`: 2015 of the development and the
+10 compared Palomar theorems of `Solution.lean`) — only `propext`,
 `Classical.choice`, `Quot.sound`. No `sorry` and no `axiom` in the development or in `Solution.lean`;
 `Challenge.lean` states the submitted results with `sorry` by design.
 
@@ -238,7 +238,7 @@ With Mathlib from the cache the build takes a few minutes (see also the audit,
 
 The files `Challenge.lean`, `Solution.lean`, `comparator.json` and `formalization.yaml` are a
 submission to the [Palomar registry](https://palomar-registry.org) of machine-checked results.
-`Challenge.lean` states nine results using Mathlib alone (with `sorry`); `Solution.lean`
+`Challenge.lean` states ten results using Mathlib alone (with `sorry`); `Solution.lean`
 (generated from it by `palomar/make_solution.py`) repeats the definitions verbatim and proves each
 statement from the development; Comparator checks that the two agree and that only `propext`,
 `Classical.choice`, `Quot.sound` are used. The workflow

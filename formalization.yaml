@@ -47,7 +47,10 @@ sources:
       of 2026-10-22, submitted to arXiv (math.GR) that day; its arXiv identifier was not yet
       assigned when this commit was made. That version marks each statement [paper], [Lean]
       or [computer], and its formalization section describes this repository at commit
-      e58aa2b (tag lean-v4.29, Lean 4.29). Drafts from 2026-10-25 on replace the markers by
+      e58aa2b (tag lean-v4.29, Lean 4.29). The theorem and section numbers cited in this file are those of the current draft
+      (ispacex/mikh, 2026-11-07 or later, where Theorem 6.9 was added and the later statements of
+      Section 6 were renumbered); the version of 2026-10-22 has no Theorem 6.9. Drafts from
+      2026-10-25 on replace the markers by
       conventional wording: computer-assisted results are labelled so, and a result proved by hand that is
       also formally verified says so at its proof, with the formal versions and their exact
       hypotheses in the section on the formalization; that section now describes the Lean 4.35

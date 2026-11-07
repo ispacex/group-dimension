@@ -23,8 +23,9 @@ central series. Kourovka Problem 20.84 asks whether `D₅(G) ⊆ γ₄(G)` for e
 `γ₃ = (⊤ : Subgroup G).lowerCentralSeries 2`, `γ₄ = (⊤ : Subgroup G).lowerCentralSeries 3`, `γ₅ = (⊤ : Subgroup G).lowerCentralSeries 4`.
 
 **What is proved.** Every statement below is unconditional except one.
-* Theorems 6.6 and 6.8 of the paper (`D₅ = γ₅` when `G/γ₂` is a finite group of exponent 3,
-  or a finite 3-group whose cubes form a cyclic group); the inclusion `D₅(G) ⊆ M₅(G)`
+* Theorems 6.6, 6.8 and 6.9 of the paper (`D₅ = γ₅` when `G/γ₂` is a finite group of exponent 3,
+  or a finite 3-group whose cubes form a cyclic group, or more generally a finite 3-group with
+  `γ₂/γ₃` of exponent at most 3); the inclusion `D₅(G) ⊆ M₅(G)`
   (Jennings' "hard" inclusion in the case needed); Lemma 5.6 and the Lean part of
   Proposition 5.7 (statements about *candidates*).
 * The reduction of Problem 20.84 to finite 2-groups of class 3 (Proposition 2.1) and the

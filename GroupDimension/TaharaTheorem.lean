@@ -77,8 +77,10 @@ theorem D_five_eq_bot_of_class_four_cubes_cyclic {Q : Type} [Group Q] [Finite Q]
 
 /-- **Theorem 6.9 of the paper** (unconditional; MATH-443): if `G/γ₂(G)` is a finite `3`-group and
 `γ₂(G)/γ₃(G)` has exponent dividing `3` (`a³ ∈ γ₃(G)` for every `a ∈ γ₂(G)`), then
-`D₅(G) = γ₅(G)`. There is no restriction on the invariants of `G/γ₂(G)`; Theorems 6.6 and 6.8 are
-the special cases `D_five_eq_gamma_five_of_exp_three`, `D_five_eq_gamma_five_of_cubes_cyclic`. -/
+`D₅(G) = γ₅(G)`. There is no restriction on the invariants of `G/γ₂(G)`; Theorems 6.6 and 6.8 follow from
+it (`ExpThree.D_five_eq_gamma_five_of_exp_three_of_exp_L1`,
+`ExpThree.D_five_eq_gamma_five_cyclic_of_exp_L1`); they are also proved directly
+(`D_five_eq_gamma_five_of_exp_three`, `D_five_eq_gamma_five_of_cubes_cyclic`). -/
 theorem D_five_eq_gamma_five_of_exp_L1_three (G : Type) [Group G]
     (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
     (h3grp : ∀ x : G, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
