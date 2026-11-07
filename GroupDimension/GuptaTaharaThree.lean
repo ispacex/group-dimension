@@ -38,6 +38,7 @@ namespace GroupDimension
 namespace GuptaTahara
 
 open Subgroup Tahara ExpThree ClassFour
+open scoped commutatorElement
 
 variable {G : Type*} [Group G]
 
@@ -67,7 +68,8 @@ theorem em_one : em (1 : G) = 0 := by
   rw [em_of (one_mem _), e, map_one, ofMul_one]
 
 theorem em_zpow {a : G} (ha : a ∈ L1 G) (n : ℤ) : em (a ^ n) = n • em a := by
-  have e : (⟨a ^ n, zpow_mem ha n⟩ : L1 G) = (⟨a, ha⟩ : L1 G) ^ n := Subtype.ext (by simp)
+  have e : (⟨a ^ n, zpow_mem ha n⟩ : L1 G) = (⟨a, ha⟩ : L1 G) ^ n :=
+    Subtype.ext (by rw [SubgroupClass.coe_zpow])
   rw [em_of ha, em_of (zpow_mem ha n), e, map_zpow, ofMul_zpow]
 
 theorem em_pow {a : G} (ha : a ∈ L1 G) (n : ℕ) : em (a ^ n) = (n : ℤ) • em a := by
@@ -202,7 +204,8 @@ theorem eq_one_of_em_eq_zero {a : G} (ha : a ∈ L1 G) (h : em a = 0) : a = 1 :=
   rw [em_of ha] at h
   have h1 : Abelianization.of (⟨a, ha⟩ : L1 G) = 1 := congrArg Additive.toMul h
   have hc : commutator (L1 G) = ⊥ := by
-    rw [commutator, Subgroup.commutator_eq_bot_iff_le_centralizer]
+    show ⁅(⊤ : Subgroup (L1 G)), ⊤⁆ = ⊥
+    rw [Subgroup.commutator_eq_bot_iff_le_centralizer]
     intro x _
     rw [Subgroup.mem_centralizer_iff]
     intro y _
@@ -224,6 +227,7 @@ variable (hmet : ∀ a ∈ L1 G, ∀ b ∈ L1 G, a * b = b * a)
   (h5 : (⊤ : Subgroup G).lowerCentralSeries 4 = ⊥)
 include hmet h5
 
+omit hmet in
 /-- `[xⁿ, y] = n c + C(n,2) t_x c + C(n,3) t_x² c` with `c = [x, y]`. -/
 theorem em_tc_pow_left (x y : G) (n : ℕ) :
     em (tc (x ^ n) y) = (n : ℤ) • em (tc x y) + ((n.choose 2 : ℕ) : ℤ) • Tm x (em (tc x y)) +
@@ -246,6 +250,7 @@ theorem em_tc_pow_left (x y : G) (n : ℕ) :
     push_cast
     module
 
+omit hmet in
 /-- `[a, xⁿ] = n t_x a + C(n,2) t_x² a` for `a ∈ γ₂`. -/
 theorem em_tc_pow_right {a : G} (ha : a ∈ L1 G) (x : G) (n : ℕ) :
     em (tc a (x ^ n)) = (n : ℤ) • Tm x (em a) + ((n.choose 2 : ℕ) : ℤ) • Tm x (Tm x (em a)) := by
@@ -284,9 +289,10 @@ theorem smul_Tm_eq_zero {x : G} {n : ℕ} (hn : Odd n) (hx : x ^ n ∈ L1 G) (v 
   obtain ⟨a, ha, rfl⟩ := em_surj v
   have k2 := key _ (tcL ha x)
   rw [← Tm_em ha, Tm3 h5 x x x, smul_zero, add_zero] at k2
+  have hd2 : (n : ℤ) ∣ ((n.choose 2 : ℕ) : ℤ) := by
+    rw [choose_two_of_odd hn]; push_cast; exact dvd_mul_right _ _
   have k1 := key a ha
-  rw [smul_eq_zero_of_dvd (d := (n : ℤ)) (by rw [choose_two_of_odd hn]; push_cast; exact
-    dvd_mul_right _ _) k2, add_zero] at k1
+  rw [smul_eq_zero_of_dvd hd2 k2, add_zero] at k1
   exact k1
 
 /-- **Lemma 3.** If `xⁿ, yⁿ ∈ γ₂` with `n` odd, then `n · [x, y, z] = 0`. -/
@@ -308,7 +314,8 @@ theorem smul_Tm_tc_eq_zero {x y : G} {n : ℕ} (hn : Odd n) (hx : x ^ n ∈ L1 G
     rw [Tm_comm hmet y x]
     exact smul_eq_zero_of_dvd hd2 (smul_Tm_eq_zero hmet h5 hn hx _)
   have e5 : (n : ℤ) • Tm y (em (tc x z)) = 0 := smul_Tm_eq_zero hmet h5 hn hy _
-  rw [e1, e2, e3, e4, e5, smul_zero, smul_zero, add_zero, add_zero, add_zero, add_zero] at hX
+  rw [e1, e2, e3, e4, e5] at hX
+  simp only [smul_zero, add_zero] at hX
   exact hX
 
 end Identities
@@ -335,7 +342,7 @@ theorem dq {i j : Fin T.s} (hij : i ≤ j) : (T.d i : ℤ) * T.q i j = T.d j := 
   simp only [Data.q]; exact_mod_cast Nat.mul_div_cancel' (hT.basis₁.dvd i j hij)
 
 omit hmet h5 hodd in
-theorem d_dvd_ch2 (hodd' : Odd (T.d i)) : (T.d i : ℤ) ∣ T.ch i 2 := by
+theorem d_dvd_ch2 {i : Fin T.s} (hodd' : Odd (T.d i)) : (T.d i : ℤ) ∣ T.ch i 2 := by
   simp only [Data.ch]; rw [choose_two_of_odd hodd']; push_cast; exact dvd_mul_right _ _
 
 /-- Lemma 2 at `x_i`. -/
@@ -347,6 +354,7 @@ theorem L3 {g j : Fin T.s} (hgj : g ≤ j) (z : G) :
     (T.d j : ℤ) • Tm z (em (tc (T.x₁ g) (T.x₁ j))) = 0 :=
   smul_Tm_tc_eq_zero hmet h5 (hodd j) (pow_d_mem_of_le hT hgj) (Y_mem hT j) z
 
+omit hodd in
 /-- `[Y_g, x_h] = d c + C(d,2) t_g c + C(d,3) t_g² c`. -/
 theorem TY (g h : Fin T.s) : Tm (T.x₁ h) (em (T.x₁ g ^ T.d g)) =
     (T.d g : ℤ) • em (tc (T.x₁ g) (T.x₁ h)) +
@@ -357,7 +365,7 @@ theorem TY (g h : Fin T.s) : Tm (T.x₁ h) (em (T.x₁ g ^ T.d g)) =
 /-- `[Y_g, x_h, x_k] = d(g) [x_g, x_h, x_k]`. -/
 theorem TTY (g h k : Fin T.s) : Tm (T.x₁ k) (Tm (T.x₁ h) (em (T.x₁ g ^ T.d g))) =
     (T.d g : ℤ) • Tm (T.x₁ k) (em (tc (T.x₁ g) (T.x₁ h))) := by
-  rw [TY hmet h5 hT hodd]
+  rw [TY hmet h5 hT]
   simp only [map_add, map_zsmul]
   have e1 : Tm (T.x₁ k) (Tm (T.x₁ g) (Tm (T.x₁ g) (em (tc (T.x₁ g) (T.x₁ h))))) = 0 := by
     rw [Tm_comm hmet _ (T.x₁ g), Tm_comm hmet _ (T.x₁ g)]; exact Tm3 h5 _ _ _ _
@@ -417,8 +425,8 @@ theorem swap {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) {i j : Fin T.s} (hij 
   set c := em (tc (T.x₁ i) (T.x₁ j)) with hc
   have hc' : em (tc (T.x₁ j) (T.x₁ i)) = -c := by
     rw [← tc_inv, em_inv (tc_mem_L1 _ _)]
-  have hA := TY hmet h5 hT hodd i j
-  have hB := TY hmet h5 hT hodd j i
+  have hA := TY hmet h5 hT i j
+  have hB := TY hmet h5 hT j i
   rw [hc'] at hB
   simp only [map_neg, smul_neg] at hB
   -- vanishing pieces
@@ -568,33 +576,39 @@ theorem row {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) (i : Fin T.s) :
     ∑ h, (if i < h then τ.u i h else 0) • Tm (T.x₁ i) (em (T.x₁ h ^ T.d h)) =
       ∑ h, (if h < i then τ.u h i * T.q h i else 0) • Tm (T.x₁ i) (em (T.x₁ h ^ T.d h)) := by
   classical
-  set xi := T.x₁ i
-  set X : Fin T.u → E G := fun l => Tm xi (em (T.x₃ l)) with hXdef
-  set X2 : Fin T.t → E G := fun k => Tm xi (em (T.x₂ k)) with hX2def
+  set X : Fin T.u → E G := fun l => Tm (T.x₁ i) (em (T.x₃ l)) with hXdef
+  set X2 : Fin T.t → E G := fun k => Tm (T.x₁ i) (em (T.x₂ k)) with hX2def
+  have hdX : ∀ l, (T.d i : ℤ) • X l = 0 := fun l => L2 hmet h5 hT hodd i _
+  have hdX2 : ∀ k, (T.d i : ℤ) • X2 k = 0 := fun k => L2 hmet h5 hT hodd i _
+  have KY' : ∀ h, Tm (T.x₁ i) (em (T.x₁ h ^ T.d h)) =
+      ∑ k, T.b h k • X2 k + ∑ l, T.c h l • X l := fun h => KY hmet h5 hT hodd h _
+  have KE' : ∀ k, (T.e k : ℤ) • X2 k = ∑ l, T.dd k l • X l := fun k => KE hmet h5 hT hodd k _
+  have KA' : ∀ g h, g ≤ h → Tm (T.x₁ i) (Tm (T.x₁ h) (em (T.x₁ g ^ T.d g))) =
+      ∑ l, T.α g h l • X l := fun g h hgh => KA hmet h5 hT hodd hgh _
   -- the vanishing of the `α`-terms
   have hZ1 : ∑ h, (if h < i then (τ.u h i * T.q h i) • ∑ l, T.α h i l • X l else 0) = 0 := by
     refine Finset.sum_eq_zero fun h _ => ?_
     split_ifs with hhi
-    · rw [← KA hmet h5 hT hodd hhi.le, TTY hmet h5 hT hodd, smul_smul,
+    · rw [← KA' h i hhi.le, TTY hmet h5 hT hodd, smul_smul,
         show τ.u h i * T.q h i * (T.d h : ℤ) = τ.u h i * ((T.d h : ℤ) * T.q h i) by ring,
         dq hT hhi.le, mul_smul, L2 hmet h5 hT hodd i, smul_zero]
     · rfl
   have hZ2 : ∑ g, ∑ h, (if g ≤ i ∧ i ≤ h then τ.w g i h • ∑ l, T.α g h l • X l else 0) = 0 := by
     refine Finset.sum_eq_zero fun g _ => Finset.sum_eq_zero fun h _ => ?_
     split_ifs with hc
-    · rw [← KA hmet h5 hT hodd (hc.1.trans hc.2), Tm_comm hmet]
+    · rw [← KA' g h (hc.1.trans hc.2), Tm_comm hmet]
       exact w_term hmet h5 hT hodd hτ hc.1 hc.2 h
     · rfl
   have hZ3 : ∑ g, ∑ h, (if g ≤ h ∧ h ≤ i then τ.w g h i • ∑ l, T.α g h l • X l else 0) = 0 := by
     refine Finset.sum_eq_zero fun g _ => Finset.sum_eq_zero fun h _ => ?_
     split_ifs with hc
-    · rw [← KA hmet h5 hT hodd hc.1]
+    · rw [← KA' g h hc.1]
       exact w_term hmet h5 hT hodd hτ hc.1 hc.2 i
     · rfl
   have hZ4 : ∑ g, ∑ h, (if i < g ∧ g ≤ h then τ.w' i g h • ∑ l, T.α g h l • X l else 0) = 0 := by
     refine Finset.sum_eq_zero fun g _ => Finset.sum_eq_zero fun h _ => ?_
     split_ifs with hc
-    · rw [← KA hmet h5 hT hodd hc.2, Tm_comm hmet, TTY hmet h5 hT hodd,
+    · rw [← KA' g h hc.2, Tm_comm hmet, TTY hmet h5 hT hodd,
         show tc (T.x₁ g) (T.x₁ i) = (tc (T.x₁ i) (T.x₁ g))⁻¹ from (tc_inv _ _).symm,
         em_inv (tc_mem_L1 _ _), map_neg, smul_neg, L3 hmet h5 hT hodd hc.1.le, neg_zero,
         smul_zero]
@@ -610,12 +624,12 @@ theorem row {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) (i : Fin T.s) :
     intro l
     refine smul_eq_zero_of_dvd (d := (Nat.gcd (T.d i) (T.f l) : ℤ))
       (Int.modEq_zero_iff_dvd.mp (hτ.E i l)) ?_
-    rw [Int.gcd_eq_gcd_ab, add_smul, mul_comm, mul_smul, mul_comm, mul_smul]
     have hf : (T.f l : ℤ) • X l = 0 := by
-      simp only [hXdef]
+      show (T.f l : ℤ) • Tm (T.x₁ i) (em (T.x₃ l)) = 0
       rw [← map_zsmul, ← em_pow (x3_mem hmet h5 hT l)]
       exact Tm_lcs3 (hT.basis₃.pow_mem l) h5 _
-    rw [L2 hmet h5 hT hodd i, hf, smul_zero, smul_zero, add_zero]
+    rw [Nat.gcd_eq_gcd_ab, add_smul, mul_comm (T.d i : ℤ), mul_smul, mul_comm (T.f l : ℤ), mul_smul,
+      hdX l, hf, smul_zero, smul_zero, add_zero]
   have hEsum := Finset.sum_eq_zero (s := Finset.univ) fun l (_ : l ∈ Finset.univ) => hE l
   simp only [add_smul, sub_smul, neg_smul, Finset.sum_add_distrib, Finset.sum_sub_distrib,
     Finset.sum_neg_distrib] at hEsum
@@ -628,7 +642,7 @@ theorem row {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) (i : Fin T.s) :
   have e4 : ∑ l, (∑ g, ∑ h, if i < g ∧ g ≤ h then τ.w' i g h * T.α g h l else 0) • X l = 0 := by
     rw [rearr2 (fun g h => i < g ∧ g ≤ h) (fun g h => τ.w' i g h) T.α X]; exact hZ4
   rw [e1, e2, e3, e4, neg_zero, zero_add, sub_zero, sub_zero, sub_zero] at hEsum
-  -- (B), multiplied by `X2 k` and summed over `k`
+  -- (B), multiplied by `X2 k`
   have hB : ∀ k, ((∑ h, if i < h then τ.u i h * T.b h k else 0)
       - (∑ h, if h < i then τ.u h i * T.q h i * T.b h k else 0)) • X2 k =
       -(τ.v' i k • ∑ l, T.dd k l • X l) := by
@@ -637,35 +651,40 @@ theorem row {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) (i : Fin T.s) :
     have e : (∑ h, if i < h then τ.u i h * T.b h k else 0)
         - (∑ h, if h < i then τ.u h i * T.q h i * T.b h k else 0) =
         -(τ.v i k * T.d i) - τ.v' i k * T.e k := by linear_combination hb
-    rw [e, sub_smul, neg_smul, mul_smul, mul_smul, L2 hmet h5 hT hodd i, smul_zero, neg_zero,
-      zero_sub]
-    simp only [hX2def, hXdef]
-    rw [KE hmet h5 hT hodd]
+    rw [e, sub_smul, neg_smul, mul_smul, mul_smul, hdX2 k, smul_zero, neg_zero, zero_sub, KE' k]
+  have hvd : ∑ k, τ.v' i k • ∑ l, T.dd k l • X l = ∑ l, (∑ k, τ.v' i k * T.dd k l) • X l := by
+    simp only [Finset.smul_sum, Finset.sum_smul, smul_smul]
+    exact Finset.sum_comm
   -- the two sides
-  rw [← sub_eq_zero, ← Finset.sum_sub_distrib]
-  have hlhs : ∀ h, (if i < h then τ.u i h else 0) • Tm xi (em (T.x₁ h ^ T.d h)) -
-      (if h < i then τ.u h i * T.q h i else 0) • Tm xi (em (T.x₁ h ^ T.d h)) =
+  have hlhs : ∀ h, (if i < h then τ.u i h else 0) • Tm (T.x₁ i) (em (T.x₁ h ^ T.d h)) -
+      (if h < i then τ.u h i * T.q h i else 0) • Tm (T.x₁ i) (em (T.x₁ h ^ T.d h)) =
       ∑ k, ((if i < h then τ.u i h * T.b h k else 0)
         - (if h < i then τ.u h i * T.q h i * T.b h k else 0)) • X2 k +
       ∑ l, ((if i < h then τ.u i h * T.c h l else 0)
         - (if h < i then τ.u h i * T.q h i * T.c h l else 0)) • X l := by
     intro h
-    rw [← sub_smul, KY hmet h5 hT hodd h xi, smul_add, Finset.smul_sum, Finset.smul_sum]
+    rw [← sub_smul, KY' h, smul_add, Finset.smul_sum, Finset.smul_sum]
     congr 1
     · refine Finset.sum_congr rfl fun k _ => ?_
       rw [smul_smul]; congr 1; split_ifs <;> ring
     · refine Finset.sum_congr rfl fun l _ => ?_
       rw [smul_smul]; congr 1; split_ifs <;> ring
-  rw [Finset.sum_congr rfl fun h _ => hlhs h, Finset.sum_add_distrib, Finset.sum_comm,
-    Finset.sum_comm (f := fun h l => _)]
-  simp only [← Finset.sum_smul, Finset.sum_sub_distrib]
-  simp only [hB, Finset.sum_neg_distrib]
-  have hvd : ∑ k, τ.v' i k • ∑ l, T.dd k l • X l = ∑ l, (∑ k, τ.v' i k * T.dd k l) • X l := by
-    simp only [Finset.smul_sum, Finset.sum_smul, smul_smul]
+  have s1 : ∑ h, ∑ k, ((if i < h then τ.u i h * T.b h k else 0)
+        - (if h < i then τ.u h i * T.q h i * T.b h k else 0)) • X2 k =
+      ∑ k, ((∑ h, if i < h then τ.u i h * T.b h k else 0)
+        - (∑ h, if h < i then τ.u h i * T.q h i * T.b h k else 0)) • X2 k := by
+    simp only [← Finset.sum_sub_distrib, Finset.sum_smul]
     exact Finset.sum_comm
-  rw [hvd]
-  rw [← hEsum]
-  simp only [Finset.sum_sub_distrib]
+  have s2 : ∑ h, ∑ l, ((if i < h then τ.u i h * T.c h l else 0)
+        - (if h < i then τ.u h i * T.q h i * T.c h l else 0)) • X l =
+      ∑ l, (∑ h, if i < h then τ.u i h * T.c h l else 0) • X l
+        - ∑ l, (∑ h, if h < i then τ.u h i * T.q h i * T.c h l else 0) • X l := by
+    rw [← Finset.sum_sub_distrib]
+    simp only [← sub_smul, ← Finset.sum_sub_distrib, Finset.sum_smul]
+    exact Finset.sum_comm
+  rw [← sub_eq_zero, ← Finset.sum_sub_distrib, Finset.sum_congr rfl fun h _ => hlhs h,
+    Finset.sum_add_distrib, s1, s2, Finset.sum_congr rfl fun k _ => hB k, Finset.sum_neg_distrib,
+    hvd, ← hEsum]
   abel
 
 /-- **Every generator of Tahara's Theorem 6.1 has order `≤ 2`** (`gen τ = genA τ` and
@@ -771,6 +790,7 @@ theorem D_five_eq_gamma_five_of_metabelian {p : ℕ} [hp : Fact p.Prime] (hp2 : 
 end GuptaTahara
 
 open Subgroup ClassFour GuptaTahara
+open scoped commutatorElement
 
 /-- Gupta–Tahara at `p = 3`: `D₅ = γ₅` for finite metabelian `3`-groups ([GT85, Thm. 3.2(c)];
 the instance `p = 3` of `GuptaTaharaMetabelian`). -/
