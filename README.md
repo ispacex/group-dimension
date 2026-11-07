@@ -247,7 +247,7 @@ statement from the development; Comparator checks that the two agree and that on
 `.github/workflows/palomar-preflight.yml` runs Palomar's own verification on every relevant push.
 Registered as
 [PALOMAR-2026-10-23-000007](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007),
-version 3 (2026-11-07, commit `add1be7`, the thirteen theorems, adding Theorems 6.10 and D.1 with
+version 3 (2026-11-07, commit `add1be7`, all thirteen theorems; it adds Theorems 6.10 and D.1, with
 Gupta–Tahara at $p=3$; version 2 of the same day, commit `508a336`, had ten, version 1 of 2026-10-23
 had nine).
 What is submitted, with the one hypothesis that remains (Proposition 5.3, a computer result), is
