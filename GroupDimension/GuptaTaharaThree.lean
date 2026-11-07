@@ -58,7 +58,7 @@ noncomputable def em (g : G) : E G :=
 theorem em_of {g : G} (h : g ∈ L1 G) :
     em g = Additive.ofMul (Abelianization.of (⟨g, h⟩ : L1 G)) := by
   unfold em
-  split_ifs with h'
+  split_ifs
   rfl
 
 theorem em_mul {a b : G} (ha : a ∈ L1 G) (hb : b ∈ L1 G) : em (a * b) = em a + em b := by
