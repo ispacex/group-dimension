@@ -5,7 +5,7 @@ public import GroupDimension.ExpThreeGen
 @[expose] public section
 
 /-!
-# `D₅ = γ₅` when `γ₄³ ⊆ γ₅` and `γ₂⁹ ⊆ γ₄` (Theorem 6.10 of the lab notebook, MATH-444)
+# `D₅ = γ₅` when `γ₄³ ⊆ γ₅` and `γ₂⁹ ⊆ γ₄` (Theorem 6.10 of the paper, MATH-444)
 
 **Theorem 6.10** (`thm:exp3h9`; `D_five_eq_gamma_five_g4_cube_g2_nine`): if `G/γ₂(G)` is a finite
 `3`-group, `γ₄(G)³ ⊆ γ₅(G)` and `γ₂(G)⁹ ⊆ γ₄(G)`, then `D₅(G) = γ₅(G)`. The finite form

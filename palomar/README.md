@@ -26,8 +26,8 @@ the repository root, licence `LICENSE` (MIT). The Lean project is the repository
 | Version | Registered | Commit | Compared theorems |
 |---|---|---|---|
 | [1](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=1) | 2026-10-23 | `533dc1c` | nine (without Theorem 6.9; Prop 2.1, Lemma 5.2 and the `D₅` form of Prop 5.7 with `D₃ = γ₃` as an additional hypothesis, Prop 2.1 also with Passi's and Gruenberg's theorems) |
-| [2](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=2) | 2026-11-07 | `508a336` | ten (without Theorem 6.10) |
-| 3 | not yet submitted | — | the thirteen listed below (adds Theorems 6.10 and D.1, Gupta–Tahara at `p = 3`) |
+| [2](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=2) | 2026-11-07 | `508a336` | ten (without Theorems 6.10 and D.1, nor Gupta–Tahara at `p = 3`) |
+| [3](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=3) | 2026-11-07 | `add1be7` | the thirteen listed below (adds Theorems 6.10 and D.1, Gupta–Tahara at `p = 3`) |
 
 Later commits are not registered until a new version is submitted.
 
