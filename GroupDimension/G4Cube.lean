@@ -522,6 +522,7 @@ theorem Erow (r : Fin T.s) (l : Fin T.u) :
   generalize (∑ g, ∑ h, if r < g ∧ g ≤ h then τ.w' r g h * T.α g h l else 0) = B7 at h' s7
   omega
 
+omit S in
 /-- Condition (B) in row `r`: `v'_{rk} e(k) = -∑_h crow_{rh} b_{hk} - v_{rk} d(r)`. -/
 theorem Brow (r : Fin T.s) (k : Fin T.t) :
     τ.v' r k * (T.e k : ℤ) = -(∑ h, crow T τ r h * T.b h k) - τ.v r k * (T.d r : ℤ) := by
@@ -599,7 +600,7 @@ theorem rowB (r : Fin T.s) {N : Type*} [AddCommGroup N] {A : G → N}
             rw [← Finset.sum_add_distrib]
             exact Finset.sum_congr rfl fun k _ => (add_smul _ _ _).symm
         _ = ∑ k, (-(∑ h, crow T τ r h * T.b h k)) • Φ (T.x₂ k) :=
-            Finset.sum_congr rfl fun k _ => by rw [S.Brow hτ r k]; congr 1; ring
+            Finset.sum_congr rfl fun k _ => by rw [SetupB.Brow hτ r k]; congr 1; ring
         _ = -∑ h, crow T τ r h • ∑ k, T.b h k • Φ (T.x₂ k) := by
             simp only [neg_smul, Finset.sum_smul, Finset.sum_neg_distrib, Finset.smul_sum,
               smul_smul]
@@ -1014,13 +1015,13 @@ theorem gen_eq_one : T.gen τ = 1 := by
   have hA : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 2, ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 2,
       A (a * b) = A a + A b := by
     intro a ha b hb
-    simp only [A, dif_pos ha, dif_pos hb, dif_pos (mul_mem ha hb)]
+    simp only [A, ha, hb, mul_mem ha hb, ↓reduceDIte]
     rfl
   have h2 := S.two_smul_gen hτ hA
   have hsq : T.gen τ ^ 2 = 1 := by
     have e : A (T.gen τ ^ 2) = 0 := by
       rw [addMapG_pow hA hg2]; exact_mod_cast h2
-    simp only [A, dif_pos (pow_mem hg2 2)] at e
+    simp only [A, pow_mem hg2 2, ↓reduceDIte] at e
     have e' := congrArg Additive.toMul e
     rw [toMul_ofMul, toMul_zero] at e'
     simpa using congrArg Subtype.val e'
@@ -1057,7 +1058,7 @@ theorem D_five_eq_bot_of_class_four_g4_cube (hT : TaharaFiveOne) {Q : Type} [Gro
     exact (hcl_pow g _).mpr hk
   -- a uniform exponent `3^N` of `Q/γ₂`, and then of `γ₂/γ₃` and `γ₃/γ₄`
   obtain ⟨N, hN⟩ : ∃ N : ℕ, ∀ x : Q, x ^ (3 ^ N) ∈ (⊤ : Subgroup Q).lowerCentralSeries 1 := by
-    letI := Fintype.ofFinite Q
+    let _ := Fintype.ofFinite Q
     choose kf hkf using h3grp
     refine ⟨Finset.univ.sup kf, fun x => ?_⟩
     have hle : kf x ≤ Finset.univ.sup kf := Finset.le_sup (Finset.mem_univ x)
@@ -1273,7 +1274,7 @@ theorem D_five_eq_gamma_five_g4_cube (hT : TaharaFiveOne) (G : Type) [Group G]
     (h4 : ∀ c ∈ (⊤ : Subgroup G).lowerCentralSeries 3, c ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 4) :
     D 5 G = (⊤ : Subgroup G).lowerCentralSeries 4 := by
   refine le_antisymm (D_le_of_D_quotient_eq_bot _ 5 ?_) (gamma_le_D G 5 (by norm_num))
-  haveI : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 4) := finite_quotient_lcs hfin 3
+  have : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 4) := finite_quotient_lcs hfin 3
   let π := QuotientGroup.mk' ((⊤ : Subgroup G).lowerCentralSeries 4)
   have hmap : ∀ (k : ℕ) (y : G), y ∈ (⊤ : Subgroup G).lowerCentralSeries k →
       π y ∈ (⊤ : Subgroup (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 4)).lowerCentralSeries k :=
