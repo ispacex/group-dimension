@@ -6,7 +6,7 @@ public import GroupDimension.PCover
 @[expose] public section
 
 /-!
-# Quotients and immediate descendants: Remark 2.2, Lemma 5.2 (d), Lemma 6.9
+# Quotients and immediate descendants: Remark 2.2, Lemma 5.2 (d), Lemma 6.10
 
 * **Remark 2.2** (`metabelian_of_class_three`): a group of class `≤ 3` is metabelian, since
   `G'' = [γ₂, γ₂] ⊆ γ₄`.
@@ -15,7 +15,7 @@ public import GroupDimension.PCover
   `R = Q/⟨n⟩` has class `2` or `3`, `2`-class `c - 1 ≥ 3` and `γ₃(R)` cyclic. As `P_c(Q) = ⟨n⟩`
   has order `2`, `Q` is an immediate descendant of `R` of step size `1` in the sense of
   [OBr90]: `Q` has `2`-class `c` and `Q/P_c(Q) = R`.
-* **Lemma 6.9** (`filter_on_parents`): let `U ≤ M` be subgroups of a group `E` with `U` normal and
+* **Lemma 6.10** (`filter_on_parents`): let `U ≤ M` be subgroups of a group `E` with `U` normal and
   `M ⊄ U`, and `Q = E/U`. For the paper, `E = P*`, `M` its multiplier, `U` of index `p` in `M`, so
   that `M/U = ⟨z⟩`; the immediate descendants of step size `1` are these `Q` with `N ⊄ U` for the
   nucleus `N = P_{c+1}(P*)`. If `Q` has class `4` and `M/U ≤ Q'' ∩ M₅(Q)` (i.e. `z ∈ Q'' ∩ M₅(Q)`),
@@ -168,7 +168,7 @@ theorem isDescendant_of_minimal (hD3 : DThreeEqGammaThree) {Q : Type} [Group Q] 
   have hN : (zpowers n).Normal := normal_of_le_center (zpowers_le.mpr hn.mem_center)
   exact ⟨n, hn, hD5, hN, isDescendant_of_isCandidate hn⟩
 
-/-! ## Lemma 6.9 -/
+/-! ## Lemma 6.10 -/
 
 section Filter
 
@@ -191,7 +191,7 @@ theorem not_inf_le_of_map_le {X : Subgroup E} (hUM : U ≤ M) (hMU : ¬ M ≤ U)
   have : m = x * (x⁻¹ * m) := by group
   rw [this]; exact mul_mem hxU hu
 
-/-- **Lemma 6.9 (a filter on parents).** Let `U ≤ M` be subgroups of `E`, `U` normal, `M ⊄ U`,
+/-- **Lemma 6.10 (a filter on parents).** Let `U ≤ M` be subgroups of `E`, `U` normal, `M ⊄ U`,
 `Q = E/U`, and `N` a subgroup with `N ⊄ U` (the nucleus). If `Q` has class `4` and the image
 `M/U` of `M` lies in `Q'' ∩ M₅(Q)`, then none of `M ∩ E''`, `M ∩ M₅(E)`, `N`, `γ₄(E)` lies in
 `γ₅(E)`. -/

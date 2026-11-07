@@ -192,6 +192,17 @@ theorem D_five_eq_gamma_five_of_cubes_cyclic (G : Type) [Group G]
     DSet 5 G = ((⊤ : Subgroup G).lowerCentralSeries 4 : Set G) := by
   rw [DSet_eq, GroupDimension.D_five_eq_gamma_five_of_cubes_cyclic G hfin h3grp t ht]
 
+/-- **Paper, Theorem 6.9.** If `G/γ₂(G)` is a finite 3-group and `γ₂(G)/γ₃(G)` has exponent
+dividing 3 (`a³ ∈ γ₃(G)` for every `a ∈ γ₂(G)`; equivalently `[x³, y] ∈ γ₃(G)` for all `x, y`),
+then `D₅(G) = γ₅(G)`. No restriction on the invariants of `G/γ₂(G)`; Theorems 6.6 and 6.8 are
+special cases. No hypotheses beyond these. -/
+theorem D_five_eq_gamma_five_of_exp_L1_three (G : Type) [Group G]
+    (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
+    (h3grp : ∀ x : G, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
+    (h2 : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, a ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 2) :
+    DSet 5 G = ((⊤ : Subgroup G).lowerCentralSeries 4 : Set G) := by
+  rw [DSet_eq, GroupDimension.D_five_eq_gamma_five_of_exp_L1_three G hfin h3grp h2]
+
 /-- **Jennings' inclusion, in the case used by the paper.** For a finite 2-group of class
 `≤ 3`, `D₅(G) ⊆ M₅(G) = ∏_{i 2^j ≥ 5} γ_i(G)^{2^j}`. (This is the "hard" inclusion of Jennings'
 theorem `G ∩ (1 + Δ_{𝔽₂}(G)^5) ⊆ M₅(G)`, applied to `D₅(G) ⊆ G ∩ (1 + Δ_{𝔽₂}(G)^5)`.) -/

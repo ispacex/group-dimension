@@ -78,6 +78,7 @@ theorem dimensionQuestion5_iff :
 PROOFS = {
 'D_five_eq_gamma_five_of_exp_three': r'''  rw [DSet_eq, GroupDimension.D_five_eq_gamma_five_of_exp_three G hfin h1]''',
 'D_five_eq_gamma_five_of_cubes_cyclic': r'''  rw [DSet_eq, GroupDimension.D_five_eq_gamma_five_of_cubes_cyclic G hfin h3grp t ht]''',
+'D_five_eq_gamma_five_of_exp_L1_three': r'''  rw [DSet_eq, GroupDimension.D_five_eq_gamma_five_of_exp_L1_three G hfin h3grp h2]''',
 'D_five_le_jennings': r'''  rw [DSet_eq, jennings_eq]
   exact fun g hg => GroupDimension.D_five_le_jennings hG h4 hg''',
 'not_isCandidate_of_quotient_z4': r'''  intro hQ

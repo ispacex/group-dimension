@@ -5,9 +5,9 @@ public import GroupDimension.ExpThreePlus
 @[expose] public section
 
 /-!
-# `D₅ = γ₅` when `γ₂/γ₃` has exponent `3`, for any invariants of `G/γ₂` (MATH-443)
+# `D₅ = γ₅` when `γ₂/γ₃` has exponent `3`, for any invariants of `G/γ₂` (Theorem 6.9, MATH-443)
 
-**Theorem** (`D_five_eq_gamma_five_exp_L1`): if `G/γ₂(G)` is a finite `3`-group and
+**Theorem 6.9** of the paper (`D_five_eq_gamma_five_exp_L1`): if `G/γ₂(G)` is a finite `3`-group and
 `γ₂(G)/γ₃(G)` has exponent dividing `3` (hypothesis `h2`: `a³ ∈ γ₃` for `a ∈ γ₂`;
 equivalently `[x³, y] ∈ γ₃` for all `x, y`, `cube_L1_of_comm_cube`), then `D₅(G) = γ₅(G)`.
 There is no restriction on the invariants of `G/γ₂`. The proof takes Tahara's Theorem 6.1
