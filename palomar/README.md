@@ -20,6 +20,16 @@ the repository root, licence `LICENSE` (MIT). The Lean project is the repository
   `full` with profile `palomar-standard-v1`. A commit is submitted only if that run reports
   `status: pass`.
 
+**Registration.** The record is
+[PALOMAR-2026-10-23-000007](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007):
+
+| Version | Registered | Commit | Compared theorems |
+|---|---|---|---|
+| [1](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=1) | 2026-10-23 | `533dc1c` | nine (without Theorem 6.9; Prop 2.1, Lemma 5.2 and the `D₅` form of Prop 5.7 with `D₃ = γ₃` as an additional hypothesis, Prop 2.1 also with Passi's and Gruenberg's theorems) |
+| [2](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=2) | 2026-11-07 | `508a336` | the ten listed below |
+
+Later commits are not registered until a new version is submitted.
+
 ## What is claimed
 
 Indexing: Mathlib's `(⊤ : Subgroup G).lowerCentralSeries k` is `γ_{k+1}(G)`.
