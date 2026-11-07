@@ -969,7 +969,7 @@ theorem two_smul_gen {N : Type*} [AddCommGroup N] {A : G → N}
     have e1 : T.x₁ i ^ T.d j = (T.x₁ i ^ T.d i) ^ (T.d j / T.d i) := by
       rw [← pow_mul, S.d_mul_q hij.le]
     have ht1 : tc (T.x₁ i ^ T.d j) (T.x₁ j) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
-      tc_mem (by omega) (by rw [e1]; exact pow_mem (S.Y1 i) _) (mem_lcs_zero _)
+      tc_mem (i := 1) (j := 0) (by omega) (by rw [e1]; exact pow_mem (S.Y1 i) _) (mem_lcs_zero _)
     have ht2 : tc (T.x₁ j ^ T.d j) (T.x₁ i) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := hY2 j i
     have hA1 : A (tc (T.x₁ i ^ T.d j) (T.x₁ j)) = ((T.d j / T.d i : ℕ) : ℤ) • a i j := by
       rw [e1, tc_pow_left_L1 S.h5 (S.Y1 i), addMapG_pow hA (hY2 i j)]
@@ -1007,7 +1007,7 @@ theorem gen_eq_one : T.gen τ = 1 := by
   have hg2 : T.gen τ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := by
     rw [Data.gen, S.genC_eq hτ, mul_one]
     exact mul_mem (S.genA_mem (τ := τ)) (h32 (S.genB_mem (τ := τ)))
-  letI : CommGroup ↥((⊤ : Subgroup G).lowerCentralSeries 2) :=
+  let _ : CommGroup ↥((⊤ : Subgroup G).lowerCentralSeries 2) :=
     commGroupOfComm _ (fun a ha b hb => comm_L2 S.h5 ha hb)
   let A : G → Additive ↥((⊤ : Subgroup G).lowerCentralSeries 2) := fun g =>
     if hg : g ∈ (⊤ : Subgroup G).lowerCentralSeries 2 then Additive.ofMul ⟨g, hg⟩ else 0
