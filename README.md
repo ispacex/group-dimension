@@ -134,8 +134,8 @@ $D_2 = \gamma_2$ is proved via the trivial square-zero extension $T=\mathbb Z\op
 first coordinate is $\varepsilon$, so $\Phi(\Delta^2)=0$ and $\Phi(g-1)=(0,\bar g)$. This is the
 same idea as the authors' `DegreeTwo.lean` (a square-zero representation).
 
-`#print axioms` for all 2123 proved declarations (`AxiomAudit.lean`: 2112 of the development and the
-11 compared Palomar theorems of `Solution.lean`) — only `propext`,
+`#print axioms` for all 2125 proved declarations (`AxiomAudit.lean`: 2112 of the development and the
+13 compared Palomar theorems of `Solution.lean`) — only `propext`,
 `Classical.choice`, `Quot.sound`. No `sorry` and no `axiom` in the development or in `Solution.lean`;
 `Challenge.lean` states the submitted results with `sorry` by design.
 
@@ -240,7 +240,7 @@ With Mathlib from the cache the build takes a few minutes (see also the audit,
 
 The files `Challenge.lean`, `Solution.lean`, `comparator.json` and `formalization.yaml` are a
 submission to the [Palomar registry](https://palomar-registry.org) of machine-checked results.
-`Challenge.lean` states eleven results using Mathlib alone (with `sorry`); `Solution.lean`
+`Challenge.lean` states thirteen results using Mathlib alone (with `sorry`); `Solution.lean`
 (generated from it by `palomar/make_solution.py`) repeats the definitions verbatim and proves each
 statement from the development; Comparator checks that the two agree and that only `propext`,
 `Classical.choice`, `Quot.sound` are used. The workflow
@@ -248,7 +248,8 @@ statement from the development; Comparator checks that the two agree and that on
 Registered as
 [PALOMAR-2026-10-23-000007](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007),
 version 2 (2026-11-07, commit `508a336`, ten theorems; version 1 of 2026-10-23 had nine);
-Theorem 6.10 was added to the compared statements later and is not yet registered.
+Theorems 6.10 and D.1 (with Gupta–Tahara at $p=3$) were added to the compared statements later
+and are not yet registered.
 What is submitted, with the one hypothesis that remains (Proposition 5.3, a computer result), is
 described in
 [`palomar/README.md`](palomar/README.md).
