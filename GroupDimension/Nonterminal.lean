@@ -5,7 +5,7 @@ public import GroupDimension.PCover
 @[expose] public section
 
 /-!
-# Theorem 6.13, necessity: a nonterminal group of type `(d, 2, 1)` satisfies (N1)–(N4)
+# Theorem 6.14, necessity: a nonterminal group of type `(d, 2, 1)` satisfies (N1)–(N4)
 
 Let `p` be an odd prime and `P` a group of type `(d, 2, 1)` with `P/γ₂(P)` elementary abelian:
 `γ₄(P) = 1`, `|γ₂(P)/γ₃(P)| = p²`, `|γ₃(P)| = p` and `x^p ∈ γ₂(P)` for all `x`. By Lemma C.1 of
@@ -14,7 +14,7 @@ order `p`, `Q/⟨z⟩ ≅ P` and `γ₄(Q) ≠ 1`. This existence is what "nonte
 `π : Q →* P` onto with `ker π = ⟨z⟩`, `z` central of order `p`, and `γ₄(Q) ≠ 1`. (That it is
 equivalent to a nontrivial nucleus is O'Brien's theory and is not formalized.)
 
-**Theorem 6.13, "⇒"** (`nonterminal_necessary`; Appendix, Steps 2 and 4) concludes
+**Theorem 6.14, "⇒"** (`nonterminal_necessary`; Appendix, Steps 2 and 4) concludes
 * (N1) `|Z(P) ∩ γ₂(P)| = p²`;
 * (N2) `γ₂(P)` is elementary abelian;
 * (N3) `P^p ≤ Z(P)`;
@@ -23,7 +23,7 @@ equivalent to a nontrivial nucleus is O'Brien's theory and is not formalized.)
   `x_i^p = v^{α_i} w^{β_i}` and `[u,x_i] = w^{f_i}`, the linear system (E)+(J) (`SystemEJ`) has a
   solution with `c = 1`. The `x_i` need not generate `P`.
 
-The proof is the paper's. `Q'' = 1` (the paper cites Lemma 6.3; here via Theorem 6.11,
+The proof is the paper's. `Q'' = 1` (the paper cites Lemma 6.3; here via Theorem 6.12,
 `metabelian_of_central_ext_card`),
 `γ₄(Q) = ⟨z⟩`, and `γ₃(Q)` has exponent `p` (`pow_p_lcs2`). For `ℓ ∈ γ₂(Q)`,
 `[[ℓ,x],y] = [[ℓ,y],x]` (`pc_pc_symm`, the Jacobi identity with `[ℓ,[x,y]] = 1`), which gives
@@ -42,7 +42,7 @@ namespace GroupDimension
 open Subgroup
 open scoped commutatorElement
 
-/-- The linear system (E)+(J) of Theorem 6.13 over `𝔽_p`, in the unknowns `c, μ_u, μ_v, η, σ`,
+/-- The linear system (E)+(J) of Theorem 6.14 over `𝔽_p`, in the unknowns `c, μ_u, μ_v, η, σ`,
 for the exponents `ω_r(i,j)`, `α_i`, `β_i`, `f_i` of a normal form of `P`; `ε_3 = 1` and
 `ε_p = 0` for `p ≥ 5`. (J) is required for `i < j < k`, as in the paper. -/
 def SystemEJ {p d : ℕ} (ω₁ ω₂ ω₃ : Fin d → Fin d → ZMod p) (α β f : Fin d → ZMod p)
@@ -857,7 +857,7 @@ end Setup
 end Nonterminal
 
 open Nonterminal in
-/-- **Theorem 6.13, "⇒"** (Appendix, Steps 2 and 4). Let `p` be an odd prime and `P` a group with
+/-- **Theorem 6.14, "⇒"** (Appendix, Steps 2 and 4). Let `p` be an odd prime and `P` a group with
 `γ₄(P) = 1`, `|γ₂(P)/γ₃(P)| = p²`, `|γ₃(P)| = p` and `P/γ₂(P)` of exponent `p`. Suppose `P` is
 nonterminal in the sense of Lemma C.1: there are a group `Q`, `π : Q →* P` onto with
 `ker π = ⟨z⟩`, `z` central of order `p`, and `γ₄(Q) ≠ 1`. Then

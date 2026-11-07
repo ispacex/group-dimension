@@ -1314,6 +1314,7 @@ open GroupDimension
 #print axioms GroupDimension.D_five_eq_gamma_five_of_comm_cube
 #print axioms GroupDimension.D_five_eq_bot_of_class_four_exp_L1_three
 #print axioms GroupDimension.Palomar.D_five_eq_gamma_five_of_exp_L1_three
+#print axioms GroupDimension.Palomar.D_five_eq_gamma_five_of_g4_cube_g2_nine
 #print axioms GroupDimension.ExpThree.cube_mul_mod'
 #print axioms GroupDimension.ExpThree.cl_pow3
 #print axioms GroupDimension.ExpThree.cl_cube_mul
