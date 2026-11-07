@@ -956,7 +956,8 @@ theorem two_smul_gen {N : Type*} [AddCommGroup N] {A : G → N}
     rw [← Finset.sum_sub_distrib]
     refine Finset.sum_congr rfl fun h _ => ?_
     simp only [crow, sub_smul]
-    split_ifs <;> simp
+    by_cases h1 : r < h <;> by_cases h2 : h < r <;>
+      simp only [h1, h2, ↓reduceIte, zero_smul, sub_zero, zero_sub, sub_self]
   have hgA' : A (T.genA τ) = (∑ r, ∑ h, if r < h then τ.u r h • a h r else 0) + V := by
     have e := hcrow.symm.trans hrows
     calc A (T.genA τ) = (∑ r, ∑ h, if r < h then τ.u r h • a h r else 0) -
@@ -990,12 +991,12 @@ theorem two_smul_gen {N : Type*} [AddCommGroup N] {A : G → N}
   have hV := S.Vpart hτ hA
   calc (2 : ℤ) • A (T.gen τ) = A (T.genA τ) + A (T.genA τ) + (2 : ℤ) • A (T.genB τ) := by
         rw [hAgen, smul_add, two_smul]
+    _ = (∑ i, ∑ j, if i < j then (τ.u i j * T.q i j) • a i j else 0) +
+          ((∑ r, ∑ h, if r < h then τ.u r h • a h r else 0) + V) + (2 : ℤ) • A (T.genB τ) := by
+        rw [← hAA, ← hgA']
     _ = ((∑ i, ∑ j, if i < j then (τ.u i j * T.q i j) • a i j else 0) +
           (∑ r, ∑ h, if r < h then τ.u r h • a h r else 0)) +
-          (V + (2 : ℤ) • A (T.genB τ)) := by
-        rw [← hAA]
-        conv_lhs => rw [hgA']
-        abel
+          (V + (2 : ℤ) • A (T.genB τ)) := by abel
     _ = 0 := by rw [hpairs, hV, add_zero]
 
 /-- **Every generator of Tahara's Theorem 6.1 is trivial** in the situation `SetupB`. -/
@@ -1020,16 +1021,272 @@ theorem gen_eq_one : T.gen τ = 1 := by
     have e : A (T.gen τ ^ 2) = 0 := by
       rw [addMapG_pow hA hg2]; exact_mod_cast h2
     simp only [A, dif_pos (pow_mem hg2 2)] at e
-    have := congrArg (fun m => ((Additive.toMul m : ↥((⊤ : Subgroup G).lowerCentralSeries 2)) : G)) e
-    simpa using this
+    have e' := congrArg Additive.toMul e
+    rw [toMul_ofMul, toMul_zero] at e'
+    simpa using congrArg Subtype.val e'
   obtain ⟨m, hm⟩ := S.htor _ hg2
-  have hord : orderOf (T.gen τ) = 1 :=
-    Nat.Coprime.eq_one_of_dvd (Nat.Coprime.pow_right m (by norm_num : Nat.Coprime 2 3))
-      (orderOf_dvd_of_pow_eq_one hsq) (orderOf_dvd_of_pow_eq_one hm)
+  have hcop : Nat.gcd 2 (3 ^ m) = 1 := Nat.Coprime.pow_right m (by norm_num : Nat.Coprime 2 3)
+  have hord : orderOf (T.gen τ) = 1 := by
+    have := Nat.dvd_gcd (orderOf_dvd_of_pow_eq_one hsq) (orderOf_dvd_of_pow_eq_one hm)
+    rw [hcop] at this
+    exact Nat.dvd_one.mp this
   exact orderOf_eq_one_iff.mp hord
 
 end SetupB
 
+/-! ## The theorem for finite groups of class `≤ 4` -/
+
+/-- **Theorem B, finite case, modulo Tahara.** Let `Q` be a finite group of class `≤ 4` such
+that `Q/γ₂(Q)` is a `3`-group and `γ₄(Q)` has exponent dividing `3`. Then `D₅(Q) = 1`. -/
+theorem D_five_eq_bot_of_class_four_g4_cube (hT : TaharaFiveOne) {Q : Type} [Group Q]
+    [Finite Q] (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥)
+    (h3grp : ∀ x : Q, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup Q).lowerCentralSeries 1)
+    (h4 : ∀ c ∈ (⊤ : Subgroup Q).lowerCentralSeries 3, c ^ 3 = 1) :
+    D 5 Q = ⊥ := by
+  classical
+  have hcl_pow : ∀ (g : Q) (k : ℕ),
+      (k • cl Q 0 g = 0 ↔ g ^ k ∈ (⊤ : Subgroup Q).lowerCentralSeries 1) := by
+    intro g k
+    rw [← natCast_zsmul, ← cl_zpow (mem_lcs_zero g), zpow_natCast, cl_eq_zero_iff (mem_lcs_zero _)]
+  have hexp0 : ∀ v : Additive (Layer Q 0), ∃ k : ℕ, ((3 : ℤ) ^ k) • v = 0 := by
+    intro v
+    obtain ⟨g, -, rfl⟩ := cl_surj (G := Q) 0 v
+    obtain ⟨k, hk⟩ := h3grp g
+    refine ⟨k, ?_⟩
+    rw [show ((3 : ℤ) ^ k) = ((3 ^ k : ℕ) : ℤ) by push_cast; rfl, natCast_zsmul]
+    exact (hcl_pow g _).mpr hk
+  -- a uniform exponent `3^N` of `Q/γ₂`, and then of `γ₂/γ₃` and `γ₃/γ₄`
+  obtain ⟨N, hN⟩ : ∃ N : ℕ, ∀ x : Q, x ^ (3 ^ N) ∈ (⊤ : Subgroup Q).lowerCentralSeries 1 := by
+    letI := Fintype.ofFinite Q
+    choose kf hkf using h3grp
+    refine ⟨Finset.univ.sup kf, fun x => ?_⟩
+    have hle : kf x ≤ Finset.univ.sup kf := Finset.le_sup (Finset.mem_univ x)
+    rw [show Finset.univ.sup kf = kf x + (Finset.univ.sup kf - kf x) by omega, pow_add, pow_mul]
+    exact pow_mem (hkf x) _
+  have hp0 : ∀ a ∈ (⊤ : Subgroup Q).lowerCentralSeries 0,
+      a ^ (3 ^ N) ∈ (⊤ : Subgroup Q).lowerCentralSeries (0 + 1) := fun a _ => hN a
+  have hp1 := pow_succ_mem hp0
+  have hp2 := pow_succ_mem hp1
+  have hexp1 : ∀ v : Additive (Layer Q 1), ∃ k : ℕ, ((3 : ℤ) ^ k) • v = 0 := by
+    intro v
+    obtain ⟨g, hg, rfl⟩ := cl_surj (G := Q) 1 v
+    refine ⟨N, ?_⟩
+    rw [← cl_zpow hg, cl_eq_zero_iff (zpow_mem hg _),
+      show ((3 : ℤ) ^ N) = ((3 ^ N : ℕ) : ℤ) by push_cast; rfl, zpow_natCast]
+    exact hp1 g hg
+  have hexp2 : ∀ v : Additive (Layer Q 2), ∃ k : ℕ, ((3 : ℤ) ^ k) • v = 0 := by
+    intro v
+    obtain ⟨g, hg, rfl⟩ := cl_surj (G := Q) 2 v
+    refine ⟨N, ?_⟩
+    rw [← cl_zpow hg, cl_eq_zero_iff (zpow_mem hg _),
+      show ((3 : ℤ) ^ N) = ((3 ^ N : ℕ) : ℤ) by push_cast; rfl, zpow_natCast]
+    exact hp2 g hg
+  have htor : ∀ c ∈ (⊤ : Subgroup Q).lowerCentralSeries 2, ∃ m : ℕ, c ^ (3 ^ m) = 1 :=
+    fun c hc => ⟨N + 1, by rw [pow_succ, pow_mul]; exact h4 _ (hp2 c hc)⟩
+  -- the cube map `Ω₁(Q/γ₂) → L₂/3L₂` and its kernel
+  choose L0 hL0 using fun v : Additive (Layer Q 0) => cl_surj (G := Q) 0 v
+  let T3 : AddSubgroup (Additive (Layer Q 1)) :=
+    { carrier := {v | ∃ w, (3 : ℤ) • w = v}
+      add_mem' := by rintro _ _ ⟨a, rfl⟩ ⟨b, rfl⟩; exact ⟨a + b, smul_add _ _ _⟩
+      zero_mem' := ⟨0, smul_zero _⟩
+      neg_mem' := by rintro _ ⟨a, rfl⟩; exact ⟨-a, smul_neg _ _⟩ }
+  have hT3 : ∀ w, (3 : ℤ) • w ∈ T3 := fun w => ⟨w, rfl⟩
+  have hmemW : ∀ x : Q, (3 : ℕ) • cl Q 0 x = 0 → x ^ 3 ∈ (⊤ : Subgroup Q).lowerCentralSeries 1 :=
+    fun x h => (hcl_pow x 3).mp h
+  have hwd : ∀ x y : Q, (3 : ℕ) • cl Q 0 x = 0 → cl Q 0 x = cl Q 0 y →
+      cl Q 1 (y ^ 3) - cl Q 1 (x ^ 3) ∈ T3 := by
+    intro x y hx hxy
+    have hm : x⁻¹ * y ∈ (⊤ : Subgroup Q).lowerCentralSeries 1 :=
+      (cl_eq_cl (mem_lcs_zero _) (mem_lcs_zero _)).mp hxy
+    obtain ⟨-, he⟩ := cl_cube_mul (hmemW x hx) (pow_mem hm 3)
+    rw [mul_inv_cancel_left] at he
+    rw [he, cl_pow3 hm]
+    have : cl Q 1 (x ^ 3) + (3 : ℤ) • cl Q 1 (x⁻¹ * y) + (3 : ℤ) • cl Q 1 (tc (x⁻¹ * y) x) -
+        cl Q 1 (x ^ 3) = (3 : ℤ) • (cl Q 1 (x⁻¹ * y) + cl Q 1 (tc (x⁻¹ * y) x)) := by
+      rw [smul_add]; abel
+    rw [this]; exact hT3 _
+  have hL0W : ∀ v : Additive (Layer Q 0), (3 : ℕ) • v = 0 → (3 : ℕ) • cl Q 0 (L0 v) = 0 :=
+    fun v hv => by rw [(hL0 v).2]; exact hv
+  let Ker0 : AddSubgroup (Additive (Layer Q 0)) :=
+    { carrier := {v | (3 : ℕ) • v = 0 ∧ cl Q 1 (L0 v ^ 3) ∈ T3}
+      zero_mem' := by
+        refine ⟨smul_zero _, ?_⟩
+        have h0 : L0 0 ∈ (⊤ : Subgroup Q).lowerCentralSeries 1 :=
+          (cl_eq_zero_iff (mem_lcs_zero _)).mp (hL0 0).2
+        rw [cl_pow3 h0]; exact hT3 _
+      add_mem' := by
+        rintro u v ⟨hu3, hu⟩ ⟨hv3, hv⟩
+        refine ⟨by rw [smul_add, hu3, hv3, add_zero], ?_⟩
+        have hg : cl Q 0 (L0 u * L0 v) = u + v := by
+          rw [cl_mul (mem_lcs_zero _) (mem_lcs_zero _), (hL0 u).2, (hL0 v).2]
+        have hg3 : (3 : ℕ) • cl Q 0 (L0 u * L0 v) = 0 := by rw [hg, smul_add, hu3, hv3, add_zero]
+        have h1 := hwd _ _ hg3 (hg.trans (hL0 (u + v)).2.symm)
+        obtain ⟨-, he⟩ := cl_cube_mul (hmemW _ (hL0W u hu3)) (hmemW _ (hL0W v hv3))
+        have : cl Q 1 (L0 (u + v) ^ 3) = (cl Q 1 (L0 (u + v) ^ 3) - cl Q 1 ((L0 u * L0 v) ^ 3)) +
+            (cl Q 1 (L0 u ^ 3) + cl Q 1 (L0 v ^ 3) + (3 : ℤ) • cl Q 1 (tc (L0 v) (L0 u))) := by
+          rw [← he]; abel
+        rw [this]
+        exact add_mem h1 (add_mem (add_mem hu hv) (hT3 _))
+      neg_mem' := by
+        rintro v ⟨hv3, hv⟩
+        refine ⟨by rw [smul_neg, hv3, neg_zero], ?_⟩
+        have hg : cl Q 0 (L0 v)⁻¹ = -v := by rw [cl_inv (mem_lcs_zero _), (hL0 v).2]
+        have hg3 : (3 : ℕ) • cl Q 0 (L0 v)⁻¹ = 0 := by rw [hg, smul_neg, hv3, neg_zero]
+        have h1 := hwd _ _ hg3 (hg.trans (hL0 (-v)).2.symm)
+        have hv1 := hmemW _ (hL0W v hv3)
+        have hinv : cl Q 1 ((L0 v)⁻¹ ^ 3) = -cl Q 1 (L0 v ^ 3) := by
+          rw [inv_pow, cl_inv hv1]
+        have : cl Q 1 (L0 (-v) ^ 3) = (cl Q 1 (L0 (-v) ^ 3) - cl Q 1 ((L0 v)⁻¹ ^ 3)) +
+            -cl Q 1 (L0 v ^ 3) := by rw [← hinv]; abel
+        rw [this]
+        exact add_mem h1 (neg_mem hv) }
+  -- the three uniqueness bases
+  obtain ⟨s, x1, ht, B1, hpow1, -, hKer⟩ := exists_layer_basis (G := Q) 0 hexp0 Ker0
+  obtain ⟨t, x2, ht2, B2, hpow2, nf2, -⟩ := exists_layer_basis (G := Q) 1 hexp1 ⊥
+  obtain ⟨u, x3, ht3, B3, -, nf3, -⟩ := exists_layer_basis (G := Q) 2 hexp2 ⊥
+  have hY1 : ∀ i, x1 i ^ (3 ^ (ht i + 1)) ∈ (⊤ : Subgroup Q).lowerCentralSeries 1 := hpow1
+  -- the structure constants
+  choose b hbr hbm using fun i => nf2 _ (hY1 i)
+  have hrem : ∀ i, (oprod x2 (b i))⁻¹ * x1 i ^ (3 ^ (ht i + 1)) ∈
+      (⊤ : Subgroup Q).lowerCentralSeries 2 := hbm
+  choose c hcr hcm using fun i => nf3 _ (hrem i)
+  have hx2e : ∀ k, x2 k ^ (3 ^ (ht2 k + 1)) ∈ (⊤ : Subgroup Q).lowerCentralSeries 2 := hpow2
+  choose dd hddr hddm using fun k => nf3 _ (hx2e k)
+  have hαm : ∀ g h, tc (x1 g ^ (3 ^ (ht g + 1))) (x1 h) ∈ (⊤ : Subgroup Q).lowerCentralSeries 2 :=
+    fun g h => tc_mem (i := 1) (j := 0) (by omega) (hY1 g) (mem_lcs_zero (x1 h))
+  choose α hαr hαm' using fun g h => nf3 _ (hαm g h)
+  let T : Tahara.Data Q :=
+    { s := s, t := t, u := u, x₁ := x1, d := fun i => 3 ^ (ht i + 1), x₂ := x2,
+      e := fun k => 3 ^ (ht2 k + 1), x₃ := x3, f := fun l => 3 ^ (ht3 l + 1),
+      b := b, c := c, dd := dd, α := α }
+  have hvalid : T.Valid := by
+    refine ⟨B1, B2, B3, fun i k => hbr i k, fun i l => hcr i l, fun k l => hddr k l,
+      fun g h l _ => hαr g h l, fun i => ?_, fun k => hddm k, fun g h _ => hαm' g h⟩
+    show (oprod x2 (b i) * oprod x3 (c i))⁻¹ * x1 i ^ (3 ^ (ht i + 1)) ∈ _
+    rw [mul_inv_rev, mul_assoc]
+    exact hcm i
+  have hd : ∀ i, ∃ m : ℕ, T.d i = 3 ^ (m + 1) := fun i => ⟨ht i, rfl⟩
+  let act : Fin s → Prop := fun i => ¬ ∃ a ∈ (⊤ : Subgroup Q).lowerCentralSeries 1,
+    ∃ c ∈ (⊤ : Subgroup Q).lowerCentralSeries 2, x1 i ^ (3 ^ (ht i + 1)) = a ^ 3 * c
+  -- the socle vectors `z_i = 3^{h_i} x̄_i`, with `z_i ∈ Ker0` exactly for the inactive `i`
+  have hz3 : ∀ i, (3 : ℕ) • cl Q 0 (x1 i ^ (3 ^ ht i)) = 0 := by
+    intro i
+    rw [← natCast_zsmul, ← cl_zpow (mem_lcs_zero _), zpow_natCast, ← pow_mul, ← pow_succ,
+      cl_eq_zero_iff (mem_lcs_zero _)]
+    exact hY1 i
+  have hcube : ∀ i, (x1 i ^ (3 ^ ht i)) ^ 3 = x1 i ^ (3 ^ (ht i + 1)) := fun i => by
+    rw [← pow_mul, ← pow_succ]
+  have hnotK : ∀ i, act i → cl Q 0 (x1 i ^ (3 ^ ht i)) ∉ Ker0 := by
+    intro i hi hK
+    apply hi
+    obtain ⟨-, hT⟩ := hK
+    have h1 := hwd _ _ (hL0W _ (hz3 i)) (hL0 _).2
+    rw [hcube] at h1
+    obtain ⟨w, hw⟩ := add_mem h1 hT
+    rw [sub_add_cancel] at hw
+    obtain ⟨a, ha, rfl⟩ := cl_surj (G := Q) 1 w
+    rw [← cl_pow3 ha] at hw
+    refine ⟨a, ha, (a ^ 3)⁻¹ * x1 i ^ (3 ^ (ht i + 1)),
+      (cl_eq_cl (pow_mem ha 3) (hY1 i)).mp hw, by group⟩
+  -- the cube of a product of the `z_i`
+  have hprod : ∀ l : List Q, (∀ w ∈ l, w ^ 3 ∈ (⊤ : Subgroup Q).lowerCentralSeries 1) →
+      l.prod ^ 3 ∈ (⊤ : Subgroup Q).lowerCentralSeries 1 ∧
+      cl Q 1 (l.prod ^ 3) - (l.map fun w => cl Q 1 (w ^ 3)).sum ∈ T3 := by
+    intro l
+    induction l with
+    | nil =>
+      intro _
+      simp only [List.prod_nil, one_pow, List.map_nil, List.sum_nil, sub_zero]
+      exact ⟨one_mem _, by rw [cl_one]; exact zero_mem _⟩
+    | cons w l ih =>
+      intro hl
+      obtain ⟨hl3, hlT⟩ := ih fun z hz => hl z (List.mem_cons_of_mem _ hz)
+      obtain ⟨hm, he⟩ := cl_cube_mul (hl w List.mem_cons_self) hl3
+      refine ⟨by rw [List.prod_cons]; exact hm, ?_⟩
+      rw [List.prod_cons, he, List.map_cons, List.sum_cons]
+      have : cl Q 1 (w ^ 3) + cl Q 1 (l.prod ^ 3) + (3 : ℤ) • cl Q 1 (tc l.prod w) -
+          (cl Q 1 (w ^ 3) + (l.map fun w => cl Q 1 (w ^ 3)).sum) =
+          (cl Q 1 (l.prod ^ 3) - (l.map fun w => cl Q 1 (w ^ 3)).sum) +
+            (3 : ℤ) • cl Q 1 (tc l.prod w) := by abel
+      rw [this]
+      exact add_mem hlT (hT3 _)
+  have hind : ∀ cf : Fin s → ℤ, (∀ k, (3 : ℤ) ∣ ∑ h, cf h * b h k) → ∀ h, act h → (3 : ℤ) ∣ cf h := by
+    intro cf hcf h hh
+    refine hKer cf ?_ h (hnotK h hh)
+    -- `∑ cf_i z_i ∈ Ker0`
+    let z : Fin s → Q := fun i => x1 i ^ (3 ^ ht i)
+    have e3 : ∀ i, (z i ^ cf i) ^ 3 = (z i ^ 3) ^ cf i := fun i => by
+      rw [← zpow_natCast, ← zpow_natCast, ← zpow_mul, ← zpow_mul, mul_comm]
+    have hz1 : ∀ i, (z i ^ cf i) ^ 3 ∈ (⊤ : Subgroup Q).lowerCentralSeries 1 := fun i => by
+      rw [e3]
+      exact zpow_mem (hmemW _ (hz3 i)) _
+    have hcl : cl Q 0 (oprod z cf) = ∑ i, cf i • cl Q 0 (x1 i ^ (3 ^ ht i)) :=
+      cl_oprod (fun i => mem_lcs_zero _) cf
+    have hsum3 : (3 : ℕ) • ∑ i, cf i • cl Q 0 (x1 i ^ (3 ^ ht i)) = 0 := by
+      rw [Finset.smul_sum]
+      refine Finset.sum_eq_zero fun i _ => ?_
+      rw [smul_comm, hz3 i, smul_zero]
+    refine ⟨hsum3, ?_⟩
+    have hwd' := hwd _ _ (by rw [hcl]; exact hsum3) (hcl.trans (hL0 _).2.symm)
+    have hP := hprod (List.ofFn fun i => z i ^ cf i) (fun w hw => by
+      obtain ⟨i, rfl⟩ := List.mem_ofFn.mp hw; exact hz1 i)
+    have hsumY : (List.map (fun w => cl Q 1 (w ^ 3)) (List.ofFn fun i => z i ^ cf i)).sum =
+        ∑ i, cf i • cl Q 1 (x1 i ^ (3 ^ (ht i + 1))) := by
+      rw [List.map_ofFn, List.sum_ofFn]
+      refine Finset.sum_congr rfl fun i _ => ?_
+      show cl Q 1 ((z i ^ cf i) ^ 3) = _
+      rw [e3 i, cl_zpow (hmemW _ (hz3 i)), show z i ^ 3 = x1 i ^ (3 ^ (ht i + 1)) from hcube i]
+    have hYb : ∀ i, cl Q 1 (x1 i ^ (3 ^ (ht i + 1))) = ∑ k, b i k • cl Q 1 (x2 k) := by
+      intro i
+      rw [← cl_oprod (k := 1) (y := x2) (fun k => B2.mem k) (b i)]
+      exact ((cl_eq_cl (oprod_mem (fun k => B2.mem k) _) (hY1 i)).mpr (hrem i)).symm
+    have hT : ∑ i, cf i • cl Q 1 (x1 i ^ (3 ^ (ht i + 1))) ∈ T3 := by
+      simp_rw [hYb, Finset.smul_sum, smul_smul]
+      rw [Finset.sum_comm]
+      simp_rw [← Finset.sum_smul]
+      refine sum_mem fun k _ => ?_
+      obtain ⟨m, hm⟩ := hcf k
+      rw [hm, mul_smul]
+      exact hT3 _
+    have hS : (List.map (fun w => cl Q 1 (w ^ 3)) (List.ofFn fun i => z i ^ cf i)).sum ∈ T3 := by
+      rw [hsumY]; exact hT
+    have hP2 : cl Q 1 ((oprod z cf) ^ 3) ∈ T3 := by
+      have := add_mem hP.2 hS
+      rwa [sub_add_cancel] at this
+    have := add_mem hwd' hP2
+    rwa [sub_add_cancel] at this
+  have S : SetupB T act :=
+    ⟨h5, h4, htor, hvalid, hd, fun k => dvd_pow_self 3 (Nat.succ_ne_zero _),
+      fun l => dvd_pow_self 3 (Nat.succ_ne_zero _), fun i hi => not_not.mp hi, hind⟩
+  have hle := hT Q h5 T hvalid
+  rw [eq_bot_iff]
+  refine hle.trans ((Subgroup.closure_le _).mpr ?_)
+  rintro y ⟨τ, hτ, rfl⟩
+  rw [SetLike.mem_coe, S.gen_eq_one hτ]
+  exact one_mem _
+
+/-- **Theorem B, modulo Tahara's Theorem 6.1** (MATH-444). Let `G/γ₂(G)` be a finite `3`-group
+with `γ₄(G)³ ⊆ γ₅(G)`. Then `D₅(G) = γ₅(G)`. -/
+theorem D_five_eq_gamma_five_g4_cube (hT : TaharaFiveOne) (G : Type) [Group G]
+    (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
+    (h3grp : ∀ x : G, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
+    (h4 : ∀ c ∈ (⊤ : Subgroup G).lowerCentralSeries 3, c ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 4) :
+    D 5 G = (⊤ : Subgroup G).lowerCentralSeries 4 := by
+  refine le_antisymm (D_le_of_D_quotient_eq_bot _ 5 ?_) (gamma_le_D G 5 (by norm_num))
+  haveI : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 4) := finite_quotient_lcs hfin 3
+  let π := QuotientGroup.mk' ((⊤ : Subgroup G).lowerCentralSeries 4)
+  have hmap : ∀ (k : ℕ) (y : G), y ∈ (⊤ : Subgroup G).lowerCentralSeries k →
+      π y ∈ (⊤ : Subgroup (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 4)).lowerCentralSeries k :=
+    fun k y hy => by rw [← lcs_map_mk]; exact Subgroup.mem_map_of_mem _ hy
+  refine D_five_eq_bot_of_class_four_g4_cube hT (lowerCentralSeries_quotient_eq_bot 4)
+    (fun x => ?_) (fun c hc => ?_)
+  · obtain ⟨x, rfl⟩ := QuotientGroup.mk'_surjective ((⊤ : Subgroup G).lowerCentralSeries 4) x
+    obtain ⟨k, hk⟩ := h3grp x
+    exact ⟨k, by rw [← map_pow]; exact hmap 1 _ hk⟩
+  · rw [← lcs_map_mk] at hc
+    obtain ⟨y, hy, rfl⟩ := Subgroup.mem_map.mp hc
+    rw [← map_pow]
+    exact (QuotientGroup.eq_one_iff _).mpr (h4 y hy)
 end ExpThree
 
 end GroupDimension
