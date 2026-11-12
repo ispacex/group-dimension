@@ -7,8 +7,8 @@ public import GroupDimension.Star
 /-!
 # `D₅ = 1` for `Q_ab ≅ C₃ × C₉ × C₉` (MATH-448)
 
-The case `Q_ab` of type `[3, 9, 9]` of the case `γ₄ ≅ C₉` left open by Theorem 6.11 (remark 6.13
-of the paper). The proof (MATH-446, Kimi's note `case_b.md`, Theorem 2 and Corollary 3 with the
+`Q_ab` of type `[3, 9, 9]`, with no condition on `γ₄`; the substantive case is `exp γ₄ = 9` (e.g.
+`γ₄ ≅ C₉`), left open by Theorem 6.11 (remark 6.13 of the paper). The proof (MATH-446, Kimi's note `case_b.md`, Theorem 2 and Corollary 3 with the
 corrections of the review, comment 8041, and the conclusion of comment 8035) evaluates the exact
 identity `(⋆)` (`Star.two_smul_gen_eq`) term by term in the basis of `G4Cube.lean` (heights flag and
 the kernel of the cube map; `act` = the index set `A`):

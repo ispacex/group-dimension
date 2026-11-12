@@ -420,7 +420,6 @@ theorem D_five_eq_bot_of_class_four_ab399 (hT : TaharaFiveOne) {Q : Type} [Group
     show (oprod x2 (b i) * oprod x3 (c i))⁻¹ * x1 i ^ (3 ^ (ht i + 1)) ∈ _
     rw [mul_inv_rev, mul_assoc]
     exact hcm i
-  have hd : ∀ i, ∃ m : ℕ, T.d i = 3 ^ (m + 1) := fun i => ⟨ht i, rfl⟩
   let act : Fin s → Prop := fun i => ¬ ∃ a ∈ (⊤ : Subgroup Q).lowerCentralSeries 1,
     ∃ c ∈ (⊤ : Subgroup Q).lowerCentralSeries 2, x1 i ^ (3 ^ (ht i + 1)) = a ^ 3 * c
   -- the socle vectors `z_i = 3^{h_i} x̄_i`, with `z_i ∈ Ker0` exactly for the inactive `i`
