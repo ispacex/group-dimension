@@ -226,6 +226,16 @@ in a comment which steps of §§5–6 of the paper carry over. In short:
   additive only modulo $\Delta^2$; the explicit $\mathbb Z$-description of $\Delta(T)^n$ on which
   the retraction $p$ is built (Prop. 6.12).
 
+## Paper labels and contributing
+
+Each declaration that states or proves a labelled statement of the paper carries
+`@[d5 "<label>"]` (`GroupDimension/D5Tag.lean`), e.g. `@[d5 "thm:g4cube"]`; the docstring then links
+to the statement on [blueprint.html](https://ispacex.github.io/d5/blueprint.html), and `#d5_tags`
+(`lake env lean D5Tags.lean`) lists them all. The source of truth is `site/blueprint.toml` of
+dimension-subrings, whose CI fails unless the tags are exactly its (label, declaration) pairs. How
+to claim a statement and contribute (blueprint → claim → pull request → review, and how AI-written
+code is labelled): [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Build
 
 ```bash

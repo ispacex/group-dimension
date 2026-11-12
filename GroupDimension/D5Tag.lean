@@ -1,6 +1,7 @@
 module
 
 public meta import Lean.Elab.Command
+public meta import Lean.DocString
 
 /-!
 # `@[d5 "label"]`: the statement of the paper that a declaration states or proves

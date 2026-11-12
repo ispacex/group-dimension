@@ -1,0 +1,76 @@
+name: Claim a statement to formalize
+description: >-
+  Announce that you will formalize a statement of the paper (or a result it uses) before you start,
+  so that work is not duplicated. See CONTRIBUTING.md.
+title: "[claim] <label>: <short statement>"
+labels: ["claim"]
+body:
+  - type: markdown
+    attributes:
+      value: >-
+        A claim says *what* you will formalize and *how*, before the pull request. The blueprint
+        (https://ispacex.github.io/d5/blueprint.html, built from `site/blueprint.toml` of
+        ispacex/dimension-subrings) lists every labelled statement of the paper and what is already
+        in Lean. A maintainer adds the label `blueprint-approved` once the Lean statement below is
+        agreed; only then is a pull request for it reviewed.
+  - type: input
+    id: label
+    attributes:
+      label: Paper label
+      description: >-
+        The label of the statement in the paper / blueprint, e.g. `thm:g4cube` (the anchor
+        `#b-thm-g4cube` on blueprint.html), or `ext:...` for a result of the literature.
+      placeholder: "thm:g4cube"
+    validations:
+      required: true
+  - type: textarea
+    id: statement
+    attributes:
+      label: Statement
+      description: The statement in mathematical language, with its number in the paper (or the reference).
+    validations:
+      required: true
+  - type: textarea
+    id: lean
+    attributes:
+      label: Lean statement to prove
+      description: >-
+        The declaration you propose, in Lean, with `sorry` as the proof. Say which hypotheses are
+        explicit (e.g. `TaharaFiveOne`) and how it differs from the paper, if at all.
+      render: lean
+    validations:
+      required: true
+  - type: textarea
+    id: uses
+    attributes:
+      label: What it uses
+      description: >-
+        Declarations of this library (e.g. `taharaFiveOne`, `D_five_eq_gamma_five_of_exp_three`)
+        and of Mathlib the proof will rest on; anything missing that must be added first.
+    validations:
+      required: true
+  - type: textarea
+    id: outline
+    attributes:
+      label: Proof outline
+      description: The steps of the proof, following the paper or saying where it departs from it.
+    validations:
+      required: true
+  - type: dropdown
+    id: authorship
+    attributes:
+      label: Who writes the Lean code
+      description: >-
+        Used for the labelling in formalization.yaml: AI-written code is Frontier until a human has
+        reviewed it line by line.
+      options:
+        - An AI agent (under my direction)
+        - I write it myself
+        - Both
+    validations:
+      required: true
+  - type: input
+    id: tracker
+    attributes:
+      label: Tracker task (optional)
+      description: A link to an issue of the project's tracker, if there is one.
