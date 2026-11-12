@@ -19,7 +19,7 @@ node (`GroupDimension/D5Tag.lean`), e.g.
 
 ```lean
 @[d5 "thm:g4cube"]
-theorem D_five_eq_gamma_five_g4_cube ...
+theorem D_five_eq_gamma_five_of_g4_cube ...
 ```
 
 The attribute also takes a permanent tag `D5:XXXX` (four characters, digits and capital letters
@@ -38,7 +38,8 @@ Before starting, open an issue with the **Claim a statement to formalize** templ
 label, the statement, the Lean statement you will prove (with `sorry`), what it uses and a proof
 outline. It gets the label `claim`; a maintainer adds `blueprint-approved` once the Lean statement
 is agreed (it matches the paper, or the difference is stated). Work on statements without an
-approved claim may be duplicated or declined.
+approved claim may be duplicated or declined. Small fixes (typos, golfing, documentation) need no
+claim.
 
 ## 3. Pull request
 

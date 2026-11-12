@@ -61,8 +61,8 @@ body:
     attributes:
       label: Who writes the Lean code
       description: >-
-        Used for the labelling in formalization.yaml: AI-written code is Frontier until a human has
-        reviewed it line by line.
+        Used for the labelling in formalization.yaml: AI-written code is Frontier; a statement moves
+        to Core only after a human has reviewed its Lean statement against the paper (CONTRIBUTING.md).
       options:
         - An AI agent (under my direction)
         - I write it myself

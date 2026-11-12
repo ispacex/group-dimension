@@ -18,14 +18,16 @@ and, in both, an optional comment: `@[d5 000P "part (a)"]`. A declaration may ca
 `@[d5 "thm:gt3", d5 "ext:guptatahara"]`. The key is stored as written (a tag with the prefix
 `D5:`), nothing else, so labels and tags can live side by side while the tags are introduced.
 
-`#d5_tags` lists every `(key, declaration, comment)` of the environment, one JSON object per line,
-e.g. `{"key": "thm:g4cube", "decl": "GroupDimension.D_five_eq_gamma_five_g4_cube", "comment": ""}`.
+`#d5_tags` lists every `(key, declaration, comment)` of the environment, one JSON object per line
+(the order of the fields is not significant), e.g.
+`{"comment":"","decl":"GroupDimension.D_five_eq_gamma_five_of_g4_cube","key":"thm:g4cube"}`.
 
 Modelled on Mathlib's `@[stacks TAG]` (`Mathlib.Tactic.CrossRefAttribute`), whose list of databases
 is closed. `site/blueprint.toml` stays the source of truth: the CI of dimension-subrings compares the
 output of `#d5_tags` with the `lean` fields of its nodes and fails on any difference. Unlike
-Mathlib's attribute this one does not append a link to the docstring: in Lean 4.35 a declaration's
-own docstring is set after `.beforeElaboration` attributes run and would replace it.
+Mathlib's attribute this one does not append a link to the docstring: tried on Lean 4.35, a link
+appended at `.beforeElaboration` was gone from a declaration with its own docstring (that docstring
+is added later, with the definition), so it was dropped.
 -/
 
 public meta section
@@ -103,6 +105,12 @@ end Lean.PrettyPrinter
 
 namespace GroupDimension.D5Tag
 
+/-- All entries of the environment, sorted by key, then declaration. -/
+def entries (env : Environment) : Array Entry :=
+  let s := PersistentEnvExtension.getState d5Ext env
+  (s.2.flatten.appendList s.1).qsort fun a b =>
+    a.key < b.key || (a.key == b.key && a.declName.toString < b.declName.toString)
+
 /-- `@[d5 000P]`, `@[d5 "thm:g4cube"]`, with an optional comment: `@[d5 000P "part (a)"]`. The
 statement of the D₅ paper that the declaration states or proves (a permanent tag `D5:XXXX` written
 without the prefix, or a label of the paper); see the module docstring. -/
@@ -126,17 +134,11 @@ initialize registerBuiltinAttribute {
     -- `stx` is `d5 key comment?`
     let key ← keyOf stx[1]
     let comment := (stx[2].getOptional?.bind (·.isStrLit?)).getD ""
-    if (d5Ext.getEntries (← getEnv)).any (fun e => e.declName == decl && e.key == key) then
+    if (entries (← getEnv)).any (fun e => e.declName == decl && e.key == key) then
       throwError "d5: {key} is already on {.ofConstName decl}"
     modifyEnv (d5Ext.addEntry · { declName := decl, key, comment })
   applicationTime := .beforeElaboration
 }
-
-/-- All entries of the environment, sorted by key, then declaration. -/
-def entries (env : Environment) : Array Entry :=
-  let s := PersistentEnvExtension.getState d5Ext env
-  (s.2.flatten.appendList s.1).qsort fun a b =>
-    a.key < b.key || (a.key == b.key && a.declName.toString < b.declName.toString)
 
 /-- One entry as a JSON object on one line. -/
 def Entry.toJson (e : Entry) : String :=
@@ -144,8 +146,8 @@ def Entry.toJson (e : Entry) : String :=
     ("comment", e.comment)]).compress
 
 /--
-`#d5_tags` lists the entries of `@[d5 ...]`, one JSON object per line (sorted by key):
-`{"key": ..., "decl": ..., "comment": ...}`. `site/blueprint.py tags` of dimension-subrings reads it.
+`#d5_tags` lists the entries of `@[d5 ...]`, one JSON object per line (sorted by key), with the
+fields `key`, `decl` and `comment`. `site/blueprint.py tags` of dimension-subrings reads it.
 -/
 elab (name := d5Tags) "#d5_tags" : command => do
   let es := entries (← getEnv)

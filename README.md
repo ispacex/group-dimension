@@ -228,7 +228,7 @@ in a comment which steps of §§5–6 of the paper carry over. In short:
 
 ## Paper labels and contributing
 
-Each declaration that states or proves a labelled statement of the paper carries
+Each declaration named in a node of the blueprint (a labelled statement of the paper) carries
 `@[d5 "<label>"]` (`GroupDimension/D5Tag.lean`), e.g. `@[d5 "thm:g4cube"]`, the label of the
 statement on [blueprint.html](https://ispacex.github.io/d5/blueprint.html); the attribute also
 takes permanent tags `D5:XXXX` (`@[d5 000P]`), to which the labels will move. `#d5_tags`

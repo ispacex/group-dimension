@@ -43,7 +43,7 @@ d5 000P0: error
       "d5 00001", "d5 000p", "d5 000P0"] do
     let r := match Parser.runParserCategory (← getEnv) `attr s with
       | .ok _ => "ok"
-      | .error _ => "error"
+      | .error e => e
     out := out.push s!"{s}: {r}"
   logInfo ("\n".intercalate out.toList)
 
