@@ -10,7 +10,9 @@ The attribute records which statement of the paper (S. Vorobev, *On the inclusio
 and an optional comment, in either of two forms:
 
 * `@[d5 "thm:g4cube"]` — a **label** of the paper, a key of the nodes of the blueprint
-  (`site/blueprint.toml` of https://github.com/ispacex/dimension-subrings);
+  (`site/blueprint.toml` of https://github.com/ispacex/dimension-subrings); the blueprint's nodes
+  outside the paper have keys of their own, `ext:…` (results of the literature) and `own:…`
+  (results proved here but not in the paper, e.g. `own:ab399`);
 * `@[d5 000P]` — a permanent **tag** `D5:000P` (wiki 912, MATH-454): four characters, digits and
   capital letters without `I` and `O` (a subset of the format of Stacks tags).
 

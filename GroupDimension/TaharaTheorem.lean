@@ -111,6 +111,7 @@ theorem D_five_eq_bot_of_class_four_g4_cube {Q : Type} [Group Q] [Finite Q]
 `C₃ × C₉ × C₉` has `D₅ = 1`. No condition on `γ₄` is assumed; in particular this covers
 `γ₄ ≅ C₉`, the case left open by Theorem 6.11 (remark 6.13 of the paper) for this type of `Q_ab`.
 Proof: the exact identity `(⋆)` (`Star.two_smul_gen_eq`) evaluated term by term (`Ab399`). -/
+@[d5 "own:ab399"]
 theorem D_five_eq_bot_of_class_four_ab399 {Q : Type} [Group Q] [Finite Q]
     (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥)
     (hab : Nonempty (Q ⧸ (⊤ : Subgroup Q).lowerCentralSeries 1 ≃*
