@@ -1,6 +1,7 @@
 module
 
 public import GroupDimension.CentralD8
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -354,6 +355,7 @@ end SqrtData
 not necessarily central, and `c = g⁻² r²` with `c^(2^j) - 1 ∈ Δ(H)^(j+2)` for all `j ≥ 0`.
 Then `ℤ[H] ∩ Δ(K)^n = Δ(H)^n` for all `n` and `D_n(K) = D_n(H)` for `n ≥ 2`. For `c = 1` this
 is Lemma 5.9 with `m = 2`. -/
+@[d5 "prop:central"]
 theorem D_n_eq_of_sqrt {K : Type*} [Group K] (H : Subgroup K) (r : K) (g : H)
     (central : ∀ x : K, r * x = x * r) (sq_mem : r * r ∈ H) (r_nmem : r ∉ H)
     (gen : ∀ k : K, ∃ h ∈ H, k = h ∨ k = h * r)

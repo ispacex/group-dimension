@@ -3,6 +3,7 @@ module
 public import GroupDimension.TaharaTheorem
 public import GroupDimension.Passi
 public import GroupDimension.MinimalThree
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -761,6 +762,7 @@ theorem D_five_eq_bot_of_metabelian {p : ℕ} [hp : Fact p.Prime] (hp2 : p ≠ 2
 
 /-- **`D₅ = γ₅` when `G/γ₂` is a finite `p`-group, `p` odd, and `[γ₂, γ₂] ⊆ γ₅`** (wiki 887;
 for `p = 3` Gupta–Tahara [GT85, Thm. 3.2(c)]). -/
+@[d5 "thm:gt3"]
 theorem D_five_eq_gamma_five_of_metabelian {p : ℕ} [hp : Fact p.Prime] (hp2 : p ≠ 2) (G : Type)
     [Group G] (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
     (hpg : IsPGroup p (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
@@ -804,6 +806,7 @@ open scoped commutatorElement
 
 /-- Gupta–Tahara at `p = 3`: `D₅ = γ₅` for finite metabelian `3`-groups ([GT85, Thm. 3.2(c)];
 the instance `p = 3` of `GuptaTaharaMetabelian`). -/
+@[d5 "ext:guptatahara"]
 def GuptaTaharaMetabelianThree : Prop :=
   ∀ (G : Type) [Group G] [Finite G], IsPGroup 3 G → derivedSeries G 2 = ⊥ →
     D 5 G = (⊤ : Subgroup G).lowerCentralSeries 4
@@ -812,6 +815,7 @@ theorem GuptaTaharaMetabelian.three (h : GuptaTaharaMetabelian) : GuptaTaharaMet
   fun G _ _ hG hd => h 3 Nat.prime_three (by norm_num) G hG hd
 
 /-- **Gupta–Tahara at `p = 3`**, proved (MATH-445). -/
+@[d5 "thm:gt3" "ext:guptatahara"]
 theorem guptaTaharaMetabelian_three : GuptaTaharaMetabelianThree := by
   intro G _ _ hG hd
   refine D_five_eq_gamma_five_of_metabelian (p := 3) (by norm_num) G inferInstance
@@ -832,6 +836,7 @@ variable {Q : Type} [Group Q] [Finite Q]
 
 /-- **Lemma 6.1, `p = 3`** (`D_le_derivedSeries_two` without `GuptaTaharaMetabelian`):
 `D₅(Q) ⊆ Q''` for a finite `3`-group of class `≤ 4`. -/
+@[d5 "lem:qpp"]
 theorem D_le_derivedSeries_two_three (hQ : IsPGroup 3 Q)
     (hc : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥) : D 5 Q ≤ derivedSeries Q 2 := by
   set N := derivedSeries Q 2
@@ -850,6 +855,7 @@ theorem D_le_derivedSeries_two_three (hQ : IsPGroup 3 Q)
 
 /-- **Lemma 6.1, `p = 3`** (`mem_of_mem_D_add_two` without the hypothesis):
 `D₅(Q) ⊆ Q'' ∩ M₅(Q)`. -/
+@[d5 "lem:qpp"]
 theorem mem_of_mem_D_add_two_three (hQ : IsPGroup 3 Q)
     (hc : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥) {g : Q} (hg : g ∈ D 5 Q) :
     g ∈ derivedSeries Q 2 ∧ MonoidAlgebra.of (ZMod 3) Q g - 1 ∈ Jennings.augIdealP 3 Q ^ 5 :=
@@ -857,6 +863,7 @@ theorem mem_of_mem_D_add_two_three (hQ : IsPGroup 3 Q)
 
 /-- `rank_ge_three_of_D_five_ne_bot` without the hypothesis: `D₅(Q) ≠ 1` needs `Q'' ≠ 1`,
 hence `d(Q) ≥ 3`. -/
+@[d5 "lem:qpp"]
 theorem rank_ge_three_of_D_five_ne_bot_three (hQ : IsPGroup 3 Q)
     (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥) (hD : D 5 Q ≠ ⊥) :
     derivedSeries Q 2 ≠ ⊥ ∧ 3 ≤ Group.rank Q := by
@@ -866,6 +873,7 @@ theorem rank_ge_three_of_D_five_ne_bot_three (hQ : IsPGroup 3 Q)
 
 /-- **Lemma 6.2** with hypotheses on the quotients (`minimal_three_of_quotients`), without
 `PassiDFourSquare` and `GuptaTaharaMetabelian`. -/
+@[d5 "lem:mincex3"]
 theorem minimal_three_of_quotients_three (hQ : IsPGroup 3 Q)
     (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥)
     (hmin : ∀ N : Subgroup Q, ∀ _ : N.Normal, N ≤ center Q → Nat.card N = 3 → D 5 (Q ⧸ N) = ⊥)
@@ -882,6 +890,7 @@ theorem minimal_three_of_quotients_three (hQ : IsPGroup 3 Q)
 
 /-- **Lemma 6.2** (`minimal_three`, `minimal_three'`) without `PassiDFourSquare` and
 `GuptaTaharaMetabelian`: the minimal counterexample to `D₅ = γ₅` among `3`-groups. -/
+@[d5 "lem:mincex3"]
 theorem minimal_three_three (hQ : IsPGroup 3 Q)
     (hmin : ∀ (R : Type) [Group R] [Finite R], IsPGroup 3 R → Nat.card R < Nat.card Q →
       D 5 R = (⊤ : Subgroup R).lowerCentralSeries 4)

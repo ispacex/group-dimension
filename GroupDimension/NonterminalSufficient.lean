@@ -2,6 +2,7 @@ module
 
 public import GroupDimension.IterExt
 public import GroupDimension.Nonterminal
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -913,6 +914,7 @@ open scoped commutatorElement
 (`[a,b] = a⁻¹b⁻¹ab`). If the system (E)+(J) has a solution with `c = 1`, then `P` is nonterminal in
 the sense of Lemma C.1: there are a group `Q` and `π : Q →* P` onto with `ker π = ⟨z⟩`, `z`
 central of order `p`, and `γ₄(Q) ≠ 1`. (`P` is taken in `Type`, and so is `Q`.) -/
+@[d5 "thm:nonterm"]
 theorem nonterminal_sufficient {P : Type} [Group P] {p : ℕ} [Fact p.Prime] (hp2 : p ≠ 2)
     (h4 : (⊤ : Subgroup P).lowerCentralSeries 3 = ⊥)
     (h3 : Nat.card ((⊤ : Subgroup P).lowerCentralSeries 2) = p)
@@ -1046,6 +1048,7 @@ be a normal form as in the theorem. Then `P` is nonterminal (in the sense of Lem
 if (N2) holds and (E)+(J) has a solution with `c = 1`. (N1) and (N3) enter through the normal form
 (`v, w` central, `x_i^p ∈ ⟨v, w⟩`); that they are necessary is `nonterminal_necessary`. `P` and
 `Q` are in `Type`. -/
+@[d5 "thm:nonterm"]
 theorem nonterminal_iff {P : Type} [Group P] {p : ℕ} [Fact p.Prime] (hp2 : p ≠ 2)
     (h4 : (⊤ : Subgroup P).lowerCentralSeries 3 = ⊥)
     (h2 : ((⊤ : Subgroup P).lowerCentralSeries 2).relIndex ((⊤ : Subgroup P).lowerCentralSeries 1) = p ^ 2)

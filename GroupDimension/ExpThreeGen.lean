@@ -1,6 +1,7 @@
 module
 
 public import GroupDimension.ExpThreePlus
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -1260,6 +1261,7 @@ variable {K V : Type*} [Field K] [AddCommGroup V] [Module K V]
 /-- For a descending chain of subspaces `W 0 ⊇ W 1 ⊇ ⋯` with `W N = 0` and a subspace `Ker`
 there is a linearly independent set `B ⊆ W 0` such that every `W j` is spanned by `B ∩ W j` and
 `W 0 ∩ Ker` by `B ∩ Ker` (wiki 886, §3.2, the lemma). -/
+@[d5 "thm:exp3gen"]
 theorem exists_flag_ker_basis (W : ℕ → Submodule K V) (hW : Antitone W) {N : ℕ} (hN : W N = ⊥)
     (Ker : Submodule K V) :
     ∃ B : Set V, LinearIndepOn K id B ∧ B ⊆ W 0 ∧
@@ -1329,6 +1331,7 @@ end FlagBasis
 `3^{h_i} y_i` are independent modulo `3` and adapted to the heights (every element of order `3`
 in `3^j A` is a combination of the `3^{h_i} y_i` with `h_i ≥ j`), in a group of exponent a power
 of `3`, is a basis: `∑ a_i y_i = 0 ↔ 3^{h_i+1} ∣ a_i`, and every element is such a sum. -/
+@[d5 "thm:exp3gen"]
 theorem socle_basis {A : Type*} [AddCommGroup A] {n : ℕ} (y : Fin n → A) (ht : Fin n → ℕ)
     (hord : ∀ i, ((3 : ℤ) ^ (ht i + 1)) • y i = 0)
     (hind : ∀ c : Fin n → ℤ, ∑ i, c i • ((3 : ℤ) ^ ht i • y i) = 0 → ∀ i, (3 : ℤ) ∣ c i)
@@ -1849,6 +1852,7 @@ theorem D_five_eq_bot_of_class_four_exp_L1 (hT : TaharaFiveOne) {Q : Type} [Grou
 MATH-443). Let `G/γ₂(G)` be a finite `3`-group and let `γ₂(G)/γ₃(G)` have exponent dividing `3`
 (`a³ ∈ γ₃` for `a ∈ γ₂`; equivalently `[x³, y] ∈ γ₃` for all `x, y`). Then `D₅(G) = γ₅(G)`; the
 invariants of `G/γ₂(G)` are arbitrary. -/
+@[d5 "thm:exp3gen"]
 theorem D_five_eq_gamma_five_exp_L1 (hT : TaharaFiveOne) (G : Type) [Group G]
     (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
     (h3grp : ∀ x : G, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
@@ -1871,6 +1875,7 @@ theorem D_five_eq_gamma_five_exp_L1 (hT : TaharaFiveOne) (G : Type) [Group G]
     exact hmap 2 _ (h2 y hy)
 
 /-- Theorem 6.6 (`D_five_eq_gamma_five`) as a special case: `G/γ₂` of exponent `3` gives `h2`. -/
+@[d5 "thm:exp3"]
 theorem D_five_eq_gamma_five_of_exp_three_of_exp_L1 (hT : TaharaFiveOne) (G : Type) [Group G]
     (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
     (h1 : ∀ x : G, x ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
@@ -1880,6 +1885,7 @@ theorem D_five_eq_gamma_five_of_exp_three_of_exp_L1 (hT : TaharaFiveOne) (G : Ty
 
 /-- Theorem 6.8 (`D_five_eq_gamma_five_cyclic`) as a special case: cyclic cubes give `h2`
 (`cube_L1_of_cubes`). -/
+@[d5 "thm:exp3plus"]
 theorem D_five_eq_gamma_five_cyclic_of_exp_L1 (hT : TaharaFiveOne) (G : Type) [Group G]
     (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
     (h3grp : ∀ x : G, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (t : G)

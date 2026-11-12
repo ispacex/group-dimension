@@ -1,6 +1,7 @@
 module
 
 public import GroupDimension.ClassFour
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -453,6 +454,7 @@ theorem type_bounds (hp2 : p ≠ 2) (hG : IsPGroup p G) (h5 : (⊤ : Subgroup G)
 
 /-- **`|Q| ≥ p^{d(Q)+5}`** for a non-metabelian `p`-group of class `≤ 4`, `p` odd; also
 `d(Q) ≥ 3`. -/
+@[d5 "prop:metab"]
 theorem card_ge_of_not_metabelian (hp2 : p ≠ 2) (hG : IsPGroup p G)
     (h5 : (⊤ : Subgroup G).lowerCentralSeries 4 = ⊥) (hm : derivedSeries G 2 ≠ ⊥) :
     3 ≤ Group.rank G ∧ p ^ (Group.rank G + 5) ≤ Nat.card G := by
@@ -463,6 +465,7 @@ theorem card_ge_of_not_metabelian (hp2 : p ≠ 2) (hG : IsPGroup p G)
 
 /-- **Proposition 6.5 (1).** A `p`-group of class `≤ 4` (`p` odd) with `|Q| ≤ p^7`, or with
 `|Q| = p^8` and `d(Q) ≥ 4`, is metabelian. -/
+@[d5 "prop:metab"]
 theorem metabelian_of_card_le (hp2 : p ≠ 2) (hG : IsPGroup p G)
     (h5 : (⊤ : Subgroup G).lowerCentralSeries 4 = ⊥)
     (h : Nat.card G ≤ p ^ 7 ∨ (Nat.card G = p ^ 8 ∧ 4 ≤ Group.rank G)) :
@@ -479,6 +482,7 @@ theorem metabelian_of_card_le (hp2 : p ≠ 2) (hG : IsPGroup p G)
 
 /-- **Proposition 6.5 (2), first part.** A non-metabelian `p`-group of class `≤ 4` and order
 `p^9` (`p` odd) has `d(Q) ∈ {3, 4}`. -/
+@[d5 "prop:metab"]
 theorem rank_of_card_nine (hp2 : p ≠ 2) (hG : IsPGroup p G) (h5 : (⊤ : Subgroup G).lowerCentralSeries 4 = ⊥)
     (hm : derivedSeries G 2 ≠ ⊥) (hcard : Nat.card G = p ^ 9) :
     Group.rank G = 3 ∨ Group.rank G = 4 := by
@@ -489,6 +493,7 @@ theorem rank_of_card_nine (hp2 : p ≠ 2) (hG : IsPGroup p G) (h5 : (⊤ : Subgr
 
 /-- **Proposition 6.5 (2), second part.** For `d(Q) = 4` the type is `(4,3,1,1)` or
 `(4,2,2,1)`. -/
+@[d5 "prop:metab"]
 theorem type_of_card_nine (hp2 : p ≠ 2) (hG : IsPGroup p G) (h5 : (⊤ : Subgroup G).lowerCentralSeries 4 = ⊥)
     (hm : derivedSeries G 2 ≠ ⊥) (hcard : Nat.card G = p ^ 9) (hr : Group.rank G = 4) :
     (((⊤ : Subgroup G).lowerCentralSeries 1).index = p ^ 4 ∧

@@ -1,6 +1,7 @@
 module
 
 public import GroupDimension.ExpNine
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -1045,6 +1046,7 @@ end SetupB
 
 /-- **Theorem B, finite case, modulo Tahara.** Let `Q` be a finite group of class `≤ 4` such
 that `Q/γ₂(Q)` is a `3`-group and `γ₄(Q)` has exponent dividing `3`. Then `D₅(Q) = 1`. -/
+@[d5 "thm:g4cube"]
 theorem D_five_eq_bot_of_class_four_g4_cube (hT : TaharaFiveOne) {Q : Type} [Group Q]
     [Finite Q] (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥)
     (h3grp : ∀ x : Q, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup Q).lowerCentralSeries 1)
@@ -1274,6 +1276,7 @@ theorem D_five_eq_bot_of_class_four_g4_cube (hT : TaharaFiveOne) {Q : Type} [Gro
 
 /-- **Theorem B, modulo Tahara's Theorem 6.1** (MATH-444). Let `G/γ₂(G)` be a finite `3`-group
 with `γ₄(G)³ ⊆ γ₅(G)`. Then `D₅(G) = γ₅(G)`. -/
+@[d5 "thm:g4cube"]
 theorem D_five_eq_gamma_five_g4_cube (hT : TaharaFiveOne) (G : Type) [Group G]
     (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1))
     (h3grp : ∀ x : G, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 1)

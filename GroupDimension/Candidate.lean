@@ -1,6 +1,7 @@
 module
 
 public import GroupDimension.ClassFourOrder
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -476,6 +477,7 @@ theorem false_of_gamma_two_le {Q : Type*} [Group Q] {n : Q} (hQ : IsCandidate Q 
 
 /-- **Lemma 5.6 of the paper.** There is no candidate `Q` of order `2¹¹` with
 `Q/P₃(Q) ≅ ℤ/4 × (ℤ/2)⁷`. -/
+@[d5 "lem:z4"]
 theorem not_isCandidate_of_quotient_z4 {Q : Type*} [Group Q] (hcard : Nat.card Q = 2 ^ 11)
     (e : Q ⧸ expCentral 2 Q 3 ≃* Z4Z2pow7) (n : Q) : ¬ IsCandidate Q n := by
   intro hQ
@@ -553,6 +555,7 @@ Suppose `|P₂| ≤ 8`. The series `P₂ ⊋ P₃ ⊋ P₄ ⊇ P_c = ⟨n⟩` de
 * `x⁸ = n`: `x²` has order `8`, so `P₂ = ⟨x²⟩` is cyclic; `|γ₂| ≥ 2|γ₃| ≥ 4` as in Lemma 5.6(2).
   If `|γ₂| = 8`, `γ₂ = P₂` and `y = x²` is the previous case. If `|γ₂| = 4`, `γ₂ = ⟨x⁴⟩ ≤ P₃`,
   which is excluded by Lemma 5.6 (`false_of_gamma_two_le`). -/
+@[d5 "prop:rank8"]
 theorem false_of_card_expCentral_two_le {Q : Type*} [Group Q] [Finite Q] {n : Q}
     (hQ : IsCandidate Q n) (hP2le : Nat.card (expCentral 2 Q 2) ≤ 8) : False := by
   obtain ⟨c, hc4, hc1, hcn⟩ := hQ.twoClass
@@ -814,6 +817,7 @@ theorem false_of_card_expCentral_two_le {Q : Type*} [Group Q] [Finite Q] {n : Q}
 /-- **Proposition 5.7 of the paper**, in the form of MATH-320: there is no candidate `Q` of order
 `2¹¹` and rank `d(Q) ≥ 8`. By `false_of_card_expCentral_two_le`, since `d(Q) ≥ 8` gives
 `|Q/P₂| ≥ 2⁸`, i.e. `|P₂| ≤ 8`. -/
+@[d5 "prop:rank8"]
 theorem not_isCandidate_of_rank {Q : Type*} [Group Q] [Finite Q] (hcard : Nat.card Q = 2 ^ 11)
     (hrank : 8 ≤ Group.rank Q) (n : Q) : ¬ IsCandidate Q n := by
   intro hQ

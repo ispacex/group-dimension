@@ -3,6 +3,7 @@ module
 public import GroupDimension.MinimalCounterexample
 public import GroupDimension.MetabelianOdd
 public import GroupDimension.Descendants
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -284,6 +285,7 @@ such that `D₅(Q/N) = 1` for every central subgroup `N` of order `3`. If `D₅(
 `γ₄(Q) ≠ 1`, `Q'' ≠ 1`, `d(Q) ≥ 3`, `Z(Q)` is cyclic, `D₅(Q) = Ω₁(Z(Q)) = ⟨z⟩` with `z` of
 order `3` in `Q'' ∩ M₅(Q)`, and for the `3`-class `c ≥ 4`: `P_c(Q) = ⟨z⟩`,
 `P_c(Q/⟨z⟩) = 1 ≠ P_{c-1}(Q/⟨z⟩)`. -/
+@[d5 "lem:mincex3"]
 theorem minimal_three_of_quotients (hP : PassiDFourSquare) (hGT : GuptaTaharaMetabelian)
     (hQ : IsPGroup 3 Q) (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥)
     (hmin : ∀ N : Subgroup Q, ∀ _ : N.Normal, N ≤ center Q → Nat.card N = 3 → D 5 (Q ⧸ N) = ⊥)
@@ -348,6 +350,7 @@ theorem minimal_three_of (hP : PassiDFourSquare) (hQ : IsPGroup 3 Q)
 order `3` in `Q'' ∩ M₅(Q)`, and for the `3`-class `c ≥ 4`: `P_c(Q) = ⟨z⟩` and
 `P_c(Q/⟨z⟩) = 1 ≠ P_{c-1}(Q/⟨z⟩)`, i.e. `Q` is an immediate descendant of step size `1` of
 `Q/⟨z⟩`. -/
+@[d5 "lem:mincex3"]
 theorem minimal_three (hP : PassiDFourSquare) (hGT : GuptaTaharaMetabelian) (hQ : IsPGroup 3 Q)
     (hmin : ∀ (R : Type) [Group R] [Finite R], IsPGroup 3 R → Nat.card R < Nat.card Q →
       D 5 R = (⊤ : Subgroup R).lowerCentralSeries 4)

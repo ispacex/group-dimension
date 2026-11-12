@@ -2,6 +2,7 @@ module
 
 public import GroupDimension.Tahara
 public import GroupDimension.ClassFour
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -1486,6 +1487,7 @@ theorem finite_quotient_lcs (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentra
 
 /-- **Theorem 6.6, modulo Tahara's Theorem 6.1.** If `G/γ₂(G)` is finite of exponent dividing
 `3`, then `D₅(G) = γ₅(G)`. -/
+@[d5 "thm:exp3"]
 theorem D_five_eq_gamma_five (hT : TaharaFiveOne) (G : Type) [Group G]
     (hfin : Finite (G ⧸ (⊤ : Subgroup G).lowerCentralSeries 1)) (h1 : ∀ x : G, x ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
     D 5 G = (⊤ : Subgroup G).lowerCentralSeries 4 := by

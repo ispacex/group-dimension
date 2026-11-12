@@ -2,6 +2,7 @@ module
 
 public import GroupDimension.DThree
 public import Mathlib.GroupTheory.ResiduallyFinite
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -290,6 +291,7 @@ theorem residuallyFinite_of_lowerCentralSeries :
   | k + 2, G, _, _, h => residuallyFinite_step (residuallyFinite_of_lowerCentralSeries (k + 1)) G h
 
 /-- Finitely generated nilpotent groups are residually finite. -/
+@[d5 "ext:gruenberg"]
 theorem residuallyFinite {G : Type u} [Group G] [Group.FG G] (hG : Group.IsNilpotent G) :
     Group.ResiduallyFinite G := by
   obtain ⟨k, hk⟩ := Subgroup.nilpotent_iff_lowerCentralSeries.mp hG
@@ -370,6 +372,7 @@ end Gruenberg
 /-- **Gruenberg's theorem** [Gru57], in the form of Proposition 2.1 of the paper: in a finitely
 generated nilpotent group, an element none of whose odd powers is trivial survives in some
 finite `2`-group quotient. -/
+@[d5 "ext:gruenberg"]
 theorem gruenbergResidualTwo : GruenbergResidualTwo := by
   intro G _ hfg hnil g hg
   obtain ⟨k, hk⟩ := Subgroup.nilpotent_iff_lowerCentralSeries.mp hnil

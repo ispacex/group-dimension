@@ -2,6 +2,7 @@ module
 
 public import GroupDimension.Reduction
 public import GroupDimension.CentralRoot
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -234,6 +235,7 @@ theorem D_five_eq_bot_of_two_groups (hP : PassiDFourSquare) (hG : GruenbergResid
 
 /-- **Proposition 2.1, `(1) ⇔ (3)`.** Given Passi's `D₄² ⊆ γ₄` and Gruenberg's theorem,
 `D₅(G) ⊆ γ₄(G)` for all groups iff `D₅(Q) = 1` for all finite `2`-groups of class `≤ 3`. -/
+@[d5 "prop:reduction"]
 theorem dimensionQuestion5_iff_finite_two_groups (hP : PassiDFourSquare)
     (hG : GruenbergResidualTwo) :
     DimensionQuestion5 ↔
@@ -253,6 +255,7 @@ theorem D_five_eq_bot_of_class_two (hD3 : DThreeEqGammaThree) (Q : Type) [Group 
 /-- **Proposition 2.1 with class exactly `3`**, given also `D₃ = γ₃` to exclude class `≤ 2`.
 The paper's word "metabelian" is dropped by Remark 2.2 (class `≤ 3` implies metabelian), which
 is formalized as `metabelian_of_class_three` (`Descendants.lean`). -/
+@[d5 "prop:reduction"]
 theorem dimensionQuestion5_iff_class_three (hD3 : DThreeEqGammaThree) (hP : PassiDFourSquare)
     (hG : GruenbergResidualTwo) :
     DimensionQuestion5 ↔
@@ -269,6 +272,7 @@ theorem dimensionQuestion5_iff_class_three (hD3 : DThreeEqGammaThree) (hP : Pass
 /-- **Remark 2.3.** If `D₅(Q) = 1` for all `2`-groups `Q` of class `≤ 3` and order `≤ 2^k`, then
 `D₅(G) ⊆ γ₄(G)` for every finite `G` whose Sylow `2`-subgroups have order `≤ 2^k`. Only Passi's
 theorem is assumed: the finite `2`-quotient is the Sylow `2`-subgroup of `G/γ₄(G)`. -/
+@[d5 "rem:bounded"]
 theorem D_five_le_of_bounded (hP : PassiDFourSquare) (k : ℕ)
     (h : ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥ →
       Nat.card Q ≤ 2 ^ k → D 5 Q = ⊥)
@@ -303,6 +307,7 @@ theorem D_five_le_of_bounded (hP : PassiDFourSquare) (k : ℕ)
 
 /-- **Remark 2.3 with class exactly `3`**, as in the paper; class `≤ 2` is excluded with
 `D₃ = γ₃`. -/
+@[d5 "rem:bounded"]
 theorem D_five_le_of_bounded_class_three (hD3 : DThreeEqGammaThree) (hP : PassiDFourSquare)
     (k : ℕ)
     (h : ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥ →

@@ -1,6 +1,7 @@
 module
 
 public import GroupDimension.ClassFourOrder
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -153,6 +154,7 @@ theorem metabelian_of_central_ext_card {Q P : Type*} [Group Q] [Group P] {p : �
 /-- **Theorem 6.15 for the immediate descendants of step size `1`.** Let `p` be an odd prime and
 `Z` a central subgroup of order `p` of a group `Q` such that `P = Q/Z` has `γ₄(P) = 1`,
 `|γ₂(P)/γ₃(P)| = p²` and `|γ₃(P)| = p`. Then `Q'' = 1`. -/
+@[d5 "thm:pcover"]
 theorem metabelian_of_central_quotient {Q : Type*} [Group Q] {p : ℕ} [Fact p.Prime] (hp2 : p ≠ 2)
     (Z : Subgroup Q) [Z.Normal] (hZ : Z ≤ center Q) (hcard : Nat.card Z = p)
     (h4 : (⊤ : Subgroup (Q ⧸ Z)).lowerCentralSeries 3 = ⊥)
@@ -165,6 +167,7 @@ theorem metabelian_of_central_quotient {Q : Type*} [Group Q] {p : ℕ} [Fact p.P
 /-- **Theorem 6.15.** Let `p` be an odd prime and `M` a central subgroup of exponent `p` of a
 group `Q` such that `P = Q/M` has `γ₄(P) = 1`, `|γ₂(P)/γ₃(P)| = p²` and `|γ₃(P)| = p`. Then
 `Q'' = 1`. For the `p`-covering group `Q = P*` and its multiplier `M` this is `P*'' = 1`. -/
+@[d5 "thm:pcover"]
 theorem metabelian_of_central_elementary {Q : Type*} [Group Q] {p : ℕ} [Fact p.Prime] (hp2 : p ≠ 2)
     (M : Subgroup Q) [M.Normal] (hM : M ≤ center Q) (hexp : ∀ m ∈ M, m ^ p = 1)
     (h4 : (⊤ : Subgroup (Q ⧸ M)).lowerCentralSeries 3 = ⊥)

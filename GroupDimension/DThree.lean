@@ -3,6 +3,7 @@ module
 public import GroupDimension.TaharaProof.TFrame
 public import GroupDimension.FiniteReduction
 public import GroupDimension.PCover
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -488,6 +489,7 @@ theorem D_three_eq_bot_of_class_two' {H : Type*} [Group H]
 
 /-- **`D₃(G) = γ₃(G)` for every group** (Higman–Rees–Passi), the statement `DThreeEqGammaThree`
 of `Statements.lean`. -/
+@[d5 "ext:dthree"]
 theorem dThreeEqGammaThree : DThreeEqGammaThree := by
   intro G _
   refine le_antisymm (D_le_of_D_quotient_eq_bot _ 3
