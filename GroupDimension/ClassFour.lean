@@ -106,32 +106,22 @@ namespace ClassFour
 
 section AddMap
 
-variable {p : ℕ} {S : Subgroup G} {A : G → ZMod p}
+section Generic
+
+variable {M : Type*} [AddCommGroup M] {S : Subgroup G} {A : G → M}
 
 theorem addMap_one (hA : ∀ a ∈ S, ∀ b ∈ S, A (a * b) = A a + A b) : A 1 = 0 := by
   have h := hA 1 (one_mem S) 1 (one_mem S)
   rw [mul_one] at h
-  linear_combination -h
+  calc A 1 = A 1 + A 1 - A 1 := by abel
+    _ = A 1 - A 1 := by rw [← h]
+    _ = 0 := sub_self _
 
 theorem addMap_inv (hA : ∀ a ∈ S, ∀ b ∈ S, A (a * b) = A a + A b) {a : G} (ha : a ∈ S) :
     A a⁻¹ = -A a := by
   have h := hA a ha a⁻¹ (inv_mem ha)
   rw [mul_inv_cancel, addMap_one hA] at h
-  linear_combination -h
-
-theorem addMap_zpow (hA : ∀ a ∈ S, ∀ b ∈ S, A (a * b) = A a + A b) {a : G} (ha : a ∈ S)
-    (k : ℤ) : A (a ^ k) = k * A a := by
-  induction k using Int.induction_on with
-  | zero => simp [addMap_one hA]
-  | succ n ih =>
-    rw [zpow_add_one, hA _ (zpow_mem ha _) _ ha, ih]; push_cast; ring
-  | pred n ih =>
-    rw [zpow_sub_one, hA _ (zpow_mem ha _) _ (inv_mem ha), ih, addMap_inv hA ha]; push_cast; ring
-
-theorem addMap_pow (hA : ∀ a ∈ S, ∀ b ∈ S, A (a * b) = A a + A b) {a : G} (ha : a ∈ S)
-    (n : ℕ) : A (a ^ n) = n * A a := by
-  have := addMap_zpow hA ha n
-  rwa [zpow_natCast, Int.cast_natCast] at this
+  exact (neg_eq_of_add_eq_zero_right h.symm).symm
 
 /-- An additive map vanishing on the generators `⁅h, k⁆` vanishes on `⁅H, K⁆`. -/
 theorem addMap_vanish {N H K : Subgroup G} (hle : ⁅H, K⁆ ≤ N)
@@ -148,6 +138,24 @@ theorem addMap_vanish {N H K : Subgroup G} (hle : ⁅H, K⁆ ≤ N)
   | mul x y _ _ hx hy =>
     exact ⟨mul_mem hx.1 hy.1, by rw [hA x hx.1 y hy.1, hx.2, hy.2, add_zero]⟩
   | inv x _ hx => exact ⟨inv_mem hx.1, by rw [addMap_inv hA hx.1, hx.2, neg_zero]⟩
+
+end Generic
+
+variable {p : ℕ} {S : Subgroup G} {A : G → ZMod p}
+
+theorem addMap_zpow (hA : ∀ a ∈ S, ∀ b ∈ S, A (a * b) = A a + A b) {a : G} (ha : a ∈ S)
+    (k : ℤ) : A (a ^ k) = k * A a := by
+  induction k using Int.induction_on with
+  | zero => simp [addMap_one hA]
+  | succ n ih =>
+    rw [zpow_add_one, hA _ (zpow_mem ha _) _ ha, ih]; push_cast; ring
+  | pred n ih =>
+    rw [zpow_sub_one, hA _ (zpow_mem ha _) _ (inv_mem ha), ih, addMap_inv hA ha]; push_cast; ring
+
+theorem addMap_pow (hA : ∀ a ∈ S, ∀ b ∈ S, A (a * b) = A a + A b) {a : G} (ha : a ∈ S)
+    (n : ℕ) : A (a ^ n) = n * A a := by
+  have := addMap_zpow hA ha n
+  rwa [zpow_natCast, Int.cast_natCast] at this
 
 /-- A map additive on `γ₂` and zero on `γ₃` is determined by its values on `c₁, c₂`. -/
 theorem addMap_expand (hA : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 1,
@@ -187,7 +195,7 @@ theorem conj_central' {u : G} (hu : u ∈ (⊤ : Subgroup G).lowerCentralSeries 
 
 section F
 
-variable {p : ℕ} (F : G → ZMod p)
+variable {M : Type*} [AddCommGroup M] (F : G → M)
   (hF : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 3, ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 3, F (a * b) = F a + F b)
 include hF
 
@@ -368,7 +376,17 @@ theorem jacobi4 (x y : G) {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSer
   have e1b : F ⁅⁅y, z⁻¹⁆, x⁆ = -F ⁅⁅y, z⁆, x⁆ :=
     addMap_inv (A := fun b => F ⁅⁅y, b⁆, x⁆) (K_mid h5 F hF y x) hz
   rw [e0a, e0b, e2a, e2b, e1a, e1b] at hs
-  linear_combination hs
+  simpa only [neg_neg] using hs
+
+end F
+
+/-! The rest of the `γ₅ = 1` section needs values in `𝔽_p`. -/
+
+section FZ
+
+variable {p : ℕ} (F : G → ZMod p)
+  (hF : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 3, ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 3, F (a * b) = F a + F b)
+include hF
 
 /-- **Jacobi identity in degree 3**, read through `u ↦ F ⁅u, e⁆` on `L₃`. -/
 theorem jacobi3 (x y z e : G) :
@@ -588,7 +606,7 @@ theorem core [Fact p.Prime] (hp2 : p ≠ 2) {t : G} (ht : t ∈ (⊤ : Subgroup 
       le_rfl (addL1z h5 F hF hc₂) (fun u _ g _ => I1 u g c₂ hc₂)
   exact hw (I2 c₁ hc₁)
 
-end F
+end FZ
 
 /-- If `γ₅ = 1`, `γ₃ = ⟨t⟩γ₄` and `t^p ∈ γ₄`, then `γ₄` has exponent `p`. -/
 theorem pow_p_gamma4 {p : ℕ} {t : G} (htp : t ^ p ∈ (⊤ : Subgroup G).lowerCentralSeries 3)
