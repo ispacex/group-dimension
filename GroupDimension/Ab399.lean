@@ -49,6 +49,9 @@ structure Setup (T : Data G) (act : Fin T.s → Prop) (i₀ i₁ i₂ : Fin T.s)
     ∃ c ∈ (⊤ : Subgroup G).lowerCentralSeries 2, T.x₁ i ^ T.d i = a ^ 3 * c
   hind : ∀ cf : Fin T.s → ℤ, (∀ k, (3 : ℤ) ∣ ∑ h, cf h * T.b h k) → ∀ h, act h → (3 : ℤ) ∣ cf h
 
+/-! Helpers for maps into an abelian group `M` that are additive on `γ₄`, beyond those of
+`ClassFour` (section `F`, now stated for any `AddCommGroup`; `F_one`, `B_L1_L2`, `addRight1`,
+`jacobi4`, … are used from there). -/
 namespace GenericMaps
 
 variable {M : Type*} [AddCommGroup M]
@@ -59,185 +62,6 @@ variable (F : G → M)
     F (a * b) = F a + F b)
 include hF
 
-omit h5 in
-theorem F_one : F 1 = 0 := addMapG_one hF
-
-theorem B_mul_left {a a' x : G} (h : ⁅a, x⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 3)
-    (h' : ⁅a', x⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 3) : F ⁅a * a', x⁆ = F ⁅a, x⁆ + F ⁅a', x⁆ := by
-  rw [comm_mul_left, conj_central h5 h', hF _ h' _ h, add_comm]
-
-theorem B_mul_right {a x x' : G} (h : ⁅a, x⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 3)
-    (h' : ⁅a, x'⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 3) : F ⁅a, x * x'⁆ = F ⁅a, x⁆ + F ⁅a, x'⁆ := by
-  rw [comm_mul_right, conj_central h5 h', hF _ h _ h']
-
-omit h5 in
-theorem B_of_eq_one {a x : G} (h : ⁅a, x⁆ = 1) : F ⁅a, x⁆ = 0 := by
-  rw [h, F_one F hF]
-
-/-- `u ↦ F ⁅u, x⁆` is additive on `γ₃`. -/
-theorem addL2x (x : G) : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 2, ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 2,
-    F ⁅a * b, x⁆ = F ⁅a, x⁆ + F ⁅b, x⁆ := fun _ ha _ hb =>
-  B_mul_left h5 F hF (commutator_mem_lcs (by norm_num) ha (mem_lcs_zero x))
-    (commutator_mem_lcs (by norm_num) hb (mem_lcs_zero x))
-
-/-- `z ↦ F ⁅z, x⁆` is additive on `γ₂` for `x ∈ γ₂`. -/
-theorem addL1z {x : G} (hx : x ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
-    ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 1,
-      F ⁅a * b, x⁆ = F ⁅a, x⁆ + F ⁅b, x⁆ := fun _ ha _ hb =>
-  B_mul_left h5 F hF (commutator_mem_lcs (by norm_num) ha hx) (commutator_mem_lcs (by norm_num) hb hx)
-
-/-- `y ↦ F ⁅u, y⁆` is additive on `G` for `u ∈ γ₃`. -/
-theorem addRight2 {u : G} (hu : u ∈ (⊤ : Subgroup G).lowerCentralSeries 2) :
-    ∀ a ∈ (⊤ : Subgroup G), ∀ b ∈ (⊤ : Subgroup G), F ⁅u, a * b⁆ = F ⁅u, a⁆ + F ⁅u, b⁆ :=
-  fun a _ b _ => B_mul_right h5 F hF (commutator_mem_lcs (by norm_num) hu (mem_lcs_zero a))
-    (commutator_mem_lcs (by norm_num) hu (mem_lcs_zero b))
-
-/-- `y ↦ F ⁅z, y⁆` is additive on `γ₂` for `z ∈ γ₂`. -/
-theorem addRight1 {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
-    ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 1,
-      F ⁅z, a * b⁆ = F ⁅z, a⁆ + F ⁅z, b⁆ := fun _ ha _ hb =>
-  B_mul_right h5 F hF (commutator_mem_lcs (by norm_num) hz ha) (commutator_mem_lcs (by norm_num) hz hb)
-
-theorem B_L3 {s : G} (hs : s ∈ (⊤ : Subgroup G).lowerCentralSeries 3) (x : G) : F ⁅s, x⁆ = 0 :=
-  B_of_eq_one F hF (comm_eq_one h5 (by norm_num) hs (mem_lcs_zero x))
-
-theorem B_L2_L1 {s z : G} (hs : s ∈ (⊤ : Subgroup G).lowerCentralSeries 2) (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
-    F ⁅s, z⁆ = 0 :=
-  B_of_eq_one F hF (comm_eq_one h5 (by norm_num) hs hz)
-
-theorem B_L1_L2 {z s : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (hs : s ∈ (⊤ : Subgroup G).lowerCentralSeries 2) :
-    F ⁅z, s⁆ = 0 :=
-  B_of_eq_one F hF (comm_eq_one h5 (by norm_num) hz hs)
-
-theorem B_conj_L2 {u : G} (hu : u ∈ (⊤ : Subgroup G).lowerCentralSeries 2) (g x : G) :
-    F ⁅g * u * g⁻¹, x⁆ = F ⁅u, x⁆ := by
-  have hgu : ⁅g, u⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := commutator_mem_lcs (by norm_num) (mem_lcs_zero g) hu
-  rw [conj_eq_comm_mul, addL2x h5 F hF x _ (lcs_mem_of_le (by norm_num) hgu) _ hu,
-    B_L3 h5 F hF hgu, zero_add]
-
-theorem B_conj_L2' {u : G} (hu : u ∈ (⊤ : Subgroup G).lowerCentralSeries 2) (g x : G) :
-    F ⁅g⁻¹ * u * g, x⁆ = F ⁅u, x⁆ := by
-  have := B_conj_L2 h5 F hF hu g⁻¹ x
-  rwa [inv_inv] at this
-
-theorem B_conj_L1 {v z : G} (hv : v ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
-    (g : G) : F ⁅g * v * g⁻¹, z⁆ = F ⁅v, z⁆ := by
-  have hgv : ⁅g, v⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := commutator_mem_lcs (by norm_num) (mem_lcs_zero g) hv
-  rw [conj_eq_comm_mul, addL1z h5 F hF hz _ (lcs_mem_of_le (by norm_num) hgv) _ hv,
-    B_L2_L1 h5 F hF hgv hz, zero_add]
-
-/-- `x ↦ F ⁅⁅x, y⁆, z⁆` is additive on `G` for `z ∈ γ₂`. -/
-theorem J_left (y : G) {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
-    ∀ a ∈ (⊤ : Subgroup G), ∀ b ∈ (⊤ : Subgroup G),
-      F ⁅⁅a * b, y⁆, z⁆ = F ⁅⁅a, y⁆, z⁆ + F ⁅⁅b, y⁆, z⁆ := by
-  intro a _ b _
-  have ha : ⁅a, y⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := commutator_mem_lcs_one a y
-  have hb : ⁅b, y⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := commutator_mem_lcs_one b y
-  rw [comm_mul_left, addL1z h5 F hF hz _ (conj_mem_lcs 1 hb a) _ ha, B_conj_L1 h5 F hF hb hz,
-    add_comm]
-
-/-- `y ↦ F ⁅⁅x, y⁆, z⁆` is additive on `G` for `z ∈ γ₂`. -/
-theorem J_right (x : G) {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
-    ∀ a ∈ (⊤ : Subgroup G), ∀ b ∈ (⊤ : Subgroup G),
-      F ⁅⁅x, a * b⁆, z⁆ = F ⁅⁅x, a⁆, z⁆ + F ⁅⁅x, b⁆, z⁆ := by
-  intro a _ b _
-  have ha : ⁅x, a⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := commutator_mem_lcs_one x a
-  have hb : ⁅x, b⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := commutator_mem_lcs_one x b
-  rw [comm_mul_right, addL1z h5 F hF hz _ ha _ (conj_mem_lcs 1 hb a), B_conj_L1 h5 F hF hb hz]
-
-/-- `x ↦ F ⁅⁅z, x⁆, y⁆` is additive on `G` for `z ∈ γ₂`. -/
-theorem K_right {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (y : G) :
-    ∀ a ∈ (⊤ : Subgroup G), ∀ b ∈ (⊤ : Subgroup G),
-      F ⁅⁅z, a * b⁆, y⁆ = F ⁅⁅z, a⁆, y⁆ + F ⁅⁅z, b⁆, y⁆ := by
-  intro a _ b _
-  have ha : ⁅z, a⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := commutator_mem_lcs (by norm_num) hz (mem_lcs_zero a)
-  have hb : ⁅z, b⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := commutator_mem_lcs (by norm_num) hz (mem_lcs_zero b)
-  rw [comm_mul_right, addL2x h5 F hF y _ ha _ (conj_mem_lcs 2 hb a), B_conj_L2 h5 F hF hb]
-
-/-- `z ↦ F ⁅⁅y, z⁆, x⁆` is additive on `γ₂`. -/
-theorem K_mid (y x : G) :
-    ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 1,
-      F ⁅⁅y, a * b⁆, x⁆ = F ⁅⁅y, a⁆, x⁆ + F ⁅⁅y, b⁆, x⁆ := by
-  intro a ha b hb
-  have ha' : ⁅y, a⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := commutator_mem_lcs (by norm_num) (mem_lcs_zero y) ha
-  have hb' : ⁅y, b⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := commutator_mem_lcs (by norm_num) (mem_lcs_zero y) hb
-  rw [comm_mul_right, addL2x h5 F hF x _ ha' _ (conj_mem_lcs 2 hb' a), B_conj_L2 h5 F hF hb']
-
-/-- `a ↦ F ⁅⁅a, z⁆, e⁆` is additive on `γ₂`. -/
-theorem R_add (z e : G) :
-    ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 1,
-      F ⁅⁅a * b, z⁆, e⁆ = F ⁅⁅a, z⁆, e⁆ + F ⁅⁅b, z⁆, e⁆ := by
-  intro a ha b hb
-  have ha' : ⁅a, z⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := commutator_mem_lcs (by norm_num) ha (mem_lcs_zero z)
-  have hb' : ⁅b, z⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := commutator_mem_lcs (by norm_num) hb (mem_lcs_zero z)
-  rw [comm_mul_left, addL2x h5 F hF e _ (conj_mem_lcs 2 hb' a) _ ha', B_conj_L2 h5 F hF hb',
-    add_comm]
-
-theorem R_zero {s : G} (hs : s ∈ (⊤ : Subgroup G).lowerCentralSeries 2) (z e : G) : F ⁅⁅s, z⁆, e⁆ = 0 :=
-  B_L3 h5 F hF (commutator_mem_lcs (by norm_num) hs (mem_lcs_zero z)) e
-
-theorem R_conj {v : G} (hv : v ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (g z e : G) :
-    F ⁅⁅g * v * g⁻¹, z⁆, e⁆ = F ⁅⁅v, z⁆, e⁆ := by
-  have hgv : ⁅g, v⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := commutator_mem_lcs (by norm_num) (mem_lcs_zero g) hv
-  rw [conj_eq_comm_mul, R_add h5 F hF z e _ (lcs_mem_of_le (by norm_num) hgv) _ hv,
-    R_zero h5 F hF hgv, zero_add]
-
-/-- `x ↦ F ⁅⁅⁅x, y⁆, z⁆, e⁆` is additive. -/
-theorem Q_left (y z e : G) : ∀ a ∈ (⊤ : Subgroup G), ∀ b ∈ (⊤ : Subgroup G),
-    F ⁅⁅⁅a * b, y⁆, z⁆, e⁆ = F ⁅⁅⁅a, y⁆, z⁆, e⁆ + F ⁅⁅⁅b, y⁆, z⁆, e⁆ := by
-  intro a _ b _
-  have ha : ⁅a, y⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := commutator_mem_lcs_one a y
-  have hb : ⁅b, y⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := commutator_mem_lcs_one b y
-  rw [comm_mul_left, R_add h5 F hF z e _ (conj_mem_lcs 1 hb a) _ ha, R_conj h5 F hF hb,
-    add_comm]
-
-/-- `y ↦ F ⁅⁅⁅x, y⁆, z⁆, e⁆` is additive. -/
-theorem Q_mid (x z e : G) : ∀ a ∈ (⊤ : Subgroup G), ∀ b ∈ (⊤ : Subgroup G),
-    F ⁅⁅⁅x, a * b⁆, z⁆, e⁆ = F ⁅⁅⁅x, a⁆, z⁆, e⁆ + F ⁅⁅⁅x, b⁆, z⁆, e⁆ := by
-  intro a _ b _
-  have ha : ⁅x, a⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := commutator_mem_lcs_one x a
-  have hb : ⁅x, b⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := commutator_mem_lcs_one x b
-  rw [comm_mul_right, R_add h5 F hF z e _ ha _ (conj_mem_lcs 1 hb a), R_conj h5 F hF hb]
-
-/-- `z ↦ F ⁅⁅⁅x, y⁆, z⁆, e⁆` is additive. -/
-theorem Q_right (x y e : G) : ∀ a ∈ (⊤ : Subgroup G), ∀ b ∈ (⊤ : Subgroup G),
-    F ⁅⁅⁅x, y⁆, a * b⁆, e⁆ = F ⁅⁅⁅x, y⁆, a⁆, e⁆ + F ⁅⁅⁅x, y⁆, b⁆, e⁆ := by
-  intro a _ b _
-  have hv : ⁅x, y⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := commutator_mem_lcs_one x y
-  have ha : ⁅⁅x, y⁆, a⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := commutator_mem_lcs (by norm_num) hv (mem_lcs_zero a)
-  have hb : ⁅⁅x, y⁆, b⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := commutator_mem_lcs (by norm_num) hv (mem_lcs_zero b)
-  rw [comm_mul_right, addL2x h5 F hF e _ ha _ (conj_mem_lcs 2 hb a), B_conj_L2 h5 F hF hb]
-
-/-- **Jacobi identity in degree 4**: `[[x,y],z] + [[z,x],y] + [[y,z],x] = 0` in `L₄` for
-`z ∈ γ₂`, read through `F`. -/
-theorem jacobi4 (x y : G) {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
-    F ⁅⁅x, y⁆, z⁆ + F ⁅⁅z, x⁆, y⁆ + F ⁅⁅y, z⁆, x⁆ = 0 := by
-  have hxy : ⁅x, y⁻¹⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := commutator_mem_lcs_one x _
-  have hzx : ⁅z, x⁻¹⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := commutator_mem_lcs (by norm_num) hz (mem_lcs_zero _)
-  have hyz : ⁅y, z⁻¹⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := commutator_mem_lcs (by norm_num) (mem_lcs_zero y) (inv_mem hz)
-  have h0 : ⁅⁅x, y⁻¹⁆, z⁻¹⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := commutator_mem_lcs (by norm_num) hxy (inv_mem hz)
-  have h2 : ⁅⁅z, x⁻¹⁆, y⁻¹⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := commutator_mem_lcs (by norm_num) hzx (mem_lcs_zero _)
-  have h1 : ⁅⁅y, z⁻¹⁆, x⁻¹⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := commutator_mem_lcs (by norm_num) hyz (mem_lcs_zero _)
-  have hw := hall_witt x y z
-  rw [conj_central' h5 h0, conj_central' h5 h2, conj_central' h5 h1] at hw
-  have hs := congrArg F hw
-  rw [hF _ (mul_mem h0 h2) _ h1, hF _ h0 _ h2, F_one F hF] at hs
-  -- the three terms, with the inverses removed
-  have e0a : F ⁅⁅x, y⁻¹⁆, z⁻¹⁆ = -F ⁅⁅x, y⁻¹⁆, z⁆ :=
-    addMapG_inv (A := fun b => F ⁅⁅x, y⁻¹⁆, b⁆) (addRight1 h5 F hF hxy) hz
-  have e0b : F ⁅⁅x, y⁻¹⁆, z⁆ = -F ⁅⁅x, y⁆, z⁆ :=
-    addMapG_inv (A := fun b => F ⁅⁅x, b⁆, z⁆) (J_right h5 F hF x hz) (mem_lcs_zero y)
-  have e2a : F ⁅⁅z, x⁻¹⁆, y⁻¹⁆ = -F ⁅⁅z, x⁻¹⁆, y⁆ :=
-    addMapG_inv (A := fun b => F ⁅⁅z, x⁻¹⁆, b⁆) (addRight2 h5 F hF hzx) (mem_lcs_zero y)
-  have e2b : F ⁅⁅z, x⁻¹⁆, y⁆ = -F ⁅⁅z, x⁆, y⁆ :=
-    addMapG_inv (A := fun b => F ⁅⁅z, b⁆, y⁆) (K_right h5 F hF hz y) (mem_lcs_zero x)
-  have e1a : F ⁅⁅y, z⁻¹⁆, x⁻¹⁆ = -F ⁅⁅y, z⁻¹⁆, x⁆ :=
-    addMapG_inv (A := fun b => F ⁅⁅y, z⁻¹⁆, b⁆) (addRight2 h5 F hF hyz) (mem_lcs_zero x)
-  have e1b : F ⁅⁅y, z⁻¹⁆, x⁆ = -F ⁅⁅y, z⁆, x⁆ :=
-    addMapG_inv (A := fun b => F ⁅⁅y, b⁆, x⁆) (K_mid h5 F hF y x) hz
-  rw [e0a, e0b, e2a, e2b, e1a, e1b] at hs
-  simpa only [neg_neg] using hs
-
 omit h5 hF in
 /-- Expansion of a uniqueness-basis product through a map additive on `K` and zero on `N`. -/
 theorem addMap_oprod_expandM {K N : Subgroup G} (hNK : N ≤ K) {F : G → M}
@@ -246,23 +70,6 @@ theorem addMap_oprod_expandM {K N : Subgroup G} (hNK : N ≤ K) {F : G → M}
     (hv : (oprod x a)⁻¹ * v ∈ N) : F v = ∑ i, a i • F (x i) := by
   have e : v = oprod x a * ((oprod x a)⁻¹ * v) := (mul_inv_cancel_left _ _).symm
   rw [e, hF _ (oprod_mem hx a) _ (hNK hv), hF0 _ hv, add_zero, addMapG_oprod hF hx]
-
-omit h5 hF in
-/-- An additive map vanishing on elementary commutators vanishes on the commutator subgroup. -/
-theorem addMap_vanishM {N H K : Subgroup G} (hle : ⁅H, K⁆ ≤ N) {F : G → M}
-    (hF : ∀ a ∈ N, ∀ b ∈ N, F (a * b) = F a + F b)
-    (hgen : ∀ h ∈ H, ∀ k ∈ K, F ⁅h, k⁆ = 0) : ∀ a ∈ ⁅H, K⁆, F a = 0 := by
-  intro a ha
-  suffices h : a ∈ N ∧ F a = 0 from h.2
-  rw [Subgroup.commutator_def] at ha
-  induction ha using closure_induction with
-  | mem x hx =>
-    obtain ⟨u, hu, g, hg, rfl⟩ := hx
-    exact ⟨hle (commutator_mem_commutator hu hg), hgen u hu g hg⟩
-  | one => exact ⟨one_mem _, addMapG_one hF⟩
-  | mul x y _ _ hx hy =>
-    exact ⟨mul_mem hx.1 hy.1, by rw [hF x hx.1 y hy.1, hx.2, hy.2, add_zero]⟩
-  | inv x _ hx => exact ⟨inv_mem hx.1, by rw [addMapG_inv hF hx.1, hx.2, neg_zero]⟩
 
 /-- Skew-symmetry of a degree-four commutator read through `F`. -/
 theorem B_swap {a b : G} (hab : ⁅a, b⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 3) :
@@ -384,49 +191,6 @@ theorem tc_inv_right_L1 {c a : G} (hc : c ∈ (⊤ : Subgroup G).lowerCentralSer
   rw [h1] at h
   exact (inv_eq_of_mul_eq_one_right h.symm).symm
 
-/-- (F0), linearity in the right argument for a commutator already in `γ₃`. -/
-theorem tc_pow_right_L2 {c : G} (hc : c ∈ (⊤ : Subgroup G).lowerCentralSeries 2)
-    (x : G) (n : ℕ) : tc c (x ^ n) = tc c x ^ n := by
-  induction n with
-  | zero => simp [tc]
-  | succ n ih =>
-    have hz : tc c (x ^ n) ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
-      tc_mem (by omega) hc (mem_lcs_zero (x ^ n))
-    have hconj : x⁻¹ * tc c (x ^ n) * x = tc c (x ^ n) := by
-      rw [mul_assoc, ← central_L3 S.h5 hz x]; group
-    rw [pow_succ, tc_mul_right, hconj, ih, ← pow_succ']
-
-/-- (K3): for `a ∈ γ₂`, `[a, xⁿ] = [a,x]ⁿ [a,x,x]^C(n,2)`. -/
-theorem tc_pow_right_K3 {a : G} (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
-    (x : G) (n : ℕ) :
-    tc a (x ^ n) = tc a x ^ n * tc (tc a x) x ^ (n.choose 2) := by
-  obtain ⟨c, hc⟩ : ∃ c, c = tc a x := ⟨_, rfl⟩
-  obtain ⟨f, hf⟩ : ∃ f, f = tc c x := ⟨_, rfl⟩
-  rw [← hc, ← hf]
-  have hc2 : c ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
-    hc ▸ tc_mem (by omega) ha (mem_lcs_zero x)
-  have hf3 : f ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
-    hf ▸ tc_mem (by omega) hc2 (mem_lcs_zero x)
-  have hcf : Commute c f := commutatorElement_eq_one_iff_mul_comm.mp
-    (comm_eq_one S.h5 (by norm_num) hc2 hf3)
-  have hc' : x⁻¹ * c * x = c * f := by rw [hf, tc]; group
-  have hf' : x⁻¹ * f * x = f := by
-    rw [mul_assoc, ← central_L3 S.h5 hf3 x]; group
-  have hconj : ∀ (b : G) (k : ℕ), x⁻¹ * b ^ k * x = (x⁻¹ * b * x) ^ k := fun b k => by
-    simpa using (conj_pow (a := x⁻¹) (b := b) (i := k)).symm
-  have hm : ∀ p q : G, x⁻¹ * (p * q) * x = (x⁻¹ * p * x) * (x⁻¹ * q * x) := fun p q => by
-    group
-  induction n with
-  | zero => simp [tc]
-  | succ n ih =>
-    have e : tc a (x ^ (n + 1)) = c * (x⁻¹ * tc a (x ^ n) * x) := by
-      rw [pow_succ, tc_mul_right, hc]
-    have e2 : (n + 1).choose 2 = n + n.choose 2 := by
-      rw [show (2 : ℕ) = 1 + 1 from rfl, Nat.choose_succ_succ', Nat.choose_one_right]
-    rw [e, ih, hm, hconj, hconj, hc', hf', hcf.mul_pow, e2, pow_succ, pow_add]
-    calc c * (c ^ n * f ^ n * f ^ n.choose 2)
-        = c ^ n * c * (f ^ n * f ^ n.choose 2) := by group
-
 /-- (K4), with the power in the middle argument. -/
 theorem triple_pow_mid {a x : G} (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
     (y : G) {n : ℕ} (hx : x ^ n ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
@@ -438,7 +202,7 @@ theorem triple_pow_mid {a x : G} (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeri
   have hz : tc a (x ^ n) ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
     tc_mem (i := 1) (j := 1) (by omega) ha hx
   have h1 : tc (tc a (x ^ n)) y = 1 := tc_L3 S.h5 hz y
-  rw [S.tc_pow_right_K3 ha x n,
+  rw [Star.tc_pow_right_K3 ha S.h5 x n,
     tc_mul_left_L1 S.h5 (lcs_mem_of_le (by norm_num) (pow_mem hc2 n))
       (lcs_mem_of_le (by norm_num) (pow_mem hf3 (n.choose 2))),
     tc_pow_left_L1 S.h5 (lcs_mem_of_le (by norm_num) hc2),
@@ -454,7 +218,7 @@ theorem triple_pow_last {a x y : G} (ha : a ∈ (⊤ : Subgroup G).lowerCentralS
   have hz : tc (tc a x) (y ^ n) ∈ (⊤ : Subgroup G).lowerCentralSeries 4 :=
     tc_mem (i := 2) (j := 1) (by omega) hc2 hy
   have h1 : tc (tc a x) (y ^ n) = 1 := by rwa [S.h5, mem_bot] at hz
-  rwa [S.tc_pow_right_L2 hc2 y n] at h1
+  rwa [Star.tc_pow_right_L2 hc2 S.h5 y n] at h1
 
 /-- Left inverses in the first argument of a class-four commutator. -/
 theorem tc_inv_left_L1 {c : G} (hc : c ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (x : G) :
@@ -814,7 +578,7 @@ theorem omega_three (a : G) (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
     norm_num at h
     exact h
   have hself (i : Fin T.s) : F0 ⁅z, ⁅X i, X i⁆⁆ = 0 := by
-    rw [commutatorElement_self, commutatorElement_one_right, GenericMaps.F_one F0 hF]
+    rw [commutatorElement_self, commutatorElement_one_right, ClassFour.F_one F0 hF]
   have hbase (i j : Fin T.s) : F0 ⁅z, ⁅X i, X j⁆⁆ = 0 := by
     rcases S.hall i with hi | hi | hi
     · subst i
@@ -861,11 +625,11 @@ theorem omega_three (a : G) (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
       exact hβ
     have hzero (u v : G) (hu : u ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
         F0 ⁅z, ⁅u, v⁆⁆ = 0 :=
-      GenericMaps.B_L1_L2 S.h5 F0 hF hz
+      ClassFour.B_L1_L2 S.h5 F0 hF hz
         (commutator_mem_lcs (i := 1) (j := 0) (n := 2) (by omega) hu (mem_lcs_zero v))
     have hzeroR (u v : G) (hv : v ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
         F0 ⁅z, ⁅u, v⁆⁆ = 0 :=
-      GenericMaps.B_L1_L2 S.h5 F0 hF hz
+      ClassFour.B_L1_L2 S.h5 F0 hF hz
         (commutator_mem_lcs (i := 0) (j := 1) (n := 2) (by omega) (mem_lcs_zero u) hv)
     have eg : F0 ⁅z, ⁅g, h⁆⁆ = ∑ i, (-α i) • F0 ⁅z, ⁅X i, h⁆⁆ := by
       simpa only [] using (GenericMaps.addMap_oprod_expandM
@@ -886,10 +650,10 @@ theorem omega_three (a : G) (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
     simp only [S.sum_three, hbase, smul_zero, add_zero, zero_add]
   rw [tc_eq]
   change F0 ⁅z, a⁻¹⁆ = 0
-  exact GenericMaps.addMap_vanishM
+  exact ClassFour.addMap_vanish
     (N := (⊤ : Subgroup G).lowerCentralSeries 1) (H := ⊤) (K := ⊤)
-    (F := fun u => F0 ⁅z, u⁆)
-    (hle := le_rfl) (hF := GenericMaps.addRight1 S.h5 F0 hF hz) (hgen := hgen)
+    (A := fun u => F0 ⁅z, u⁆)
+    (hle := le_rfl) (hA := ClassFour.addRight1 S.h5 F0 hF hz) (hgen := hgen)
     (a := a⁻¹) (inv_mem ha)
 
 /-- The reverse orientation of `omega_three`. -/
@@ -1000,7 +764,7 @@ theorem delta_reduced (x y : G) :
       tc_mem (i := 1) (j := 0) (n := 2) (by omega) hc (mem_lcs_zero _)
     have hgz : tc (tc (tc x y) z) z ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
       tc_mem (i := 2) (j := 0) (n := 3) (by omega) hfz (mem_lcs_zero _)
-    have e := congrArg A (S.tc_pow_right_K3 hc z 9)
+    have e := congrArg A (Star.tc_pow_right_K3 hc S.h5 z 9)
     norm_num [Nat.choose] at e
     rw [hA _ (pow_mem hfz 9) _ (lcs_mem_of_le (by norm_num) (pow_mem hgz 36)),
       addMapG_pow hA hfz, addMapG_pow hA (lcs_mem_of_le (by norm_num) hgz)] at e
@@ -1176,7 +940,7 @@ theorem T2_eq : Star.T2 T τ A = 0 := by
     have hnine : (9 : ℤ) • A (tc (tc (T.x₁ i₀) (T.x₁ h)) (T.x₁ h)) =
         A (tc (tc (T.x₁ i₀) (T.x₁ h)) (T.x₁ h ^ 9)) -
           (36 : ℤ) • A (tc (tc (tc (T.x₁ i₀) (T.x₁ h)) (T.x₁ h)) (T.x₁ h)) := by
-      have e := congrArg A (S.tc_pow_right_K3 hc (T.x₁ h) 9)
+      have e := congrArg A (Star.tc_pow_right_K3 hc S.h5 (T.x₁ h) 9)
       norm_num [Nat.choose] at e
       rw [hA _ (pow_mem htri 9) _ (lcs_mem_of_le (by norm_num) (pow_mem htriple 36)),
         addMapG_pow hA htri, addMapG_pow hA (lcs_mem_of_le (by norm_num) htriple)] at e
@@ -1216,7 +980,7 @@ theorem T2_eq : Star.T2 T τ A = 0 := by
     have hnine : (9 : ℤ) • A (tc (tc (T.x₁ i₁) (T.x₁ i₂)) (T.x₁ i₂)) =
         A (tc (tc (T.x₁ i₁) (T.x₁ i₂)) (T.x₁ i₂ ^ 9)) -
           (36 : ℤ) • A (tc (tc (tc (T.x₁ i₁) (T.x₁ i₂)) (T.x₁ i₂)) (T.x₁ i₂)) := by
-      have e := congrArg A (S.tc_pow_right_K3 hc (T.x₁ i₂) 9)
+      have e := congrArg A (Star.tc_pow_right_K3 hc S.h5 (T.x₁ i₂) 9)
       norm_num [Nat.choose] at e
       rw [hA _ (pow_mem htri 9) _ (lcs_mem_of_le (by norm_num) (pow_mem htriple 36)),
         addMapG_pow hA htri, addMapG_pow hA (lcs_mem_of_le (by norm_num) htriple)] at e
@@ -1314,7 +1078,7 @@ theorem T3_eq : Star.T3 T τ A = 0 := by
             rw [tc_inv (T.x₁ i₂ ^ T.d i₂) (T.x₁ i₁), tc_eq (T.x₁ i₁) (T.x₁ i₂ ^ T.d i₂)]
         _ = A (tc (tc (T.x₁ i₂ ^ T.d i₂) (T.x₁ i₁)) (T.x₁ i₂)) := by
           rw [tc_eq (tc (T.x₁ i₂ ^ T.d i₂) (T.x₁ i₁)) (T.x₁ i₂)]
-    have hJ := GenericMaps.jacobi4 S.h5 A hF (T.x₁ i₂)⁻¹ (T.x₁ i₁)⁻¹
+    have hJ := ClassFour.jacobi4 S.h5 A hF (T.x₁ i₂)⁻¹ (T.x₁ i₁)⁻¹
       (z := (T.x₁ i₂ ^ T.d i₂)⁻¹) (inv_mem (S.Y1 i₂))
     rw [hU, hV, hW, add_zero] at hJ
     have hAB : A (tc (tc (T.x₁ i₂ ^ T.d i₂) (T.x₁ i₁)) (T.x₁ i₂)) =

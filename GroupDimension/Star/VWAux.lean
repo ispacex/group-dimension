@@ -8,7 +8,8 @@ public import GroupDimension.Star.Defs
 # Auxiliary exact identities for Lemmas 2 and 3 of `(⋆)`
 
 These are variants of the identities in `G4Cube.lean`, without any condition on the exponent of
-`γ₄`. In particular, K5 is obtained from `ClassFour.jacobi4`, not from a mod-3 argument.
+`γ₄`. In particular, K5 is obtained from `ClassFour.jacobi4` (for maps into any abelian group),
+not from a mod-3 argument.
 -/
 
 namespace GroupDimension
@@ -280,121 +281,7 @@ theorem map_jacobi_vw (h5 : (⊤ : Subgroup G).lowerCentralSeries 4 = ⊥)
       ∀ v ∈ (⊤ : Subgroup G).lowerCentralSeries 3, A (u * v) = A u + A v := by
     intro u hu v hv
     exact hA u (h32 hu) v (h32 hv)
-  have B_mul_left : ∀ {a a' u : G}, ⁅a, u⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 3 →
-      ⁅a', u⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 3 →
-      A ⁅a * a', u⁆ = A ⁅a, u⁆ + A ⁅a', u⁆ := by
-    intro a a' u h h'
-    rw [comm_mul_left, conj_central h5 h', hF _ h' _ h, add_comm]
-  have B_mul_right : ∀ {a u u' : G}, ⁅a, u⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 3 →
-      ⁅a, u'⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 3 →
-      A ⁅a, u * u'⁆ = A ⁅a, u⁆ + A ⁅a, u'⁆ := by
-    intro a u u' h h'
-    rw [comm_mul_right, conj_central h5 h', hF _ h _ h']
-  have addL2x : ∀ u : G, ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 2,
-      ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 2,
-      A ⁅a * b, u⁆ = A ⁅a, u⁆ + A ⁅b, u⁆ := by
-    intro u a ha b hb
-    exact B_mul_left (commutator_mem_lcs (by norm_num) ha (mem_lcs_zero u))
-      (commutator_mem_lcs (by norm_num) hb (mem_lcs_zero u))
-  have addL1z : ∀ {z : G}, z ∈ (⊤ : Subgroup G).lowerCentralSeries 1 →
-      ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 1,
-      A ⁅a * b, z⁆ = A ⁅a, z⁆ + A ⁅b, z⁆ := by
-    intro z hz a ha b hb
-    exact B_mul_left (commutator_mem_lcs (by norm_num) ha hz)
-      (commutator_mem_lcs (by norm_num) hb hz)
-  have B_L3 : ∀ {s : G}, s ∈ (⊤ : Subgroup G).lowerCentralSeries 3 → ∀ u : G, A ⁅s, u⁆ = 0 := by
-    intro s hs u
-    rw [comm_eq_one h5 (by norm_num) hs (mem_lcs_zero u), addMapG_one hA]
-  have B_L2_L1 : ∀ {s z : G}, s ∈ (⊤ : Subgroup G).lowerCentralSeries 2 →
-      z ∈ (⊤ : Subgroup G).lowerCentralSeries 1 → A ⁅s, z⁆ = 0 := by
-    intro s z hs hz
-    rw [comm_eq_one h5 (by norm_num) hs hz, addMapG_one hA]
-  have B_conj_L2 : ∀ {u : G}, u ∈ (⊤ : Subgroup G).lowerCentralSeries 2 →
-      ∀ g x : G, A ⁅g * u * g⁻¹, x⁆ = A ⁅u, x⁆ := by
-    intro u hu g x
-    have hgu : ⁅g, u⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
-      commutator_mem_lcs (by norm_num) (mem_lcs_zero g) hu
-    rw [conj_eq_comm_mul, addL2x x _ (lcs_mem_of_le (by norm_num) hgu) _ hu,
-      B_L3 hgu, zero_add]
-  have B_conj_L1 : ∀ {v z : G}, v ∈ (⊤ : Subgroup G).lowerCentralSeries 1 →
-      z ∈ (⊤ : Subgroup G).lowerCentralSeries 1 → ∀ g : G,
-      A ⁅g * v * g⁻¹, z⁆ = A ⁅v, z⁆ := by
-    intro v z hv hz g
-    have hgv : ⁅g, v⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
-      commutator_mem_lcs (by norm_num) (mem_lcs_zero g) hv
-    rw [conj_eq_comm_mul, addL1z hz _ (lcs_mem_of_le (by norm_num) hgv) _ hv,
-      B_L2_L1 hgv hz, zero_add]
-  have addRight1 : ∀ {z : G}, z ∈ (⊤ : Subgroup G).lowerCentralSeries 1 →
-      ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 1,
-      A ⁅z, a * b⁆ = A ⁅z, a⁆ + A ⁅z, b⁆ := by
-    intro z hz a ha b hb
-    exact B_mul_right (commutator_mem_lcs (by norm_num) hz ha)
-      (commutator_mem_lcs (by norm_num) hz hb)
-  have addRight2 : ∀ {u : G}, u ∈ (⊤ : Subgroup G).lowerCentralSeries 2 →
-      ∀ a b : G, A ⁅u, a * b⁆ = A ⁅u, a⁆ + A ⁅u, b⁆ := by
-    intro u hu a b
-    exact B_mul_right (commutator_mem_lcs (by norm_num) hu (mem_lcs_zero a))
-      (commutator_mem_lcs (by norm_num) hu (mem_lcs_zero b))
-  have J_right : ∀ (x : G) {z : G}, z ∈ (⊤ : Subgroup G).lowerCentralSeries 1 →
-      ∀ a b : G, A ⁅⁅x, a * b⁆, z⁆ = A ⁅⁅x, a⁆, z⁆ + A ⁅⁅x, b⁆, z⁆ := by
-    intro x z hz a b
-    have ha : ⁅x, a⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := commutator_mem_lcs_one x a
-    have hb : ⁅x, b⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := commutator_mem_lcs_one x b
-    rw [comm_mul_right, addL1z hz _ ha _ (conj_mem_lcs 1 hb a), B_conj_L1 hb hz]
-  have K_right : ∀ {z : G}, z ∈ (⊤ : Subgroup G).lowerCentralSeries 1 → ∀ y a b : G,
-      A ⁅⁅z, a * b⁆, y⁆ = A ⁅⁅z, a⁆, y⁆ + A ⁅⁅z, b⁆, y⁆ := by
-    intro z hz y a b
-    have ha : ⁅z, a⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
-      commutator_mem_lcs (by norm_num) hz (mem_lcs_zero a)
-    have hb : ⁅z, b⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
-      commutator_mem_lcs (by norm_num) hz (mem_lcs_zero b)
-    rw [comm_mul_right, addL2x y _ ha _ (conj_mem_lcs 2 hb a), B_conj_L2 hb]
-  have K_mid : ∀ (y x : G) {z : G}, z ∈ (⊤ : Subgroup G).lowerCentralSeries 1 →
-      ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1, ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 1,
-      A ⁅⁅y, a * b⁆, x⁆ = A ⁅⁅y, a⁆, x⁆ + A ⁅⁅y, b⁆, x⁆ := by
-    intro y x z hz a ha b hb
-    have ha' : ⁅y, a⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
-      commutator_mem_lcs (by norm_num) (mem_lcs_zero y) ha
-    have hb' : ⁅y, b⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
-      commutator_mem_lcs (by norm_num) (mem_lcs_zero y) hb
-    rw [comm_mul_right, addL2x x _ ha' _ (conj_mem_lcs 2 hb' a), B_conj_L2 hb']
-  have jacobi4v : ∀ (x y : G) {z : G}, z ∈ (⊤ : Subgroup G).lowerCentralSeries 1 →
-      A ⁅⁅x, y⁆, z⁆ + A ⁅⁅z, x⁆, y⁆ + A ⁅⁅y, z⁆, x⁆ = 0 := by
-    intro x y z hz
-    have hxy : ⁅x, y⁻¹⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := commutator_mem_lcs_one x _
-    have hzx : ⁅z, x⁻¹⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
-      commutator_mem_lcs (by norm_num) hz (mem_lcs_zero _)
-    have hyz : ⁅y, z⁻¹⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
-      commutator_mem_lcs (by norm_num) (mem_lcs_zero y) (inv_mem hz)
-    have h0 : ⁅⁅x, y⁻¹⁆, z⁻¹⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
-      commutator_mem_lcs (by norm_num) hxy (inv_mem hz)
-    have h2 : ⁅⁅z, x⁻¹⁆, y⁻¹⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
-      commutator_mem_lcs (by norm_num) hzx (mem_lcs_zero _)
-    have h1 : ⁅⁅y, z⁻¹⁆, x⁻¹⁆ ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
-      commutator_mem_lcs (by norm_num) hyz (mem_lcs_zero _)
-    have hw := hall_witt x y z
-    rw [conj_central' h5 h0, conj_central' h5 h2, conj_central' h5 h1] at hw
-    have hs := congrArg A hw
-    rw [hF _ (mul_mem h0 h2) _ h1, hF _ h0 _ h2, addMapG_one hA] at hs
-    have e0a : A ⁅⁅x, y⁻¹⁆, z⁻¹⁆ = -A ⁅⁅x, y⁻¹⁆, z⁆ :=
-      addMapG_inv (A := fun b => A ⁅⁅x, y⁻¹⁆, b⁆) (addRight1 hxy) hz
-    have e0b : A ⁅⁅x, y⁻¹⁆, z⁆ = -A ⁅⁅x, y⁆, z⁆ :=
-      addMapG_inv (A := fun b => A ⁅⁅x, b⁆, z⁆)
-        (fun a _ b _ => J_right x hz a b) (mem_lcs_zero y)
-    have e2a : A ⁅⁅z, x⁻¹⁆, y⁻¹⁆ = -A ⁅⁅z, x⁻¹⁆, y⁆ :=
-      addMapG_inv (A := fun b => A ⁅⁅z, x⁻¹⁆, b⁆)
-        (fun a _ b _ => addRight2 hzx a b) (mem_lcs_zero y)
-    have e2b : A ⁅⁅z, x⁻¹⁆, y⁆ = -A ⁅⁅z, x⁆, y⁆ :=
-      addMapG_inv (A := fun b => A ⁅⁅z, b⁆, y⁆)
-        (fun a _ b _ => K_right hz y a b) (mem_lcs_zero x)
-    have e1a : A ⁅⁅y, z⁻¹⁆, x⁻¹⁆ = -A ⁅⁅y, z⁻¹⁆, x⁆ :=
-      addMapG_inv (A := fun b => A ⁅⁅y, z⁻¹⁆, b⁆)
-        (fun a _ b _ => addRight2 hyz a b) (mem_lcs_zero x)
-    have e1b : A ⁅⁅y, z⁻¹⁆, x⁆ = -A ⁅⁅y, z⁆, x⁆ :=
-      addMapG_inv (A := fun b => A ⁅⁅y, b⁆, x⁆) (K_mid y x hz) hz
-    rw [e0a, e0b, e2a, e2b, e1a, e1b] at hs
-    simpa only [neg_neg, add_comm, add_left_comm, add_assoc] using hs
-  have hj := jacobi4v y⁻¹ x⁻¹ (inv_mem ha)
+  have hj := ClassFour.jacobi4 h5 A hF y⁻¹ x⁻¹ (inv_mem ha)
   have hfirst : A ⁅⁅y⁻¹, x⁻¹⁆, a⁻¹⁆ = A (tc (tc x y) a) := by
     simp only [tc_eq, commutatorElement_def]
     group
