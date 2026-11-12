@@ -815,7 +815,7 @@ theorem GuptaTaharaMetabelian.three (h : GuptaTaharaMetabelian) : GuptaTaharaMet
   fun G _ _ hG hd => h 3 Nat.prime_three (by norm_num) G hG hd
 
 /-- **Gupta–Tahara at `p = 3`**, proved (MATH-445). -/
-@[d5 "thm:gt3" "ext:guptatahara"]
+@[d5 "thm:gt3", d5 "ext:guptatahara"]
 theorem guptaTaharaMetabelian_three : GuptaTaharaMetabelianThree := by
   intro G _ _ hG hd
   refine D_five_eq_gamma_five_of_metabelian (p := 3) (by norm_num) G inferInstance
