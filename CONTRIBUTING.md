@@ -22,8 +22,12 @@ node (`GroupDimension/D5Tag.lean`), e.g.
 theorem D_five_eq_gamma_five_g4_cube ...
 ```
 
-which adds a link to the blueprint entry to the docstring. `#d5_tags` lists all tagged
-declarations (`lake env lean D5Tags.lean`). The attribute does not replace the blueprint: the CI of
+The attribute also takes a permanent tag `D5:XXXX` (four characters, digits and capital letters
+without `I` and `O`; wiki 912 of the project's tracker), written without the prefix: `@[d5 000P]`,
+and an optional comment, `@[d5 000P "part (a)"]`; the declarations will move from labels to tags
+once the tags are registered in `blueprint.toml`. A declaration may carry several:
+`@[d5 "thm:gt3", d5 "ext:guptatahara"]`. `#d5_tags` lists all of them, one JSON object per line
+(`lake env lean D5Tags.lean`). The attribute does not replace the blueprint: the CI of
 dimension-subrings (`.github/workflows/blueprint.yml`) fails unless the tagged (label, declaration)
 pairs are exactly those of `blueprint.toml`. A new declaration for a node is added in both places,
 in two pull requests: here (with the tag), then the node and the bump of `groups/` there.

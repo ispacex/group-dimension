@@ -103,42 +103,32 @@ end Lean.PrettyPrinter
 
 namespace GroupDimension.D5Tag
 
-/-- The key of `@[d5 ...]`: a permanent tag (`000P`) or a label of the paper (`"thm:g4cube"`). -/
-declare_syntax_cat d5Key
-/-- A permanent tag `D5:XXXX`, written without the prefix. -/
-syntax d5TagParser : d5Key
-/-- A label of the paper, a key of the nodes of `site/blueprint.toml`. -/
-syntax str : d5Key
-
 /-- `@[d5 000P]`, `@[d5 "thm:g4cube"]`, with an optional comment: `@[d5 000P "part (a)"]`. The
-statement of the D₅ paper that the declaration states or proves; see the module docstring. -/
-syntax (name := d5) "d5" d5Key (ppSpace str)? : attr
+statement of the D₅ paper that the declaration states or proves (a permanent tag `D5:XXXX` written
+without the prefix, or a label of the paper); see the module docstring. -/
+syntax (name := d5) "d5" (d5TagParser <|> str) (ppSpace str)? : attr
 
 /-- The key as stored: `D5:000P` for a tag, the label as written for a label. -/
-def keyOf (stx : TSyntax `d5Key) : CoreM String := do
-  match stx with
-  | `(d5Key| $s:str) =>
-    let l := s.getString
-    if l.isEmpty || l.any (fun c => c.isWhitespace || c == '"') then
-      throwError "d5: a label is a nonempty string without spaces or quotes, got {repr l}"
-    if l.startsWith "D5:" then
-      throwError "d5: write a tag without quotes and without the prefix: @[d5 {(l.drop 3).toString}]"
-    return l
-  | _ =>
-    let some t := Syntax.isLit? d5TagKind stx.raw[0] | throwError "d5: malformed tag"
+def keyOf (k : Syntax) : CoreM String := do
+  if let some t := Syntax.isLit? d5TagKind k then
     return "D5:" ++ t
+  let some l := k.isStrLit? | throwError "d5: malformed key {k}"
+  if l.isEmpty || l.any (fun c => c.isWhitespace || c == '"') then
+    throwError "d5: a label is a nonempty string without spaces or quotes, got {repr l}"
+  if l.startsWith "D5:" then
+    throwError "d5: write a tag without quotes and without the prefix: @[d5 {(l.drop 3).toString}]"
+  return l
 
 initialize registerBuiltinAttribute {
   name := `d5
-  descr := "The statement of the D₅ paper that a declaration states or proves (a label or a tag)."
+  descr := "The statement of the D₅ paper that a declaration states or proves (a tag or a label)."
   add := fun decl stx _attrKind => do
-    let (key, comment) ← match stx with
-      | `(attr| d5 $k $[$c]?) => pure (k, c)
-      | _ => throwUnsupportedSyntax
-    let key ← keyOf key
+    -- `stx` is `d5 key comment?`
+    let key ← keyOf stx[1]
+    let comment := (stx[2].getOptional?.bind (·.isStrLit?)).getD ""
     if (d5Ext.getEntries (← getEnv)).any (fun e => e.declName == decl && e.key == key) then
       throwError "d5: {key} is already on {.ofConstName decl}"
-    modifyEnv (d5Ext.addEntry · { declName := decl, key, comment := (comment.map (·.getString)).getD "" })
+    modifyEnv (d5Ext.addEntry · { declName := decl, key, comment })
   applicationTime := .beforeElaboration
 }
 

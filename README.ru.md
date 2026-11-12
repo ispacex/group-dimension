@@ -232,9 +232,10 @@ $D_5 = 1$ — проверяется в Lean по сертификатам, не
 ## Метки статьи и участие в работе
 
 Каждое объявление, которое формулирует или доказывает помеченное утверждение статьи, несёт
-`@[d5 "<метка>"]` (`GroupDimension/D5Tag.lean`), например `@[d5 "thm:g4cube"]`; в docstring тогда
-появляется ссылка на утверждение на [blueprint.html](https://ispacex.github.io/d5/blueprint.html), а
-`#d5_tags` (`lake env lean D5Tags.lean`) перечисляет все. Источник истины — `site/blueprint.toml` в
+`@[d5 "<метка>"]` (`GroupDimension/D5Tag.lean`), например `@[d5 "thm:g4cube"]`, — метку
+утверждения на [blueprint.html](https://ispacex.github.io/d5/blueprint.html); атрибут принимает и
+постоянные теги `D5:XXXX` (`@[d5 000P]`), на которые метки потом перейдут. `#d5_tags`
+(`lake env lean D5Tags.lean`) перечисляет все, в JSON. Источник истины — `site/blueprint.toml` в
 dimension-subrings: его CI падает, если метки не совпадают в точности с его парами (метка,
 объявление). Как заявить утверждение и внести вклад (blueprint → заявка → pull request → рецензия,
 и как помечается код, написанный ИИ): [CONTRIBUTING.md](CONTRIBUTING.md).
