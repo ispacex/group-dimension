@@ -209,7 +209,7 @@ automation:
       framework: "Open Math OS"
       tool_setup: >-
         For the result for Q/γ_2(Q) ≅ C_3 × C_9 × C_9 (2026-11-12) the Lean proofs of the exact
-        identity (⋆) (GroupDimension/Star), of the vanishing of its terms (Ab399.lean) and of the
+        identity (⋆) (GroupDimension/Star.lean, GroupDimension/Star/), of the vanishing of its terms (Ab399.lean) and of the
         finite theorem (Ab399Finite.lean) were written by Kimi K3.1 Pro agents in Open Math OS
         virtual machines, against statements and a skeleton fixed by a Claude Code agent, which
         did not let the model change them. Every answer was checked by a build on the separate
