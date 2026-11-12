@@ -187,7 +187,10 @@ automation:
       framework: "Claude Code"
       tool_setup: >-
         Claude Code agents wrote all Lean code (definitions, statements and proofs) and the
-        Challenge/Solution pair, under the direction of Stanislav Vorobev, who chose the
+        Challenge/Solution pair, except the proofs for the result for Q/γ_2(Q) ≅ C_3 × C_9 × C_9
+        (GroupDimension/Star, Ab399.lean, Ab399Finite.lean), which were written by Kimi K3.1 Pro
+        agents (next entry) against statements and a skeleton fixed by a Claude Code agent;
+        all of it under the direction of Stanislav Vorobev, who chose the
         results and tracked the work in an issue tracker. Lean builds ran on a separate
         build machine through a job runner. The port from Lean 4.29 to Lean 4.35 with the
         module system was also done by an agent.
