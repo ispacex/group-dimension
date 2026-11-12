@@ -226,6 +226,17 @@ in a comment which steps of §§5–6 of the paper carry over. In short:
   additive only modulo $\Delta^2$; the explicit $\mathbb Z$-description of $\Delta(T)^n$ on which
   the retraction $p$ is built (Prop. 6.12).
 
+## Paper labels and contributing
+
+Each declaration named in a node of the blueprint (a labelled statement of the paper) carries
+`@[d5 "<label>"]` (`GroupDimension/D5Tag.lean`), e.g. `@[d5 "thm:g4cube"]`, the label of the
+statement on [blueprint.html](https://ispacex.github.io/d5/blueprint.html); the attribute also
+takes permanent tags `D5:XXXX` (`@[d5 000P]`), to which the labels will move. `#d5_tags`
+(`lake env lean D5Tags.lean`) lists them all, as JSON. The source of truth is `site/blueprint.toml` of
+dimension-subrings, whose CI fails unless the tags are exactly its (label, declaration) pairs. How
+to claim a statement and contribute (blueprint → claim → pull request → review, and how AI-written
+code is labelled): [CONTRIBUTING.md](CONTRIBUTING.md).
+
 ## Build
 
 ```bash
@@ -248,9 +259,9 @@ statement from the development; Comparator checks that the two agree and that on
 `.github/workflows/palomar-preflight.yml` runs Palomar's own verification on every relevant push.
 Registered as
 [PALOMAR-2026-10-23-000007](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007),
-version 3 (2026-11-07, commit `add1be7`, all thirteen theorems; it adds Theorems 6.10 and D.1, with
-Gupta–Tahara at $p=3$; version 2 of the same day, commit `508a336`, had ten, version 1 of 2026-10-23
-had nine). Version 4, which adds Theorem 6.11 ($\gamma_4^3\subseteq\gamma_5$ suffices), is not yet registered.
+version 4 (2026-11-07, commit `d4a8ddb`, all fourteen theorems; it adds Theorem 6.11,
+$\gamma_4^3\subseteq\gamma_5$ suffices; version 3 of the same day, commit `add1be7`, had thirteen, version 2,
+commit `508a336`, ten, version 1 of 2026-10-23 nine).
 What is submitted, with the one hypothesis that remains (Proposition 5.3, a computer result), is
 described in
 [`palomar/README.md`](palomar/README.md).

@@ -5,6 +5,7 @@ public import GroupDimension.Descendants
 public import GroupDimension.Gruenberg
 public import GroupDimension.Passi
 public import GroupDimension.MinimalThree
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -28,6 +29,7 @@ theorem D_five_eq_bot_of_class_two' (Q : Type) [Group Q]
 
 /-- **Proposition 2.1, `(1) ⇔ (3)`**, without hypotheses: `D₅(G) ⊆ γ₄(G)` for all groups iff
 `D₅(Q) = 1` for all finite `2`-groups of class `≤ 3`. -/
+@[d5 "prop:reduction"]
 theorem dimensionQuestion5_iff_finite_two_groups' :
     DimensionQuestion5 ↔
       ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥ →
@@ -35,6 +37,7 @@ theorem dimensionQuestion5_iff_finite_two_groups' :
   dimensionQuestion5_iff_finite_two_groups passiDFourSquare gruenbergResidualTwo
 
 /-- **Proposition 2.1 with class exactly `3`**, without hypotheses. -/
+@[d5 "prop:reduction"]
 theorem dimensionQuestion5_iff_class_three' :
     DimensionQuestion5 ↔
       ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥ →
@@ -42,6 +45,7 @@ theorem dimensionQuestion5_iff_class_three' :
   dimensionQuestion5_iff_class_three dThreeEqGammaThree passiDFourSquare gruenbergResidualTwo
 
 /-- **Remark 2.3**, without hypotheses. -/
+@[d5 "rem:bounded"]
 theorem D_five_le_of_bounded' (k : ℕ)
     (h : ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥ →
       Nat.card Q ≤ 2 ^ k → D 5 Q = ⊥)
@@ -50,6 +54,7 @@ theorem D_five_le_of_bounded' (k : ℕ)
   D_five_le_of_bounded passiDFourSquare k h G hG
 
 /-- **Remark 2.3 with class exactly `3`**, without hypotheses. -/
+@[d5 "rem:bounded"]
 theorem D_five_le_of_bounded_class_three' (k : ℕ)
     (h : ∀ (Q : Type) [Group Q] [Finite Q], IsPGroup 2 Q → (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥ →
       (⊤ : Subgroup Q).lowerCentralSeries 2 ≠ ⊥ → Nat.card Q ≤ 2 ^ k → D 5 Q = ⊥)
@@ -58,6 +63,7 @@ theorem D_five_le_of_bounded_class_three' (k : ℕ)
   D_five_le_of_bounded_class_three dThreeEqGammaThree passiDFourSquare k h G hG
 
 /-- **Lemma 5.2 (a)–(c)**: a minimal counterexample is a candidate, and `D₅(Q) = ⟨n⟩`. -/
+@[d5 "lem:mincex"]
 theorem isCandidate_of_minimal' {Q : Type} [Group Q] [Finite Q]
     (hQ : IsPGroup 2 Q) (h4 : (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥) (h3 : (⊤ : Subgroup Q).lowerCentralSeries 2 ≠ ⊥)
     (hmin : ∀ N : Subgroup Q, ∀ _ : N.Normal, N ≤ Subgroup.center Q → Nat.card N = 2 → D 5 (Q ⧸ N) = ⊥)
@@ -79,6 +85,7 @@ theorem isDescendant_of_minimal' {Q : Type} [Group Q] [Finite Q]
   isDescendant_of_minimal dThreeEqGammaThree hQ h4 h3 hmin hD
 
 /-- **Proposition 5.7**, the `D₅` form, given Proposition 5.3 (`h1024`). -/
+@[d5 "prop:rank8"]
 theorem D_five_eq_bot_of_rank'
     (h1024 : ∀ (R : Type) [Group R] [Finite R], Nat.card R = 2 ^ 10 →
       (⊤ : Subgroup R).lowerCentralSeries 3 = ⊥ → D 5 R = ⊥)
@@ -93,6 +100,7 @@ theorem D_four_le_of_isPGroup_three' {Q : Type} [Group Q] [Finite Q] (hQ : IsPGr
 
 /-- **Lemma 6.2** (minimal counterexample, `p = 3`), with Gupta–Tahara as the only hypothesis
 (without it: `minimal_three_three`, `GuptaTaharaThree.lean`). -/
+@[d5 "lem:mincex3"]
 theorem minimal_three' (hGT : GuptaTaharaMetabelian) {Q : Type} [Group Q] [Finite Q]
     (hQ : IsPGroup 3 Q)
     (hmin : ∀ (R : Type) [Group R] [Finite R], IsPGroup 3 R → Nat.card R < Nat.card Q →

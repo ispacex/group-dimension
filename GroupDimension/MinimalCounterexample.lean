@@ -3,6 +3,7 @@ module
 public import GroupDimension.Jennings.Theorem
 public import GroupDimension.Reduction
 public import GroupDimension.Statements
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -124,6 +125,7 @@ theorem normal_of_le_center {G : Type*} [Group G] {N : Subgroup G} (h : N ≤ ce
 
 /-- **Lemma 5.2 of the paper**, parts (a)–(c): a minimal counterexample is a candidate, and
 `D₅(Q) = ⟨n⟩`. -/
+@[d5 "lem:mincex"]
 theorem isCandidate_of_minimal (hD3 : DThreeEqGammaThree) {Q : Type} [Group Q] [Finite Q]
     (hQ : IsPGroup 2 Q) (h4 : (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥) (h3 : (⊤ : Subgroup Q).lowerCentralSeries 2 ≠ ⊥)
     (hmin : ∀ N : Subgroup Q, ∀ _ : N.Normal, N ≤ center Q → Nat.card N = 2 → D 5 (Q ⧸ N) = ⊥)
@@ -241,6 +243,7 @@ be a candidate, and there is none (`not_isCandidate_of_rank`). The hypothesis `h
 class `≤ 2` as well, which is immediate from `D₃ = γ₃`, so given `hD3` it is Proposition 5.3.
 `h1024` is not proved here; `hD3` is proved in `DThree.lean` (`D_five_eq_bot_of_rank'` is the
 version without it). -/
+@[d5 "prop:rank8"]
 theorem D_five_eq_bot_of_rank (hD3 : DThreeEqGammaThree)
     (h1024 : ∀ (R : Type) [Group R] [Finite R], Nat.card R = 2 ^ 10 →
       (⊤ : Subgroup R).lowerCentralSeries 3 = ⊥ → D 5 R = ⊥)

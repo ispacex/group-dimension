@@ -4,6 +4,7 @@ public import GroupDimension.Jennings.Theorem
 public import GroupDimension.ClassFourOrder
 public import GroupDimension.Descendants
 public import GroupDimension.Statements
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -36,6 +37,7 @@ open Subgroup MonoidAlgebra
 variable {p : ℕ} [Fact p.Prime] {Q : Type} [Group Q] [Finite Q]
 
 /-- `D_{p+2}(Q) ⊆ Q''` for a finite `p`-group of class `≤ p + 1`, `p` odd, given Gupta–Tahara. -/
+@[d5 "lem:qpp"]
 theorem D_le_derivedSeries_two (hGT : GuptaTaharaMetabelian) (hp2 : p ≠ 2) (hQ : IsPGroup p Q)
     (hc : (⊤ : Subgroup Q).lowerCentralSeries (p + 1) = ⊥) :
     D (p + 2) Q ≤ derivedSeries Q 2 := by
@@ -55,6 +57,7 @@ theorem D_le_derivedSeries_two (hGT : GuptaTaharaMetabelian) (hp2 : p ≠ 2) (hQ
 
 /-- **Lemma 6.1.** For a finite `p`-group `Q` of class `≤ p + 1`, `p` odd, given Gupta–Tahara:
 `D_{p+2}(Q) ⊆ Q'' ∩ M_{p+2}(Q)`. -/
+@[d5 "lem:qpp"]
 theorem mem_of_mem_D_add_two (hGT : GuptaTaharaMetabelian) (hp2 : p ≠ 2) (hQ : IsPGroup p Q)
     (hc : (⊤ : Subgroup Q).lowerCentralSeries (p + 1) = ⊥) {g : Q} (hg : g ∈ D (p + 2) Q) :
     g ∈ derivedSeries Q 2 ∧ of (ZMod p) Q g - 1 ∈ Jennings.augIdealP p Q ^ (p + 2) :=
@@ -62,6 +65,7 @@ theorem mem_of_mem_D_add_two (hGT : GuptaTaharaMetabelian) (hp2 : p ≠ 2) (hQ :
 
 /-- **Lemma 6.1, `p = 3`.** For a finite `3`-group of class `≤ 4`, given Gupta–Tahara:
 `D₅(Q) ≠ 1` needs `Q'' ≠ 1`, hence `d(Q) ≥ 3`. -/
+@[d5 "lem:qpp"]
 theorem rank_ge_three_of_D_five_ne_bot (hGT : GuptaTaharaMetabelian) (hQ : IsPGroup 3 Q)
     (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥) (hD : D 5 Q ≠ ⊥) :
     derivedSeries Q 2 ≠ ⊥ ∧ 3 ≤ Group.rank Q := by

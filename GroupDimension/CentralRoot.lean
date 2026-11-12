@@ -1,6 +1,7 @@
 module
 
 public import GroupDimension.DTwo
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -389,6 +390,7 @@ end CentralRoot
 central. Then `ℤ[H] ∩ Δ(K)^n = Δ(H)^n` for all `n` and `D_n(K) = D_n(H)` for `n ≥ 2`.
 The other direction of `|K : H| = m` (`m ∣ d → r^d ∈ H`) follows from `root`; `m = 0` is allowed
 and covers `K ≅ H × ℤ`. -/
+@[d5 "lem:root"]
 theorem D_n_eq_of_index {K : Type*} [Group K] (H : Subgroup K) (r : K) (g : H) (m : ℕ)
     (central : ∀ x : K, r * x = x * r) (gen : ∀ k : K, ∃ l : ℤ, k * r ^ (-l) ∈ H)
     (index : ∀ d : ℤ, r ^ d ∈ H → (m : ℤ) ∣ d) (root : r ^ m = (g : K) ^ m) :

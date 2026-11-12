@@ -2,6 +2,7 @@ module
 
 public import GroupDimension.TaharaProof.DFour
 public import GroupDimension.Gruenberg
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -574,6 +575,7 @@ end Passi
 open Passi in
 /-- **Passi's theorem** [Pas68]: `D₄(G)² ⊆ γ₄(G)` for every group, the statement
 `PassiDFourSquare` of `Statements.lean`. -/
+@[d5 "ext:passi"]
 theorem passiDFourSquare : PassiDFourSquare := by
   intro G _ g hg
   have h := sq_eq_one_of_class_three (lowerCentralSeries_quotient_eq_bot 3)

@@ -2,6 +2,7 @@ module
 
 public import GroupDimension.MinimalCounterexample
 public import GroupDimension.PCover
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -37,6 +38,7 @@ variable {G : Type*} [Group G]
 /-! ## Remark 2.2 -/
 
 /-- **Remark 2.2.** A group of class `≤ 3` is metabelian. -/
+@[d5 "rem:metab"]
 theorem metabelian_of_class_three (h4 : (⊤ : Subgroup G).lowerCentralSeries 3 = ⊥) :
     derivedSeries G 2 = ⊥ :=
   le_bot_iff.mp (h4 ▸ derivedSeries_two_le_lcs_three)
@@ -154,6 +156,7 @@ theorem isDescendant_of_isCandidate {Q : Type*} [Group Q] {n : Q} [(zpowers n).N
 
 /-- **Lemma 5.2, all parts**: a minimal counterexample `Q` is a candidate with `D₅(Q) = ⟨n⟩`, and
 it is an immediate descendant of step size `1` of `R = Q/⟨n⟩` as in `isDescendant_of_isCandidate`. -/
+@[d5 "lem:mincex"]
 theorem isDescendant_of_minimal (hD3 : DThreeEqGammaThree) {Q : Type} [Group Q] [Finite Q]
     (hQ : IsPGroup 2 Q) (h4 : (⊤ : Subgroup Q).lowerCentralSeries 3 = ⊥) (h3 : (⊤ : Subgroup Q).lowerCentralSeries 2 ≠ ⊥)
     (hmin : ∀ N : Subgroup Q, ∀ _ : N.Normal, N ≤ center Q → Nat.card N = 2 → D 5 (Q ⧸ N) = ⊥)
@@ -195,6 +198,7 @@ theorem not_inf_le_of_map_le {X : Subgroup E} (hUM : U ≤ M) (hMU : ¬ M ≤ U)
 `Q = E/U`, and `N` a subgroup with `N ⊄ U` (the nucleus). If `Q` has class `4` and the image
 `M/U` of `M` lies in `Q'' ∩ M₅(Q)`, then none of `M ∩ E''`, `M ∩ M₅(E)`, `N`, `γ₄(E)` lies in
 `γ₅(E)`. -/
+@[d5 "lem:filter"]
 theorem filter_on_parents {p : ℕ} (N : Subgroup E) (hUM : U ≤ M) (hMU : ¬ M ≤ U) (hNU : ¬ N ≤ U)
     (h5 : (⊤ : Subgroup (E ⧸ U)).lowerCentralSeries 4 = ⊥)
     (h4 : (⊤ : Subgroup (E ⧸ U)).lowerCentralSeries 3 ≠ ⊥)

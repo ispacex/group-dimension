@@ -1,6 +1,7 @@
 module
 
 public import GroupDimension.PCover
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -866,6 +867,7 @@ and (N4): for every `w` generating `γ₃(P)`, `v ∈ Z(P) ∩ γ₂(P) \ γ₃(
 `x_1, …, x_d ∈ P`, with `[x_i,x_j] = u^{ω₁(i,j)} v^{ω₂(i,j)} w^{ω₃(i,j)}`,
 `x_i^p = v^{α_i} w^{β_i}` and `[u,x_i] = w^{f_i}` (`[a,b] = a⁻¹b⁻¹ab`), the system (E)+(J) has a
 solution with `c = 1`. -/
+@[d5 "thm:nonterm"]
 theorem nonterminal_necessary {Q P : Type*} [Group Q] [Group P] {p : ℕ} [Fact p.Prime]
     (hp2 : p ≠ 2) (h4 : (⊤ : Subgroup P).lowerCentralSeries 3 = ⊥)
     (h2 : ((⊤ : Subgroup P).lowerCentralSeries 2).relIndex ((⊤ : Subgroup P).lowerCentralSeries 1) = p ^ 2)

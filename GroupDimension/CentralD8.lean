@@ -1,6 +1,7 @@
 module
 
 public import GroupDimension.CentralRoot
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -671,6 +672,7 @@ end DihedralData
 involutions commuting with `H`, with `t = [a, b] ∈ γ₂(H)`, `Q = H⟨a, b⟩` (every element is
 `h`, `ha`, `hb` or `hab` with `h ∈ H`) and `a, b, ab ∉ H`; so `Q = H ∘ D₈`. Then
 `ℤ[H] ∩ Δ(Q)^n = Δ(H)^n` for all `n` and `D_n(Q) = D_n(H)` for `n ≥ 2`. -/
+@[d5 "prop:central"]
 theorem D_n_eq_of_dihedral {Q : Type*} [Group Q] (H : Subgroup Q) (a b : Q) (t : H)
     (ha : a * a = 1) (hb : b * b = 1) (comm_a : ∀ h ∈ H, a * h = h * a)
     (comm_b : ∀ h ∈ H, b * h = h * b) (ht : (t : Q) = a * b * a⁻¹ * b⁻¹)

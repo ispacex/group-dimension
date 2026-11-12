@@ -3,6 +3,7 @@ module
 public import GroupDimension.Cert1024.Data.All
 public import GroupDimension.MinimalCounterexample
 public import GroupDimension.DThree
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -39,13 +40,16 @@ theorem cand_ok (i : Fin 3400) : checkStr (cands.get (i.cast cands_length.symm))
   exact h _ (List.get_mem _ _)
 
 /-- **The certificates**: `D₅ = 1` for all `3400` candidates. -/
+@[d5 "prop:1024"]
 theorem D_five_cand (i : Fin 3400) : D 5 (cand i) = ⊥ := D_five_candGroup (cand_ok i)
 
 /-- `D₄ = 1` for all `3400` candidates (this is what the certificates prove). -/
+@[d5 "prop:1024"]
 theorem D_four_cand (i : Fin 3400) : D 4 (cand i) = ⊥ := D_four_candGroup (cand_ok i)
 
 /-- Each `cand i` has order `2¹⁰` (so a surjection from it onto a group of order `2¹⁰` is an
 isomorphism; this is how `verify_lines.g` identifies it with the ANUPQ group). -/
+@[d5 "prop:1024"]
 theorem card_cand (i : Fin 3400) : Nat.card (cand i) = 2 ^ 10 := card_candGroup (cand_ok i)
 
 /-- `D_n` is invariant under isomorphism. -/
@@ -60,6 +64,7 @@ theorem D_eq_bot_of_mulEquiv {G H : Type*} [Group G] [Group H] (e : G ≃* H) {n
 
 /-- **Proposition 5.3**, given `D₃ = γ₃`, Proposition 5.1 at order `2⁹`, and the completeness of
 the candidate list: `D₅(R) = 1` for every group of order `2¹⁰` with `γ₄(R) = 1`. -/
+@[d5 "prop:1024"]
 theorem prop_1024 (hD3 : DThreeEqGammaThree)
     (h512 : ∀ (R : Type) [Group R] [Finite R], Nat.card R = 2 ^ 9 →
       (⊤ : Subgroup R).lowerCentralSeries 3 = ⊥ → D 5 R = ⊥)
@@ -88,6 +93,7 @@ theorem prop_1024 (hD3 : DThreeEqGammaThree)
 /-- **Proposition 5.7** (`D_five_eq_bot_of_rank`) with its hypothesis `h1024` discharged by
 `prop_1024`: what remains assumed is `D₃ = γ₃`, Proposition 5.1 at order `2⁹`, and the completeness
 of the order-`2¹⁰` candidate list. -/
+@[d5 "prop:rank8"]
 theorem D_five_eq_bot_of_rank_of_complete (hD3 : DThreeEqGammaThree)
     (h512 : ∀ (R : Type) [Group R] [Finite R], Nat.card R = 2 ^ 9 →
       (⊤ : Subgroup R).lowerCentralSeries 3 = ⊥ → D 5 R = ⊥)
@@ -99,6 +105,7 @@ theorem D_five_eq_bot_of_rank_of_complete (hD3 : DThreeEqGammaThree)
 
 /-- **Proposition 5.3** with `D₃ = γ₃` proved (`dThreeEqGammaThree`): what remains assumed is
 Proposition 5.1 at order `2⁹` and the completeness of the candidate list. -/
+@[d5 "prop:1024"]
 theorem prop_1024'
     (h512 : ∀ (R : Type) [Group R] [Finite R], Nat.card R = 2 ^ 9 →
       (⊤ : Subgroup R).lowerCentralSeries 3 = ⊥ → D 5 R = ⊥)
@@ -110,6 +117,7 @@ theorem prop_1024'
 
 /-- **Proposition 5.7** with `D₃ = γ₃` proved: given Proposition 5.1 at order `2⁹` and the
 completeness of the order-`2¹⁰` candidate list. -/
+@[d5 "prop:rank8"]
 theorem D_five_eq_bot_of_rank_of_complete'
     (h512 : ∀ (R : Type) [Group R] [Finite R], Nat.card R = 2 ^ 9 →
       (⊤ : Subgroup R).lowerCentralSeries 3 = ⊥ → D 5 R = ⊥)

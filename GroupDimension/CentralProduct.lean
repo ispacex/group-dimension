@@ -1,6 +1,7 @@
 module
 
 public import GroupDimension.CentralSqrt
+public import GroupDimension.D5Tag
 
 @[expose] public section
 
@@ -382,6 +383,7 @@ theorem augIdeal_of_commutator {H : Type*} [Group H] {t : H} (htc : t ∈ commut
 `Q = H ⊔ Hα ⊔ Hβ ⊔ Hαβ`, `s = α² ∈ H`, `β² = s^e`, `t = [α, β] ∈ γ₂(H)`, and for some `g ∈ H`
 the element `c = g⁻² s` has `c^(2^j) - 1 ∈ Δ(H)^(j+2)` for all `j ≥ 0`. Then
 `ℤ[H] ∩ Δ(Q)^n = Δ(H)^n` for all `n` and `D_n(Q) = D_n(H)` for `n ≥ 2`. -/
+@[d5 "prop:central"]
 theorem D_n_eq_of_central_product {Q : Type*} [Group Q] (H : Subgroup Q) (α β : Q)
     (s t g : H) (e : ℤ) (comm_α : ∀ h ∈ H, α * h = h * α) (comm_β : ∀ h ∈ H, β * h = h * β)
     (hα : α * α = s) (hβ : β * β = (s : Q) ^ e) (ht : (t : Q) = α * β * α⁻¹ * β⁻¹)

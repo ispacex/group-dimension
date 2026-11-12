@@ -1,5 +1,6 @@
 module
 
+public import GroupDimension.D5Tag
 public import GroupDimension.Basic
 public import GroupDimension.LowerCentral
 public import GroupDimension.DTwo
