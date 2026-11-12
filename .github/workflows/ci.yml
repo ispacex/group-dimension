@@ -42,6 +42,8 @@ jobs:
             <(tr '\n' ' ' < audit.log | sed 's/  */ /g') \
             || { echo "::error::audit does not see proof bodies"; exit 1; }
           echo "audit: $got declarations, only propext / Classical.choice / Quot.sound"
+      - name: the attribute @[d5 ...] and #d5_tags, with negative controls (Test/D5Tag.lean)
+        run: lake build GroupDimension.Test.D5Tag
       - name: certificate checker, negative controls (Test/Tamper.lean)
         run: lake build GroupDimension.Cert1024.Test.Tamper
       - name: certificate data (Prop. 5.3, 34 native_decide)
