@@ -25,6 +25,7 @@ open scoped commutatorElement
 variable {G : Type*} [Group G] {N : Type*} [AddCommGroup N]
 
 /-- **`(⋆)`**: `2 A(g(τ)) = T₁ + T₂ + T₃ + T₄ + T₅`. -/
+@[d5 "own:ab399" "the exact identity (⋆)"]
 theorem two_smul_gen_eq {T : Data G} (h5 : (⊤ : Subgroup G).lowerCentralSeries 4 = ⊥)
     (hv : T.Valid) {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) {A : G → N}
     (hA : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 2, ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 2,

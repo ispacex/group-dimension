@@ -286,6 +286,7 @@ private noncomputable def layerZeroMulEquiv (Q : Type*) [Group Q] :
         rfl }
 
 /-- **`D₅(Q) = 1` for `Q_ab ≅ C₃ × C₉ × C₉`, modulo Tahara.** -/
+@[d5 "own:ab399"]
 theorem D_five_eq_bot_of_class_four_ab399 (hT : TaharaFiveOne) {Q : Type} [Group Q] [Finite Q]
     (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥)
     (hab : Nonempty (Q ⧸ (⊤ : Subgroup Q).lowerCentralSeries 1 ≃*
