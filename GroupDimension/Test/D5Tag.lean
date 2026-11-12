@@ -29,12 +29,12 @@ open Lean Elab Command in
 info: d5 000P: ok
 d5 0001 "part (a)": ok
 d5 "thm:a": ok
-d5 I001: error
-d5 00O1: error
-d5 000: error
-d5 00001: error
-d5 000p: error
-d5 000P0: error
+d5 I001: <input>:1:7: D5 tags consist of digits and capital letters other than I and O
+d5 00O1: <input>:1:7: D5 tags consist of digits and capital letters other than I and O
+d5 000: <input>:1:6: D5 tags have exactly 4 characters
+d5 00001: <input>:1:8: D5 tags have exactly 4 characters
+d5 000p: <input>:1:7: D5 tags consist of digits and capital letters other than I and O
+d5 000P0: <input>:1:8: D5 tags have exactly 4 characters
 -/
 #guard_msgs in
 #eval show CommandElabM Unit from do
