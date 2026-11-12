@@ -26,6 +26,13 @@ public import GroupDimension.ExpThreePlus
 public import GroupDimension.ExpThreeGen
 public import GroupDimension.ExpNine
 public import GroupDimension.G4Cube
+public import GroupDimension.Star.Defs
+public import GroupDimension.Star.VWAux
+public import GroupDimension.Star.VW
+public import GroupDimension.Star.Row
+public import GroupDimension.Star
+public import GroupDimension.Ab399
+public import GroupDimension.Ab399Finite
 public import GroupDimension.TaharaTheorem
 public import GroupDimension.Candidate
 public import GroupDimension.Jennings.Theorem

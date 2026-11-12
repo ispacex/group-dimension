@@ -4,6 +4,7 @@ public import GroupDimension.ExpThreePlus
 public import GroupDimension.ExpThreeGen
 public import GroupDimension.ExpNine
 public import GroupDimension.G4Cube
+public import GroupDimension.Ab399Finite
 public import GroupDimension.TaharaProof.Decode12
 public import GroupDimension.D5Tag
 
@@ -105,6 +106,17 @@ theorem D_five_eq_bot_of_class_four_g4_cube {Q : Type} [Group Q] [Finite Q]
     (h4 : ∀ c ∈ (⊤ : Subgroup Q).lowerCentralSeries 3, c ^ 3 = 1) :
     D 5 Q = ⊥ :=
   ExpThree.D_five_eq_bot_of_class_four_g4_cube taharaFiveOne h5 h3grp h4
+
+/-- `Q_ab ≅ C₃ × C₉ × C₉` (MATH-448): a finite group of class `≤ 4` whose abelianization is
+`C₃ × C₉ × C₉` has `D₅ = 1`. No condition on `γ₄` is assumed; in particular this covers
+`γ₄ ≅ C₉`, the case left open by Theorem 6.11 (remark 6.13 of the paper) for this type of `Q_ab`.
+Proof: the exact identity `(⋆)` (`Star.two_smul_gen_eq`) evaluated term by term (`Ab399`). -/
+theorem D_five_eq_bot_of_class_four_ab399 {Q : Type} [Group Q] [Finite Q]
+    (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥)
+    (hab : Nonempty (Q ⧸ (⊤ : Subgroup Q).lowerCentralSeries 1 ≃*
+      Multiplicative (ZMod 3 × ZMod 9 × ZMod 9))) :
+    D 5 Q = ⊥ :=
+  Ab399.D_five_eq_bot_of_class_four_ab399 taharaFiveOne h5 hab
 
 /-- **Theorem 6.10 of the paper** (`thm:exp3h9`, unconditional; MATH-444): if `G/γ₂(G)` is a
 finite `3`-group, `γ₄(G)³ ⊆ γ₅(G)` and `γ₂(G)⁹ ⊆ γ₄(G)`, then `D₅(G) = γ₅(G)`. It contains

@@ -2188,3 +2188,11 @@ open GroupDimension
 #print axioms GroupDimension.Kernel.Carrier.lemma15_prod
 #print axioms GroupDimension.Kernel.Carrier.lemma15_w
 #print axioms GroupDimension.Kernel.Carrier.part_trivial
+#print axioms GroupDimension.Star.row_exact
+#print axioms GroupDimension.Star.v_exact
+#print axioms GroupDimension.Star.w_exact
+#print axioms GroupDimension.Star.two_smul_gen_eq
+#print axioms GroupDimension.Ab399.Setup.omega_three
+#print axioms GroupDimension.Ab399.Setup.gen_eq_one
+#print axioms GroupDimension.Ab399.D_five_eq_bot_of_class_four_ab399
+#print axioms GroupDimension.D_five_eq_bot_of_class_four_ab399
