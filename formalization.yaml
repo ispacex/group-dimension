@@ -32,7 +32,8 @@ project:
     One compared result is not in the paper: D_5(Q) = 1 for every finite group Q of class at
     most 4 with Q/γ_2(Q) ≅ C_3 × C_9 × C_9, with no condition on γ_4(Q) (in particular for
     γ_4(Q) ≅ C_9, which the paper's Theorem 6.11 does not cover); its proof on paper is in the
-    authors' research notes, and the paper is not being changed to include it.
+    author's research notes (public account: docs/ab399.md), and the paper is not being changed
+    to include it.
   authors:
     - "Stanislav Vorobev"
   license: "MIT"
@@ -77,25 +78,34 @@ sources:
     type: paper
     relationship: adapts
     note: >-
-      D_five_le_jennings formalizes the case needed by the paper (p = 2, n = 5, class at most 3)
-      of the inclusion G ∩ (1 + Δ_{F_p}(G)^n) ⊆ ∏_{i p^j ≥ n} γ_i(G)^{p^j} of Jennings'
-      theorem, applied to D_5(G). The general theorem is not formalized.
-  - title: "D_5(Q) = 1 for Q/γ_2(Q) ≅ C_3 × C_9 × C_9: the authors' research notes (2026-11-12), not part of the paper"
+      D_five_le_jennings states D_5(G) ⊆ ∏_{i 2^j ≥ 5} γ_i(G)^{2^j} for finite 2-groups of
+      class at most 3. The development proves it from the case p = 2, n = 5, class at most 3
+      of the inclusion G ∩ (1 + Δ_{F_p}(G)^n) ⊆ ∏_{i p^j ≥ n} γ_i(G)^{p^j} of Jennings' theorem
+      (mem_jennings_of_sub_one_mem, not a compared statement). The general theorem is not
+      formalized.
+  - title: "D_5(Q) = 1 for Q/γ_2(Q) ≅ C_3 × C_9 × C_9: the author's research notes (2026-11-12), not part of the paper"
     authors: ["Stanislav Vorobev"]
     type: other
-    id: "https://ispacex.github.io/d5/blueprint.html#b-own-ab399"
+    id: "https://github.com/ispacex/group-dimension/blob/main/docs/ab399.md"
+    location: "the theorem and its proof (public account of the notes)"
+    contributors:
+      - name: "Kimi K3.1 Pro (Moonshot AI), through Open Math OS"
+        role: "drafted the argument"
     relationship: formalizes
     note: >-
       The source of GroupDimension.Palomar.D_five_eq_bot_of_class_four_ab399. The proof on
-      paper is in the project's internal research notes (issue tracker and wiki, not publicly
-      archived): it evaluates the exact identity (⋆) of the proof of the paper's Theorem 6.11,
-      2g(τ) = T_1 + ... + T_5, which holds in every finite group of class ≤ 4 with no condition
-      on γ_4, term by term for Q/γ_2(Q) of type [3, 9, 9]. The argument was first drafted by the
+      paper is in the author's internal research notes (issue tracker and wiki, not publicly
+      archived); docs/ab399.md in this repository is its public account. It evaluates the
+      exact identity (⋆) of the proof of the paper's Theorem 6.11, 2g(τ) = T_1 + ... + T_5,
+      which holds in every finite 3-group of class ≤ 4 with no condition on γ_4 (paper,
+      Remark 6.13; in Lean for any group of class ≤ 4 with Tahara's data), term by term for
+      Q/γ_2(Q) of type [3, 9, 9]. The argument was first drafted by the
       model Kimi K3.1 Pro (through Open Math OS) at the author's direction and corrected after
       one independent agent review; it has not been reviewed by a human expert. The result is
       deliberately not added to the paper, and the paper (cited above) does not contain it. The
-      public statement and its status are on the D_5 site's blueprint (node own:ab399), linked
-      above; that page is generated from this repository and is not an independent source.
+      statement and its status are also on the D_5 site's blueprint
+      (https://ispacex.github.io/d5/blueprint.html#b-own-ab399, node own:ab399), which is
+      generated from this repository and is not an independent source.
       Novelty is not claimed: no literature search specific to this case has been made.
   - title: "K.-I. Tahara, The augmentation quotients of group rings and the fifth dimension subgroups, J. Algebra 71 (1981) 141-173"
     authors: ["Ken-Ichi Tahara"]
@@ -161,7 +171,11 @@ status:
     enter through it, N2 as a hypothesis of the sufficiency; nonterminal taken as in Lemma C.1: a
     central extension by a subgroup of order p with γ_4 ≠ 1; for the sufficiency and the
     equivalence P is in Type), the Lie algebra of Appendix A (Remark 6.4(2), over any field),
-    and the inclusion part of Tahara's Theorem 6.1.
+    the inclusion part of Tahara's Theorem 6.1, and the exact identity (⋆) of the proof of
+    Theorem 6.11 without any condition on γ_4 (Star.two_smul_gen_eq, used for the result for
+    Q/γ_2(Q) ≅ C_3 × C_9 × C_9, which is not in the paper). Not formalized either: the general
+    form D_5(G) = γ_5(G) whenever G/γ_2(G) ≅ C_3 × C_9 × C_9 (only the finite form of class
+    ≤ 4 is compared).
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: ["propext", "Classical.choice", "Quot.sound"]
@@ -214,7 +228,10 @@ fidelity:
     Jennings' product formula, not as G ∩ (1 + Δ_{F_2}(G)^n); the inclusion
     G ∩ (1 + Δ_{F_2}(G)^5) ⊆ M_5 (class ≤ 3) is proved, the reverse is not. Hence the
     non-existence results for candidates (Lemma 5.6, Proposition 5.7) are at least as strong
-    as the paper's, while Lemma 5.2 (b) gives n ∈ M_5 only in the product sense. (3) Proposition 2.1 is stated with
+    as the paper's. Lemma 5.2 (b) gives n ∈ M_5 in the product sense together with
+    D_5(Q) = ⟨n⟩; the paper's n ∈ Q ∩ (1 + Δ_{F_2}(Q)^5) follows from n ∈ D_5(Q), because
+    Z[Q] → F_2[Q] maps Δ(Q)^5 into Δ_{F_2}(Q)^5 (the paper's own proof of (b)), so no
+    direction of Jennings' theorem is needed for it. (3) Proposition 2.1 is stated with
     "metabelian" omitted, which is automatic for class ≤ 3 (Remark 2.2, metabelian_of_class_three). (4) Lemma 5.2 is compared in
     parts (a)-(c); part (d) is formalized as isDescendant_of_minimal but not
     compared. (5) The D_5 form of Proposition 5.7 assumes
@@ -235,7 +252,7 @@ fidelity:
     stated elementwise as in (9), and "G/γ_2(G) is a finite 3-group" as in (8); Theorem 6.10 is
     now derived from it in the development. (12) D_five_eq_bot_of_class_four_ab399 is not a
     statement of the paper, and the paper is not being changed: it is the theorem of the
-    authors' notes (see sources), "Q a finite 3-group of class ≤ 4 with Q_ab ≅ C_3 × C_9 × C_9
+    author's notes (see sources), "Q a finite 3-group of class ≤ 4 with Q_ab ≅ C_3 × C_9 × C_9
     ⇒ D_5(Q) = 1". In Lean, class ≤ 4 is γ_5(Q) = ⊥ (lowerCentralSeries 4 = ⊥), and
     Q_ab ≅ C_3 × C_9 × C_9 is a multiplicative isomorphism from Q/γ_2(Q) to
     Multiplicative (ZMod 3 × ZMod 9 × ZMod 9). "Q a 3-group" is not assumed, since it follows (a
@@ -278,7 +295,7 @@ alignment:
       lean: "GroupDimension.Palomar.D_five_eq_gamma_five_of_g4_cube"
       module: "Challenge"
       status: "proved"
-    - source: "Not in the paper: the authors' notes, D_5(Q) = 1 for Q/γ_2(Q) ≅ C_3 × C_9 × C_9 (class ≤ 4)"
+    - source: "Not in the paper: the author's notes (docs/ab399.md), D_5(Q) = 1 for Q/γ_2(Q) ≅ C_3 × C_9 × C_9 (class ≤ 4)"
       lean: "GroupDimension.Palomar.D_five_eq_bot_of_class_four_ab399"
       module: "Challenge"
       status: "proved"

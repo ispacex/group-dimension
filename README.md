@@ -135,7 +135,7 @@ $D_2 = \gamma_2$ is proved via the trivial square-zero extension $T=\mathbb Z\op
 first coordinate is $\varepsilon$, so $\Phi(\Delta^2)=0$ and $\Phi(g-1)=(0,\bar g)$. This is the
 same idea as the authors' `DegreeTwo.lean` (a square-zero representation).
 
-`#print axioms` for all 2182 proved declarations (`AxiomAudit.lean`: 2167 of the development and the
+`#print axioms` for all 2251 proved declarations (`AxiomAudit.lean`: 2236 of the development and the
 15 compared Palomar theorems of `Solution.lean`) — only `propext`,
 `Classical.choice`, `Quot.sound`. No `sorry` and no `axiom` in the development or in `Solution.lean`;
 `Challenge.lean` states the submitted results with `sorry` by design.

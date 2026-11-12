@@ -28,7 +28,7 @@ the repository root, licence `LICENSE` (MIT). The Lean project is the repository
 | [1](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=1) | 2026-10-23 | `533dc1c` | nine (without Theorem 6.9; Prop 2.1, Lemma 5.2 and the `D₅` form of Prop 5.7 with `D₃ = γ₃` as an additional hypothesis, Prop 2.1 also with Passi's and Gruenberg's theorems) |
 | [2](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=2) | 2026-11-07 | `508a336` | ten (without Theorems 6.10 and D.1, nor Gupta–Tahara at `p = 3`) |
 | [3](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=3) | 2026-11-07 | `add1be7` | thirteen (adds Theorems 6.10 and D.1, Gupta–Tahara at `p = 3`) |
-| [4](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=4) | 2026-11-07 | `d4a8ddb` | the fourteen listed below (adds Theorem 6.11) |
+| [4](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=4) | 2026-11-07 | `d4a8ddb` | the fourteen listed below other than `D_five_eq_bot_of_class_four_ab399` (adds Theorem 6.11) |
 
 Later commits are not registered until a new version is submitted. The fifteenth compared
 theorem (`D_five_eq_bot_of_class_four_ab399`, not in the paper; MATH-449) is prepared for the
@@ -56,7 +56,7 @@ Indexing: Mathlib's `(⊤ : Subgroup G).lowerCentralSeries k` is `γ_{k+1}(G)`.
 | Prop 5.7, candidate form | no candidate of order `2^11` and rank `≥ 8` | `not_isCandidate_of_rank` |
 | Prop 2.1 (1) ⇔ (3) | `D₅ ⊆ γ₄` for all groups ⇔ `D₅(Q) = 1` for all finite 2-groups `Q` of class exactly 3; "metabelian" dropped (Remark 2.2, `metabelian_of_class_three`) | `dimensionQuestion5_iff_class_three` |
 | Lemma 5.2 (a)–(c) | a minimal finite 2-group of class 3 with `D₅ ≠ 1` is a candidate, `D₅ = ⟨n⟩` | `isCandidate_of_minimal` |
-| **not in the paper** (authors' notes) | finite `Q` of class ≤ 4 (`γ₅(Q) = 1`) with `Q/γ₂(Q) ≅ C₃ × C₉ × C₉` ⇒ `D₅(Q) = 1`; no condition on `γ₄(Q)`, so `γ₄ ≅ C₉` (open for Thm 6.11, Remark 6.13) is covered | `D_five_eq_bot_of_class_four_ab399` |
+| **not in the paper** (author's notes) | finite `Q` of class ≤ 4 (`γ₅(Q) = 1`) with `Q/γ₂(Q) ≅ C₃ × C₉ × C₉` ⇒ `D₅(Q) = 1`; no condition on `γ₄(Q)`, so `γ₄ ≅ C₉` (not covered by Thm 6.11; left open in Remark 6.13) is covered; proof: [`docs/ab399.md`](../docs/ab399.md) | `D_five_eq_bot_of_class_four_ab399` |
 
 The proofs of Prop 2.1 and Lemma 5.2 use `D₃ = γ₃` (Higman–Rees–Passi), Passi's `D₄² ⊆ γ₄`
 and Gruenberg's theorem on finite 2-quotients of finitely generated nilpotent groups; all three
