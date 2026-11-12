@@ -135,8 +135,8 @@ $D_2 = \gamma_2$ is proved via the trivial square-zero extension $T=\mathbb Z\op
 first coordinate is $\varepsilon$, so $\Phi(\Delta^2)=0$ and $\Phi(g-1)=(0,\bar g)$. This is the
 same idea as the authors' `DegreeTwo.lean` (a square-zero representation).
 
-`#print axioms` for all 2173 proved declarations (`AxiomAudit.lean`: 2159 of the development and the
-14 compared Palomar theorems of `Solution.lean`) — only `propext`,
+`#print axioms` for all 2182 proved declarations (`AxiomAudit.lean`: 2167 of the development and the
+15 compared Palomar theorems of `Solution.lean`) — only `propext`,
 `Classical.choice`, `Quot.sound`. No `sorry` and no `axiom` in the development or in `Solution.lean`;
 `Challenge.lean` states the submitted results with `sorry` by design.
 
@@ -252,7 +252,7 @@ With Mathlib from the cache the build takes a few minutes (see also the audit,
 
 The files `Challenge.lean`, `Solution.lean`, `comparator.json` and `formalization.yaml` are a
 submission to the [Palomar registry](https://palomar-registry.org) of machine-checked results.
-`Challenge.lean` states fourteen results using Mathlib alone (with `sorry`); `Solution.lean`
+`Challenge.lean` states fifteen results using Mathlib alone (with `sorry`); `Solution.lean`
 (generated from it by `palomar/make_solution.py`) repeats the definitions verbatim and proves each
 statement from the development; Comparator checks that the two agree and that only `propext`,
 `Classical.choice`, `Quot.sound` are used. The workflow
@@ -261,7 +261,9 @@ Registered as
 [PALOMAR-2026-10-23-000007](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007),
 version 4 (2026-11-07, commit `d4a8ddb`, all fourteen theorems; it adds Theorem 6.11,
 $\gamma_4^3\subseteq\gamma_5$ suffices; version 3 of the same day, commit `add1be7`, had thirteen, version 2,
-commit `508a336`, ten, version 1 of 2026-10-23 nine).
+commit `508a336`, ten, version 1 of 2026-10-23 nine). The fifteenth statement, $D_5(Q)=1$ for
+$Q/\gamma_2(Q)\cong C_3\times C_9\times C_9$ (class $\le4$; not in the paper), is prepared for the next
+version and not yet registered.
 What is submitted, with the one hypothesis that remains (Proposition 5.3, a computer result), is
 described in
 [`palomar/README.md`](palomar/README.md).

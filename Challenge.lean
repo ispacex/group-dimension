@@ -28,7 +28,9 @@ central series. Kourovka Problem 20.84 asks whether `D₅(G) ⊆ γ₄(G)` for e
   3-group with `γ₂/γ₃` of exponent at most 3, or still more generally a finite 3-group with
   `γ₄³ ⊆ γ₅` and `γ₂⁹ ⊆ γ₄`, and most generally a finite 3-group with `γ₄³ ⊆ γ₅`); Theorem D.1 of the paper (`D₅ = γ₅` when `G/γ₂` is a finite
   `p`-group, `p` odd, and `[γ₂, γ₂] ⊆ γ₅`; in particular Gupta–Tahara's theorem at `p = 3`:
-  `D₅ = γ₅` for finite metabelian 3-groups); the inclusion `D₅(G) ⊆ M₅(G)`
+  `D₅ = γ₅` for finite metabelian 3-groups); one result that is **not in the paper**:
+  `D₅(Q) = 1` for a finite group `Q` of class `≤ 4` with `Q/γ₂(Q) ≅ C₃ × C₉ × C₉`, with no
+  condition on `γ₄(Q)` (`D_five_eq_bot_of_class_four_ab399`); the inclusion `D₅(G) ⊆ M₅(G)`
   (Jennings' "hard" inclusion in the case needed); Lemma 5.6 and the Lean part of
   Proposition 5.7 (statements about *candidates*).
 * The reduction of Problem 20.84 to finite 2-groups of class 3 (Proposition 2.1) and the
@@ -173,6 +175,19 @@ theorem D_five_eq_gamma_five_of_g4_cube (G : Type) [Group G]
     (h3grp : ∀ x : G, ∃ k : ℕ, x ^ (3 ^ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
     (h4 : ∀ c ∈ (⊤ : Subgroup G).lowerCentralSeries 3, c ^ 3 ∈ (⊤ : Subgroup G).lowerCentralSeries 4) :
     DSet 5 G = ((⊤ : Subgroup G).lowerCentralSeries 4 : Set G) := by
+  sorry
+
+/-- **Not a statement of the paper** (proved on paper in the authors' notes after Theorem 6.11,
+and formalized; see `formalization.yaml`). Let `Q` be a finite group of class `≤ 4`
+(`γ₅(Q) = 1`) whose abelianization `Q/γ₂(Q)` is isomorphic to `C₃ × C₉ × C₉`. Then
+`D₅(Q) = 1`. There is no condition on `γ₄(Q)`: in particular `γ₄(Q) ≅ C₉` is allowed, a case
+that Theorem 6.11 (which needs `γ₄³ ⊆ γ₅`) does not cover (paper, Remark 6.13). `Q` is not
+assumed to be a 3-group: a finite nilpotent group whose abelianization is a 3-group is one. -/
+theorem D_five_eq_bot_of_class_four_ab399 {Q : Type} [Group Q] [Finite Q]
+    (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥)
+    (hab : Nonempty (Q ⧸ (⊤ : Subgroup Q).lowerCentralSeries 1 ≃*
+      Multiplicative (ZMod 3 × ZMod 9 × ZMod 9))) :
+    DSet 5 Q = {1} := by
   sorry
 
 open scoped commutatorElement in

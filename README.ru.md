@@ -136,8 +136,8 @@ $\Phi\colon\mathbb Z[G]\to T$ с первой координатой $\varepsilo
 $\Phi(g-1)=(0,\bar g)$. Это та же идея, что у авторов в `DegreeTwo.lean` (квадратично-нулевое
 представление).
 
-`#print axioms` для всех 2173 доказанных объявлений (`AxiomAudit.lean`: 2159 из разработки и
-14 сравниваемых теорем Palomar из `Solution.lean`) — только `propext`,
+`#print axioms` для всех 2182 доказанных объявлений (`AxiomAudit.lean`: 2167 из разработки и
+15 сравниваемых теорем Palomar из `Solution.lean`) — только `propext`,
 `Classical.choice`, `Quot.sound`. Ни `sorry`, ни `axiom` нет ни в разработке, ни в `Solution.lean`;
 `Challenge.lean` формулирует подаваемые результаты с `sorry` намеренно.
 
@@ -255,7 +255,7 @@ lake env lean AxiomAudit.lean
 
 Файлы `Challenge.lean`, `Solution.lean`, `comparator.json` и `formalization.yaml` — подача в
 [реестр Palomar](https://palomar-registry.org) машинно проверенных результатов. `Challenge.lean`
-формулирует четырнадцать результатов только средствами Mathlib (с `sorry`); `Solution.lean` (порождается
+формулирует пятнадцать результатов только средствами Mathlib (с `sorry`); `Solution.lean` (порождается
 из него скриптом `palomar/make_solution.py`) дословно повторяет определения и доказывает каждое
 утверждение из разработки; Comparator проверяет, что они совпадают и что используются только
 `propext`, `Classical.choice`, `Quot.sound`. Workflow `.github/workflows/palomar-preflight.yml`
@@ -263,7 +263,9 @@ lake env lean AxiomAudit.lean
 [PALOMAR-2026-10-23-000007](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007),
 версия 4 (07.11.2026, коммит `d4a8ddb`, все четырнадцать теорем: добавлена теорема 6.11, достаточно
 $\gamma_4^3\subseteq\gamma_5$; в версии 3 того же дня, коммит `add1be7`, их было тринадцать, в версии 2,
-коммит `508a336`, — десять, в версии 1 от 23.10.2026 — девять).
+коммит `508a336`, — десять, в версии 1 от 23.10.2026 — девять). Пятнадцатое утверждение, $D_5(Q)=1$ при
+$Q/\gamma_2(Q)\cong C_3\times C_9\times C_9$ (ступень $\le4$; не из статьи), подготовлено к следующей
+версии и ещё не зарегистрировано.
 Что подано, с единственной оставшейся гипотезой (предложение 5.3, результат вычисления), описано в [`palomar/README.md`](palomar/README.md).
 
 ## Литература

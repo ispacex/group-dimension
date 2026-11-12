@@ -29,6 +29,10 @@ project:
     gruenbergResidualTwo). One conditional result, with the assumption an explicit hypothesis:
     D_5 = 1 for groups of order 2^11, class at most 3 and rank at least 8, assuming the paper's
     computer result for order 2^10 (Proposition 5.7, D_5 form, assuming Proposition 5.3).
+    One compared result is not in the paper: D_5(Q) = 1 for every finite group Q of class at
+    most 4 with Q/γ_2(Q) ≅ C_3 × C_9 × C_9, with no condition on γ_4(Q) (in particular for
+    γ_4(Q) ≅ C_9, which the paper's Theorem 6.11 does not cover); its proof on paper is in the
+    authors' research notes, and the paper is not being changed to include it.
   authors:
     - "Stanislav Vorobev"
   license: "MIT"
@@ -76,6 +80,23 @@ sources:
       D_five_le_jennings formalizes the case needed by the paper (p = 2, n = 5, class at most 3)
       of the inclusion G ∩ (1 + Δ_{F_p}(G)^n) ⊆ ∏_{i p^j ≥ n} γ_i(G)^{p^j} of Jennings'
       theorem, applied to D_5(G). The general theorem is not formalized.
+  - title: "D_5(Q) = 1 for Q/γ_2(Q) ≅ C_3 × C_9 × C_9: the authors' research notes (2026-11-12), not part of the paper"
+    authors: ["Stanislav Vorobev"]
+    type: other
+    id: "https://ispacex.github.io/d5/blueprint.html#b-own-ab399"
+    relationship: formalizes
+    note: >-
+      The source of GroupDimension.Palomar.D_five_eq_bot_of_class_four_ab399. The proof on
+      paper is in the project's internal research notes (issue tracker and wiki, not publicly
+      archived): it evaluates the exact identity (⋆) of the proof of the paper's Theorem 6.11,
+      2g(τ) = T_1 + ... + T_5, which holds in every finite group of class ≤ 4 with no condition
+      on γ_4, term by term for Q/γ_2(Q) of type [3, 9, 9]. The argument was first drafted by the
+      model Kimi K3.1 Pro (through Open Math OS) at the author's direction and corrected after
+      one independent agent review; it has not been reviewed by a human expert. The result is
+      deliberately not added to the paper, and the paper (cited above) does not contain it. The
+      public statement and its status are on the D_5 site's blueprint (node own:ab399), linked
+      above; that page is generated from this repository and is not an independent source.
+      Novelty is not claimed: no literature search specific to this case has been made.
   - title: "K.-I. Tahara, The augmentation quotients of group rings and the fifth dimension subgroups, J. Algebra 71 (1981) 141-173"
     authors: ["Ken-Ichi Tahara"]
     type: paper
@@ -83,7 +104,8 @@ sources:
     relationship: other
     note: >-
       The inclusion part of Tahara's Theorem 6.1 is formalized in the development
-      (taharaFiveOne) and is the main ingredient of the proofs of Theorems 6.6, 6.8, 6.9, 6.10, 6.11 and D.1. It is
+      (taharaFiveOne) and is the main ingredient of the proofs of Theorems 6.6, 6.8, 6.9, 6.10, 6.11 and D.1,
+      and of the result for Q/γ_2(Q) ≅ C_3 × C_9 × C_9 (not in the paper). It is
       not itself a compared statement.
   - title: "N. Gupta, K.-I. Tahara, Dimension and lower central subgroups of metabelian p-groups, Nagoya Math. J. 100 (1985) 127-133"
     authors: ["Narain Gupta", "Ken-Ichi Tahara"]
@@ -164,6 +186,20 @@ automation:
         paper source and the existing development, and were required to keep an axiom
         audit (#print axioms for every declaration) free of anything beyond the three
         standard axioms.
+    - method: agent
+      models: ["moonshotai/kimi-k3.1-pro"]
+      framework: "Open Math OS"
+      tool_setup: >-
+        For the result for Q/γ_2(Q) ≅ C_3 × C_9 × C_9 (2026-11-12) the Lean proofs of the exact
+        identity (⋆) (GroupDimension/Star), of the vanishing of its terms (Ab399.lean) and of the
+        finite theorem (Ab399Finite.lean) were written by Kimi K3.1 Pro agents in Open Math OS
+        virtual machines, against statements and a skeleton fixed by a Claude Code agent, which
+        did not let the model change them. Every answer was checked by a build on the separate
+        build machine. The model GLM 5.3 was tried on two of the lemmas and did not complete them.
+      cost:
+        wall_time: "about four hours (2026-11-12)"
+        spend_usd: "subscription-based usage; not itemized"
+        hardware: "API-only for the agents; a 10-core build server for Lean"
   spend_usd: "subscription-based usage; not itemized"
   notes: >-
     The Lean code is AI-written. The human author directed the work and is responsible for
@@ -192,12 +228,20 @@ fidelity:
     and every x^(3^k) lies in γ_2(G) for some k. (9) In Theorem 6.10 the paper's γ_4(G)^3 ⊆ γ_5(G)
     and γ_2(G)^9 ⊆ γ_4(G) are stated elementwise: c^3 ∈ γ_5(G) for every c ∈ γ_4(G), and
     a^9 ∈ γ_4(G) for every a ∈ γ_2(G) (equivalent, since γ_5(G) and γ_4(G) are subgroups);
-    "G/γ_2(G) is a finite 3-group" as in (8). (11) In Theorem 6.11 γ_4(G)^3 ⊆ γ_5(G) is stated
-    elementwise as in (9), and "G/γ_2(G) is a finite 3-group" as in (8); Theorem 6.10 is now
-    derived from it in the development. (10) In Theorem D.1 "[γ_2(G), γ_2(G)] ⊆ γ_5(G)"
+    "G/γ_2(G) is a finite 3-group" as in (8). (10) In Theorem D.1 "[γ_2(G), γ_2(G)] ⊆ γ_5(G)"
     is stated elementwise ([a, b] ∈ γ_5(G) for a, b ∈ γ_2(G)) and "p an odd prime" as p.Prime
     and p ≠ 2; its "in particular" (Gupta–Tahara at p = 3) is compared separately, for finite
-    G with IsPGroup 3 G and derivedSeries G 2 = ⊥.
+    G with IsPGroup 3 G and derivedSeries G 2 = ⊥. (11) In Theorem 6.11 γ_4(G)^3 ⊆ γ_5(G) is
+    stated elementwise as in (9), and "G/γ_2(G) is a finite 3-group" as in (8); Theorem 6.10 is
+    now derived from it in the development. (12) D_five_eq_bot_of_class_four_ab399 is not a
+    statement of the paper, and the paper is not being changed: it is the theorem of the
+    authors' notes (see sources), "Q a finite 3-group of class ≤ 4 with Q_ab ≅ C_3 × C_9 × C_9
+    ⇒ D_5(Q) = 1". In Lean, class ≤ 4 is γ_5(Q) = ⊥ (lowerCentralSeries 4 = ⊥), and
+    Q_ab ≅ C_3 × C_9 × C_9 is a multiplicative isomorphism from Q/γ_2(Q) to
+    Multiplicative (ZMod 3 × ZMod 9 × ZMod 9). "Q a 3-group" is not assumed, since it follows (a
+    finite nilpotent group whose abelianization is a 3-group is a 3-group); there is no condition
+    on γ_4(Q), as in the notes. Only this finite form is compared; the general form of the notes,
+    D_5(G) = γ_5(G) whenever G/γ_2(G) ≅ C_3 × C_9 × C_9, is not formalized.
 
 review:
   status: "agent-reviewed"
@@ -234,6 +278,11 @@ alignment:
       lean: "GroupDimension.Palomar.D_five_eq_gamma_five_of_g4_cube"
       module: "Challenge"
       status: "proved"
+    - source: "Not in the paper: the authors' notes, D_5(Q) = 1 for Q/γ_2(Q) ≅ C_3 × C_9 × C_9 (class ≤ 4)"
+      lean: "GroupDimension.Palomar.D_five_eq_bot_of_class_four_ab399"
+      module: "Challenge"
+      status: "proved"
+      note: "Not a statement of the paper (see sources and fidelity (12)). No condition on γ_4; covers γ_4 ≅ C_9."
     - source: "Theorem D.1"
       lean: "GroupDimension.Palomar.D_five_eq_gamma_five_of_metabelian"
       module: "Challenge"
