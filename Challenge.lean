@@ -28,8 +28,11 @@ central series. Kourovka Problem 20.84 asks whether `D₅(G) ⊆ γ₄(G)` for e
   3-group with `γ₂/γ₃` of exponent at most 3, or still more generally a finite 3-group with
   `γ₄³ ⊆ γ₅` and `γ₂⁹ ⊆ γ₄`, and most generally a finite 3-group with `γ₄³ ⊆ γ₅`); Theorem D.1 of the paper (`D₅ = γ₅` when `G/γ₂` is a finite
   `p`-group, `p` odd, and `[γ₂, γ₂] ⊆ γ₅`; in particular Gupta–Tahara's theorem at `p = 3`:
-  `D₅ = γ₅` for finite metabelian 3-groups); the inclusion `D₅(G) ⊆ M₅(G)`
-  (Jennings' "hard" inclusion in the case needed); Lemma 5.6 and the Lean part of
+  `D₅ = γ₅` for finite metabelian 3-groups); one result that is **not in the paper**:
+  `D₅(Q) = 1` for a finite group `Q` of class `≤ 4` with `Q/γ₂(Q) ≅ C₃ × C₉ × C₉`, with no
+  condition on `γ₄(Q)` (`D_five_eq_bot_of_class_four_ab399`); the inclusion `D₅(G) ⊆ G⁸γ₂⁴γ₃²`
+  (Jennings' product `M₅`, class `≤ 3`; proved in the development through Jennings' "hard"
+  inclusion in that case); Lemma 5.6 and the Lean part of
   Proposition 5.7 (statements about *candidates*).
 * The reduction of Problem 20.84 to finite 2-groups of class 3 (Proposition 2.1) and the
   passage from a minimal counterexample to a candidate (Lemma 5.2). Their proofs in the
@@ -47,9 +50,11 @@ in general. What is formalized is the inclusion that matters for `D₅`:
 `D₅(G) ⊆ jennings 2 G 5` for a finite 2-group of class `≤ 3` (`D_five_le_jennings`), so the
 condition `n ∈ M₅` of a candidate is met by the elements of `D₅`. Since the formalized inclusion
 is `G ∩ (1 + Δ_{𝔽₂}(G)^5) ⊆ jennings 2 G 5` (class `≤ 3`), the non-existence results for
-candidates (Lemma 5.6, Proposition 5.7) are at least as strong as the paper's; conversely
-`isCandidate_of_minimal` (Lemma 5.2 (b)) yields `n ∈ jennings 2 Q 5`, which is the paper's
-`n ∈ M₅` only via the unformalized direction of Jennings' theorem.
+candidates (Lemma 5.6, Proposition 5.7) are at least as strong as the paper's. Conversely,
+`isCandidate_of_minimal` (Lemma 5.2 (b)) yields `n ∈ jennings 2 Q 5` and `D₅(Q) = ⟨n⟩`; the
+paper's `n ∈ M₅(Q) = Q ∩ (1 + Δ_{𝔽₂}(Q)^5)` follows from `n ∈ D₅(Q)`, because `ℤ[Q] → 𝔽₂[Q]`
+maps `Δ(Q)^5` into `Δ_{𝔽₂}(Q)^5` (the paper's own proof of (b)), so no direction of Jennings'
+theorem is needed for it.
 -/
 
 namespace GroupDimension.Palomar
@@ -175,6 +180,20 @@ theorem D_five_eq_gamma_five_of_g4_cube (G : Type) [Group G]
     DSet 5 G = ((⊤ : Subgroup G).lowerCentralSeries 4 : Set G) := by
   sorry
 
+/-- **Not a statement of the paper**, and the paper is not changing: proved on paper in the
+author's research notes, by evaluating the identity `(⋆)` of the proof of Theorem 6.11
+(account: `docs/ab399.md`; see also `formalization.yaml`). Let `Q` be a finite group of class `≤ 4`
+(`γ₅(Q) = 1`) whose abelianization `Q/γ₂(Q)` is isomorphic to `C₃ × C₉ × C₉`. Then
+`D₅(Q) = 1`. There is no condition on `γ₄(Q)`: in particular `γ₄(Q) ≅ C₉` is allowed, a case
+that Theorem 6.11 (which needs `γ₄³ ⊆ γ₅`) does not cover (paper, Remark 6.13). `Q` is not
+assumed to be a 3-group: a finite nilpotent group whose abelianization is a 3-group is one. -/
+theorem D_five_eq_bot_of_class_four_ab399 {Q : Type} [Group Q] [Finite Q]
+    (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥)
+    (hab : Nonempty (Q ⧸ (⊤ : Subgroup Q).lowerCentralSeries 1 ≃*
+      Multiplicative (ZMod 3 × ZMod 9 × ZMod 9))) :
+    DSet 5 Q = {1} := by
+  sorry
+
 open scoped commutatorElement in
 /-- **Paper, Theorem D.1.** Let `p` be an odd prime. If `G/γ₂(G)` is a finite `p`-group and
 `[γ₂(G), γ₂(G)] ⊆ γ₅(G)` (`[a, b] ∈ γ₅(G)` for all `a, b ∈ γ₂(G)`; e.g. `G` metabelian), then
@@ -198,8 +217,11 @@ theorem D_five_eq_gamma_five_of_metabelian_three (G : Type) [Group G] [Finite G]
   sorry
 
 /-- **Jennings' inclusion, in the case used by the paper.** For a finite 2-group of class
-`≤ 3`, `D₅(G) ⊆ M₅(G) = ∏_{i 2^j ≥ 5} γ_i(G)^{2^j}`. (This is the "hard" inclusion of Jennings'
-theorem `G ∩ (1 + Δ_{𝔽₂}(G)^5) ⊆ M₅(G)`, applied to `D₅(G) ⊆ G ∩ (1 + Δ_{𝔽₂}(G)^5)`.) -/
+`≤ 3`, `D₅(G) ⊆ ∏_{i 2^j ≥ 5} γ_i(G)^{2^j} = G⁸ γ₂⁴ γ₃²` (`jennings 2 G 5`, Jennings' product
+formula for `M₅(G)`). Only this outer inclusion is stated here. The development proves it as
+`D₅(G) ⊆ G ∩ (1 + Δ_{𝔽₂}(G)^5)` (reduction `ℤ[G] → 𝔽₂[G]`) followed by the "hard" inclusion of
+Jennings' theorem in this case, `G ∩ (1 + Δ_{𝔽₂}(G)^5) ⊆ G⁸ γ₂⁴ γ₃²`
+(`GroupDimension.mem_jennings_of_sub_one_mem`), which is not a statement of this file. -/
 theorem D_five_le_jennings {G : Type*} [Group G] [Finite G] (hG : IsPGroup 2 G)
     (h4 : (⊤ : Subgroup G).lowerCentralSeries 3 = ⊥) : DSet 5 G ⊆ (jennings 2 G 5 : Set G) := by
   sorry
