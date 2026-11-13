@@ -366,6 +366,7 @@ theorem small {i j k : Fin T.s} (hij : i < j) (hik : i < k) (hjk : j ≠ k) : T.
   · exact S.hsmall i j k hij h
   · exact S.hsmall i k j hik h
 
+omit S in
 /-- `3^μ ∣ 3 · 3^{μ-1}` (truncated subtraction: `1 ∣ 3` when `μ = 0`). -/
 theorem three_pow_dvd (μ : ℕ) : 3 ^ μ ∣ 3 * 3 ^ (μ - 1) := by
   rcases μ with _ | μ
@@ -446,9 +447,9 @@ theorem K_dvd (m : ℕ) : ((3 ^ m : ℕ) : ℤ) ∣ K (3 ^ (m + 1)) := by
   have hdf : n.descFactorial 3 = (n - 2) * ((n - 1) * ((n - 0) * 1)) := by
     simp only [Nat.descFactorial_succ, Nat.descFactorial_zero]
   have hodd' : ((((n - 1) / 2 : ℕ) : ℤ)) * 2 = (n : ℤ) - 1 := by
-    have := congrArg (fun t : ℕ => (t : ℤ)) hodd
-    push_cast [Nat.cast_sub hn1] at this
-    exact this
+    have h1 : (((n - 1) / 2 * 2 : ℕ) : ℤ) = ((n - 1 : ℕ) : ℤ) := congrArg _ hodd
+    rw [Nat.cast_mul, Nat.cast_sub hn1, Nat.cast_ofNat, Nat.cast_one] at h1
+    exact h1
   have c2 : ((n.choose 2 : ℕ) : ℤ) * 2 = (n : ℤ) * ((n : ℤ) - 1) := by
     have := congrArg (fun t : ℕ => (t : ℤ)) c2n
     push_cast [Nat.cast_sub hn1] at this
@@ -760,7 +761,7 @@ theorem cY {i h : Fin T.s} (hih : i < h) :
     have hza : tc (tc (T.x₁ i) (T.x₁ h)) a ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
       lcs_mem_of_le (by norm_num) (tc_mem (i := 1) (j := 1) (n := 3) (by omega) hc ha)
     rw [hmap, addMapG_pow hA hza, smul_smul]
-    exact S.kill hA (S.omega_le hA hih a ha) ⟨τ.u i h, by push_cast; ring⟩
+    exact S.kill hA (S.omega_le hA hih a ha) (by push_cast; exact dvd_mul_left _ _)
 
 /-- The `q`-term `u_{ih} q_{ih} ω(c̄_{ih}, Ȳ_i)`, times `3^{μ-1}`, vanishes: `3 ∣ u_{ih} q_{ih}`. -/
 theorem cYlow {i h : Fin T.s} (hih : i < h) :
@@ -791,19 +792,247 @@ theorem uK_dvd {i h : Fin T.s} (hih : i < h) : (T.d i : ℤ) ∣ τ.u i h * K (T
     exact mul_dvd_mul hu hK
 
 theorem T1_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T1 T τ A = 0 := by
-  sorry
+  classical
+  unfold Star.T1
+  rw [Finset.smul_sum]
+  refine Finset.sum_eq_zero fun i _ => ?_
+  rw [Finset.smul_sum]
+  refine Finset.sum_eq_zero fun h _ => ?_
+  split_ifs with hih
+  · have hodd : Odd (T.d h) := by
+      obtain ⟨m, hm⟩ := S.hd h
+      rw [hm]
+      exact Odd.pow (by decide)
+    have hc : tc (T.x₁ i) (T.x₁ h) ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+      tc_mem (i := 0) (j := 0) (n := 1) (by omega) (mem_lcs_zero _) (mem_lcs_zero _)
+    have hYi : tc (tc (T.x₁ i) (T.x₁ h)) (T.x₁ i ^ T.d i) ∈
+        (⊤ : Subgroup G).lowerCentralSeries 2 :=
+      lcs_mem_of_le (by norm_num) (tc_mem (i := 1) (j := 1) (n := 3) (by omega) hc (S.Y1 i))
+    have hxi : T.x₁ i ^ T.d h = (T.x₁ i ^ T.d i) ^ (T.d h / T.d i) := by
+      rw [← pow_mul, S.d_mul_q hih.le]
+    have hA1 : A (tc (tc (T.x₁ i) (T.x₁ h)) (T.x₁ i ^ T.d h)) =
+        T.q i h • A (tc (tc (T.x₁ i) (T.x₁ h)) (T.x₁ i ^ T.d i)) := by
+      rw [hxi, tc_pow_right_L1 S.h5 hc (S.Y1 i), addMapG_pow hA hYi]
+      rfl
+    have htri (z : G) : tc (tc (tc (T.x₁ i) (T.x₁ h)) z) z ∈
+        (⊤ : Subgroup G).lowerCentralSeries 2 :=
+      lcs_mem_of_le (by norm_num) (tc_mem (i := 2) (j := 0) (n := 3) (by omega)
+        (tc_mem (i := 1) (j := 0) (n := 2) (by omega) hc (mem_lcs_zero _)) (mem_lcs_zero _))
+    rw [S.delta_general hA _ _ hodd, hA1]
+    set P : ℤ := (((T.d h - 1) / 2 : ℕ) : ℤ)
+    set M : ℤ := ((3 ^ (μ - 1) : ℕ) : ℤ)
+    have e : M • (τ.u i h • (P • (T.q i h • A (tc (tc (T.x₁ i) (T.x₁ h)) (T.x₁ i ^ T.d i)) -
+        A (tc (tc (T.x₁ i) (T.x₁ h)) (T.x₁ h ^ T.d h))) +
+        K (T.d h) • (A (tc (tc (tc (T.x₁ i) (T.x₁ h)) (T.x₁ i)) (T.x₁ i)) -
+          A (tc (tc (tc (T.x₁ i) (T.x₁ h)) (T.x₁ h)) (T.x₁ h))))) =
+        P • (M • ((τ.u i h * T.q i h) • A (tc (tc (T.x₁ i) (T.x₁ h)) (T.x₁ i ^ T.d i)))) -
+          P • (M • (τ.u i h • A (tc (tc (T.x₁ i) (T.x₁ h)) (T.x₁ h ^ T.d h)))) +
+          (M * (τ.u i h * K (T.d h))) •
+            A (tc (tc (tc (T.x₁ i) (T.x₁ h)) (T.x₁ i)) (T.x₁ i)) -
+          (M * (τ.u i h * K (T.d h))) •
+            A (tc (tc (tc (T.x₁ i) (T.x₁ h)) (T.x₁ h)) (T.x₁ h)) := by
+      module
+    rw [e, S.cYlow hA hτ hih, S.cY hA hτ hih, smul_zero, smul_zero, sub_zero, zero_add]
+    have hdv : ((T.d i : ℕ) : ℤ) ∣ M * (τ.u i h * K (T.d h)) := (S.uK_dvd hA hτ hih).mul_left _
+    rw [S.smul_of_nat_dvd_of_pow_eq_one hA (htri _) hdv
+        (S.c_triple_kill i h (T.x₁ i) (T.x₁ i)),
+      S.smul_of_nat_dvd_of_pow_eq_one hA (htri _) hdv
+        (S.c_triple_kill i h (T.x₁ h) (T.x₁ h)), sub_zero]
+  · rw [smul_zero]
 
 theorem T2_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T2 T τ A = 0 := by
-  sorry
+  classical
+  unfold Star.T2
+  rw [smul_neg, neg_eq_zero, Finset.smul_sum]
+  refine Finset.sum_eq_zero fun h _ => ?_
+  rw [Finset.smul_sum]
+  refine Finset.sum_eq_zero fun i _ => ?_
+  split_ifs with hhi
+  · have hc : tc (T.x₁ h) (T.x₁ i) ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+      tc_mem (i := 0) (j := 0) (n := 1) (by omega) (mem_lcs_zero _) (mem_lcs_zero _)
+    have htri : tc (tc (T.x₁ h) (T.x₁ i)) (T.x₁ i) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
+      tc_mem (i := 1) (j := 0) (n := 2) (by omega) hc (mem_lcs_zero _)
+    have htriple : tc (tc (tc (T.x₁ h) (T.x₁ i)) (T.x₁ i)) (T.x₁ i) ∈
+        (⊤ : Subgroup G).lowerCentralSeries 3 :=
+      tc_mem (i := 2) (j := 0) (n := 3) (by omega) htri (mem_lcs_zero _)
+    have hK3 : A (tc (tc (T.x₁ h) (T.x₁ i)) (T.x₁ i ^ T.d i)) =
+        ((T.d i : ℕ) : ℤ) • A (tc (tc (T.x₁ h) (T.x₁ i)) (T.x₁ i)) +
+          (((T.d i).choose 2 : ℕ) : ℤ) • A (tc (tc (tc (T.x₁ h) (T.x₁ i)) (T.x₁ i)) (T.x₁ i)) := by
+      rw [Star.tc_pow_right_K3 hc S.h5 (T.x₁ i) (T.d i),
+        hA _ (pow_mem htri _) _ (lcs_mem_of_le (by norm_num) (pow_mem htriple _)),
+        addMapG_pow hA htri, addMapG_pow hA (lcs_mem_of_le (by norm_num) htriple)]
+    have hq : T.q h i * ((T.d h : ℕ) : ℤ) = ((T.d i : ℕ) : ℤ) := by
+      unfold Data.q
+      rw [mul_comm]
+      exact_mod_cast S.d_mul_q hhi.le
+    have hterm : (τ.u h i * T.q h i) • A (tc (tc (T.x₁ h ^ T.d h) (T.x₁ i)) (T.x₁ i)) =
+        τ.u h i • A (tc (tc (T.x₁ h) (T.x₁ i)) (T.x₁ i ^ T.d i)) -
+          (τ.u h i * (((T.d i).choose 2 : ℕ) : ℤ)) •
+            A (tc (tc (tc (T.x₁ h) (T.x₁ i)) (T.x₁ i)) (T.x₁ i)) := by
+      rw [S.F4 h i i, addMapG_pow hA htri, hK3, smul_smul,
+        show τ.u h i * T.q h i * ((T.d h : ℕ) : ℤ) = τ.u h i * ((T.d i : ℕ) : ℤ) by
+          rw [mul_assoc, hq]]
+      module
+    rw [hterm, smul_sub, S.cY hA hτ hhi, zero_sub, neg_eq_zero, smul_smul]
+    have hC : ((T.d h : ℕ) : ℤ) ∣ (((T.d i).choose 2 : ℕ) : ℤ) := by
+      have h1 : ((T.d h : ℕ) : ℤ) ∣ ((T.d i : ℕ) : ℤ) := by exact_mod_cast S.d_dvd hhi.le
+      have h2 := S.ch2_dvd_d i
+      unfold Data.ch at h2
+      exact h1.trans h2
+    exact S.smul_of_nat_dvd_of_pow_eq_one hA (lcs_mem_of_le (by norm_num) htriple)
+      ((hC.mul_left _).mul_left _) (S.c_triple_kill h i (T.x₁ i) (T.x₁ i))
+  · rw [smul_zero]
 
 theorem T3_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T3 T τ A = 0 := by
-  sorry
+  classical
+  unfold Star.T3
+  rw [smul_neg, neg_eq_zero, Finset.smul_sum]
+  refine Finset.sum_eq_zero fun i _ => ?_
+  rw [Finset.smul_sum]
+  refine Finset.sum_eq_zero fun g _ => ?_
+  rw [Finset.smul_sum]
+  refine Finset.sum_eq_zero fun h _ => ?_
+  split_ifs with high
+  · obtain ⟨hig, hgh⟩ := high
+    by_cases htop : ∀ k, i < k → k = g
+    · -- the top pair: `h = g`, and the value is `[Y_g, c_{ig}]` (Jacobi)
+      have hhg : h = g := htop h (hig.trans_le hgh)
+      subst hhg
+      have hF : ∀ u ∈ (⊤ : Subgroup G).lowerCentralSeries 3,
+          ∀ v ∈ (⊤ : Subgroup G).lowerCentralSeries 3, A (u * v) = A u + A v := by
+        intro u hu v hv
+        exact hA u (lcs_mem_of_le (by norm_num) hu) v (lcs_mem_of_le (by norm_num) hv)
+      have hYself : tc (T.x₁ h ^ T.d h) (T.x₁ h) = 1 :=
+        tc_eq_one_iff.mpr (Commute.pow_left (Commute.refl _) _)
+      have hU : A ⁅⁅(T.x₁ h)⁻¹, (T.x₁ i)⁻¹⁆, (T.x₁ h ^ T.d h)⁻¹⁆ =
+          -A (tc (T.x₁ h ^ T.d h) (tc (T.x₁ i) (T.x₁ h))) := by
+        calc A ⁅⁅(T.x₁ h)⁻¹, (T.x₁ i)⁻¹⁆, (T.x₁ h ^ T.d h)⁻¹⁆ =
+            A ⁅tc (T.x₁ h) (T.x₁ i), (T.x₁ h ^ T.d h)⁻¹⁆ := by rw [tc_eq]
+          _ = -A ⁅(T.x₁ h ^ T.d h)⁻¹, tc (T.x₁ h) (T.x₁ i)⁆ :=
+            Ab399.GenericMaps.B_swap S.h5 A hF
+              (commutator_mem_lcs (i := 1) (j := 1) (n := 3) (by omega)
+                (tc_mem (i := 0) (j := 0) (n := 1) (by omega) (mem_lcs_zero _)
+                  (mem_lcs_zero _))
+                (inv_mem (S.Y1 h)))
+          _ = -A (tc (T.x₁ h ^ T.d h) (tc (T.x₁ i) (T.x₁ h))) := by
+              rw [tc_eq (T.x₁ h ^ T.d h) (tc (T.x₁ i) (T.x₁ h)),
+                tc_inv (T.x₁ i) (T.x₁ h), tc_eq (T.x₁ h) (T.x₁ i)]
+      have hV : A ⁅⁅(T.x₁ h ^ T.d h)⁻¹, (T.x₁ h)⁻¹⁆, (T.x₁ i)⁻¹⁆ = 0 := by
+        rw [← tc_eq (T.x₁ h ^ T.d h) (T.x₁ h), hYself, commutatorElement_one_left,
+          addMapG_one hF]
+      have hW : A ⁅⁅(T.x₁ i)⁻¹, (T.x₁ h ^ T.d h)⁻¹⁆, (T.x₁ h)⁻¹⁆ =
+          A (tc (tc (T.x₁ h ^ T.d h) (T.x₁ i)) (T.x₁ h)) := by
+        calc A ⁅⁅(T.x₁ i)⁻¹, (T.x₁ h ^ T.d h)⁻¹⁆, (T.x₁ h)⁻¹⁆ =
+            A ⁅(tc (T.x₁ h ^ T.d h) (T.x₁ i))⁻¹, (T.x₁ h)⁻¹⁆ := by
+              rw [tc_inv (T.x₁ h ^ T.d h) (T.x₁ i), tc_eq (T.x₁ i) (T.x₁ h ^ T.d h)]
+          _ = A (tc (tc (T.x₁ h ^ T.d h) (T.x₁ i)) (T.x₁ h)) := by
+            rw [tc_eq (tc (T.x₁ h ^ T.d h) (T.x₁ i)) (T.x₁ h)]
+      have hJ := ClassFour.jacobi4 S.h5 A hF (T.x₁ h)⁻¹ (T.x₁ i)⁻¹
+        (z := (T.x₁ h ^ T.d h)⁻¹) (inv_mem (S.Y1 h))
+      rw [hU, hV, hW, add_zero] at hJ
+      have hAB : A (tc (tc (T.x₁ h ^ T.d h) (T.x₁ i)) (T.x₁ h)) =
+          A (tc (T.x₁ h ^ T.d h) (tc (T.x₁ i) (T.x₁ h))) := by
+        apply eq_of_sub_eq_zero
+        rw [sub_eq_add_neg, add_comm]
+        exact hJ
+      rw [hAB]
+      by_cases ha : act h
+      · exact S.kill hA (S.omega_le_rev hA hig _ (S.Y1 h)) (S.w'3 hτ ha hig le_rfl)
+      · obtain ⟨a, ha1, c, hc3, hY⟩ := S.hK h ha
+        have hc12 : tc (T.x₁ i) (T.x₁ h) ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+          tc_mem (i := 0) (j := 0) (n := 1) (by omega) (mem_lcs_zero _) (mem_lcs_zero _)
+        have hza : tc a (tc (T.x₁ i) (T.x₁ h)) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
+          lcs_mem_of_le (by norm_num) (tc_mem (i := 1) (j := 1) (n := 3) (by omega) ha1 hc12)
+        rw [hY, tc_mul_left_L1 S.h5 (pow_mem ha1 3) (lcs_mem_of_le (by norm_num) hc3),
+          tc_pow_left_L1 S.h5 ha1, tc_L2_L1 S.h5 hc3 hc12, mul_one, addMapG_pow hA hza,
+          smul_smul]
+        exact S.kill hA (S.omega_le_rev hA hig a ha1) (by push_cast; exact dvd_mul_left _ _)
+    · -- a second index above `i`: everything is killed by `d(i) ∣ 3^μ`
+      obtain ⟨k, hk⟩ := not_forall.mp htop
+      obtain ⟨hik, hkg⟩ := not_imp.mp hk
+      obtain ⟨r, hr⟩ := S.small hig hik hkg.symm
+      have hrr : ((T.d i : ℕ) : ℤ) ∣ ((3 ^ μ : ℕ) : ℤ) := ⟨r, by exact_mod_cast hr⟩
+      have hkill : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1,
+          ((3 ^ μ : ℕ) : ℤ) • A (tc (tc a (T.x₁ i)) (T.x₁ h)) = 0 := by
+        intro a ha
+        have hi2 : tc a (T.x₁ i) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
+          tc_mem (i := 1) (j := 0) (n := 2) (by omega) ha (mem_lcs_zero _)
+        have hz3 : tc (tc a (T.x₁ i)) (T.x₁ h) ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
+          tc_mem (i := 2) (j := 0) (n := 3) (by omega) hi2 (mem_lcs_zero _)
+        exact S.smul_of_nat_dvd_of_pow_eq_one hA (lcs_mem_of_le (by norm_num) hz3) hrr
+          (S.triple_pow_mid ha (T.x₁ h) (S.Y1 i))
+      by_cases ha : act g
+      · exact S.kill hA (hkill _ (S.Y1 g)) (S.w'3 hτ ha hig hgh)
+      · obtain ⟨a, ha1, c, hc, hY⟩ := S.hK g ha
+        have hinner : tc a (T.x₁ i) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
+          tc_mem (i := 1) (j := 0) (n := 2) (by omega) ha1 (mem_lcs_zero _)
+        have hsecond : tc c (T.x₁ i) ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
+          tc_mem (i := 2) (j := 0) (n := 3) (by omega) hc (mem_lcs_zero _)
+        have hz3 : tc (tc a (T.x₁ i)) (T.x₁ h) ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
+          tc_mem (i := 2) (j := 0) (n := 3) (by omega) hinner (mem_lcs_zero _)
+        have hz : tc (tc (T.x₁ g ^ T.d g) (T.x₁ i)) (T.x₁ h) =
+            tc (tc a (T.x₁ i)) (T.x₁ h) ^ 3 := by
+          rw [hY, tc_mul_left_L1 S.h5 (pow_mem ha1 3) (lcs_mem_of_le (by norm_num) hc),
+            tc_pow_left_L1 S.h5 ha1,
+            tc_mul_left_L1 S.h5 (lcs_mem_of_le (by norm_num) (pow_mem hinner 3))
+              (lcs_mem_of_le (by norm_num) hsecond),
+            tc_pow_left_L1 S.h5 (lcs_mem_of_le (by norm_num) hinner),
+            tc_L3 S.h5 hsecond, mul_one]
+        rw [hz, addMapG_pow hA (lcs_mem_of_le (by norm_num) hz3), smul_smul]
+        exact S.kill hA (hkill a ha1) (by push_cast; exact dvd_mul_left _ _)
+  · rw [smul_zero]
 
 theorem T4_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T4 T τ A = 0 := by
-  sorry
+  classical
+  unfold Star.T4
+  rw [smul_neg, neg_eq_zero, Finset.smul_sum]
+  refine Finset.sum_eq_zero fun j _ => ?_
+  rw [Finset.smul_sum]
+  refine Finset.sum_eq_zero fun k _ => ?_
+  rw [Finset.smul_sum]
+  refine Finset.sum_eq_zero fun h _ => ?_
+  split_ifs with hjkh
+  · obtain ⟨hjk, hkh⟩ := hjkh
+    obtain ⟨r, hr⟩ := S.hsmall j k h hjk hkh
+    have hrr : ((T.d j : ℕ) : ℤ) ∣ ((3 ^ μ : ℕ) : ℤ) := ⟨r, by exact_mod_cast hr⟩
+    have hc : tc (T.x₁ j) (T.x₁ k) ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+      tc_mem (i := 0) (j := 0) (n := 1) (by omega) (mem_lcs_zero _) (mem_lcs_zero _)
+    have hkill : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1,
+        ((3 ^ μ : ℕ) : ℤ) • A (tc a (tc (T.x₁ j) (T.x₁ k))) = 0 := by
+      intro a ha
+      have hz : tc a (tc (T.x₁ j) (T.x₁ k)) ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
+        tc_mem (i := 1) (j := 1) (n := 3) (by omega) ha hc
+      have hp : tc a (tc (T.x₁ j) (T.x₁ k)) ^ T.d j = 1 := by
+        have h' := S.c_pow_kill j k ha
+        rw [← tc_inv, inv_pow, h', inv_one]
+      exact S.smul_of_nat_dvd_of_pow_eq_one hA (lcs_mem_of_le (by norm_num) hz) hrr hp
+    by_cases ha : act h
+    · exact S.kill hA (hkill _ (S.Y1 h)) (S.w''3 hτ ha hjk hkh)
+    · obtain ⟨a, ha1, c, hc3, hY⟩ := S.hK h ha
+      have hz : tc (T.x₁ h ^ T.d h) (tc (T.x₁ j) (T.x₁ k)) =
+          tc a (tc (T.x₁ j) (T.x₁ k)) ^ 3 := by
+        rw [hY, tc_mul_left_L1 S.h5 (pow_mem ha1 3) (lcs_mem_of_le (by norm_num) hc3),
+          tc_pow_left_L1 S.h5 ha1, tc_L2_L1 S.h5 hc3 hc, mul_one]
+      have hza : tc a (tc (T.x₁ j) (T.x₁ k)) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
+        lcs_mem_of_le (by norm_num) (tc_mem (i := 1) (j := 1) (n := 3) (by omega) ha1 hc)
+      rw [hz, addMapG_pow hA hza, smul_smul]
+      exact S.kill hA (hkill a ha1) (by push_cast; exact dvd_mul_left _ _)
+  · rw [smul_zero]
 
 theorem T5_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T5 T τ A = 0 := by
-  sorry
+  suffices h : Star.T5 T τ A = 0 by rw [h, smul_zero]
+  unfold Star.T5
+  rw [neg_eq_zero]
+  refine Finset.sum_eq_zero fun i _ => Finset.sum_eq_zero fun k _ => ?_
+  have hc2 : tc (T.x₂ k) (T.x₁ i) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
+    tc_mem (i := 1) (j := 0) (n := 2) (by omega) (S.x2mem k) (mem_lcs_zero _)
+  have ht3 : tc (tc (T.x₂ k) (T.x₁ i)) (T.x₁ i) ∈
+      (⊤ : Subgroup G).lowerCentralSeries 3 :=
+    tc_mem (i := 2) (j := 0) (n := 3) (by omega) hc2 (mem_lcs_zero _)
+  have hp : tc (tc (T.x₂ k) (T.x₁ i)) (T.x₁ i) ^ T.d i = 1 :=
+    S.triple_pow_mid (S.x2mem k) (T.x₁ i) (S.Y1 i)
+  exact S.smul_of_nat_dvd_of_pow_eq_one hA (lcs_mem_of_le (by norm_num) ht3)
+    ((S.ch2_dvd_d i).mul_left _) hp
 
 end Values
 
@@ -862,7 +1091,39 @@ end Setup
 theorem Setup.gen_pow_eq_one {T : Data G} {act : Fin T.s → Prop} {μ : ℕ}
     (S : Setup T act μ) {τ : Coeffs T.s T.t} (hτ : T.Admissible τ) :
     T.gen τ ^ (3 ^ (μ - 1)) = 1 := by
-  sorry
+  classical
+  have hg2 := S.gen_mem hτ
+  let _ : CommGroup ↥((⊤ : Subgroup G).lowerCentralSeries 2) :=
+    commGroupOfComm _ (fun a ha b hb => comm_L2 S.h5 ha hb)
+  let A : G → Additive ↥((⊤ : Subgroup G).lowerCentralSeries 2) := fun g =>
+    if hg : g ∈ (⊤ : Subgroup G).lowerCentralSeries 2 then Additive.ofMul ⟨g, hg⟩ else 0
+  have hA : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 2,
+      ∀ b ∈ (⊤ : Subgroup G).lowerCentralSeries 2, A (a * b) = A a + A b := by
+    intro a ha b hb
+    simp only [A, ha, hb, mul_mem ha hb, ↓reduceDIte]
+    rfl
+  have h2 := Star.two_smul_gen_eq S.h5 S.valid hτ hA
+  have hM : ((3 ^ (μ - 1) : ℕ) : ℤ) • ((2 : ℤ) • A (T.gen τ)) = 0 := by
+    rw [h2]
+    simp only [smul_add]
+    rw [S.T1_eq hA hτ, S.T2_eq hA hτ, S.T3_eq hA hτ, S.T4_eq hA hτ, S.T5_eq hA hτ]
+    simp
+  have hg' : T.gen τ ^ (3 ^ (μ - 1)) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := pow_mem hg2 _
+  have hsq : (T.gen τ ^ (3 ^ (μ - 1))) ^ 2 = 1 := by
+    have e : A ((T.gen τ ^ (3 ^ (μ - 1))) ^ 2) = 0 := by
+      rw [addMapG_pow hA hg', addMapG_pow hA hg2, smul_smul, mul_comm, ← smul_smul]
+      exact_mod_cast hM
+    simp only [A, pow_mem hg' 2, ↓reduceDIte] at e
+    have e' := congrArg Additive.toMul e
+    rw [toMul_ofMul, toMul_zero] at e'
+    simpa using congrArg Subtype.val e'
+  obtain ⟨m, hm⟩ := S.htor _ hg'
+  have hcop : Nat.gcd 2 (3 ^ m) = 1 := Nat.Coprime.pow_right m (by norm_num : Nat.Coprime 2 3)
+  have hord : orderOf (T.gen τ ^ (3 ^ (μ - 1))) = 1 := by
+    have h := Nat.dvd_gcd (orderOf_dvd_of_pow_eq_one hsq) (orderOf_dvd_of_pow_eq_one hm)
+    rw [hcop] at h
+    exact Nat.dvd_one.mp h
+  exact orderOf_eq_one_iff.mp hord
 
 end ThirdInvariant
 
