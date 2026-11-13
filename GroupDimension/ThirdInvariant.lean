@@ -760,7 +760,7 @@ theorem cY {i h : Fin T.s} (hih : i < h) :
       rw [hY, S.tc_mul_right_L1 hc (pow_mem ha 3), tc_pow_right_L1 S.h5 hc ha, hzero, mul_one]
     have hza : tc (tc (T.x₁ i) (T.x₁ h)) a ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
       lcs_mem_of_le (by norm_num) (tc_mem (i := 1) (j := 1) (n := 3) (by omega) hc ha)
-    rw [hmap, addMapG_pow hA hza, smul_smul]
+    rw [hmap, addMapG_pow hA hza, smul_smul (τ.u i h)]
     refine S.kill hA (S.omega_le hA hih a ha) ?_
     push_cast
     exact dvd_mul_left _ _
@@ -948,7 +948,7 @@ theorem T3_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T3 T τ A = 0 := by
           lcs_mem_of_le (by norm_num) (tc_mem (i := 1) (j := 1) (n := 3) (by omega) ha1 hc12)
         rw [hY, tc_mul_left_L1 S.h5 (pow_mem ha1 3) (lcs_mem_of_le (by norm_num) hc3),
           tc_pow_left_L1 S.h5 ha1, tc_L2_L1 S.h5 hc3 hc12, mul_one, addMapG_pow hA hza,
-          smul_smul]
+          smul_smul (τ.w' i h h)]
         refine S.kill hA (S.omega_le_rev hA hig a ha1) ?_
         push_cast
         exact dvd_mul_left _ _
@@ -983,7 +983,7 @@ theorem T3_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T3 T τ A = 0 := by
               (lcs_mem_of_le (by norm_num) hsecond),
             tc_pow_left_L1 S.h5 (lcs_mem_of_le (by norm_num) hinner),
             tc_L3 S.h5 hsecond, mul_one]
-        rw [hz, addMapG_pow hA (lcs_mem_of_le (by norm_num) hz3), smul_smul]
+        rw [hz, addMapG_pow hA (lcs_mem_of_le (by norm_num) hz3), smul_smul (τ.w' i g h)]
         refine S.kill hA (hkill a ha1) ?_
         push_cast
         exact dvd_mul_left _ _
@@ -1022,7 +1022,7 @@ theorem T4_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T4 T τ A = 0 := by
           tc_pow_left_L1 S.h5 ha1, tc_L2_L1 S.h5 hc3 hc, mul_one]
       have hza : tc a (tc (T.x₁ j) (T.x₁ k)) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
         lcs_mem_of_le (by norm_num) (tc_mem (i := 1) (j := 1) (n := 3) (by omega) ha1 hc)
-      rw [hz, addMapG_pow hA hza, smul_smul]
+      rw [hz, addMapG_pow hA hza, smul_smul (τ.w'' j k h)]
       refine S.kill hA (hkill a ha1) ?_
       push_cast
       exact dvd_mul_left _ _
