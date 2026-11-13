@@ -706,8 +706,8 @@ theorem omega_le {i h : Fin T.s} (hih : i < h) (a : G)
     ((3 ^ μ : ℕ) : ℤ) • A (tc (tc (T.x₁ i) (T.x₁ h)) a) = 0 := by
   by_cases htop : ∀ k, i < k → k = h
   · exact S.omega_top hA hih htop a ha
-  · push_neg at htop
-    obtain ⟨k, hik, hkh⟩ := htop
+  · obtain ⟨k, hk⟩ := not_forall.mp htop
+    obtain ⟨hik, hkh⟩ := not_imp.mp hk
     obtain ⟨r, hr⟩ := S.small hih hik hkh.symm
     have hc : tc (T.x₁ i) (T.x₁ h) ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
       tc_mem (i := 0) (j := 0) (n := 1) (by omega) (mem_lcs_zero _) (mem_lcs_zero _)
