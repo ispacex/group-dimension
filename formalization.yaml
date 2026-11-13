@@ -89,7 +89,7 @@ sources:
   - title: "D_5(Q) = 1 for Q/γ_2(Q) ≅ C_3 × C_9 × C_9: the author's research notes (2026-11-12), not part of the paper"
     authors: ["Stanislav Vorobev"]
     type: other
-    id: "https://github.com/ispacex/group-dimension/blob/PIN/docs/ab399.md"
+    id: "https://github.com/ispacex/group-dimension/blob/1a10e9453fb73c10ac40e6f39d8abba7a7dcd4b2/docs/ab399.md"
     location: "the theorem and its proof (public account of the notes)"
     contributors:
       - name: "Kimi K3.1 Pro (Moonshot AI), through Open Math OS"
@@ -113,7 +113,7 @@ sources:
   - title: "D_5 and the third invariant of Q/γ_2(Q) (class ≤ 4): the author's research notes (2026-11-12, Theorems 12.6 and 11.2), not part of the paper"
     authors: ["Stanislav Vorobev"]
     type: other
-    id: "https://github.com/ispacex/group-dimension/blob/PIN/docs/thm126.md"
+    id: "https://github.com/ispacex/group-dimension/blob/1a10e9453fb73c10ac40e6f39d8abba7a7dcd4b2/docs/thm126.md"
     location: "Theorems 12.6 and 11.2 and their proof (public account of the notes)"
     contributors:
       - name: "Kimi K3.1 Pro (Moonshot AI), through Open Math OS"
