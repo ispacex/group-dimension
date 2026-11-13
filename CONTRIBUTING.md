@@ -59,8 +59,13 @@ have been by independent AI agents (see `review` in `formalization.yaml`).
 
 ## AI-written code: Frontier and Core
 
-All Lean code of this repository so far was written by AI agents (Claude Code) under the direction
-of the author, who did not review the proofs line by line (`automation` in `formalization.yaml`).
+All Lean code of this repository so far was written by AI agents under the direction of the
+author, who did not review the proofs line by line (`automation` in `formalization.yaml`). Claude
+Code agents wrote all of it, with one exception: for the theorem on
+$Q/\gamma_2(Q)\cong C_3\times C_9\times C_9$ (2026-11-12), the proofs in `GroupDimension/Star.lean`,
+`GroupDimension/Star/`, `Ab399.lean` and `Ab399Finite.lean` were written by Kimi K3.1 Pro agents
+(through Open Math OS) against statements and a skeleton fixed by a Claude Code agent, and later
+edited in review by Claude Code agents.
 In the terms of the Stacks project, the whole library is therefore **Frontier**: checked by the Lean
 kernel and the axiom audit, reviewed by agents, but not by human experts. There is no **Core**
 (human-reviewed) part yet; a statement moves to Core only after a human review of its Lean
