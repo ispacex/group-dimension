@@ -136,8 +136,8 @@ $\Phi\colon\mathbb Z[G]\to T$ с первой координатой $\varepsilo
 $\Phi(g-1)=(0,\bar g)$. Это та же идея, что у авторов в `DegreeTwo.lean` (квадратично-нулевое
 представление).
 
-`#print axioms` для всех 2251 доказанных объявлений (`AxiomAudit.lean`: 2236 из разработки и
-15 сравниваемых теорем Palomar из `Solution.lean`) — только `propext`,
+`#print axioms` для всех 2306 доказанных объявлений (`AxiomAudit.lean`: 2289 из разработки и
+17 сравниваемых теорем Palomar из `Solution.lean`) — только `propext`,
 `Classical.choice`, `Quot.sound`. Ни `sorry`, ни `axiom` нет ни в разработке, ни в `Solution.lean`;
 `Challenge.lean` формулирует подаваемые результаты с `sorry` намеренно.
 
@@ -255,14 +255,18 @@ lake env lean AxiomAudit.lean
 
 Файлы `Challenge.lean`, `Solution.lean`, `comparator.json` и `formalization.yaml` — подача в
 [реестр Palomar](https://palomar-registry.org) машинно проверенных результатов. `Challenge.lean`
-формулирует пятнадцать результатов только средствами Mathlib (с `sorry`); `Solution.lean` (порождается
+формулирует семнадцать результатов только средствами Mathlib (с `sorry`); `Solution.lean` (порождается
 из него скриптом `palomar/make_solution.py`) дословно повторяет определения и доказывает каждое
 утверждение из разработки; Comparator проверяет, что они совпадают и что используются только
 `propext`, `Classical.choice`, `Quot.sound`. Workflow `.github/workflows/palomar-preflight.yml`
 запускает собственную проверку Palomar на каждом существенном push. Зарегистрировано как
 [PALOMAR-2026-10-23-000007](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007),
 версия 5 (13.11.2026, коммит `8de4db1`, все пятнадцать теорем: добавлено $D_5(Q)=1$ при
-$Q/\gamma_2(Q)\cong C_3\times C_9\times C_9$, ступень $\le4$, — этого утверждения нет в статье). Прежние версии: в версии 4
+$Q/\gamma_2(Q)\cong C_3\times C_9\times C_9$, ступень $\le4$, — этого утверждения нет в статье). После неё для следующей версии (ещё не
+зарегистрированной) добавлены ещё два результата, которых нет в статье: теорема 12.6 записок автора
+($z^{3^{\mu-1}}=1$ для $z\in D_5(Q)$, если у $Q_{ab}$ не больше двух инвариантов $>3^\mu$,
+`D_five_pow_eq_one_of_third_invariant`) и её случай $\mu=1$, теорема 11.2 ($D_5(Q)=1$, если не больше двух
+инвариантов $\ge9$, `D_five_eq_bot_of_two_large_invariants`); доказательство — [`docs/thm126.md`](docs/thm126.md). Прежние версии: в версии 4
 (07.11.2026, коммит `d4a8ddb`) их было четырнадцать, она добавила теорему 6.11 (достаточно
 $\gamma_4^3\subseteq\gamma_5$); в версии 3 того же дня, коммит `add1be7`, их было тринадцать, в версии 2,
 коммит `508a336`, — десять, в версии 1 от 23.10.2026 — девять.

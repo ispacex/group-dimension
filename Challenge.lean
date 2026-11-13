@@ -28,9 +28,13 @@ central series. Kourovka Problem 20.84 asks whether `D₅(G) ⊆ γ₄(G)` for e
   3-group with `γ₂/γ₃` of exponent at most 3, or still more generally a finite 3-group with
   `γ₄³ ⊆ γ₅` and `γ₂⁹ ⊆ γ₄`, and most generally a finite 3-group with `γ₄³ ⊆ γ₅`); Theorem D.1 of the paper (`D₅ = γ₅` when `G/γ₂` is a finite
   `p`-group, `p` odd, and `[γ₂, γ₂] ⊆ γ₅`; in particular Gupta–Tahara's theorem at `p = 3`:
-  `D₅ = γ₅` for finite metabelian 3-groups); one result that is **not in the paper**:
+  `D₅ = γ₅` for finite metabelian 3-groups); results that are **not in the paper**:
   `D₅(Q) = 1` for a finite group `Q` of class `≤ 4` with `Q/γ₂(Q) ≅ C₃ × C₉ × C₉`, with no
-  condition on `γ₄(Q)` (`D_five_eq_bot_of_class_four_ab399`); the inclusion `D₅(G) ⊆ G⁸γ₂⁴γ₃²`
+  condition on `γ₄(Q)` (`D_five_eq_bot_of_class_four_ab399`), and, for a finite 3-group `Q` of
+  class `≤ 4` with at most two invariants of `Q/γ₂(Q)` larger than `3^μ`, the exponent bound
+  `z^{3^{μ-1}} = 1` for `z ∈ D₅(Q)` (`D_five_pow_eq_one_of_third_invariant`), whose case
+  `μ = 1` is `D₅(Q) = 1` when at most two invariants are `≥ 9`
+  (`D_five_eq_bot_of_two_large_invariants`), again with no condition on `γ₄(Q)`; the inclusion `D₅(G) ⊆ G⁸γ₂⁴γ₃²`
   (Jennings' product `M₅`, class `≤ 3`; proved in the development through Jennings' "hard"
   inclusion in that case); Lemma 5.6 and the Lean part of
   Proposition 5.7 (statements about *candidates*).
@@ -191,6 +195,32 @@ theorem D_five_eq_bot_of_class_four_ab399 {Q : Type} [Group Q] [Finite Q]
     (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥)
     (hab : Nonempty (Q ⧸ (⊤ : Subgroup Q).lowerCentralSeries 1 ≃*
       Multiplicative (ZMod 3 × ZMod 9 × ZMod 9))) :
+    DSet 5 Q = {1} := by
+  sorry
+
+/-- **Not a statement of the paper**, and the paper is not changing: Theorem 12.6 of the author's
+research notes (account: `docs/thm126.md`; see also `formalization.yaml`), as an exponent bound.
+Let `Q` be a finite 3-group of class `≤ 4` (`γ₅(Q) = 1`) and `μ` a natural number such that at
+most two invariants of `Q/γ₂(Q)` are larger than `3^μ`, stated intrinsically: the subgroup of
+`3^μ`-th powers of `Q/γ₂(Q)` has at most `9` elements of order dividing `3` (for
+`Q/γ₂(Q) ≅ ∏ C_{3^{k_i}}` it has exactly `3^{#{i : k_i > μ}}`). Then every `z ∈ D₅(Q)` satisfies
+`z^{3^{μ-1}} = 1` (natural subtraction: `z = 1` for `μ ≤ 1`). There is no condition on `γ₄(Q)`.
+The notes state `D₅(Q) ⊆ Ω_{μ-1}(γ₄(Q))`; the part `D₅(Q) ⊆ γ₄(Q)` is not claimed here. -/
+theorem D_five_pow_eq_one_of_third_invariant {Q : Type} [Group Q] [Finite Q]
+    (h3 : IsPGroup 3 Q) (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥) (μ : ℕ)
+    (hsoc : Nat.card {w : Abelianization Q // w ^ 3 = 1 ∧ ∃ v, w = v ^ (3 ^ μ)} ≤ 9) :
+    ∀ z ∈ DSet 5 Q, z ^ (3 ^ (μ - 1)) = 1 := by
+  sorry
+
+/-- **Not a statement of the paper**: Theorem 11.2 of the author's research notes, the case
+`μ = 1` of `D_five_pow_eq_one_of_third_invariant` (account: `docs/thm126.md`). Let `Q` be a finite
+3-group of class `≤ 4` such that at most two invariants of `Q/γ₂(Q)` are `≥ 9`, stated as: the
+subgroup of cubes of `Q/γ₂(Q)` has at most `9` elements of order dividing `3`. Then `D₅(Q) = 1`,
+with no condition on `γ₄(Q)`. This contains `D_five_eq_bot_of_class_four_ab399` (type
+`[3, 9, 9]`) for 3-groups. -/
+theorem D_five_eq_bot_of_two_large_invariants {Q : Type} [Group Q] [Finite Q]
+    (h3 : IsPGroup 3 Q) (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥)
+    (hsoc : Nat.card {w : Abelianization Q // w ^ 3 = 1 ∧ ∃ v, w = v ^ 3} ≤ 9) :
     DSet 5 Q = {1} := by
   sorry
 

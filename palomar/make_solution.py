@@ -82,6 +82,9 @@ PROOFS = {
 'D_five_eq_gamma_five_of_g4_cube_g2_nine': r'''  rw [DSet_eq, GroupDimension.D_five_eq_gamma_five_of_g4_cube_g2_nine G hfin h3grp h4 h9]''',
 'D_five_eq_gamma_five_of_g4_cube': r'''  rw [DSet_eq, GroupDimension.D_five_eq_gamma_five_of_g4_cube G hfin h3grp h4]''',
 'D_five_eq_bot_of_class_four_ab399': r'''  exact DSet_eq_one_iff.2 (GroupDimension.D_five_eq_bot_of_class_four_ab399 h5 hab)''',
+'D_five_pow_eq_one_of_third_invariant': r'''  exact fun z hz =>
+    GroupDimension.D_five_pow_eq_one_of_third_invariant h3 h5 μ hsoc z (by rwa [DSet_eq] at hz)''',
+'D_five_eq_bot_of_two_large_invariants': r'''  exact DSet_eq_one_iff.2 (GroupDimension.D_five_eq_bot_of_two_large_invariants h3 h5 hsoc)''',
 'D_five_eq_gamma_five_of_metabelian': r'''  have : Fact p.Prime := ⟨hp⟩
   rw [DSet_eq, GroupDimension.GuptaTahara.D_five_eq_gamma_five_of_metabelian hp2 G hfin hpg hmet]''',
 'D_five_eq_gamma_five_of_metabelian_three': r'''  rw [DSet_eq, GroupDimension.guptaTaharaMetabelian_three G hG hd]''',

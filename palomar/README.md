@@ -11,7 +11,7 @@ the repository root, licence `LICENSE` (MIT). The Lean project is the repository
   development's definitions (`DSet_eq : DSet n G = D n G`, `isCandidate_iff`, ...). It then
   proves each theorem from the development. After editing the Challenge, run
   `python3 palomar/make_solution.py`.
-* `comparator.json` names the fifteen compared theorems. The permitted axioms are `propext`,
+* `comparator.json` names the seventeen compared theorems. The permitted axioms are `propext`,
   `Quot.sound` and `Classical.choice`.
 * `formalization.yaml` holds the metadata: sources, the automation and review account, fidelity
   notes and alignment.
@@ -28,10 +28,13 @@ the repository root, licence `LICENSE` (MIT). The Lean project is the repository
 | [1](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=1) | 2026-10-23 | `533dc1c` | nine (without Theorem 6.9; Prop 2.1, Lemma 5.2 and the `D₅` form of Prop 5.7 with `D₃ = γ₃` as an additional hypothesis, Prop 2.1 also with Passi's and Gruenberg's theorems) |
 | [2](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=2) | 2026-11-07 | `508a336` | ten (without Theorems 6.10 and D.1, nor Gupta–Tahara at `p = 3`) |
 | [3](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=3) | 2026-11-07 | `add1be7` | thirteen (adds Theorems 6.10 and D.1, Gupta–Tahara at `p = 3`) |
-| [4](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=4) | 2026-11-07 | `d4a8ddb` | the fourteen listed below other than `D_five_eq_bot_of_class_four_ab399` (adds Theorem 6.11) |
-| [5](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=5) | 2026-11-13 | `8de4db1` | the fifteen listed below (adds `D_five_eq_bot_of_class_four_ab399`, not in the paper) |
+| [4](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=4) | 2026-11-07 | `d4a8ddb` | the fourteen listed below other than `D_five_eq_bot_of_class_four_ab399`, `D_five_pow_eq_one_of_third_invariant` and `D_five_eq_bot_of_two_large_invariants` (adds Theorem 6.11) |
+| [5](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=5) | 2026-11-13 | `8de4db1` | fifteen: all listed below other than `D_five_pow_eq_one_of_third_invariant` and `D_five_eq_bot_of_two_large_invariants` (adds `D_five_eq_bot_of_class_four_ab399`, not in the paper) |
 
-Later commits are not registered until a new version is submitted.
+Later commits are not registered until a new version is submitted. The next version is to add
+`D_five_pow_eq_one_of_third_invariant` and `D_five_eq_bot_of_two_large_invariants` (Theorems 12.6
+and 11.2 of the author's notes, not in the paper); it will be submitted together with the next
+substantive change, not on its own.
 
 ## What is claimed
 
@@ -56,6 +59,8 @@ Indexing: Mathlib's `(⊤ : Subgroup G).lowerCentralSeries k` is `γ_{k+1}(G)`.
 | Prop 2.1 (1) ⇔ (3) | `D₅ ⊆ γ₄` for all groups ⇔ `D₅(Q) = 1` for all finite 2-groups `Q` of class exactly 3; "metabelian" dropped (Remark 2.2, `metabelian_of_class_three`) | `dimensionQuestion5_iff_class_three` |
 | Lemma 5.2 (a)–(c) | a minimal finite 2-group of class 3 with `D₅ ≠ 1` is a candidate, `D₅ = ⟨n⟩` | `isCandidate_of_minimal` |
 | **not in the paper** (author's notes) | finite `Q` of class ≤ 4 (`γ₅(Q) = 1`) with `Q/γ₂(Q) ≅ C₃ × C₉ × C₉` ⇒ `D₅(Q) = 1`; no condition on `γ₄(Q)`, so `γ₄ ≅ C₉` (not covered by Thm 6.11; left open in Remark 6.13) is covered; proof: [`docs/ab399.md`](../docs/ab399.md) | `D_five_eq_bot_of_class_four_ab399` |
+| **not in the paper** (author's notes, Thm 12.6) | finite 3-group `Q` of class ≤ 4 with at most two invariants of `Q/γ₂(Q)` larger than `3^μ` (stated as: the `3^μ`-th powers of `Q_ab` contain at most 9 elements of order dividing 3) ⇒ `z^{3^{μ-1}} = 1` for every `z ∈ D₅(Q)`; no condition on `γ₄(Q)`; the notes' `D₅ ⊆ Ω_{μ-1}(γ₄)` is claimed only as this exponent bound; proof: [`docs/thm126.md`](../docs/thm126.md) | `D_five_pow_eq_one_of_third_invariant` |
+| **not in the paper** (author's notes, Thm 11.2 = Thm 12.6 at `μ = 1`) | finite 3-group `Q` of class ≤ 4 with at most two invariants of `Q/γ₂(Q)` that are `≥ 9` ⇒ `D₅(Q) = 1`; no condition on `γ₄(Q)`; contains the previous row for 3-groups | `D_five_eq_bot_of_two_large_invariants` |
 
 The proofs of Prop 2.1 and Lemma 5.2 use `D₃ = γ₃` (Higman–Rees–Passi), Passi's `D₄² ⊆ γ₄`
 and Gruenberg's theorem on finite 2-quotients of finitely generated nilpotent groups; all three
