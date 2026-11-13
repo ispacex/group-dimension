@@ -17,6 +17,9 @@ powers has at most `9` elements (for `Q_ab ≅ ∏ C_{3^{k_i}}` it has `3^{#{i :
 * `D_five_eq_bot_of_two_large_invariants` (Theorem 11.2, the case `μ = 1`): if at most two
   invariants of `Q_ab` are `≥ 9`, then `D₅(Q) = 1`, with no condition on `γ₄(Q)`.
 
+The inclusion `D₅(Q) ⊆ γ₄(Q)`, which with the exponent bound gives `D₅(Q) ⊆ Ω_{μ-1}(γ₄(Q))` as in
+the notes, is not formalized here.
+
 The finite reduction (the uniqueness bases, the basis adapted to the kernel of the cube map) is
 that of `Ab399Finite.lean`; the hypothesis `hsmall` of `ThirdInvariant.Setup` comes from the socle
 bound: three indices `i < j < k` with `d(i) ∤ 3^μ` would give the `27` socle vectors
@@ -146,7 +149,7 @@ theorem D_five_pow_eq_one_of_third_invariant' (hT : TaharaFiveOne) {Q : Type} [G
     exact hcm i
   let act : Fin s → Prop := fun i => ¬ ∃ a ∈ (⊤ : Subgroup Q).lowerCentralSeries 1,
     ∃ c ∈ (⊤ : Subgroup Q).lowerCentralSeries 2, x1 i ^ (3 ^ (ht i + 1)) = a ^ 3 * c
-  -- the socle vectors `z_i = 3^{h_i} x̄_i`, with `z_i ∈ Ker0` exactly for the inactive `i`
+  -- the socle vectors `z_i = 3^{h_i} x̄_i`, with `z_i ∉ Ker0` for an active `i`
   have hz3 : ∀ i, (3 : ℕ) • cl Q 0 (x1 i ^ (3 ^ ht i)) = 0 := by
     intro i
     rw [← natCast_zsmul, ← cl_zpow (mem_lcs_zero _), zpow_natCast, ← pow_mul, ← pow_succ,
@@ -188,7 +191,8 @@ theorem D_five_pow_eq_one_of_third_invariant' (hT : TaharaFiveOne) {Q : Type} [G
             (3 : ℤ) • cl Q 1 (tc l.prod w) := by abel
       rw [this]
       exact add_mem hlT (hT3 _)
-  have hind : ∀ cf : Fin s → ℤ, (∀ k, (3 : ℤ) ∣ ∑ h, cf h * b h k) → ∀ h, act h → (3 : ℤ) ∣ cf h := by
+  have hind : ∀ cf : Fin s → ℤ, (∀ k, (3 : ℤ) ∣ ∑ h, cf h * b h k) →
+      ∀ h, act h → (3 : ℤ) ∣ cf h := by
     intro cf hcf h hh
     refine hKer cf ?_ h (hnotK h hh)
     -- `∑ cf_i z_i ∈ Ker0`
@@ -361,7 +365,7 @@ theorem D_five_pow_eq_one_of_third_invariant' (hT : TaharaFiveOne) {Q : Type} [G
       fun l => dvd_pow_self 3 (Nat.succ_ne_zero _), hsmall, fun i hi => not_not.mp hi, hind⟩
   intro z hz
   have hle := hT Q h5 T hvalid hz
-  let Ωμ : Subgroup Q :=
+  let Ωγ₃ : Subgroup Q :=
     { carrier := {y | y ∈ (⊤ : Subgroup Q).lowerCentralSeries 2 ∧ y ^ (3 ^ (μ - 1)) = 1}
       one_mem' := ⟨one_mem _, one_pow _⟩
       mul_mem' := by
@@ -372,7 +376,7 @@ theorem D_five_pow_eq_one_of_third_invariant' (hT : TaharaFiveOne) {Q : Type} [G
       inv_mem' := by
         rintro a ⟨ha, ha'⟩
         exact ⟨inv_mem ha, by rw [inv_pow, ha', inv_one]⟩ }
-  have hcl : Subgroup.closure {y | ∃ τ : Coeffs T.s T.t, T.Admissible τ ∧ y = T.gen τ} ≤ Ωμ := by
+  have hcl : Subgroup.closure {y | ∃ τ : Coeffs T.s T.t, T.Admissible τ ∧ y = T.gen τ} ≤ Ωγ₃ := by
     rw [Subgroup.closure_le]
     rintro y ⟨τ, hτ, rfl⟩
     exact ⟨S.gen_mem hτ, S.gen_pow_eq_one hτ⟩

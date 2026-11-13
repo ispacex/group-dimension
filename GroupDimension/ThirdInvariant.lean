@@ -5,13 +5,15 @@ public import GroupDimension.Ab399
 @[expose] public section
 
 /-!
-# `D₅ ⊆ Ω_{μ-1}(γ₄)`: the third invariant of `Q_ab` (Theorem 12.6 of wiki 891; MATH-468)
+# `D₅ ⊆ Ω_{μ-1}`: the third invariant of `Q_ab` (Theorem 12.6 of wiki 891; MATH-468)
 
 Let `Q` be a finite `3`-group of class `≤ 4` and `3^μ` the third largest invariant of `Q_ab`
 (`μ = 0` when `Q_ab` has at most two invariants). Theorem 12.6 of the notes (MATH wiki page 891,
 §12.3, MATH-451) states `D₅(Q) ⊆ Ω_{μ-1}(γ₄(Q))` (`Ω_{-1} = 1`); with `μ ≤ 1` it gives
 Theorem 11.2: `D₅(Q) = 1` when at most two invariants of `Q_ab` are `≥ 9`, with no condition
-on `γ₄`.
+on `γ₄`. In Lean the bound is proved as an exponent bound, `z^{3^{μ-1}} = 1` for
+`z ∈ D₅(Q)`; the inclusion `D₅(Q) ⊆ γ₄(Q)` (which with it gives `Ω_{μ-1}(γ₄)`) is not
+formalized here.
 
 This file proves the core: in the situation `Setup` (Tahara's data with a basis adapted to the
 kernel of the cube map, as in `Ab399.Setup`, with every `d(i)` a power of `3` and
@@ -113,7 +115,8 @@ theorem three_dvd_q {i j : Fin T.s} (hij : i ≤ j) (hne : T.d i ≠ T.d j) : 3 
 
 /-- For `c ∈ γ₂`, the right argument of `[c, ·]` is multiplicative in class `≤ 4`. -/
 theorem tc_mul_right_L1 {c : G} (hc : c ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
-    {a : G} (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (b : G) : tc c (a * b) = tc c a * tc c b := by
+    {a : G} (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (b : G) :
+    tc c (a * b) = tc c a * tc c b := by
   have hz : tc c a ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
     tc_mem (i := 1) (j := 1) (n := 3) (by norm_num) hc ha
   have hconj : b⁻¹ * tc c a * b = tc c a := by
@@ -294,7 +297,8 @@ theorem crow_act (r : Fin T.s) {h : Fin T.s} (hh : act h) : (3 : ℤ) ∣ crow T
     simp only [crow]
     split_ifs <;> ring
   rw [ec]
-  have hd : (3 : ℤ) ∣ τ.v r k * T.d r := (by exact_mod_cast S.three_dvd_d r : (3 : ℤ) ∣ T.d r).mul_left _
+  have hd : (3 : ℤ) ∣ τ.v r k * T.d r :=
+    (by exact_mod_cast S.three_dvd_d r : (3 : ℤ) ∣ T.d r).mul_left _
   have he : (3 : ℤ) ∣ τ.v' r k * T.e k := (by exact_mod_cast S.he k : (3 : ℤ) ∣ T.e k).mul_left _
   generalize (∑ y, if r < y then τ.u r y * T.b y k else 0) = X at hB ⊢
   generalize (∑ y, if y < r then τ.u y r * T.q y r * T.b y k else 0) = Y at hB ⊢
@@ -423,7 +427,7 @@ theorem c_triple_kill (a b : Fin T.s) (x y : G) :
   have h1 : tc (tc (tc (T.x₁ a) (T.x₁ b) ^ T.d a) x) y = 1 := by rwa [S.h5, mem_bot] at hz
   rwa [tc_pow_left_L1 S.h5 hc1 x, tc_pow_left_L1 S.h5 (lcs_mem_of_le (by norm_num) hd2) y] at h1
 
-/-- `(n-1)/2` and `K n = C(n,3) - (n-1)/2 · C(n,2)` (`= -n(n²-1)/12` for odd `n`): the coefficients
+/-- `K n = C(n,3) - (n-1)/2 · C(n,2)` (`= -n(n²-1)/12` for odd `n`): with `(n-1)/2`, a coefficient
 of the degree-`n` defect `delta_general`. -/
 def K (n : ℕ) : ℤ := ((n.choose 3 : ℕ) : ℤ) - (((n - 1) / 2 : ℕ) : ℤ) * ((n.choose 2 : ℕ) : ℤ)
 
@@ -1050,7 +1054,7 @@ theorem T5_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T5 T τ A = 0 := by
 
 end Values
 
-/-- Tahara's generators lie in `γ₃`. -/
+/-- Tahara's generators lie in `γ₃` (membership in `γ₄` is not needed for the exponent bound). -/
 theorem gen_mem {τ : Coeffs T.s T.t} (_hτ : T.Admissible τ) :
     T.gen τ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := by
   classical
