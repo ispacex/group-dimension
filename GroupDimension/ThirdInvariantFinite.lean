@@ -352,14 +352,8 @@ theorem D_five_pow_eq_one_of_third_invariant' (hT : TaharaFiveOne) {Q : Type} [G
       · exact key i 0 (by rw [hcf_i, hcf_i, Nat.sub_zero]; ring)
       · exact key j 1 (by rw [hcf_j, hcf_j, Nat.sub_zero]; ring)
       · exact key k 2 (by rw [hcf_k, hcf_k, Nat.sub_zero]; ring)
-    have : Finite (Abelianization Q) := by
-      first
-      | exact inferInstance
-      | exact Finite.of_surjective (Abelianization.of : Q →* Abelianization Q) fun y => by
-          obtain ⟨g, hg⟩ := QuotientGroup.mk_surjective (s := commutator Q) y
-          exact ⟨g, hg⟩
     have hcard := Nat.card_le_card_of_injective w hw
-    have h27 : Nat.card (Fin 3 → ZMod 3) = 27 := by simp [Nat.card_zmod]
+    have h27 : Nat.card (Fin 3 → ZMod 3) = 27 := by simp
     omega
   have S : Setup T act μ :=
     ⟨h5, htor, hvalid, fun i => ⟨ht i, rfl⟩,

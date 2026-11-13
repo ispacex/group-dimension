@@ -486,6 +486,7 @@ variable {N : Type*} [AddCommGroup N] {A : G → N}
     A (a * b) = A a + A b)
 include hA
 
+omit S in
 /-- An additive map sends an `n`-torsion element to an `n`-torsion value. -/
 theorem smul_of_pow_eq_one {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 2)
     {n : ℕ} (hp : z ^ n = 1) : (n : ℤ) • A z = 0 := by
@@ -497,7 +498,7 @@ theorem smul_of_pow_eq_one {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSe
 theorem smul_of_nat_dvd_of_pow_eq_one {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 2)
     {n : ℕ} {w : ℤ} (hw : (n : ℤ) ∣ w) (hp : z ^ n = 1) : w • A z = 0 := by
   obtain ⟨q, rfl⟩ := hw
-  have h := S.smul_of_pow_eq_one hA hz hp
+  have h := smul_of_pow_eq_one hA hz hp
   have h' : ((n : ℤ) * q) • A z = q • ((n : ℤ) • A z) := by rw [smul_smul, mul_comm]
   rw [h', h, smul_zero]
 
@@ -725,6 +726,7 @@ theorem omega_le_rev {i h : Fin T.s} (hih : i < h) (a : G)
   rw [← tc_inv, addMapG_inv hA (lcs_mem_of_le (by norm_num) hz), smul_neg,
     S.omega_le hA hih a ha, neg_zero]
 
+omit S hA in
 /-- A coefficient divisible by `3`, times `3^{μ-1}`, kills a value killed by `3^μ`. -/
 theorem kill {v : N} (hv : ((3 ^ μ : ℕ) : ℤ) • v = 0) {w : ℤ} (hw : (3 : ℤ) ∣ w) :
     ((3 ^ (μ - 1) : ℕ) : ℤ) • (w • v) = 0 := by
@@ -751,7 +753,7 @@ theorem cY {i h : Fin T.s} (hih : i < h) :
   · have hu : (3 : ℤ) ∣ τ.u i h := by
       have h' := S.crow_act hτ i hact
       simpa [crow, hih, not_lt.mpr hih.le] using h'
-    exact S.kill hA (S.omega_le hA hih _ (S.Y1 h)) hu
+    exact kill (S.omega_le hA hih _ (S.Y1 h)) hu
   · obtain ⟨a, ha, c, hc3, hY⟩ := S.hK h hact
     have hzero : tc (tc (T.x₁ i) (T.x₁ h)) c = 1 := by
       rw [← tc_inv, tc_L2_L1 S.h5 hc3 hc, inv_one]
@@ -761,7 +763,7 @@ theorem cY {i h : Fin T.s} (hih : i < h) :
     have hza : tc (tc (T.x₁ i) (T.x₁ h)) a ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
       lcs_mem_of_le (by norm_num) (tc_mem (i := 1) (j := 1) (n := 3) (by omega) hc ha)
     rw [hmap, addMapG_pow hA hza, smul_smul (τ.u i h)]
-    refine S.kill hA (S.omega_le hA hih a ha) ?_
+    refine kill (S.omega_le hA hih a ha) ?_
     push_cast
     exact dvd_mul_left _ _
 
@@ -769,8 +771,9 @@ theorem cY {i h : Fin T.s} (hih : i < h) :
 theorem cYlow {i h : Fin T.s} (hih : i < h) :
     ((3 ^ (μ - 1) : ℕ) : ℤ) • ((τ.u i h * T.q i h) •
       A (tc (tc (T.x₁ i) (T.x₁ h)) (T.x₁ i ^ T.d i))) = 0 := by
-  exact S.kill hA (S.omega_le hA hih _ (S.Y1 i)) (S.uq3 hτ hih)
+  exact kill (S.omega_le hA hih _ (S.Y1 i)) (S.uq3 hτ hih)
 
+omit hA in
 /-- `d(i) ∣ u_{ih} K(d(h))` for `i < h` (Theorem 1 of §10.2: the `t`-part of `T₁` vanishes). -/
 theorem uK_dvd {i h : Fin T.s} (hih : i < h) : (T.d i : ℤ) ∣ τ.u i h * K (T.d h) := by
   obtain ⟨a, ha⟩ := S.hd i
@@ -836,7 +839,7 @@ theorem T1_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T1 T τ A = 0 := by
       module
     rw [e, S.cYlow hA hτ hih, S.cY hA hτ hih]
     simp only [smul_zero, sub_zero, zero_add]
-    have hdv : ((T.d i : ℕ) : ℤ) ∣ M * (τ.u i h * K (T.d h)) := (S.uK_dvd hA hτ hih).mul_left _
+    have hdv : ((T.d i : ℕ) : ℤ) ∣ M * (τ.u i h * K (T.d h)) := (S.uK_dvd hτ hih).mul_left _
     rw [S.smul_of_nat_dvd_of_pow_eq_one hA (htri _) hdv
         (S.c_triple_kill i h (T.x₁ i) (T.x₁ i)),
       S.smul_of_nat_dvd_of_pow_eq_one hA (htri _) hdv
@@ -940,7 +943,7 @@ theorem T3_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T3 T τ A = 0 := by
         exact hJ
       rw [hAB]
       by_cases ha : act h
-      · exact S.kill hA (S.omega_le_rev hA hig _ (S.Y1 h)) (S.w'3 hτ ha hig le_rfl)
+      · exact kill (S.omega_le_rev hA hig _ (S.Y1 h)) (S.w'3 hτ ha hig le_rfl)
       · obtain ⟨a, ha1, c, hc3, hY⟩ := S.hK h ha
         have hc12 : tc (T.x₁ i) (T.x₁ h) ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
           tc_mem (i := 0) (j := 0) (n := 1) (by omega) (mem_lcs_zero _) (mem_lcs_zero _)
@@ -949,7 +952,7 @@ theorem T3_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T3 T τ A = 0 := by
         rw [hY, tc_mul_left_L1 S.h5 (pow_mem ha1 3) (lcs_mem_of_le (by norm_num) hc3),
           tc_pow_left_L1 S.h5 ha1, tc_L2_L1 S.h5 hc3 hc12, mul_one, addMapG_pow hA hza,
           smul_smul (τ.w' i h h)]
-        refine S.kill hA (S.omega_le_rev hA hig a ha1) ?_
+        refine kill (S.omega_le_rev hA hig a ha1) ?_
         push_cast
         exact dvd_mul_left _ _
     · -- a second index above `i`: everything is killed by `d(i) ∣ 3^μ`
@@ -967,7 +970,7 @@ theorem T3_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T3 T τ A = 0 := by
         exact S.smul_of_nat_dvd_of_pow_eq_one hA (lcs_mem_of_le (by norm_num) hz3) hrr
           (S.triple_pow_mid ha (T.x₁ h) (S.Y1 i))
       by_cases ha : act g
-      · exact S.kill hA (hkill _ (S.Y1 g)) (S.w'3 hτ ha hig hgh)
+      · exact kill (hkill _ (S.Y1 g)) (S.w'3 hτ ha hig hgh)
       · obtain ⟨a, ha1, c, hc, hY⟩ := S.hK g ha
         have hinner : tc a (T.x₁ i) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
           tc_mem (i := 1) (j := 0) (n := 2) (by omega) ha1 (mem_lcs_zero _)
@@ -984,7 +987,7 @@ theorem T3_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T3 T τ A = 0 := by
             tc_pow_left_L1 S.h5 (lcs_mem_of_le (by norm_num) hinner),
             tc_L3 S.h5 hsecond, mul_one]
         rw [hz, addMapG_pow hA (lcs_mem_of_le (by norm_num) hz3), smul_smul (τ.w' i g h)]
-        refine S.kill hA (hkill a ha1) ?_
+        refine kill (hkill a ha1) ?_
         push_cast
         exact dvd_mul_left _ _
   · rw [smul_zero]
@@ -1014,7 +1017,7 @@ theorem T4_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T4 T τ A = 0 := by
         rw [← tc_inv, inv_pow, h', inv_one]
       exact S.smul_of_nat_dvd_of_pow_eq_one hA (lcs_mem_of_le (by norm_num) hz) hrr hp
     by_cases ha : act h
-    · exact S.kill hA (hkill _ (S.Y1 h)) (S.w''3 hτ ha hjk hkh)
+    · exact kill (hkill _ (S.Y1 h)) (S.w''3 hτ ha hjk hkh)
     · obtain ⟨a, ha1, c, hc3, hY⟩ := S.hK h ha
       have hz : tc (T.x₁ h ^ T.d h) (tc (T.x₁ j) (T.x₁ k)) =
           tc a (tc (T.x₁ j) (T.x₁ k)) ^ 3 := by
@@ -1023,11 +1026,12 @@ theorem T4_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T4 T τ A = 0 := by
       have hza : tc a (tc (T.x₁ j) (T.x₁ k)) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
         lcs_mem_of_le (by norm_num) (tc_mem (i := 1) (j := 1) (n := 3) (by omega) ha1 hc)
       rw [hz, addMapG_pow hA hza, smul_smul (τ.w'' j k h)]
-      refine S.kill hA (hkill a ha1) ?_
+      refine kill (hkill a ha1) ?_
       push_cast
       exact dvd_mul_left _ _
   · rw [smul_zero]
 
+omit hτ in
 theorem T5_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T5 T τ A = 0 := by
   suffices h : Star.T5 T τ A = 0 by rw [h, smul_zero]
   unfold Star.T5
@@ -1115,7 +1119,7 @@ theorem Setup.gen_pow_eq_one {T : Data G} {act : Fin T.s → Prop} {μ : ℕ}
   have hM : ((3 ^ (μ - 1) : ℕ) : ℤ) • ((2 : ℤ) • A (T.gen τ)) = 0 := by
     have h2' := congrArg (fun v => ((3 ^ (μ - 1) : ℕ) : ℤ) • v) h2
     simp only [smul_add] at h2'
-    rw [S.T1_eq hA hτ, S.T2_eq hA hτ, S.T3_eq hA hτ, S.T4_eq hA hτ, S.T5_eq hA hτ] at h2'
+    rw [S.T1_eq hA hτ, S.T2_eq hA hτ, S.T3_eq hA hτ, S.T4_eq hA hτ, S.T5_eq hA] at h2'
     simp only [add_zero] at h2'
     exact h2'
   have hg' : T.gen τ ^ (3 ^ (μ - 1)) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := pow_mem hg2 _
