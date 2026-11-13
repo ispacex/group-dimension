@@ -33,7 +33,9 @@ public import GroupDimension.Star.Row
 public import GroupDimension.Star
 public import GroupDimension.Ab399
 public import GroupDimension.Ab399Finite
+public import GroupDimension.ThirdInvariant
 public import GroupDimension.TaharaTheorem
+public import GroupDimension.ThirdInvariantFinite
 public import GroupDimension.Candidate
 public import GroupDimension.Jennings.Theorem
 public import GroupDimension.MinimalCounterexample
