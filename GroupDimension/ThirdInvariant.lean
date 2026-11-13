@@ -488,6 +488,54 @@ theorem T5_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T5 T τ A = 0 := by
 
 end Values
 
+/-- Tahara's generators lie in `γ₃`. -/
+theorem gen_mem {τ : Coeffs T.s T.t} (_hτ : T.Admissible τ) :
+    T.gen τ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := by
+  classical
+  have hgA : T.genA τ ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := by
+    unfold Data.genA
+    exact list_prod_mem fun y hy => by
+      obtain ⟨i, rfl⟩ := List.mem_ofFn.mp hy
+      exact list_prod_mem fun y hy => by
+        obtain ⟨j, rfl⟩ := List.mem_ofFn.mp hy
+        split_ifs
+        · exact zpow_mem (tc_mem (i := 1) (j := 0) (n := 2) (by omega) (S.Y1 i)
+            (mem_lcs_zero _)) _
+        · exact one_mem _
+  have memB : ∀ (i : Fin T.s) (k : Fin T.t) (v : ℤ), (List.ofFn fun l => if k < l then
+      tc (T.x₂ l) (T.x₂ k) ^ T.b i l else 1).prod ^ v ∈
+        (⊤ : Subgroup G).lowerCentralSeries 3 := by
+    intro i k v
+    refine zpow_mem (list_prod_mem fun y hy => ?_) _
+    obtain ⟨l, rfl⟩ := List.mem_ofFn.mp hy
+    split_ifs
+    · exact zpow_mem (tc_mem (i := 1) (j := 1) (n := 3) (by omega) (S.x2mem l) (S.x2mem k)) _
+    · exact one_mem _
+  have hgB : T.genB τ ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by
+    unfold Data.genB
+    exact list_prod_mem fun y hy => by
+      obtain ⟨i, rfl⟩ := List.mem_ofFn.mp hy
+      exact list_prod_mem fun y hy => by
+        obtain ⟨k, rfl⟩ := List.mem_ofFn.mp hy
+        exact memB i k _
+  have hgC : T.genC τ ∈ (⊤ : Subgroup G).lowerCentralSeries 3 := by
+    unfold Data.genC
+    exact list_prod_mem fun y hy => by
+      obtain ⟨i, rfl⟩ := List.mem_ofFn.mp hy
+      exact list_prod_mem fun y hy => by
+        obtain ⟨j, rfl⟩ := List.mem_ofFn.mp hy
+        exact list_prod_mem fun y hy => by
+          obtain ⟨k, rfl⟩ := List.mem_ofFn.mp hy
+          split_ifs
+          · exact zpow_mem (tc_mem (i := 2) (j := 0) (n := 3) (by omega)
+              (tc_mem (i := 1) (j := 0) (n := 2) (by omega) (S.Y1 i) (mem_lcs_zero _))
+              (mem_lcs_zero _)) _
+          · exact one_mem _
+  have h32 : (⊤ : Subgroup G).lowerCentralSeries 3 ≤ (⊤ : Subgroup G).lowerCentralSeries 2 :=
+    Subgroup.lowerCentralSeries_antitone ⊤ (by norm_num)
+  rw [Data.gen]
+  exact mul_mem (mul_mem hgA (h32 hgB)) (h32 hgC)
+
 end Setup
 
 /-- **Every generator of Tahara's Theorem 6.1 has order dividing `3^{μ-1}`** in the situation
