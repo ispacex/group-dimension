@@ -708,7 +708,7 @@ theorem omega_le {i h : Fin T.s} (hih : i < h) (a : G)
   · exact S.omega_top hA hih htop a ha
   · obtain ⟨k, hk⟩ := not_forall.mp htop
     obtain ⟨hik, hkh⟩ := not_imp.mp hk
-    obtain ⟨r, hr⟩ := S.small hih hik hkh.symm
+    obtain ⟨r, hr⟩ := S.small hih hik (Ne.symm hkh)
     have hc : tc (T.x₁ i) (T.x₁ h) ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
       tc_mem (i := 0) (j := 0) (n := 1) (by omega) (mem_lcs_zero _) (mem_lcs_zero _)
     have hz : tc (tc (T.x₁ i) (T.x₁ h)) a ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
@@ -761,7 +761,9 @@ theorem cY {i h : Fin T.s} (hih : i < h) :
     have hza : tc (tc (T.x₁ i) (T.x₁ h)) a ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
       lcs_mem_of_le (by norm_num) (tc_mem (i := 1) (j := 1) (n := 3) (by omega) hc ha)
     rw [hmap, addMapG_pow hA hza, smul_smul]
-    exact S.kill hA (S.omega_le hA hih a ha) (by push_cast; exact dvd_mul_left _ _)
+    refine S.kill hA (S.omega_le hA hih a ha) ?_
+    push_cast
+    exact dvd_mul_left _ _
 
 /-- The `q`-term `u_{ih} q_{ih} ω(c̄_{ih}, Ȳ_i)`, times `3^{μ-1}`, vanishes: `3 ∣ u_{ih} q_{ih}`. -/
 theorem cYlow {i h : Fin T.s} (hih : i < h) :
@@ -832,7 +834,8 @@ theorem T1_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T1 T τ A = 0 := by
           (M * (τ.u i h * K (T.d h))) •
             A (tc (tc (tc (T.x₁ i) (T.x₁ h)) (T.x₁ h)) (T.x₁ h)) := by
       module
-    rw [e, S.cYlow hA hτ hih, S.cY hA hτ hih, smul_zero, smul_zero, sub_zero, zero_add]
+    rw [e, S.cYlow hA hτ hih, S.cY hA hτ hih]
+    simp only [smul_zero, sub_zero, zero_add]
     have hdv : ((T.d i : ℕ) : ℤ) ∣ M * (τ.u i h * K (T.d h)) := (S.uK_dvd hA hτ hih).mul_left _
     rw [S.smul_of_nat_dvd_of_pow_eq_one hA (htri _) hdv
         (S.c_triple_kill i h (T.x₁ i) (T.x₁ i)),
@@ -946,11 +949,13 @@ theorem T3_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T3 T τ A = 0 := by
         rw [hY, tc_mul_left_L1 S.h5 (pow_mem ha1 3) (lcs_mem_of_le (by norm_num) hc3),
           tc_pow_left_L1 S.h5 ha1, tc_L2_L1 S.h5 hc3 hc12, mul_one, addMapG_pow hA hza,
           smul_smul]
-        exact S.kill hA (S.omega_le_rev hA hig a ha1) (by push_cast; exact dvd_mul_left _ _)
+        refine S.kill hA (S.omega_le_rev hA hig a ha1) ?_
+        push_cast
+        exact dvd_mul_left _ _
     · -- a second index above `i`: everything is killed by `d(i) ∣ 3^μ`
       obtain ⟨k, hk⟩ := not_forall.mp htop
       obtain ⟨hik, hkg⟩ := not_imp.mp hk
-      obtain ⟨r, hr⟩ := S.small hig hik hkg.symm
+      obtain ⟨r, hr⟩ := S.small hig hik (Ne.symm hkg)
       have hrr : ((T.d i : ℕ) : ℤ) ∣ ((3 ^ μ : ℕ) : ℤ) := ⟨r, by exact_mod_cast hr⟩
       have hkill : ∀ a ∈ (⊤ : Subgroup G).lowerCentralSeries 1,
           ((3 ^ μ : ℕ) : ℤ) • A (tc (tc a (T.x₁ i)) (T.x₁ h)) = 0 := by
@@ -979,7 +984,9 @@ theorem T3_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T3 T τ A = 0 := by
             tc_pow_left_L1 S.h5 (lcs_mem_of_le (by norm_num) hinner),
             tc_L3 S.h5 hsecond, mul_one]
         rw [hz, addMapG_pow hA (lcs_mem_of_le (by norm_num) hz3), smul_smul]
-        exact S.kill hA (hkill a ha1) (by push_cast; exact dvd_mul_left _ _)
+        refine S.kill hA (hkill a ha1) ?_
+        push_cast
+        exact dvd_mul_left _ _
   · rw [smul_zero]
 
 theorem T4_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T4 T τ A = 0 := by
@@ -1016,7 +1023,9 @@ theorem T4_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T4 T τ A = 0 := by
       have hza : tc a (tc (T.x₁ j) (T.x₁ k)) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
         lcs_mem_of_le (by norm_num) (tc_mem (i := 1) (j := 1) (n := 3) (by omega) ha1 hc)
       rw [hz, addMapG_pow hA hza, smul_smul]
-      exact S.kill hA (hkill a ha1) (by push_cast; exact dvd_mul_left _ _)
+      refine S.kill hA (hkill a ha1) ?_
+      push_cast
+      exact dvd_mul_left _ _
   · rw [smul_zero]
 
 theorem T5_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T5 T τ A = 0 := by
@@ -1104,10 +1113,11 @@ theorem Setup.gen_pow_eq_one {T : Data G} {act : Fin T.s → Prop} {μ : ℕ}
     rfl
   have h2 := Star.two_smul_gen_eq S.h5 S.valid hτ hA
   have hM : ((3 ^ (μ - 1) : ℕ) : ℤ) • ((2 : ℤ) • A (T.gen τ)) = 0 := by
-    rw [h2]
-    simp only [smul_add]
-    rw [S.T1_eq hA hτ, S.T2_eq hA hτ, S.T3_eq hA hτ, S.T4_eq hA hτ, S.T5_eq hA hτ]
-    simp
+    have h2' := congrArg (fun v => ((3 ^ (μ - 1) : ℕ) : ℤ) • v) h2
+    simp only [smul_add] at h2'
+    rw [S.T1_eq hA hτ, S.T2_eq hA hτ, S.T3_eq hA hτ, S.T4_eq hA hτ, S.T5_eq hA hτ] at h2'
+    simp only [add_zero] at h2'
+    exact h2'
   have hg' : T.gen τ ^ (3 ^ (μ - 1)) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := pow_mem hg2 _
   have hsq : (T.gen τ ^ (3 ^ (μ - 1))) ^ 2 = 1 := by
     have e : A ((T.gen τ ^ (3 ^ (μ - 1))) ^ 2) = 0 := by
