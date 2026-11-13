@@ -375,17 +375,52 @@ theorem three_pow_dvd (μ : ℕ) : 3 ^ μ ∣ 3 * 3 ^ (μ - 1) := by
 /-- (F2) for any pair: `c_{ab}^{d(a)} ∈ γ₃`. -/
 theorem c_pow_mem (a b : Fin T.s) :
     tc (T.x₁ a) (T.x₁ b) ^ T.d a ∈ (⊤ : Subgroup G).lowerCentralSeries 2 := by
-  sorry
+  have hY : T.x₁ a ^ T.d a ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := S.Y1 a
+  have hc1 : tc (T.x₁ a) (T.x₁ b) ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+    tc_mem (i := 0) (j := 0) (n := 1) (by omega) (mem_lcs_zero _) (mem_lcs_zero _)
+  have hleft : tc (T.x₁ a ^ T.d a) (T.x₁ b) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
+    tc_mem (i := 1) (j := 0) (n := 2) (by omega) hY (mem_lcs_zero _)
+  have hd2 : tc (tc (T.x₁ a) (T.x₁ b)) (T.x₁ a) ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
+    tc_mem (i := 1) (j := 0) (n := 2) (by omega) hc1 (mem_lcs_zero _)
+  have he3 : tc (tc (tc (T.x₁ a) (T.x₁ b)) (T.x₁ a)) (T.x₁ a) ∈
+      (⊤ : Subgroup G).lowerCentralSeries 3 :=
+    tc_mem (i := 2) (j := 0) (n := 3) (by omega) hd2 (mem_lcs_zero _)
+  have hf := tc_pow_formula S.h5 (T.x₁ a) (T.x₁ b) (T.d a)
+  have hR : tc (tc (T.x₁ a) (T.x₁ b)) (T.x₁ a) ^ (T.d a).choose 2 *
+      tc (tc (tc (T.x₁ a) (T.x₁ b)) (T.x₁ a)) (T.x₁ a) ^ (T.d a).choose 3 ∈
+      (⊤ : Subgroup G).lowerCentralSeries 2 :=
+    mul_mem (pow_mem hd2 _) (lcs_mem_of_le (by norm_num) (pow_mem he3 _))
+  have heq : tc (T.x₁ a) (T.x₁ b) ^ T.d a = tc (T.x₁ a ^ T.d a) (T.x₁ b) *
+      (tc (tc (T.x₁ a) (T.x₁ b)) (T.x₁ a) ^ (T.d a).choose 2 *
+        tc (tc (tc (T.x₁ a) (T.x₁ b)) (T.x₁ a)) (T.x₁ a) ^ (T.d a).choose 3)⁻¹ := by
+    rw [hf]; group
+  rw [heq]
+  exact mul_mem hleft (inv_mem hR)
 
 /-- `[c_{ab}, w]^{d(a)} = 1` for `w ∈ γ₂`: the form `ω(c̄_{ab}, ·)` is killed by `d(a)`. -/
 theorem c_pow_kill (a b : Fin T.s) {w : G} (hw : w ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
     tc (tc (T.x₁ a) (T.x₁ b)) w ^ T.d a = 1 := by
-  sorry
+  have hc1 : tc (T.x₁ a) (T.x₁ b) ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+    tc_mem (i := 0) (j := 0) (n := 1) (by omega) (mem_lcs_zero _) (mem_lcs_zero _)
+  have hz : tc (tc (T.x₁ a) (T.x₁ b) ^ T.d a) w ∈ (⊤ : Subgroup G).lowerCentralSeries 4 :=
+    tc_mem (i := 2) (j := 1) (n := 4) (by omega) (S.c_pow_mem a b) hw
+  have h1 : tc (tc (T.x₁ a) (T.x₁ b) ^ T.d a) w = 1 := by rwa [S.h5, mem_bot] at hz
+  rwa [tc_pow_left_L1 S.h5 hc1 w] at h1
 
 /-- A triple commutator beginning with `c_{ab}` is killed by `d(a)`. -/
 theorem c_triple_kill (a b : Fin T.s) (x y : G) :
     tc (tc (tc (T.x₁ a) (T.x₁ b)) x) y ^ T.d a = 1 := by
-  sorry
+  have hc1 : tc (T.x₁ a) (T.x₁ b) ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+    tc_mem (i := 0) (j := 0) (n := 1) (by omega) (mem_lcs_zero _) (mem_lcs_zero _)
+  have hd2 : tc (tc (T.x₁ a) (T.x₁ b)) x ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
+    tc_mem (i := 1) (j := 0) (n := 2) (by omega) hc1 (mem_lcs_zero x)
+  have hz : tc (tc (tc (T.x₁ a) (T.x₁ b) ^ T.d a) x) y ∈
+      (⊤ : Subgroup G).lowerCentralSeries 4 := by
+    have h3 : tc (tc (T.x₁ a) (T.x₁ b) ^ T.d a) x ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
+      tc_mem (i := 2) (j := 0) (n := 3) (by omega) (S.c_pow_mem a b) (mem_lcs_zero x)
+    exact tc_mem (i := 3) (j := 0) (n := 4) (by omega) h3 (mem_lcs_zero y)
+  have h1 : tc (tc (tc (T.x₁ a) (T.x₁ b) ^ T.d a) x) y = 1 := by rwa [S.h5, mem_bot] at hz
+  rwa [tc_pow_left_L1 S.h5 hc1 x, tc_pow_left_L1 S.h5 (lcs_mem_of_le (by norm_num) hd2) y] at h1
 
 /-- `(n-1)/2` and `K n = C(n,3) - (n-1)/2 · C(n,2)` (`= -n(n²-1)/12` for odd `n`): the coefficients
 of the degree-`n` defect `delta_general`. -/
@@ -394,7 +429,54 @@ def K (n : ℕ) : ℤ := ((n.choose 3 : ℕ) : ℤ) - (((n - 1) / 2 : ℕ) : ℤ
 omit S in
 /-- `3^m ∣ K (3^{m+1})`: from `12 K n = -n(n-1)(n+1)`. -/
 theorem K_dvd (m : ℕ) : ((3 ^ m : ℕ) : ℤ) ∣ K (3 ^ (m + 1)) := by
-  sorry
+  set n := 3 ^ (m + 1) with hn
+  have hn3 : n = 3 * 3 ^ m := by rw [hn, pow_succ, mul_comm]
+  have hn1 : 1 ≤ n := Nat.one_le_pow _ _ (by norm_num)
+  have hn2 : 2 ≤ n := by
+    have : 1 ≤ 3 ^ m := Nat.one_le_pow _ _ (by norm_num)
+    omega
+  have hodd : (n - 1) / 2 * 2 = n - 1 := by
+    obtain ⟨k, hk⟩ : Odd n := Odd.pow (by decide)
+    omega
+  have c2n : n.choose 2 * 2 = n * (n - 1) := by
+    rw [Nat.choose_two_right, Nat.div_mul_cancel (Nat.even_mul_pred_self n).two_dvd]
+  have c3n : n.descFactorial 3 = 6 * n.choose 3 := by
+    rw [Nat.descFactorial_eq_factorial_mul_choose]
+    rfl
+  have hdf : n.descFactorial 3 = (n - 2) * ((n - 1) * ((n - 0) * 1)) := by
+    simp only [Nat.descFactorial_succ, Nat.descFactorial_zero]
+  have hodd' : ((((n - 1) / 2 : ℕ) : ℤ)) * 2 = (n : ℤ) - 1 := by
+    have := congrArg (fun t : ℕ => (t : ℤ)) hodd
+    push_cast [Nat.cast_sub hn1] at this
+    exact this
+  have c2 : ((n.choose 2 : ℕ) : ℤ) * 2 = (n : ℤ) * ((n : ℤ) - 1) := by
+    have := congrArg (fun t : ℕ => (t : ℤ)) c2n
+    push_cast [Nat.cast_sub hn1] at this
+    exact this
+  have c3 : ((n.choose 3 : ℕ) : ℤ) * 6 = (n : ℤ) * ((n : ℤ) - 1) * ((n : ℤ) - 2) := by
+    have := congrArg (fun t : ℕ => (t : ℤ)) (c3n.symm.trans hdf)
+    push_cast [Nat.cast_sub hn1, Nat.cast_sub hn2] at this
+    linear_combination this
+  have h12 : K n * 12 = -(n : ℤ) * ((n : ℤ) - 1) * ((n : ℤ) + 1) := by
+    unfold K
+    linear_combination 2 * c3 - 3 * ((((n - 1) / 2 : ℕ) : ℤ) * 2) * c2 -
+      3 * ((n : ℤ) * ((n : ℤ) - 1)) * hodd'
+  have hn3' : (n : ℤ) = 3 * ((3 ^ m : ℕ) : ℤ) := by exact_mod_cast hn3
+  set e : ℤ := ((3 ^ m : ℕ) : ℤ)
+  have h4 : K n * 4 = e * (-(3 * e - 1) * (3 * e + 1)) := by
+    have h3 : (K n * 4 - e * (-(3 * e - 1) * (3 * e + 1))) * 3 = 0 := by
+      rw [hn3'] at h12
+      linear_combination h12
+    rcases mul_eq_zero.mp h3 with h | h
+    · linear_combination h
+    · norm_num at h
+  have hcop : IsCoprime e 4 := by
+    have h34 : IsCoprime (3 : ℤ) 4 := by
+      rw [Int.isCoprime_iff_gcd_eq_one]
+      rfl
+    have := h34.pow_left (m := m)
+    simpa [e] using this
+  exact hcop.dvd_of_dvd_mul_right ⟨_, h4⟩
 
 section Values
 
@@ -425,32 +507,235 @@ theorem delta_general (x y : G) {n : ℕ} (hn : Odd n) :
     A (tc (x ^ n) y * tc (y ^ n) x) =
       (((n - 1) / 2 : ℕ) : ℤ) • (A (tc (tc x y) (x ^ n)) - A (tc (tc x y) (y ^ n))) +
         K n • (A (tc (tc (tc x y) x) x) - A (tc (tc (tc x y) y) y)) := by
-  sorry
+  have hc : tc x y ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+    tc_mem (i := 0) (j := 0) (n := 1) (by omega) (mem_lcs_zero _) (mem_lcs_zero _)
+  have hfx : tc (tc x y) x ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
+    tc_mem (i := 1) (j := 0) (n := 2) (by omega) hc (mem_lcs_zero _)
+  have hfy : tc (tc x y) y ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
+    tc_mem (i := 1) (j := 0) (n := 2) (by omega) hc (mem_lcs_zero _)
+  have hgx : tc (tc (tc x y) x) x ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
+    tc_mem (i := 2) (j := 0) (n := 3) (by omega) hfx (mem_lcs_zero _)
+  have hgy : tc (tc (tc x y) y) y ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
+    tc_mem (i := 2) (j := 0) (n := 3) (by omega) hfy (mem_lcs_zero _)
+  have key : ∀ (c F₁ G₁ F₂ G₂ : G) (n : ℕ), Commute (F₁ * G₁) (c⁻¹ ^ n) →
+      c ^ n * F₁ * G₁ * (c⁻¹ ^ n * F₂ * G₂) = F₁ * G₁ * (F₂ * G₂) := by
+    intro c F₁ G₁ F₂ G₂ n h
+    calc c ^ n * F₁ * G₁ * (c⁻¹ ^ n * F₂ * G₂) =
+          c ^ n * ((F₁ * G₁) * c⁻¹ ^ n) * (F₂ * G₂) := by group
+      _ = c ^ n * (c⁻¹ ^ n * (F₁ * G₁)) * (F₂ * G₂) := by rw [h.eq]
+      _ = F₁ * G₁ * (F₂ * G₂) := by rw [inv_pow]; group
+  have hx2 : tc (tc x y) x ^ n.choose 2 * tc (tc (tc x y) x) x ^ n.choose 3 ∈
+      (⊤ : Subgroup G).lowerCentralSeries 2 :=
+    mul_mem (pow_mem hfx _) (lcs_mem_of_le (by norm_num) (pow_mem hgx _))
+  have hfy' : tc (tc y x) y ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
+    tc_mem (i := 1) (j := 0) (n := 2) (by omega)
+      (tc_mem (i := 0) (j := 0) (n := 1) (by omega) (mem_lcs_zero _) (mem_lcs_zero _))
+      (mem_lcs_zero _)
+  have hgy' : tc (tc (tc y x) y) y ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
+    tc_mem (i := 2) (j := 0) (n := 3) (by omega) hfy' (mem_lcs_zero _)
+  have hy2 : tc (tc y x) y ^ n.choose 2 * tc (tc (tc y x) y) y ^ n.choose 3 ∈
+      (⊤ : Subgroup G).lowerCentralSeries 2 :=
+    mul_mem (pow_mem hfy' _) (lcs_mem_of_le (by norm_num) (pow_mem hgy' _))
+  have hcomm : Commute (tc (tc x y) x ^ n.choose 2 * tc (tc (tc x y) x) x ^ n.choose 3)
+      ((tc x y)⁻¹ ^ n) :=
+    commutatorElement_eq_one_iff_mul_comm.mp
+      (comm_eq_one S.h5 (by norm_num) hx2 (pow_mem (inv_mem hc) n))
+  have hinv : tc y x = (tc x y)⁻¹ := (tc_inv x y).symm
+  have hprod : tc (x ^ n) y * tc (y ^ n) x =
+      tc (tc x y) x ^ n.choose 2 * tc (tc (tc x y) x) x ^ n.choose 3 *
+        (tc (tc y x) y ^ n.choose 2 * tc (tc (tc y x) y) y ^ n.choose 3) := by
+    rw [tc_pow_formula S.h5 x y n, tc_pow_formula S.h5 y x n, hinv]
+    exact key _ _ _ _ _ _ hcomm
+  have hFy : A (tc (tc y x) y) = -A (tc (tc x y) y) := by
+    rw [hinv, S.tc_inv_left_L1 hc, addMapG_inv hA hfy]
+  have hGy : A (tc (tc (tc y x) y) y) = -A (tc (tc (tc x y) y) y) := by
+    rw [hinv, S.tc_inv_left_L1 hc, S.tc_inv_left_L1 (lcs_mem_of_le (by norm_num) hfy),
+      addMapG_inv hA (lcs_mem_of_le (by norm_num) hgy)]
+  have hsum : A (tc (x ^ n) y * tc (y ^ n) x) =
+      ((n.choose 2 : ℕ) : ℤ) • (A (tc (tc x y) x) - A (tc (tc x y) y)) +
+        ((n.choose 3 : ℕ) : ℤ) • (A (tc (tc (tc x y) x) x) - A (tc (tc (tc x y) y) y)) := by
+    rw [hprod, hA _ hx2 _ hy2,
+      hA _ (pow_mem hfx _) _ (lcs_mem_of_le (by norm_num) (pow_mem hgx _)),
+      hA _ (pow_mem hfy' _) _ (lcs_mem_of_le (by norm_num) (pow_mem hgy' _)),
+      addMapG_pow hA hfx, addMapG_pow hA hfy',
+      addMapG_pow hA (lcs_mem_of_le (by norm_num) hgx),
+      addMapG_pow hA (lcs_mem_of_le (by norm_num) hgy'), hFy, hGy]
+    module
+  have hC2 : ((n.choose 2 : ℕ) : ℤ) = (n : ℤ) * (((n - 1) / 2 : ℕ) : ℤ) := by
+    have hev : 2 ∣ n - 1 := by
+      obtain ⟨k, hk⟩ := hn
+      exact ⟨k, by omega⟩
+    have : n.choose 2 = n * ((n - 1) / 2) := by
+      rw [Nat.choose_two_right, Nat.mul_div_assoc n hev]
+    exact_mod_cast this
+  have kz : ∀ z : G, ((n.choose 2 : ℕ) : ℤ) • A (tc (tc x y) z) =
+      (((n - 1) / 2 : ℕ) : ℤ) • A (tc (tc x y) (z ^ n)) -
+        ((((n - 1) / 2 : ℕ) : ℤ) * ((n.choose 2 : ℕ) : ℤ)) • A (tc (tc (tc x y) z) z) := by
+    intro z
+    have hfz : tc (tc x y) z ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
+      tc_mem (i := 1) (j := 0) (n := 2) (by omega) hc (mem_lcs_zero _)
+    have hgz : tc (tc (tc x y) z) z ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
+      tc_mem (i := 2) (j := 0) (n := 3) (by omega) hfz (mem_lcs_zero _)
+    have e := congrArg A (Star.tc_pow_right_K3 hc S.h5 z n)
+    rw [hA _ (pow_mem hfz _) _ (lcs_mem_of_le (by norm_num) (pow_mem hgz _)),
+      addMapG_pow hA hfz, addMapG_pow hA (lcs_mem_of_le (by norm_num) hgz)] at e
+    rw [e, hC2]
+    module
+  rw [hsum, smul_sub, kz x, kz y]
+  unfold K
+  module
 
 /-- The top pair: if `h` is the only index above `i`, then `ω(c̄_{ih}, ·)` is killed by `3^μ` on
 `γ₂` (generalizes `Ab399.Setup.omega_three`). -/
 theorem omega_top {i h : Fin T.s} (hih : i < h) (htop : ∀ k, i < k → k = h) (a : G)
     (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
     ((3 ^ μ : ℕ) : ℤ) • A (tc (tc (T.x₁ i) (T.x₁ h)) a) = 0 := by
-  sorry
+  classical
+  set c : G := tc (T.x₁ i) (T.x₁ h) with hcdef
+  let z : G := c⁻¹
+  let X : Fin T.s → G := fun j => (T.x₁ j)⁻¹
+  let F0 : G → N := fun b => ((3 ^ μ : ℕ) : ℤ) • A b
+  have hc : c ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+    tc_mem (i := 0) (j := 0) (n := 1) (by omega) (mem_lcs_zero _) (mem_lcs_zero _)
+  have hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := inv_mem hc
+  have hF : ∀ u ∈ (⊤ : Subgroup G).lowerCentralSeries 3,
+      ∀ v ∈ (⊤ : Subgroup G).lowerCentralSeries 3, F0 (u * v) = F0 u + F0 v := by
+    intro u hu v hv
+    simp only [F0]
+    rw [hA u (lcs_mem_of_le (by norm_num) hu) v (lcs_mem_of_le (by norm_num) hv), smul_add]
+  have hconvert (p q : Fin T.s) : F0 ⁅z, ⁅X p, X q⁆⁆ =
+      ((3 ^ μ : ℕ) : ℤ) • A (tc c (tc (T.x₁ q) (T.x₁ p))) := by
+    simp only [F0, z, X]
+    congr 2
+    rw [tc_eq c (tc (T.x₁ q) (T.x₁ p)), tc_inv (T.x₁ q) (T.x₁ p),
+      tc_eq (T.x₁ p) (T.x₁ q)]
+  have hmem (p q : Fin T.s) : tc c (tc (T.x₁ p) (T.x₁ q)) ∈
+      (⊤ : Subgroup G).lowerCentralSeries 2 :=
+    lcs_mem_of_le (by norm_num)
+      (tc_mem (i := 1) (j := 1) (n := 3) (by omega) hc
+        (tc_mem (i := 0) (j := 0) (n := 1) (by omega) (mem_lcs_zero _) (mem_lcs_zero _)))
+  have hfwd (p q : Fin T.s) : tc c (tc (T.x₁ p) (T.x₁ q)) ^ T.d p = 1 := by
+    have hp := S.c_pow_kill p q hc
+    rw [← tc_inv, inv_pow, hp, inv_one]
+  have hrev (p q : Fin T.s) : tc c (tc (T.x₁ q) (T.x₁ p)) ^ T.d p = 1 := by
+    have hcpq : tc (T.x₁ p) (T.x₁ q) ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+      tc_mem (i := 0) (j := 0) (n := 1) (by omega) (mem_lcs_zero _) (mem_lcs_zero _)
+    have e : tc (T.x₁ q) (T.x₁ p) = (tc (T.x₁ p) (T.x₁ q))⁻¹ := (tc_inv _ _).symm
+    rw [e, S.tc_inv_right_L1 hc hcpq, inv_pow, hfwd p q, inv_one]
+  have hsmallpair : ∀ p q : Fin T.s, p < q → ¬ (p = i ∧ q = h) → T.d p ∣ 3 ^ μ := by
+    intro p q hpq hne
+    rcases lt_trichotomy p i with hpi | hpi | hpi
+    · exact S.small hpi (hpi.trans hih) hih.ne
+    · exact absurd ⟨hpi, htop q (hpi ▸ hpq)⟩ hne
+    · have hp := htop p hpi
+      have hq := htop q (hpi.trans hpq)
+      rw [hp, hq] at hpq
+      exact absurd hpq (lt_irrefl _)
+  have hcc : tc c c = 1 := by simp only [tc]; group
+  have hcc' : tc c c⁻¹ = 1 := by simp only [tc]; group
+  have hbase (p q : Fin T.s) : F0 ⁅z, ⁅X p, X q⁆⁆ = 0 := by
+    rw [hconvert]
+    rcases lt_trichotomy p q with hpq | hpq | hpq
+    · by_cases hpair : p = i ∧ q = h
+      · rw [hpair.1, hpair.2, ← tc_inv (T.x₁ i) (T.x₁ h), ← hcdef, hcc', addMapG_one hA,
+          smul_zero]
+      · obtain ⟨r, hr⟩ := hsmallpair p q hpq hpair
+        exact S.smul_of_nat_dvd_of_pow_eq_one hA (hmem q p) ⟨r, by exact_mod_cast hr⟩ (hrev p q)
+    · rw [hpq, show tc (T.x₁ q) (T.x₁ q) = 1 by simp only [tc]; group,
+        show tc c 1 = 1 by simp only [tc]; group, addMapG_one hA, smul_zero]
+    · by_cases hpair : q = i ∧ p = h
+      · rw [hpair.1, hpair.2, ← hcdef, hcc, addMapG_one hA, smul_zero]
+      · obtain ⟨r, hr⟩ := hsmallpair q p hpq hpair
+        exact S.smul_of_nat_dvd_of_pow_eq_one hA (hmem q p) ⟨r, by exact_mod_cast hr⟩ (hfwd q p)
+  have hgen : ∀ g ∈ (⊤ : Subgroup G), ∀ h ∈ (⊤ : Subgroup G), F0 ⁅z, ⁅g, h⁆⁆ = 0 := by
+    intro g _ h _
+    obtain ⟨α, hα⟩ := S.valid.basis₁.span g (mem_lcs_zero g)
+    obtain ⟨β, hβ⟩ := S.valid.basis₁.span h (mem_lcs_zero h)
+    have hprodα : oprod X (fun i => -α i) = oprod T.x₁ α := by
+      unfold oprod
+      refine congrArg List.prod (congrArg List.ofFn (funext fun i => ?_))
+      simp only [X, inv_zpow', neg_neg]
+    have hprodβ : oprod X (fun i => -β i) = oprod T.x₁ β := by
+      unfold oprod
+      refine congrArg List.prod (congrArg List.ofFn (funext fun i => ?_))
+      simp only [X, inv_zpow', neg_neg]
+    have hα' : (oprod X (fun i => -α i))⁻¹ * g ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := by
+      rw [hprodα]
+      exact hα
+    have hβ' : (oprod X (fun i => -β i))⁻¹ * h ∈ (⊤ : Subgroup G).lowerCentralSeries 1 := by
+      rw [hprodβ]
+      exact hβ
+    have hzero (u v : G) (hu : u ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
+        F0 ⁅z, ⁅u, v⁆⁆ = 0 :=
+      ClassFour.B_L1_L2 S.h5 F0 hF hz
+        (commutator_mem_lcs (i := 1) (j := 0) (n := 2) (by omega) hu (mem_lcs_zero v))
+    have hzeroR (u v : G) (hv : v ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
+        F0 ⁅z, ⁅u, v⁆⁆ = 0 :=
+      ClassFour.B_L1_L2 S.h5 F0 hF hz
+        (commutator_mem_lcs (i := 0) (j := 1) (n := 2) (by omega) (mem_lcs_zero u) hv)
+    have eg : F0 ⁅z, ⁅g, h⁆⁆ = ∑ i, (-α i) • F0 ⁅z, ⁅X i, h⁆⁆ := by
+      simpa only [] using (Ab399.GenericMaps.addMap_oprod_expandM
+        (K := (⊤ : Subgroup G)) (N := (⊤ : Subgroup G).lowerCentralSeries 1)
+        (F := fun u => F0 ⁅z, ⁅u, h⁆⁆) (x := X) (a := fun i => -α i) (v := g)
+        (hNK := le_top)
+        (hF := Ab399.GenericMaps.nested_left S.h5 F0 hF hz (h := h))
+        (hF0 := fun u hu => hzero u h hu) (hx := fun i => mem_lcs_zero (X i)) (hv := hα'))
+    have eh (i : Fin T.s) : F0 ⁅z, ⁅X i, h⁆⁆ = ∑ j, (-β j) • F0 ⁅z, ⁅X i, X j⁆⁆ := by
+      simpa only [] using (Ab399.GenericMaps.addMap_oprod_expandM
+        (K := (⊤ : Subgroup G)) (N := (⊤ : Subgroup G).lowerCentralSeries 1)
+        (F := fun u => F0 ⁅z, ⁅X i, u⁆⁆) (x := X) (a := fun j => -β j) (v := h)
+        (hNK := le_top)
+        (hF := Ab399.GenericMaps.nested_right S.h5 F0 hF hz (h := X i))
+        (hF0 := fun u hu => hzeroR (X i) u hu) (hx := fun j => mem_lcs_zero (X j)) (hv := hβ'))
+    rw [eg]
+    simp_rw [eh]
+    simp only [hbase, smul_zero, Finset.sum_const_zero]
+  rw [tc_eq]
+  change F0 ⁅z, a⁻¹⁆ = 0
+  exact ClassFour.addMap_vanish
+    (N := (⊤ : Subgroup G).lowerCentralSeries 1) (H := ⊤) (K := ⊤)
+    (A := fun u => F0 ⁅z, u⁆)
+    (hle := le_rfl) (hA := ClassFour.addRight1 S.h5 F0 hF hz) (hgen := hgen)
+    (a := a⁻¹) (inv_mem ha)
 
 /-- For every pair `i < h`, `ω(c̄_{ih}, ·)` is killed by `3^μ` on `γ₂`: by `d(i) ∣ 3^μ` when a
 second index lies above `i`, by `omega_top` otherwise. -/
 theorem omega_le {i h : Fin T.s} (hih : i < h) (a : G)
     (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
     ((3 ^ μ : ℕ) : ℤ) • A (tc (tc (T.x₁ i) (T.x₁ h)) a) = 0 := by
-  sorry
+  by_cases htop : ∀ k, i < k → k = h
+  · exact S.omega_top hA hih htop a ha
+  · push_neg at htop
+    obtain ⟨k, hik, hkh⟩ := htop
+    obtain ⟨r, hr⟩ := S.small hih hik hkh.symm
+    have hc : tc (T.x₁ i) (T.x₁ h) ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+      tc_mem (i := 0) (j := 0) (n := 1) (by omega) (mem_lcs_zero _) (mem_lcs_zero _)
+    have hz : tc (tc (T.x₁ i) (T.x₁ h)) a ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
+      lcs_mem_of_le (by norm_num) (tc_mem (i := 1) (j := 1) (n := 3) (by omega) hc ha)
+    exact S.smul_of_nat_dvd_of_pow_eq_one hA hz ⟨r, by exact_mod_cast hr⟩ (S.c_pow_kill i h ha)
 
 /-- The reverse orientation of `omega_le`. -/
 theorem omega_le_rev {i h : Fin T.s} (hih : i < h) (a : G)
     (ha : a ∈ (⊤ : Subgroup G).lowerCentralSeries 1) :
     ((3 ^ μ : ℕ) : ℤ) • A (tc a (tc (T.x₁ i) (T.x₁ h))) = 0 := by
-  sorry
+  have hz : tc (tc (T.x₁ i) (T.x₁ h)) a ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
+    tc_mem (i := 1) (j := 1) (n := 3) (by omega)
+      (tc_mem (i := 0) (j := 0) (n := 1) (by omega) (mem_lcs_zero _) (mem_lcs_zero _)) ha
+  rw [← tc_inv, addMapG_inv hA (lcs_mem_of_le (by norm_num) hz), smul_neg,
+    S.omega_le hA hih a ha, neg_zero]
 
 /-- A coefficient divisible by `3`, times `3^{μ-1}`, kills a value killed by `3^μ`. -/
 theorem kill {v : N} (hv : ((3 ^ μ : ℕ) : ℤ) • v = 0) {w : ℤ} (hw : (3 : ℤ) ∣ w) :
     ((3 ^ (μ - 1) : ℕ) : ℤ) • (w • v) = 0 := by
-  sorry
+  obtain ⟨w', rfl⟩ := hw
+  obtain ⟨r, hr⟩ := three_pow_dvd μ
+  have e : ((3 ^ (μ - 1) : ℕ) : ℤ) • (((3 : ℤ) * w') • v) =
+      (w' * r) • (((3 ^ μ : ℕ) : ℤ) • v) := by
+    rw [smul_smul, smul_smul]
+    congr 1
+    have hr' : ((3 : ℤ) * ((3 ^ (μ - 1) : ℕ) : ℤ)) = ((3 ^ μ : ℕ) : ℤ) * r := by exact_mod_cast hr
+    linear_combination w' * hr'
+  rw [e, hv, smul_zero]
 
 variable {τ : Coeffs T.s T.t} (hτ : T.Admissible τ)
 include hτ
@@ -459,17 +744,51 @@ include hτ
 active `h`, `Ȳ_h ∈ 3 L₂` for an inactive one. -/
 theorem cY {i h : Fin T.s} (hih : i < h) :
     ((3 ^ (μ - 1) : ℕ) : ℤ) • (τ.u i h • A (tc (tc (T.x₁ i) (T.x₁ h)) (T.x₁ h ^ T.d h))) = 0 := by
-  sorry
+  have hc : tc (T.x₁ i) (T.x₁ h) ∈ (⊤ : Subgroup G).lowerCentralSeries 1 :=
+    tc_mem (i := 0) (j := 0) (n := 1) (by omega) (mem_lcs_zero _) (mem_lcs_zero _)
+  by_cases hact : act h
+  · have hu : (3 : ℤ) ∣ τ.u i h := by
+      have h' := S.crow_act hτ i hact
+      simpa [crow, hih, not_lt.mpr hih.le] using h'
+    exact S.kill hA (S.omega_le hA hih _ (S.Y1 h)) hu
+  · obtain ⟨a, ha, c, hc3, hY⟩ := S.hK h hact
+    have hzero : tc (tc (T.x₁ i) (T.x₁ h)) c = 1 := by
+      rw [← tc_inv, tc_L2_L1 S.h5 hc3 hc, inv_one]
+    have hmap : tc (tc (T.x₁ i) (T.x₁ h)) (T.x₁ h ^ T.d h) =
+        tc (tc (T.x₁ i) (T.x₁ h)) a ^ 3 := by
+      rw [hY, S.tc_mul_right_L1 hc (pow_mem ha 3), tc_pow_right_L1 S.h5 hc ha, hzero, mul_one]
+    have hza : tc (tc (T.x₁ i) (T.x₁ h)) a ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
+      lcs_mem_of_le (by norm_num) (tc_mem (i := 1) (j := 1) (n := 3) (by omega) hc ha)
+    rw [hmap, addMapG_pow hA hza, smul_smul]
+    exact S.kill hA (S.omega_le hA hih a ha) ⟨τ.u i h, by push_cast; ring⟩
 
 /-- The `q`-term `u_{ih} q_{ih} ω(c̄_{ih}, Ȳ_i)`, times `3^{μ-1}`, vanishes: `3 ∣ u_{ih} q_{ih}`. -/
 theorem cYlow {i h : Fin T.s} (hih : i < h) :
     ((3 ^ (μ - 1) : ℕ) : ℤ) • ((τ.u i h * T.q i h) •
       A (tc (tc (T.x₁ i) (T.x₁ h)) (T.x₁ i ^ T.d i))) = 0 := by
-  sorry
+  exact S.kill hA (S.omega_le hA hih _ (S.Y1 i)) (S.uq3 hτ hih)
 
 /-- `d(i) ∣ u_{ih} K(d(h))` for `i < h` (Theorem 1 of §10.2: the `t`-part of `T₁` vanishes). -/
 theorem uK_dvd {i h : Fin T.s} (hih : i < h) : (T.d i : ℤ) ∣ τ.u i h * K (T.d h) := by
-  sorry
+  obtain ⟨a, ha⟩ := S.hd i
+  obtain ⟨b, hb⟩ := S.hd h
+  have hdv := S.d_dvd hih.le
+  rw [ha, hb] at hdv
+  have hab : a + 1 ≤ b + 1 := (Nat.pow_dvd_pow_iff_le_right (by norm_num)).mp hdv
+  have hK := K_dvd b
+  rw [hb]
+  rcases lt_or_eq_of_le hab with hlt | heq
+  · have h1 : ((T.d i : ℕ) : ℤ) ∣ ((3 ^ b : ℕ) : ℤ) := by
+      rw [ha]
+      exact_mod_cast Nat.pow_dvd_pow 3 (by omega)
+    exact (h1.trans hK).mul_left _
+  · have hu := S.u3_eq hτ hih (by rw [ha, hb, heq])
+    have e : ((T.d i : ℕ) : ℤ) = 3 * ((3 ^ b : ℕ) : ℤ) := by
+      rw [ha, heq]
+      push_cast
+      ring
+    rw [e]
+    exact mul_dvd_mul hu hK
 
 theorem T1_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T1 T τ A = 0 := by
   sorry
