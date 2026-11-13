@@ -86,7 +86,7 @@ sources:
   - title: "D_5(Q) = 1 for Q/γ_2(Q) ≅ C_3 × C_9 × C_9: the author's research notes (2026-11-12), not part of the paper"
     authors: ["Stanislav Vorobev"]
     type: other
-    id: "https://github.com/ispacex/group-dimension/blob/main/docs/ab399.md"
+    id: "https://github.com/ispacex/group-dimension/blob/8de4db115e4c7c2c71856168ef3aeeff4be40d23/docs/ab399.md"
     location: "the theorem and its proof (public account of the notes)"
     contributors:
       - name: "Kimi K3.1 Pro (Moonshot AI), through Open Math OS"

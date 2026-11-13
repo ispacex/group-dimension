@@ -259,11 +259,11 @@ statement from the development; Comparator checks that the two agree and that on
 `.github/workflows/palomar-preflight.yml` runs Palomar's own verification on every relevant push.
 Registered as
 [PALOMAR-2026-10-23-000007](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007),
-version 4 (2026-11-07, commit `d4a8ddb`, all fourteen theorems; it adds Theorem 6.11,
-$\gamma_4^3\subseteq\gamma_5$ suffices; version 3 of the same day, commit `add1be7`, had thirteen, version 2,
-commit `508a336`, ten, version 1 of 2026-10-23 nine). The fifteenth statement, $D_5(Q)=1$ for
-$Q/\gamma_2(Q)\cong C_3\times C_9\times C_9$ (class $\le4$; not in the paper), is prepared for the next
-version and not yet registered.
+version 5 (2026-11-13, commit `8de4db1`, all fifteen theorems; it adds $D_5(Q)=1$ for
+$Q/\gamma_2(Q)\cong C_3\times C_9\times C_9$, class $\le4$, which is not in the paper). Earlier versions: version 4
+(2026-11-07, commit `d4a8ddb`) had fourteen and added Theorem 6.11
+($\gamma_4^3\subseteq\gamma_5$ suffices); version 3 of the same day, commit `add1be7`, had thirteen, version 2,
+commit `508a336`, ten, version 1 of 2026-10-23 nine.
 What is submitted, with the one hypothesis that remains (Proposition 5.3, a computer result), is
 described in
 [`palomar/README.md`](palomar/README.md).
