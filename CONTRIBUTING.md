@@ -66,8 +66,11 @@ $Q/\gamma_2(Q)\cong C_3\times C_9\times C_9$ (2026-11-12), the proofs in `GroupD
 `GroupDimension/Star/`, `Ab399.lean` and `Ab399Finite.lean` were written by Kimi K3.1 Pro agents
 (through Open Math OS) against statements and a skeleton fixed by a Claude Code agent, and later
 edited in review by Claude Code agents.
-`ThirdInvariant.lean` and `ThirdInvariantFinite.lean` (Theorem 12.6 of the notes, 2026-11-13) were
-written by Claude Code; their helper lemmas are adapted from `Ab399.lean`.
+`ThirdInvariant.lean` and `ThirdInvariantFinite.lean` (Theorems 12.6 and 11.2 of the notes,
+2026-11-13) were written by Claude Code, but about half of their lines (helper lemmas and the
+finite reduction) are carried over, verbatim or nearly so, from the Kimi-written `Ab399.lean` and
+`Ab399Finite.lean`, and their proof rests on the Kimi-written identity in `Star/`. A Kimi K3.1 Pro
+agent run on their skeleton was not used.
 In the terms of the Stacks project, the whole library is therefore **Frontier**: checked by the Lean
 kernel and the axiom audit, reviewed by agents, but not by human experts. There is no **Core**
 (human-reviewed) part yet; a statement moves to Core only after a human review of its Lean
