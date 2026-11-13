@@ -132,7 +132,7 @@ sources:
       model Kimi K3.1 Pro (through Open Math OS) at the author's direction; the bound for all μ
       was worked out by a Claude Code agent, and Theorem 11.2 was also obtained independently by
       a Claude Code agent. Theorems 11.2 and 12.6 each had one independent agent review (verdict:
-      correct after corrections, which were made) and has not been reviewed by a human expert. The
+      correct after corrections, which were made) and have not been reviewed by a human expert. The
       results are deliberately not added to the paper, and the paper (cited above) does not
       contain them. The statements and their status are also on the D_5 site's blueprint
       (https://ispacex.github.io/d5/blueprint.html#b-own-thm126, node own:thm126), which is
