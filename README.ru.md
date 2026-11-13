@@ -261,7 +261,7 @@ lake env lean AxiomAudit.lean
 `propext`, `Classical.choice`, `Quot.sound`. Workflow `.github/workflows/palomar-preflight.yml`
 запускает собственную проверку Palomar на каждом существенном push. Зарегистрировано как
 [PALOMAR-2026-10-23-000007](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007),
-версия 5 (12.11.2026, коммит `8de4db1`, все пятнадцать теорем: добавлено $D_5(Q)=1$ при
+версия 5 (13.11.2026, коммит `8de4db1`, все пятнадцать теорем: добавлено $D_5(Q)=1$ при
 $Q/\gamma_2(Q)\cong C_3\times C_9\times C_9$, ступень $\le4$, — этого утверждения нет в статье); в версии 4
 (07.11.2026, коммит `d4a8ddb`) их было четырнадцать, она добавила теорему 6.11 (достаточно
 $\gamma_4^3\subseteq\gamma_5$); в версии 3 того же дня, коммит `add1be7`, их было тринадцать, в версии 2,
