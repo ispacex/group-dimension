@@ -135,8 +135,8 @@ $D_2 = \gamma_2$ is proved via the trivial square-zero extension $T=\mathbb Z\op
 first coordinate is $\varepsilon$, so $\Phi(\Delta^2)=0$ and $\Phi(g-1)=(0,\bar g)$. This is the
 same idea as the authors' `DegreeTwo.lean` (a square-zero representation).
 
-`#print axioms` for all 2251 proved declarations (`AxiomAudit.lean`: 2236 of the development and the
-15 compared Palomar theorems of `Solution.lean`) — only `propext`,
+`#print axioms` for all 2306 proved declarations (`AxiomAudit.lean`: 2289 of the development and the
+17 compared Palomar theorems of `Solution.lean`) — only `propext`,
 `Classical.choice`, `Quot.sound`. No `sorry` and no `axiom` in the development or in `Solution.lean`;
 `Challenge.lean` states the submitted results with `sorry` by design.
 
@@ -252,7 +252,7 @@ With Mathlib from the cache the build takes a few minutes (see also the audit,
 
 The files `Challenge.lean`, `Solution.lean`, `comparator.json` and `formalization.yaml` are a
 submission to the [Palomar registry](https://palomar-registry.org) of machine-checked results.
-`Challenge.lean` states fifteen results using Mathlib alone (with `sorry`); `Solution.lean`
+`Challenge.lean` states seventeen results using Mathlib alone (with `sorry`); `Solution.lean`
 (generated from it by `palomar/make_solution.py`) repeats the definitions verbatim and proves each
 statement from the development; Comparator checks that the two agree and that only `propext`,
 `Classical.choice`, `Quot.sound` are used. The workflow
@@ -260,7 +260,11 @@ statement from the development; Comparator checks that the two agree and that on
 Registered as
 [PALOMAR-2026-10-23-000007](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007),
 version 5 (2026-11-13, commit `8de4db1`, all fifteen theorems; it adds $D_5(Q)=1$ for
-$Q/\gamma_2(Q)\cong C_3\times C_9\times C_9$, class $\le4$, which is not in the paper). Earlier versions: version 4
+$Q/\gamma_2(Q)\cong C_3\times C_9\times C_9$, class $\le4$, which is not in the paper). Since then two more
+results that are not in the paper have been added for the next version (not yet registered): Theorem 12.6 of the
+author's notes ($z^{3^{\mu-1}}=1$ for $z\in D_5(Q)$ when at most two invariants of $Q_{ab}$ exceed $3^\mu$,
+`D_five_pow_eq_one_of_third_invariant`) and its case $\mu=1$, Theorem 11.2 ($D_5(Q)=1$ when at most two
+invariants are $\ge9$, `D_five_eq_bot_of_two_large_invariants`); proof: [`docs/thm126.md`](docs/thm126.md). Earlier versions: version 4
 (2026-11-07, commit `d4a8ddb`) had fourteen and added Theorem 6.11
 ($\gamma_4^3\subseteq\gamma_5$ suffices); version 3 of the same day, commit `add1be7`, had thirteen, version 2,
 commit `508a336`, ten, version 1 of 2026-10-23 nine.
