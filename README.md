@@ -260,10 +260,10 @@ statement from the development; Comparator checks that the two agree and that on
 Registered as
 [PALOMAR-2026-10-23-000007](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007),
 version 5 (2026-11-13, commit `8de4db1`, all fifteen theorems; it adds $D_5(Q)=1$ for
-$Q/\gamma_2(Q)\cong C_3\times C_9\times C_9$, class $\le4$, which is not in the paper); version 4
-(2026-11-07, commit `d4a8ddb`, fourteen; it added Theorem 6.11,
-$\gamma_4^3\subseteq\gamma_5$ suffices); version 3 of the same day, commit `add1be7`, had thirteen, version 2,
-commit `508a336`, ten, version 1 of 2026-10-23 nine).
+$Q/\gamma_2(Q)\cong C_3\times C_9\times C_9$, class $\le4$, which is not in the paper). Earlier versions: version 4
+(2026-11-07, commit `d4a8ddb`) had fourteen and added Theorem 6.11
+($\gamma_4^3\subseteq\gamma_5$ suffices); version 3 of the same day, commit `add1be7`, had thirteen, version 2,
+commit `508a336`, ten, version 1 of 2026-10-23 nine.
 What is submitted, with the one hypothesis that remains (Proposition 5.3, a computer result), is
 described in
 [`palomar/README.md`](palomar/README.md).
