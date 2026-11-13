@@ -29,7 +29,7 @@ the repository root, licence `LICENSE` (MIT). The Lean project is the repository
 | [2](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=2) | 2026-11-07 | `508a336` | ten (without Theorems 6.10 and D.1, nor Gupta–Tahara at `p = 3`) |
 | [3](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=3) | 2026-11-07 | `add1be7` | thirteen (adds Theorems 6.10 and D.1, Gupta–Tahara at `p = 3`) |
 | [4](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=4) | 2026-11-07 | `d4a8ddb` | the fourteen listed below other than `D_five_eq_bot_of_class_four_ab399` (adds Theorem 6.11) |
-| [5](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=5) | 2026-11-12 | `64d26a1` | the fifteen listed below (adds `D_five_eq_bot_of_class_four_ab399`, not in the paper) |
+| [5](https://palomar-registry.org/entry.html?id=PALOMAR-2026-10-23-000007&version=5) | 2026-11-12 | `8de4db1` | the fifteen listed below (adds `D_five_eq_bot_of_class_four_ab399`, not in the paper) |
 
 Later commits are not registered until a new version is submitted.
 
