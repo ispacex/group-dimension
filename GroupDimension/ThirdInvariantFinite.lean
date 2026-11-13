@@ -236,8 +236,11 @@ theorem D_five_pow_eq_one_of_third_invariant' (hT : TaharaFiveOne) {Q : Type} [G
   -- `Abelianization.of` and the layer classes
   have hof : ∀ g h : Q, Abelianization.of g = Abelianization.of h ↔ cl Q 0 g = cl Q 0 h := by
     intro g h
-    rw [cl_eq_cl (mem_lcs_zero _) (mem_lcs_zero _), ← map_inv_mul_eq_one_iff, ← map_inv,
-      ← map_mul, ← MonoidHom.mem_ker, Abelianization.ker_of, Subgroup.top_lowerCentralSeries_one]
+    have e : Abelianization.of g = Abelianization.of h ↔ Abelianization.of (g⁻¹ * h) = 1 := by
+      rw [map_mul, map_inv, inv_mul_eq_one]
+    rw [e, cl_eq_cl (mem_lcs_zero _) (mem_lcs_zero _), ← MonoidHom.mem_ker, Abelianization.ker_of]
+    show _ ↔ _ ∈ (⊤ : Subgroup Q).lowerCentralSeries 1
+    rw [Subgroup.top_lowerCentralSeries_one]
   -- `hsmall` from the socle bound
   have hsmall : ∀ i j k : Fin s, i < j → j < k → 3 ^ (ht i + 1) ∣ 3 ^ μ := by
     intro i j k hij hjk
@@ -349,11 +352,14 @@ theorem D_five_pow_eq_one_of_third_invariant' (hT : TaharaFiveOne) {Q : Type} [G
       · exact key i 0 (by rw [hcf_i, hcf_i, Nat.sub_zero]; ring)
       · exact key j 1 (by rw [hcf_j, hcf_j, Nat.sub_zero]; ring)
       · exact key k 2 (by rw [hcf_k, hcf_k, Nat.sub_zero]; ring)
-    haveI : Finite (Abelianization Q) :=
-      Finite.of_surjective (Abelianization.of : Q →* Abelianization Q) fun y =>
-        Abelianization.induction_on y fun g => ⟨g, rfl⟩
+    have : Finite (Abelianization Q) := by
+      first
+      | exact inferInstance
+      | exact Finite.of_surjective (Abelianization.of : Q →* Abelianization Q) fun y => by
+          obtain ⟨g, hg⟩ := QuotientGroup.mk_surjective (s := commutator Q) y
+          exact ⟨g, hg⟩
     have hcard := Nat.card_le_card_of_injective w hw
-    have h27 : Nat.card (Fin 3 → ZMod 3) = 27 := by simp [Nat.card_fun, Nat.card_zmod]
+    have h27 : Nat.card (Fin 3 → ZMod 3) = 27 := by simp [Nat.card_zmod]
     omega
   have S : Setup T act μ :=
     ⟨h5, htor, hvalid, fun i => ⟨ht i, rfl⟩,
