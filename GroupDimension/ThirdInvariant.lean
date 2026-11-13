@@ -494,6 +494,7 @@ theorem smul_of_pow_eq_one {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSe
   rw [hp, addMapG_one hA] at h
   exact h.symm
 
+omit S in
 /-- A multiple of `n` kills a value whose group element has order dividing `n`. -/
 theorem smul_of_nat_dvd_of_pow_eq_one {z : G} (hz : z ∈ (⊤ : Subgroup G).lowerCentralSeries 2)
     {n : ℕ} {w : ℤ} (hw : (n : ℤ) ∣ w) (hp : z ^ n = 1) : w • A z = 0 := by
@@ -642,13 +643,13 @@ theorem omega_top {i h : Fin T.s} (hih : i < h) (htop : ∀ k, i < k → k = h) 
       · rw [hpair.1, hpair.2, ← tc_inv (T.x₁ i) (T.x₁ h), ← hcdef, hcc', addMapG_one hA,
           smul_zero]
       · obtain ⟨r, hr⟩ := hsmallpair p q hpq hpair
-        exact S.smul_of_nat_dvd_of_pow_eq_one hA (hmem q p) ⟨r, by exact_mod_cast hr⟩ (hrev p q)
+        exact smul_of_nat_dvd_of_pow_eq_one hA (hmem q p) ⟨r, by exact_mod_cast hr⟩ (hrev p q)
     · rw [hpq, show tc (T.x₁ q) (T.x₁ q) = 1 by simp only [tc]; group,
         show tc c 1 = 1 by simp only [tc]; group, addMapG_one hA, smul_zero]
     · by_cases hpair : q = i ∧ p = h
       · rw [hpair.1, hpair.2, ← hcdef, hcc, addMapG_one hA, smul_zero]
       · obtain ⟨r, hr⟩ := hsmallpair q p hpq hpair
-        exact S.smul_of_nat_dvd_of_pow_eq_one hA (hmem q p) ⟨r, by exact_mod_cast hr⟩ (hfwd q p)
+        exact smul_of_nat_dvd_of_pow_eq_one hA (hmem q p) ⟨r, by exact_mod_cast hr⟩ (hfwd q p)
   have hgen : ∀ g ∈ (⊤ : Subgroup G), ∀ h ∈ (⊤ : Subgroup G), F0 ⁅z, ⁅g, h⁆⁆ = 0 := by
     intro g _ h _
     obtain ⟨α, hα⟩ := S.valid.basis₁.span g (mem_lcs_zero g)
@@ -714,7 +715,7 @@ theorem omega_le {i h : Fin T.s} (hih : i < h) (a : G)
       tc_mem (i := 0) (j := 0) (n := 1) (by omega) (mem_lcs_zero _) (mem_lcs_zero _)
     have hz : tc (tc (T.x₁ i) (T.x₁ h)) a ∈ (⊤ : Subgroup G).lowerCentralSeries 2 :=
       lcs_mem_of_le (by norm_num) (tc_mem (i := 1) (j := 1) (n := 3) (by omega) hc ha)
-    exact S.smul_of_nat_dvd_of_pow_eq_one hA hz ⟨r, by exact_mod_cast hr⟩ (S.c_pow_kill i h ha)
+    exact smul_of_nat_dvd_of_pow_eq_one hA hz ⟨r, by exact_mod_cast hr⟩ (S.c_pow_kill i h ha)
 
 /-- The reverse orientation of `omega_le`. -/
 theorem omega_le_rev {i h : Fin T.s} (hih : i < h) (a : G)
@@ -840,9 +841,9 @@ theorem T1_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T1 T τ A = 0 := by
     rw [e, S.cYlow hA hτ hih, S.cY hA hτ hih]
     simp only [smul_zero, sub_zero, zero_add]
     have hdv : ((T.d i : ℕ) : ℤ) ∣ M * (τ.u i h * K (T.d h)) := (S.uK_dvd hτ hih).mul_left _
-    rw [S.smul_of_nat_dvd_of_pow_eq_one hA (htri _) hdv
+    rw [smul_of_nat_dvd_of_pow_eq_one hA (htri _) hdv
         (S.c_triple_kill i h (T.x₁ i) (T.x₁ i)),
-      S.smul_of_nat_dvd_of_pow_eq_one hA (htri _) hdv
+      smul_of_nat_dvd_of_pow_eq_one hA (htri _) hdv
         (S.c_triple_kill i h (T.x₁ h) (T.x₁ h)), sub_zero]
   · rw [smul_zero]
 
@@ -885,7 +886,7 @@ theorem T2_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T2 T τ A = 0 := by
       have h2 := S.ch2_dvd_d i
       unfold Data.ch at h2
       exact h1.trans h2
-    exact S.smul_of_nat_dvd_of_pow_eq_one hA (lcs_mem_of_le (by norm_num) htriple)
+    exact smul_of_nat_dvd_of_pow_eq_one hA (lcs_mem_of_le (by norm_num) htriple)
       ((hC.mul_left _).mul_left _) (S.c_triple_kill h i (T.x₁ i) (T.x₁ i))
   · rw [smul_zero]
 
@@ -967,7 +968,7 @@ theorem T3_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T3 T τ A = 0 := by
           tc_mem (i := 1) (j := 0) (n := 2) (by omega) ha (mem_lcs_zero _)
         have hz3 : tc (tc a (T.x₁ i)) (T.x₁ h) ∈ (⊤ : Subgroup G).lowerCentralSeries 3 :=
           tc_mem (i := 2) (j := 0) (n := 3) (by omega) hi2 (mem_lcs_zero _)
-        exact S.smul_of_nat_dvd_of_pow_eq_one hA (lcs_mem_of_le (by norm_num) hz3) hrr
+        exact smul_of_nat_dvd_of_pow_eq_one hA (lcs_mem_of_le (by norm_num) hz3) hrr
           (S.triple_pow_mid ha (T.x₁ h) (S.Y1 i))
       by_cases ha : act g
       · exact kill (hkill _ (S.Y1 g)) (S.w'3 hτ ha hig hgh)
@@ -1015,7 +1016,7 @@ theorem T4_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T4 T τ A = 0 := by
       have hp : tc a (tc (T.x₁ j) (T.x₁ k)) ^ T.d j = 1 := by
         have h' := S.c_pow_kill j k ha
         rw [← tc_inv, inv_pow, h', inv_one]
-      exact S.smul_of_nat_dvd_of_pow_eq_one hA (lcs_mem_of_le (by norm_num) hz) hrr hp
+      exact smul_of_nat_dvd_of_pow_eq_one hA (lcs_mem_of_le (by norm_num) hz) hrr hp
     by_cases ha : act h
     · exact kill (hkill _ (S.Y1 h)) (S.w''3 hτ ha hjk hkh)
     · obtain ⟨a, ha1, c, hc3, hY⟩ := S.hK h ha
@@ -1044,7 +1045,7 @@ theorem T5_eq : ((3 ^ (μ - 1) : ℕ) : ℤ) • Star.T5 T τ A = 0 := by
     tc_mem (i := 2) (j := 0) (n := 3) (by omega) hc2 (mem_lcs_zero _)
   have hp : tc (tc (T.x₂ k) (T.x₁ i)) (T.x₁ i) ^ T.d i = 1 :=
     S.triple_pow_mid (S.x2mem k) (T.x₁ i) (S.Y1 i)
-  exact S.smul_of_nat_dvd_of_pow_eq_one hA (lcs_mem_of_le (by norm_num) ht3)
+  exact smul_of_nat_dvd_of_pow_eq_one hA (lcs_mem_of_le (by norm_num) ht3)
     ((S.ch2_dvd_d i).mul_left _) hp
 
 end Values
