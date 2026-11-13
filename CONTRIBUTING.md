@@ -61,7 +61,7 @@ have been by independent AI agents (see `review` in `formalization.yaml`).
 
 All Lean code of this repository so far was written by AI agents under the direction of the
 author, who did not review the proofs line by line (`automation` in `formalization.yaml`). Claude
-Code agents wrote all of it, with one exception: for the theorem on
+Code agents wrote all of it, with one exception (and the reuse noted below): for the theorem on
 $Q/\gamma_2(Q)\cong C_3\times C_9\times C_9$ (2026-11-12), the proofs in `GroupDimension/Star.lean`,
 `GroupDimension/Star/`, `Ab399.lean` and `Ab399Finite.lean` were written by Kimi K3.1 Pro agents
 (through Open Math OS) against statements and a skeleton fixed by a Claude Code agent, and later

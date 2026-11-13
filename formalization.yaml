@@ -89,7 +89,7 @@ sources:
   - title: "D_5(Q) = 1 for Q/γ_2(Q) ≅ C_3 × C_9 × C_9: the author's research notes (2026-11-12), not part of the paper"
     authors: ["Stanislav Vorobev"]
     type: other
-    id: "https://github.com/ispacex/group-dimension/blob/8de4db115e4c7c2c71856168ef3aeeff4be40d23/docs/ab399.md"
+    id: "https://github.com/ispacex/group-dimension/blob/PIN/docs/ab399.md"
     location: "the theorem and its proof (public account of the notes)"
     contributors:
       - name: "Kimi K3.1 Pro (Moonshot AI), through Open Math OS"
@@ -118,6 +118,8 @@ sources:
     contributors:
       - name: "Kimi K3.1 Pro (Moonshot AI), through Open Math OS"
         role: "drafted a term-by-term bound that gives the case μ ≤ 1 (Theorem 11.2), and independently Theorem 11.2 by another route"
+      - name: "Claude Opus 5.5 (Anthropic), through Claude Code"
+        role: "worked out the bound for all μ (the top pair via ω(c̄_{s-1,s}, ·)) and obtained Theorem 11.2 independently"
     relationship: formalizes
     note: >-
       The source of GroupDimension.Palomar.D_five_pow_eq_one_of_third_invariant (Theorem 12.6)
@@ -129,8 +131,8 @@ sources:
       3^μ y = 0, where 3^μ is the third largest invariant. The starting point was a note by the
       model Kimi K3.1 Pro (through Open Math OS) at the author's direction; the bound for all μ
       was worked out by a Claude Code agent, and Theorem 11.2 was also obtained independently by
-      a Claude Code agent. The argument has had one independent agent review (verdict: correct
-      after corrections, which were made) and has not been reviewed by a human expert. The
+      a Claude Code agent. Theorems 11.2 and 12.6 each had one independent agent review (verdict:
+      correct after corrections, which were made) and has not been reviewed by a human expert. The
       results are deliberately not added to the paper, and the paper (cited above) does not
       contain them. The statements and their status are also on the D_5 site's blueprint
       (https://ispacex.github.io/d5/blueprint.html#b-own-thm126, node own:thm126), which is
@@ -205,7 +207,9 @@ status:
     Theorem 6.11 without any condition on γ_4 (Star.two_smul_gen_eq, used for the result for
     Q/γ_2(Q) ≅ C_3 × C_9 × C_9, which is not in the paper). Not formalized either: the general
     form D_5(G) = γ_5(G) whenever G/γ_2(G) ≅ C_3 × C_9 × C_9 (only the finite form of class
-    ≤ 4 is compared).
+    ≤ 4 is compared), nor the general form D_5(G) = γ_5(G) when G/γ_2(G) is a finite 3-group with
+    at most two invariants > 3 (Theorem 11.2 of the notes), nor the part D_5(Q) ⊆ γ_4(Q) of
+    Theorem 12.6 of the notes (only the exponent bound is compared).
   sorry_count: 0
   sorry_in_definitions: 0
   axioms: ["propext", "Classical.choice", "Quot.sound"]
@@ -326,9 +330,9 @@ review:
     all depend only on propext, Classical.choice and Quot.sound. No human expert has
     reviewed the Lean code. The three compared results that are not in the paper
     (D_five_eq_bot_of_class_four_ab399, D_five_pow_eq_one_of_third_invariant,
-    D_five_eq_bot_of_two_large_invariants) also have no human-reviewed proof on paper: each
-    argument on paper (docs/ab399.md, docs/thm126.md) had one independent agent review and no
-    human review.
+    D_five_eq_bot_of_two_large_invariants) also have no human-reviewed proof on paper: the
+    proof on paper of each (docs/ab399.md; docs/thm126.md for Theorems 12.6 and 11.2 of the notes)
+    had a single independent agent review and no human review.
 
 alignment:
   namespace: "GroupDimension.Palomar"
