@@ -20,7 +20,7 @@ the hint to write the tag. The key is stored with the prefix, `D5:000P`.
 
 `#d5_tags` lists every `(key, declaration, comment)` of the environment, one JSON object per line
 (the order of the fields is not significant), e.g.
-`{"comment":"","decl":"GroupDimension.D_five_eq_gamma_five_of_g4_cube","key":"thm:g4cube"}`.
+`{"comment":"","decl":"GroupDimension.D_five_eq_gamma_five_of_g4_cube","key":"D5:000P"}`.
 
 Modelled on Mathlib's `@[stacks TAG]` (`Mathlib.Tactic.CrossRefAttribute`), whose list of databases
 is closed. **This attribute is the source of truth** for which declaration formalizes which
@@ -131,7 +131,7 @@ def keyOf (k : Syntax) : CoreM String := do
 
 initialize registerBuiltinAttribute {
   name := `d5
-  descr := "The statement of the D₅ paper that a declaration states or proves (a tag or a label)."
+  descr := "The statement of the D₅ paper that a declaration states or proves (its tag D5:XXXX)."
   add := fun decl stx _attrKind => do
     -- `stx` is `d5 key comment?`
     let key ← keyOf stx[1]

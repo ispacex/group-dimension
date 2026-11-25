@@ -35,8 +35,8 @@ gets its node and tag there first (the tags are issued in the project D5 of the 
 
 ## 2. Claim
 
-Before starting, open an issue with the **Claim a statement to formalize** template: the paper
-label, the statement, the Lean statement you will prove (with `sorry`), what it uses and a proof
+Before starting, open an issue with the **Claim a statement to formalize** template: the tag of the
+statement's node (`D5:XXXX`) and its paper label, the statement, the Lean statement you will prove (with `sorry`), what it uses and a proof
 outline. It gets the label `claim`; a maintainer adds `blueprint-approved` once the Lean statement
 is agreed (it matches the paper, or the difference is stated). Work on statements without an
 approved claim may be duplicated or declined. Small fixes (typos, golfing, documentation) need no

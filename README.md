@@ -226,7 +226,7 @@ in a comment which steps of §§5–6 of the paper carry over. In short:
   additive only modulo $\Delta^2$; the explicit $\mathbb Z$-description of $\Delta(T)^n$ on which
   the retraction $p$ is built (Prop. 6.12).
 
-## Paper labels and contributing
+## Tags of the paper and contributing
 
 Each declaration that states or proves a statement of the paper (a node of the blueprint) carries
 the statement's permanent tag `D5:XXXX`, written without the prefix: `@[d5 000P]`

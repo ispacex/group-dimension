@@ -2,7 +2,7 @@ name: Claim a statement to formalize
 description: >-
   Announce that you will formalize a statement of the paper (or a result it uses) before you start,
   so that work is not duplicated. See CONTRIBUTING.md.
-title: "[claim] <label>: <short statement>"
+title: "[claim] D5:<tag> <label>: <short statement>"
 labels: ["claim"]
 body:
   - type: markdown
@@ -10,9 +10,20 @@ body:
       value: >-
         A claim says *what* you will formalize and *how*, before the pull request. The blueprint
         (https://ispacex.github.io/d5/blueprint.html, built from `site/blueprint.toml` of
-        ispacex/dimension-subrings) lists every labelled statement of the paper and what is already
-        in Lean. A maintainer adds the label `blueprint-approved` once the Lean statement below is
+        ispacex/dimension-subrings) lists every labelled statement of the paper, its permanent tag
+        D5:XXXX and what is already in Lean. A maintainer adds the label `blueprint-approved` once the Lean statement below is
         agreed; only then is a pull request for it reviewed.
+  - type: input
+    id: tag
+    attributes:
+      label: Tag
+      description: >-
+        The permanent tag of the statement's node in the blueprint, e.g. `D5:000P`; the
+        declarations will carry it as `@[d5 000P]`. A statement with no node yet: leave
+        `new`, a maintainer adds the node and its tag first.
+      placeholder: "D5:000P"
+    validations:
+      required: true
   - type: input
     id: label
     attributes:
