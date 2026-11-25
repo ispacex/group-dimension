@@ -489,7 +489,7 @@ theorem D_three_eq_bot_of_class_two' {H : Type*} [Group H]
 
 /-- **`D₃(G) = γ₃(G)` for every group** (Higman–Rees–Passi), the statement `DThreeEqGammaThree`
 of `Statements.lean`. -/
-@[d5 "ext:dthree"]
+@[d5 002W]
 theorem dThreeEqGammaThree : DThreeEqGammaThree := by
   intro G _
   refine le_antisymm (D_le_of_D_quotient_eq_bot _ 3

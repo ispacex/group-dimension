@@ -128,7 +128,7 @@ theorem mem_jennings_of_sub_one_mem (hG : IsPGroup 2 G) (h4 : (⊤ : Subgroup G)
 
 
 /-- For a finite `2`-group of class `≤ 3`, `D₅(G) ≤ G⁸ γ₂⁴ γ₃²` (via `M₅`). -/
-@[d5 "ext:jennings"]
+@[d5 0030]
 theorem D_five_le_jennings {G : Type*} [Group G] [Finite G] (hG : IsPGroup 2 G)
     (h4 : (⊤ : Subgroup G).lowerCentralSeries 3 = ⊥) : D 5 G ≤ jennings 2 G 5 := fun _ hg =>
   mem_jennings_of_sub_one_mem hG h4 (sub_one_mem_augIdealP_pow_of_mem_D hg)
