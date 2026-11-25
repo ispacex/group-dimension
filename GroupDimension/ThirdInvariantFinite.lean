@@ -392,7 +392,7 @@ namespace GroupDimension
 and `μ` such that at most two invariants of `Q_ab` exceed `3^μ`, stated as: the elements of order
 dividing `3` among the `3^μ`-th powers of `Q_ab` are at most `9`. Then every `z ∈ D₅(Q)`
 satisfies `z^{3^{μ-1}} = 1` (`z = 1` when `μ ≤ 1`). -/
-@[d5 "own:thm126"]
+@[d5 0033]
 theorem D_five_pow_eq_one_of_third_invariant {Q : Type} [Group Q] [Finite Q] (h3 : IsPGroup 3 Q)
     (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥) (μ : ℕ)
     (hsoc : Nat.card {w : Abelianization Q // w ^ 3 = 1 ∧ ∃ v, w = v ^ (3 ^ μ)} ≤ 9) :
@@ -402,7 +402,7 @@ theorem D_five_pow_eq_one_of_third_invariant {Q : Type} [Group Q] [Finite Q] (h3
 /-- **Theorem 11.2 of wiki 891.** Let `Q` be a finite `3`-group of class `≤ 4` such that at most
 two invariants of `Q_ab` are `≥ 9` (the cubes of `Q_ab` contain at most `9` elements of order
 dividing `3`). Then `D₅(Q) = 1`, with no condition on `γ₄(Q)`. -/
-@[d5 "own:thm126" "Theorem 11.2: at most two invariants ≥ 9"]
+@[d5 0033 "Theorem 11.2: at most two invariants ≥ 9"]
 theorem D_five_eq_bot_of_two_large_invariants {Q : Type} [Group Q] [Finite Q]
     (h3 : IsPGroup 3 Q) (h5 : (⊤ : Subgroup Q).lowerCentralSeries 4 = ⊥)
     (hsoc : Nat.card {w : Abelianization Q // w ^ 3 = 1 ∧ ∃ v, w = v ^ 3} ≤ 9) :

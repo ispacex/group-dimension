@@ -740,7 +740,7 @@ theorem lcs_map_mk (N : Subgroup G) [N.Normal] (k : ℕ) :
 The generation hypothesis is stated through coordinates: every `z ∈ γ₂` is `c₁^a c₂^b` modulo
 `γ₃`; since `γ₂/γ₃` is abelian, this is the same as `γ₂/γ₃ = ⟨c̄₁, c̄₂⟩` (one or no generator:
 take `c₂ = 1` or `c₁ = c₂ = 1`). -/
-@[d5 "lem:lie"]
+@[d5 002F]
 theorem commutator_gamma_two_le_gamma_five {p : ℕ} [Fact p.Prime] (hp2 : p ≠ 2)
     (h3 : ((⊤ : Subgroup G).lowerCentralSeries 3).relIndex ((⊤ : Subgroup G).lowerCentralSeries 2) = p)
     {c₁ c₂ : G} (hc₁ : c₁ ∈ (⊤ : Subgroup G).lowerCentralSeries 1) (hc₂ : c₂ ∈ (⊤ : Subgroup G).lowerCentralSeries 1)
@@ -793,7 +793,7 @@ theorem commutator_gamma_two_le_gamma_five {p : ℕ} [Fact p.Prime] (hp2 : p ≠
 
 /-- **Lemma 6.3, last sentence**: under the same hypotheses, a group of class `≤ 4` is
 metabelian. -/
-@[d5 "lem:lie"]
+@[d5 002F]
 theorem metabelian_of_class_four {p : ℕ} [Fact p.Prime] (hp2 : p ≠ 2)
     (h5 : (⊤ : Subgroup G).lowerCentralSeries 4 = ⊥)
     (h3 : ((⊤ : Subgroup G).lowerCentralSeries 3).relIndex ((⊤ : Subgroup G).lowerCentralSeries 2) = p)

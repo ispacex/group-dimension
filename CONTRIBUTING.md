@@ -8,29 +8,30 @@ claim, pull request, review.
 
 Every labelled statement of the paper is a node of the blueprint, `site/blueprint.toml` in
 [ispacex/dimension-subrings](https://github.com/ispacex/dimension-subrings) (where this package is
-the submodule `groups/`). A node lists the Lean declarations that state or prove the statement and
-whether the proof is formalized; the pages are
+the submodule `groups/`). A node has a permanent tag `D5:XXXX` (four characters, digits and capital letters
+without `I` and `O`; wiki 912 of the project's tracker), lists the Lean declarations that state or
+prove the statement and says whether the proof is formalized; the pages are
 [blueprint.html](https://ispacex.github.io/d5/blueprint.html) and the leanblueprint graph under
-`blueprint/` of the site. **`blueprint.toml` is the source of truth** for which declaration
-formalizes which statement.
+`blueprint/` of the site.
 
-In the code, each such declaration carries the attribute `@[d5 "<label>"]` with the label of its
-node (`GroupDimension/D5Tag.lean`), e.g.
+In the code, each such declaration carries the attribute `@[d5 <tag>]` with the tag of its node,
+written without the prefix (`GroupDimension/D5Tag.lean`), e.g. for Theorem `thm:g4cube`, tag
+`D5:000P`:
 
 ```lean
-@[d5 "thm:g4cube"]
+@[d5 000P]
 theorem D_five_eq_gamma_five_of_g4_cube ...
 ```
 
-The attribute also takes a permanent tag `D5:XXXX` (four characters, digits and capital letters
-without `I` and `O`; wiki 912 of the project's tracker), written without the prefix: `@[d5 000P]`,
-and an optional comment, `@[d5 000P "part (a)"]`; the declarations will move from labels to tags
-once the tags are registered in `blueprint.toml`. A declaration may carry several:
-`@[d5 "thm:gt3", d5 "ext:guptatahara"]`. `#d5_tags` lists all of them, one JSON object per line
-(`lake env lean D5Tags.lean`). The attribute does not replace the blueprint: the CI of
-dimension-subrings (`.github/workflows/blueprint.yml`) fails unless the tagged (label, declaration)
-pairs are exactly those of `blueprint.toml`. A new declaration for a node is added in both places,
-in two pull requests: here (with the tag), then the node and the bump of `groups/` there.
+with an optional comment, `@[d5 000P "part (a)"]`; a declaration may carry several tags,
+`@[d5 002V, d5 0031]`. A label of the paper (`@[d5 "thm:g4cube"]`) is refused. `#d5_tags` lists all
+of them, one JSON object per line (`lake env lean D5Tags.lean`). **The attribute is the source of
+truth** for which declaration formalizes which statement (MATH-458): the `lean` fields of
+`blueprint.toml` are written from `#d5_tags` by `python3 site/blueprint.py sync LOG`, and the CI of
+dimension-subrings (`.github/workflows/blueprint.yml`) fails unless they are exactly the tagged
+pairs. A new declaration for a node is tagged here; then, in dimension-subrings, `groups/` is
+bumped and `sync` rewrites the `lean` fields, in one pull request. A statement that has no node yet
+gets its node and tag there first (the tags are issued in the project D5 of the tracker).
 
 ## 2. Claim
 
@@ -47,7 +48,7 @@ One pull request per claim, referring to it (`Closes #N`). It must
 
 * build with no `sorry` and pass the axiom audit of CI (`AxiomAudit.lean`: only `propext`,
   `Classical.choice`, `Quot.sound`; add the new declarations there);
-* tag the declarations that formalize the statement with `@[d5 "<label>"]`;
+* tag the declarations that formalize the statement with `@[d5 <tag>]`, the tag of its node;
 * say, in the module docstring, which statement of the paper it is and how the Lean version
   differs.
 

@@ -6,27 +6,27 @@ public meta import Lean.Elab.Command
 # `@[d5 ...]`: the statement of the D₅ paper that a declaration states or proves
 
 The attribute records which statement of the paper (S. Vorobev, *On the inclusion
-`D₅(G) ⊆ γ₄(G)`*, https://ispacex.github.io/d5) a declaration states or proves. It takes one key
-and an optional comment, in either of two forms:
+`D₅(G) ⊆ γ₄(G)`*, https://ispacex.github.io/d5) a declaration states or proves, by the statement's
+permanent **tag** `D5:XXXX` (wiki 912, MATH-454, MATH-457), written without the prefix: `@[d5 000P]`.
+A tag is four characters, digits and capital letters without `I` and `O` (a subset of the format
+of Stacks tags); it is the `tag` of a node of the blueprint (`site/blueprint.toml` of
+https://github.com/ispacex/dimension-subrings: the statements of the paper, and the nodes outside
+it, `ext:…` for results of the literature and `own:…` for results proved here but not in the
+paper), and it stays when the paper is renumbered or a `\label` renamed. An optional comment may
+follow: `@[d5 000P "part (a)"]`. A declaration may carry several tags: `@[d5 002V, d5 0031]`.
 
-* `@[d5 "thm:g4cube"]` — a **label** of the paper, a key of the nodes of the blueprint
-  (`site/blueprint.toml` of https://github.com/ispacex/dimension-subrings); the blueprint's nodes
-  outside the paper have keys of their own, `ext:…` (results of the literature) and `own:…`
-  (results proved here but not in the paper, e.g. `own:ab399`);
-* `@[d5 000P]` — a permanent **tag** `D5:000P` (wiki 912, MATH-454): four characters, digits and
-  capital letters without `I` and `O` (a subset of the format of Stacks tags).
-
-and, in both, an optional comment: `@[d5 000P "part (a)"]`. A declaration may carry several keys:
-`@[d5 "thm:gt3", d5 "ext:guptatahara"]`. The key is stored as written (a tag with the prefix
-`D5:`), nothing else, so labels and tags can live side by side while the tags are introduced.
+Labels of the paper (`@[d5 "thm:g4cube"]`) were accepted until MATH-458; they are refused now, with
+the hint to write the tag. The key is stored with the prefix, `D5:000P`.
 
 `#d5_tags` lists every `(key, declaration, comment)` of the environment, one JSON object per line
 (the order of the fields is not significant), e.g.
 `{"comment":"","decl":"GroupDimension.D_five_eq_gamma_five_of_g4_cube","key":"thm:g4cube"}`.
 
 Modelled on Mathlib's `@[stacks TAG]` (`Mathlib.Tactic.CrossRefAttribute`), whose list of databases
-is closed. `site/blueprint.toml` stays the source of truth: the CI of dimension-subrings compares the
-output of `#d5_tags` with the `lean` fields of its nodes and fails on any difference. Unlike
+is closed. **This attribute is the source of truth** for which declaration formalizes which
+statement (MATH-458): the `lean` fields of the nodes of `site/blueprint.toml` are written from the
+output of `#d5_tags` (`site/blueprint.py sync`), and the CI of dimension-subrings fails if they
+differ from it. Unlike
 Mathlib's attribute this one does not append a link to the docstring: tried on Lean 4.35, a link
 appended at `.beforeElaboration` was gone from a declaration with its own docstring (that docstring
 is added later, with the definition), so it was dropped.
@@ -38,11 +38,11 @@ open Lean Elab Parser
 
 namespace GroupDimension.D5Tag
 
-/-- A declaration and a key of the paper (a label, or a tag `D5:XXXX`) that it states or proves. -/
+/-- A declaration and the tag `D5:XXXX` of the statement of the paper that it states or proves. -/
 structure Entry where
   /-- The tagged declaration. -/
   declName : Name
-  /-- `thm:g4cube` (a label of the paper) or `D5:000P` (a permanent tag). -/
+  /-- The tag with its prefix, e.g. `D5:000P`. -/
   key : String
   /-- An optional comment, e.g. `part (a)`. -/
   comment : String
@@ -113,21 +113,21 @@ def entries (env : Environment) : Array Entry :=
   (s.2.flatten.appendList s.1).qsort fun a b =>
     a.key < b.key || (a.key == b.key && a.declName.toString < b.declName.toString)
 
-/-- `@[d5 000P]`, `@[d5 "thm:g4cube"]`, with an optional comment: `@[d5 000P "part (a)"]`. The
-statement of the D₅ paper that the declaration states or proves (a permanent tag `D5:XXXX` written
-without the prefix, or a label of the paper); see the module docstring. -/
+/-- `@[d5 000P]`, with an optional comment: `@[d5 000P "part (a)"]`. The statement of the D₅ paper
+that the declaration states or proves, by its permanent tag `D5:XXXX` written without the prefix;
+see the module docstring. (A string in place of the tag is parsed only to refuse it with a hint.) -/
 syntax (name := d5) "d5" (d5TagParser <|> str) (ppSpace str)? : attr
 
-/-- The key as stored: `D5:000P` for a tag, the label as written for a label. -/
+/-- The key as stored, `D5:000P`. A string is refused: a tag is written without quotes and without
+the prefix, and a label of the paper is no longer a key (MATH-458). -/
 def keyOf (k : Syntax) : CoreM String := do
   if let some t := Syntax.isLit? d5TagKind k then
     return "D5:" ++ t
   let some l := k.isStrLit? | throwError "d5: malformed key {k}"
-  if l.isEmpty || l.any (fun c => c.isWhitespace || c == '"') then
-    throwError "d5: a label is a nonempty string without spaces or quotes, got {repr l}"
   if l.startsWith "D5:" then
     throwError "d5: write a tag without quotes and without the prefix: @[d5 {(l.drop 3).toString}]"
-  return l
+  throwError "d5: write the permanent tag of the statement, not a label: @[d5 XXXX], the tag of \
+    node {repr l} in site/blueprint.toml of dimension-subrings"
 
 initialize registerBuiltinAttribute {
   name := `d5
@@ -149,7 +149,7 @@ def Entry.toJson (e : Entry) : String :=
 
 /--
 `#d5_tags` lists the entries of `@[d5 ...]`, one JSON object per line (sorted by key), with the
-fields `key`, `decl` and `comment`. `site/blueprint.py tags` of dimension-subrings reads it.
+fields `key`, `decl` and `comment`. `site/blueprint.py tags` and `sync` of dimension-subrings read it.
 -/
 elab (name := d5Tags) "#d5_tags" : command => do
   let es := entries (← getEnv)

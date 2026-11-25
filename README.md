@@ -228,12 +228,14 @@ in a comment which steps of §§5–6 of the paper carry over. In short:
 
 ## Paper labels and contributing
 
-Each declaration named in a node of the blueprint (a labelled statement of the paper) carries
-`@[d5 "<label>"]` (`GroupDimension/D5Tag.lean`), e.g. `@[d5 "thm:g4cube"]`, the label of the
-statement on [blueprint.html](https://ispacex.github.io/d5/blueprint.html); the attribute also
-takes permanent tags `D5:XXXX` (`@[d5 000P]`), to which the labels will move. `#d5_tags`
-(`lake env lean D5Tags.lean`) lists them all, as JSON. The source of truth is `site/blueprint.toml` of
-dimension-subrings, whose CI fails unless the tags are exactly its (label, declaration) pairs. How
+Each declaration that states or proves a statement of the paper (a node of the blueprint) carries
+the statement's permanent tag `D5:XXXX`, written without the prefix: `@[d5 000P]`
+(`GroupDimension/D5Tag.lean`) for Theorem `thm:g4cube`; the tags of the statements are on
+[blueprint.html](https://ispacex.github.io/d5/blueprint.html) and in `site/blueprint.toml` of
+dimension-subrings. `#d5_tags` (`lake env lean D5Tags.lean`) lists them all, as JSON. **The
+attribute is the source of truth** for which declaration formalizes which statement (MATH-458): the
+`lean` fields of `blueprint.toml` are written from `#d5_tags` (`site/blueprint.py sync`), and the CI
+there fails if they differ. How
 to claim a statement and contribute (blueprint → claim → pull request → review, and how AI-written
 code is labelled): [CONTRIBUTING.md](CONTRIBUTING.md).
 
