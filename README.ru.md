@@ -137,7 +137,9 @@ $\Phi(g-1)=(0,\bar g)$. Это та же идея, что у авторов в `
 представление).
 
 `#print axioms` для всех 2306 доказанных объявлений (`AxiomAudit.lean`: 2289 из разработки и
-17 сравниваемых теорем Palomar из `Solution.lean`) — только `propext`,
+17 сравниваемых теорем Palomar из `Solution.lean`) и для 7 определений-формулировок
+(`def … : Prop`), которые называет blueprint статьи, например `DimensionQuestion5` и `TaharaFiveOne`
+(MATH-529: реестр D5 привязывает Lean-основание только с аудитом аксиом) — только `propext`,
 `Classical.choice`, `Quot.sound`. Ни `sorry`, ни `axiom` нет ни в разработке, ни в `Solution.lean`;
 `Challenge.lean` формулирует подаваемые результаты с `sorry` намеренно.
 

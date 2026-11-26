@@ -6,7 +6,8 @@ public import Solution
 @[expose] public section
 
 /-! Axiom audit: `lake env lean AxiomAudit.lean`. Every proved theorem of the project must
-depend only on `propext`, `Classical.choice`, `Quot.sound`. -/
+depend only on `propext`, `Classical.choice`, `Quot.sound`; so must the statement definitions the
+blueprint names (at the end). -/
 
 open GroupDimension
 
@@ -2321,3 +2322,14 @@ open GroupDimension
 #print axioms GroupDimension.ThirdInvariant.D_five_pow_eq_one_of_third_invariant'
 #print axioms GroupDimension.D_five_pow_eq_one_of_third_invariant
 #print axioms GroupDimension.D_five_eq_bot_of_two_large_invariants
+
+-- The statement definitions (`def … : Prop`) that the blueprint of the paper names in its `lean`
+-- fields (tagged `@[d5 …]`): they prove nothing, but the D5 registry binds a Lean basis only with an
+-- axiom audit, so their axioms are printed too (MATH-529). Not counted among the proved declarations.
+#print axioms GroupDimension.DimensionQuestion5
+#print axioms GroupDimension.DThreeEqGammaThree
+#print axioms GroupDimension.PassiDFourSquare
+#print axioms GroupDimension.GruenbergResidualTwo
+#print axioms GroupDimension.TaharaFiveOne
+#print axioms GroupDimension.GuptaTaharaMetabelian
+#print axioms GroupDimension.GuptaTaharaMetabelianThree
