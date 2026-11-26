@@ -136,7 +136,9 @@ first coordinate is $\varepsilon$, so $\Phi(\Delta^2)=0$ and $\Phi(g-1)=(0,\bar 
 same idea as the authors' `DegreeTwo.lean` (a square-zero representation).
 
 `#print axioms` for all 2306 proved declarations (`AxiomAudit.lean`: 2289 of the development and the
-17 compared Palomar theorems of `Solution.lean`) — only `propext`,
+17 compared Palomar theorems of `Solution.lean`), and for the 7 statement definitions
+(`def … : Prop`) that the blueprint of the paper names, such as `DimensionQuestion5` and `TaharaFiveOne`
+(MATH-529: the D5 registry binds a Lean basis only with an axiom audit) — only `propext`,
 `Classical.choice`, `Quot.sound`. No `sorry` and no `axiom` in the development or in `Solution.lean`;
 `Challenge.lean` states the submitted results with `sorry` by design.
 
